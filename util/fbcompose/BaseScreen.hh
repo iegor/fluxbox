@@ -1,4 +1,4 @@
-/** Screen.hh file for the fluxbox compositor. */
+/** BaseScreen.hh file for the fluxbox compositor. */
 
 // Copyright (c) 2011 Gediminas Liktaras (gliktaras at gmail dot com)
 //
@@ -24,8 +24,7 @@
 #ifndef FBCOMPOSITOR_SCREEN_HH
 #define FBCOMPOSITOR_SCREEN_HH
 
-#include "Window.hh"
-#include "Workspace.hh"
+#include "BaseCompWindow.hh"
 
 #include <X11/Xlib.h>
 
@@ -34,22 +33,18 @@
 
 namespace FbCompositor {
 
-    class BaseScreen;
     class BaseCompWindow;
-    class CompWorkspace;
+    class BaseScreen;
 
     /**
-     * Handles a particular screen.
-     *
-     * This means that it provides access to the screen's root window, visual
-     * and so on.
+     * Base class for screen managing classes.
      */
     class BaseScreen {
     public:
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        BaseScreen(Display *display, int screenNumber);
+        BaseScreen(int screenNumber);
 
         /** Destructor. */
         ~BaseScreen();
@@ -62,9 +57,6 @@ namespace FbCompositor {
 
         /** \returns the list of windows on the screen (const version). */
         const std::list<BaseCompWindow> &allWindows() const throw();
-
-        /** \returns screen's Display. */
-        Display *display() const throw();
 
         /** \returns screen's root window. */
         BaseCompWindow &rootWindow() throw();
@@ -79,16 +71,16 @@ namespace FbCompositor {
         //--- WINDOW MANIPULATION ----------------------------------------------
 
         /** Creates a new window and inserts it into the list of windows. */
-        void createWindow(const XCreateWindowEvent &event);
+        void createWindow(const BaseCompWindow &window);
 
         /** Destroys a window on this screen. */
-        void destroyWindow(const XDestroyWindowEvent &event);
+        void destroyWindow(Window window);
 
         /** Maps a window on this screen. */
-        void mapWindow(const XMapEvent &event);
+        void mapWindow(Window window);
 
         /** Unmaps a window on this screen. */
-        void unmapWindow(const XUnmapEvent &event);
+        void unmapWindow(Window window);
 
 
     private:
@@ -124,11 +116,6 @@ namespace FbCompositor {
     // Returns all of screen's windows (const version).
     inline const std::list<BaseCompWindow> &BaseScreen::allWindows() const throw() {
         return m_windows;
-    }
-
-    // Returns screen's display.
-    inline Display *BaseScreen::display() const throw() {
-        return m_display;
     }
 
     // Returns screen's root window.

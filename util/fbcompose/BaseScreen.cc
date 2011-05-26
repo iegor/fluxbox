@@ -1,4 +1,4 @@
-/** Screen.cc file for the fluxbox compositor. */
+/** BaseScreen.cc file for the fluxbox compositor. */
 
 // Copyright (c) 2011 Gediminas Liktaras (gliktaras at gmail dot com)
 //
@@ -21,7 +21,9 @@
 // THE SOFTWARE.
 
 
-#include "Screen.hh"
+#include "BaseScreen.hh"
+
+#include "FbTk/App.hh"
 
 using namespace FbCompositor;
 
@@ -29,15 +31,14 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-BaseScreen::BaseScreen(Display *display, int screenNumber) :
-    m_rootWindow(display, XRootWindow(display, screenNumber)) {
-
-    m_display = display;
-    m_screenNumber = screenNumber;
+BaseScreen::BaseScreen(int screenNumber) :
+    m_display(FbTk::App::instance()->display()),
+    m_screenNumber(screenNumber),
+    m_rootWindow(XRootWindow(m_display, m_screenNumber)) {
 
     // Registering events.
-    XSelectInput(m_display, m_rootWindow.window(),
-                 ExposureMask | PropertyChangeMask | StructureNotifyMask | SubstructureNotifyMask);
+    long events = ExposureMask | PropertyChangeMask | StructureNotifyMask | SubstructureNotifyMask;
+    XSelectInput(m_display, m_rootWindow.window(), events);
 
     // Fetching all top level windows.
     Window root;
@@ -48,7 +49,7 @@ BaseScreen::BaseScreen(Display *display, int screenNumber) :
     XQueryTree(m_display, m_rootWindow.window(), &root, &parent, &children, &childCount);
 
     for(unsigned int i = 0; i < childCount; i++) {
-        m_windows.push_back(BaseCompWindow(m_display, children[i]));
+        createWindow(children[i]);
     }
     if(children) {
         XFree(children);
@@ -62,23 +63,38 @@ BaseScreen::~BaseScreen() { }
 //--- WINDOW MANIPULATION ----------------------------------------------
 
 // Creates a new window and inserts it into the list of windows.
-void BaseScreen::createWindow(const XCreateWindowEvent &event) {
-    m_windows.push_back(BaseCompWindow(m_display, event.window));
+void BaseScreen::createWindow(const BaseCompWindow &window) {
+    m_windows.push_back(window);
 }
 
 // Destroys a window on this screen.
-void BaseScreen::destroyWindow(const XDestroyWindowEvent &event) {
-    m_windows.erase(getWindowIterator(event.window));
+void BaseScreen::destroyWindow(Window window) {
+    std::list<BaseCompWindow>::iterator it = getWindowIterator(window);
+    if (it != m_windows.end()) {
+        m_windows.erase(it);
+    } else {
+        // TODO: Throw something.
+    }
 }
 
 // Maps a window on this screen.
-void BaseScreen::mapWindow(const XMapEvent &event) {
-    getWindowIterator(event.window)->setMapped();
+void BaseScreen::mapWindow(Window window) {
+    std::list<BaseCompWindow>::iterator it = getWindowIterator(window);
+    if (it != m_windows.end()) {
+        it->setMapped();
+    } else {
+        // TODO: Throw something.
+    }
 }
 
 // Unmaps a window on this screen.
-void BaseScreen::unmapWindow(const XUnmapEvent &event) {
-    getWindowIterator(event.window)->setUnmapped();
+void BaseScreen::unmapWindow(Window window) {
+    std::list<BaseCompWindow>::iterator it = getWindowIterator(window);
+    if (it != m_windows.end()) {
+        it->setUnmapped();
+    } else {
+        // TODO: Throw something.
+    }
 }
 
 

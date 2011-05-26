@@ -24,10 +24,10 @@
 #ifndef FBCOMPOSITOR_COMPOSITOR_HH
 #define FBCOMPOSITOR_COMPOSITOR_HH
 
+#include "BaseScreen.hh"
 #include "CompositorConfig.hh"
 #include "Constants.hh"
 #include "Exceptions.hh"
-#include "Screen.hh"
 
 #include "FbTk/App.hh"
 
@@ -52,7 +52,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        Compositor(const CompositorConfig &configuration);
+        Compositor(const CompositorConfig &configuration) throw(ConfigException);
 
         /** Destructor. */
         ~Compositor();
@@ -86,6 +86,12 @@ namespace FbCompositor {
 
         /** Assignment operator. */
         Compositor operator=(const Compositor&);
+
+
+        //--- INITIALIZATION FUNCTIONS -----------------------------------------
+
+        /** Initializes X's extensions. */
+        void initXExtensions() throw(ConfigException);
 
 
         //--- COMPOSITOR VARIABLES ---------------------------------------------

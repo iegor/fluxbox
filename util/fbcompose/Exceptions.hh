@@ -48,10 +48,10 @@ namespace FbCompositor {
             m_errorMessage(errorMessage) {}
 
         /** Destructor.  */
-        ~CompositorException() throw() {}
+        virtual ~CompositorException() throw() {}
 
         /** \returns The main error message.  */
-        const char *what() const throw() { return m_errorMessage.c_str(); }
+        virtual const char *what() const throw() { return m_errorMessage.c_str(); }
 
     private:
         /** The exception's main message. */
@@ -72,7 +72,7 @@ namespace FbCompositor {
             CompositorException(errorMessage) {}
 
         /** Destructor. */
-        ~ConfigException() throw() {}
+        virtual ~ConfigException() throw() {}
     };
 
 
@@ -87,26 +87,7 @@ namespace FbCompositor {
             CompositorException(errorMessage) {}
 
         /** Destructor. */
-        ~IndexOutOfBoundsException() throw() {}
-    };
-
-
-
-    /**
-     * This exception is thrown whenever there is an error condition in a
-     * singleton class.
-     *
-     * That is, it is thrown if someone tries to create a second singleton or
-     * access uninitialized singleton instance.
-     */
-    class SingletonException : public CompositorException {
-    public:
-        /** Public constructor. */
-        SingletonException(std::string errorMessage) throw() :
-            CompositorException(errorMessage) {}
-
-        /** Destructor. */
-        ~SingletonException() throw() {}
+        virtual ~IndexOutOfBoundsException() throw() {}
     };
 
 }

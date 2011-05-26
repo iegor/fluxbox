@@ -1,4 +1,4 @@
-/** Window.hh file for the fluxbox compositor. */
+/** BaseCompWindow.hh file for the fluxbox compositor. */
 
 // Copyright (c) 2011 Gediminas Liktaras (gliktaras at gmail dot com)
 //
@@ -29,24 +29,21 @@
 #include <X11/Xlib.h>
 
 #include <iosfwd>
-#include <string>
 
 
 namespace FbCompositor {
 
     class BaseCompWindow;
-    
+
     /** << output stream operator for the BaseCompWindow class. */
     std::ostream &operator<<(std::ostream& out, const BaseCompWindow& window);
 
 
     /**
-     * Maintains information about a particular window.
-     *
-     * This includes things like its location, dimensions, damage status and
-     * off-screen pixmap.
+     * Base class for composited windows.
      */
     class BaseCompWindow : public FbTk::FbWindow {
+
         //--- FRIEND OPERATORS -------------------------------------------------
         friend std::ostream &operator<<(std::ostream& out, const BaseCompWindow& window);
 
@@ -54,7 +51,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        BaseCompWindow(Display *display, Window windowXID);
+        BaseCompWindow(Window windowXID);
 
         /** Destructor. */
         ~BaseCompWindow();
@@ -69,20 +66,20 @@ namespace FbCompositor {
         //--- WINDOW MANIPULATION ----------------------------------------------
 
         /** Marks the window as mapped. */
-        void setMapped();
+        void setMapped() throw();
 
         /** Marks the window as unmapped. */
-        void setUnmapped();
+        void setUnmapped() throw();
 
     private:
         //--- WINDOW ATTRIBUTES ------------------------------------------------
 
         /** Window's map state. */
         bool m_isMapped;
-
     };
 
-    //--- WINDOW ATTRIBUTES ------------------------------------------------
+
+    //--- INLINE FUNCTIONS -------------------------------------------------
 
     // Returns whether the window is mapped or not.
     inline bool BaseCompWindow::isMapped() const throw() {

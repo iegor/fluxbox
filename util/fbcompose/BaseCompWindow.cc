@@ -1,4 +1,4 @@
-/** Window.cc file for the fluxbox compositor. */
+/** BaseCompWindow.cc file for the fluxbox compositor. */
 
 // Copyright (c) 2011 Gediminas Liktaras (gliktaras at gmail dot com)
 //
@@ -21,7 +21,7 @@
 // THE SOFTWARE.
 
 
-#include "Window.hh"
+#include "BaseCompWindow.hh"
 
 #include <ostream>
 
@@ -31,10 +31,13 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-BaseCompWindow::BaseCompWindow(Display *display, Window windowXID) :
+BaseCompWindow::BaseCompWindow(Window windowXID) :
     FbTk::FbWindow(windowXID) {
+
+    XWindowAttributes xwa;
+    XGetWindowAttributes(display(), window(), &xwa);
     
-    m_isMapped = false;
+    m_isMapped = (xwa.map_state != IsUnmapped);
 }
 
 // Destructor.
@@ -44,12 +47,12 @@ BaseCompWindow::~BaseCompWindow() { }
 //--- WINDOW MANIPULATION ----------------------------------------------
 
 /** Marks the window as mapped. */
-void BaseCompWindow::setMapped() {
+void BaseCompWindow::setMapped() throw() {
     m_isMapped = true;
 }
 
 /** Marks the window as unmapped. */
-void BaseCompWindow::setUnmapped() {
+void BaseCompWindow::setUnmapped() throw() {
     m_isMapped = false;
 }
 

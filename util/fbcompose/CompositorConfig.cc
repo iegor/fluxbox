@@ -33,8 +33,9 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-CompositorConfig::CompositorConfig(int argc, char **argv) throw(ConfigException) {
-    m_renderingMode = RM_OpenGL;
+CompositorConfig::CompositorConfig(int argc, char **argv) throw(ConfigException) :
+    m_displayName(""),
+    m_renderingMode(RM_XRenderAuto) {
 }
 
 // Destructor.

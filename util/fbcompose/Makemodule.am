@@ -34,16 +34,14 @@ fbcompose_CXXFLAGS = \
 
 fbcompose_SOURCES = \
 	util/fbcompose/main.cc \
+	util/fbcompose/BaseCompWindow.hh util/fbcompose/BaseCompWindow.cc \
+	util/fbcompose/BaseScreen.hh util/fbcompose/BaseScreen.cc \
 	util/fbcompose/Compositor.hh \
 	util/fbcompose/Compositor.cc \
 	util/fbcompose/CompositorConfig.hh \
 	util/fbcompose/CompositorConfig.cc \
 	util/fbcompose/Constants.hh \
-	util/fbcompose/Exceptions.hh \
-	util/fbcompose/Screen.hh \
-	util/fbcompose/Screen.cc \
-	util/fbcompose/Window.hh \
-	util/fbcompose/Window.cc \
+	util/fbcompose/Exceptions.hh
 
 #  FLUXBOX_SRC_DIR=	../../src/
 # INCLUDES= 		-I$(top_srcdir)/src -I$(top_srcdir)/src/FbTk

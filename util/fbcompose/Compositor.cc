@@ -34,12 +34,29 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // The constructor.
-Compositor::Compositor(const CompositorConfig &config) :
+Compositor::Compositor(const CompositorConfig &config) throw(ConfigException) :
     App(config.displayName().c_str()) {
 
     m_renderingMode = config.renderingMode();
 
-    // Checking for XComposite extension.
+    initXExtensions();
+
+    // Setting up screens.
+    int screenCount = XScreenCount(display());
+    m_screens.reserve(screenCount);
+    for(int i = 0; i < screenCount; i++) {
+        m_screens.push_back(BaseScreen(i));
+    }
+}
+
+// Destructor.
+Compositor::~Compositor() { }
+
+
+//--- INITIALIZATION FUNCTIONS -----------------------------------------
+
+// Initializes X's extensions.
+void Compositor::initXExtensions() throw(ConfigException) {
     if(!XCompositeQueryExtension(display(), &m_compositeEventBase, &m_compositeErrorBase)) {
         XCloseDisplay(display());
         throw ConfigException("XComposite extension not available.");
@@ -55,7 +72,6 @@ Compositor::Compositor(const CompositorConfig &config) :
         throw ConfigException("Unsupported XComposite extension version.");
     }
 
-    // Checking for XDamage extension.
     if(!XDamageQueryExtension(display(), &m_damageEventBase, &m_damageErrorBase)) {
         XCloseDisplay(display());
         throw ConfigException("XDamage extension not available.");
@@ -70,17 +86,7 @@ Compositor::Compositor(const CompositorConfig &config) :
         XCloseDisplay(display());
         throw ConfigException("Unsupported XDamage extension version.");
     }
-
-    // Setting up screens.
-    int screenCount = XScreenCount(display());
-    m_screens.reserve(screenCount);
-    for(int i = 0; i < screenCount; i++) {
-        m_screens.push_back(BaseScreen(display(), i));
-    }
 }
-
-// Destructor.
-Compositor::~Compositor() { }
 
 
 //--- EVENT LOOP ---------------------------------------------------------------
@@ -93,9 +99,8 @@ void Compositor::eventLoop() {
         while(XPending(display())) {
             XNextEvent(display(), &event);
 
-            // TODO: Use size_t?
             int eventScreen = -1;
-            for(int i = 0; i < int(m_screens.size()); i++) {
+            for(unsigned int i = 0; i < m_screens.size(); i++) {
                 if(event.xany.window == m_screens[i].rootWindow().window()) {
                     eventScreen = i;
                     break;
@@ -105,35 +110,35 @@ void Compositor::eventLoop() {
                 // TODO: Do something here.
             }
 
-            std::cout << "Event " << event.xany.type << " on screen " << eventScreen << std::endl;
-
             switch(event.type) {
             case ConfigureNotify :
                 std::cout << "  ConfigureNotify on " << event.xconfigure.window << std::endl;
                 break;
             case CreateNotify :
-                m_screens[eventScreen].createWindow(event.xcreatewindow);
+                m_screens[eventScreen].createWindow(BaseCompWindow(event.xcreatewindow.window));
                 std::cout << "  CreateNotify on " << event.xcreatewindow.window << std::endl;
                 break;
             case DestroyNotify :
-                m_screens[eventScreen].destroyWindow(event.xdestroywindow);
+                m_screens[eventScreen].destroyWindow(event.xdestroywindow.window);
                 std::cout << "  DestroyNotify on " << event.xdestroywindow.window << std::endl;
                 break;
             case Expose :
                 std::cout << "  Expose on " << event.xexpose.window << std::endl;
                 break;
             case MapNotify :
-                m_screens[eventScreen].mapWindow(event.xmap);
+                m_screens[eventScreen].mapWindow(event.xmap.window);
                 std::cout << "  MapNotify on " << event.xmap.window << std::endl;
                 break;
             case PropertyNotify :
                 std::cout << "  PropertyNotify on " << event.xproperty.window << std::endl;
                 break;
             case UnmapNotify :
-                m_screens[eventScreen].unmapWindow(event.xunmap);
+                m_screens[eventScreen].unmapWindow(event.xunmap.window);
                 std::cout << "  UnmapNotify on " << event.xunmap.window << std::endl;
                 break;
             default:
+                std::cout << "Event " << event.xany.type << " on screen " << eventScreen
+                          << " and window " << event.xany.window << std::endl;
                 break;
             }
         }
