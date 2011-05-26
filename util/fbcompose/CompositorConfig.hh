@@ -54,7 +54,7 @@ namespace FbCompositor {
 
 
         //--- ACCESSORS --------------------------------------------------------
-        
+
         /** \returns the display name. */
         const std::string &displayName() const throw();
 
@@ -64,7 +64,7 @@ namespace FbCompositor {
 
     private:
         //--- PRIVATE VARIABLES ------------------------------------------------
-        
+
         /** The name of the display we want to use. */
         std::string m_displayName;
 

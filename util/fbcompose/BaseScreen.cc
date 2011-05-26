@@ -48,10 +48,10 @@ BaseScreen::BaseScreen(int screenNumber) :
 
     XQueryTree(m_display, m_rootWindow.window(), &root, &parent, &children, &childCount);
 
-    for(unsigned int i = 0; i < childCount; i++) {
+    for (unsigned int i = 0; i < childCount; i++) {
         createWindow(children[i]);
     }
-    if(children) {
+    if (children) {
         XFree(children);
     }
 }
@@ -103,8 +103,8 @@ void BaseScreen::unmapWindow(Window window) {
 /** Returns an iterator of m_windows that points to the given window. */
 std::list<BaseCompWindow>::iterator BaseScreen::getWindowIterator(Window window) {
     std::list<BaseCompWindow>::iterator it = m_windows.begin();
-    while(it != m_windows.end()) {
-        if(window == (*it).window()) {
+    while (it != m_windows.end()) {
+        if (window == (*it).window()) {
             break;
         }
         it++;

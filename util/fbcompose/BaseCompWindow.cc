@@ -36,7 +36,7 @@ BaseCompWindow::BaseCompWindow(Window windowXID) :
 
     XWindowAttributes xwa;
     XGetWindowAttributes(display(), window(), &xwa);
-    
+
     m_isMapped = (xwa.map_state != IsUnmapped);
 }
 

@@ -44,7 +44,7 @@ Compositor::Compositor(const CompositorConfig &config) throw(ConfigException) :
     // Setting up screens.
     int screenCount = XScreenCount(display());
     m_screens.reserve(screenCount);
-    for(int i = 0; i < screenCount; i++) {
+    for (int i = 0; i < screenCount; i++) {
         m_screens.push_back(BaseScreen(i));
     }
 }
@@ -57,7 +57,7 @@ Compositor::~Compositor() { }
 
 // Initializes X's extensions.
 void Compositor::initXExtensions() throw(ConfigException) {
-    if(!XCompositeQueryExtension(display(), &m_compositeEventBase, &m_compositeErrorBase)) {
+    if (!XCompositeQueryExtension(display(), &m_compositeEventBase, &m_compositeErrorBase)) {
         XCloseDisplay(display());
         throw ConfigException("XComposite extension not available.");
     }
@@ -66,13 +66,13 @@ void Compositor::initXExtensions() throw(ConfigException) {
     int compositeMinor;
     XCompositeQueryVersion(display(), &compositeMajor, &compositeMinor);
 
-    if((compositeMajor < MIN_XCOMPOSITE_MAJOR_VERSION) 
+    if ((compositeMajor < MIN_XCOMPOSITE_MAJOR_VERSION)
             || ((compositeMajor == MIN_XCOMPOSITE_MAJOR_VERSION) && (compositeMinor < MIN_XCOMPOSITE_MINOR_VERSION))) {
         XCloseDisplay(display());
         throw ConfigException("Unsupported XComposite extension version.");
     }
 
-    if(!XDamageQueryExtension(display(), &m_damageEventBase, &m_damageErrorBase)) {
+    if (!XDamageQueryExtension(display(), &m_damageEventBase, &m_damageErrorBase)) {
         XCloseDisplay(display());
         throw ConfigException("XDamage extension not available.");
     }
@@ -81,7 +81,7 @@ void Compositor::initXExtensions() throw(ConfigException) {
     int damageMinor;
     XDamageQueryVersion(display(), &damageMajor, &damageMinor);
 
-    if((damageMajor < MIN_XDAMAGE_MAJOR_VERSION) 
+    if ((damageMajor < MIN_XDAMAGE_MAJOR_VERSION)
             || ((damageMajor == MIN_XDAMAGE_MAJOR_VERSION) && (damageMinor < MIN_XDAMAGE_MINOR_VERSION))) {
         XCloseDisplay(display());
         throw ConfigException("Unsupported XDamage extension version.");
@@ -95,22 +95,22 @@ void Compositor::initXExtensions() throw(ConfigException) {
 void Compositor::eventLoop() {
     XEvent event;
 
-    while(!done()) {
-        while(XPending(display())) {
+    while (!done()) {
+        while (XPending(display())) {
             XNextEvent(display(), &event);
 
             int eventScreen = -1;
-            for(unsigned int i = 0; i < m_screens.size(); i++) {
-                if(event.xany.window == m_screens[i].rootWindow().window()) {
+            for (unsigned int i = 0; i < m_screens.size(); i++) {
+                if (event.xany.window == m_screens[i].rootWindow().window()) {
                     eventScreen = i;
                     break;
                 }
             }
-            if(eventScreen < 0) {
+            if (eventScreen < 0) {
                 // TODO: Do something here.
             }
 
-            switch(event.type) {
+            switch (event.type) {
             case ConfigureNotify :
                 std::cout << "  ConfigureNotify on " << event.xconfigure.window << std::endl;
                 break;

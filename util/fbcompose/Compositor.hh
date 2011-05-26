@@ -116,7 +116,7 @@ namespace FbCompositor {
 
         /** Error base of the X Damage extension. */
         int m_damageErrorBase;
-        
+
     };
 
 
@@ -129,7 +129,7 @@ namespace FbCompositor {
 
     // Returns a particular screen.
     inline BaseScreen &Compositor::getScreen(int screenNumber) throw(IndexOutOfBoundsException) {
-        if((screenNumber < 0) || (screenNumber >= screenCount())) {
+        if ((screenNumber < 0) || (screenNumber >= screenCount())) {
             throw IndexOutOfBoundsException("getScreen(int) was given a bad index.");
         }
         return m_screens[screenNumber];
@@ -137,7 +137,7 @@ namespace FbCompositor {
 
     // Returns a particular screen (const version).
     inline const BaseScreen &Compositor::getScreen(int screenNumber) const throw(IndexOutOfBoundsException) {
-        if((screenNumber < 0) || (screenNumber >= screenCount())) {
+        if ((screenNumber < 0) || (screenNumber >= screenCount())) {
             throw IndexOutOfBoundsException("getScreen(int) was given a bad index.");
         }
         return m_screens[screenNumber];

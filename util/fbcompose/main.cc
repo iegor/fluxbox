@@ -45,12 +45,12 @@ int main(int argc, char **argv) {
         Compositor app(config);
 
         std::cout << app.screenCount() << " screen(s) available." << std::endl;
-        for(int i = 0; i < app.screenCount(); i++) {
-            std::cout << "Root window of screen " << i << ": " 
+        for (int i = 0; i < app.screenCount(); i++) {
+            std::cout << "Root window of screen " << i << ": "
                       << app.getScreen(i).rootWindow() << std::endl;
-            
+
             std::list<BaseCompWindow>::const_iterator it = app.getScreen(i).allWindows().begin();
-            while(it != app.getScreen(i).allWindows().end()) {
+            while (it != app.getScreen(i).allWindows().end()) {
                 std::cout << "  " << *it << std::endl;
                 it++;
             }
