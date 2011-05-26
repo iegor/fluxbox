@@ -63,7 +63,7 @@ FbWindow::FbWindow(const FbWindow& the_copy):
     m_width(the_copy.width()), m_height(the_copy.height()),
     m_border_width(the_copy.borderWidth()),
     m_border_color(the_copy.borderColor()),
-    m_depth(the_copy.depth()), m_destroy(true),
+    m_depth(the_copy.depth()), m_destroy(the_copy.m_destroy),
     m_lastbg_color_set(false), m_lastbg_color(0), m_lastbg_pm(0),
     m_renderer(the_copy.m_renderer) {
     the_copy.m_window = 0;
