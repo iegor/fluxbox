@@ -47,5 +47,6 @@ Makefile.in
 /testTexture
 /util/fluxbox-generate_menu
 /util/startfluxbox
+/util/fbcompose/fbcompose
 /version.h
 tags
