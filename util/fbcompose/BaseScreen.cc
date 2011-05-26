@@ -36,24 +36,8 @@ BaseScreen::BaseScreen(int screenNumber) :
     m_screenNumber(screenNumber),
     m_rootWindow(XRootWindow(m_display, m_screenNumber)) {
 
-    // Registering events.
     long events = ExposureMask | PropertyChangeMask | StructureNotifyMask | SubstructureNotifyMask;
-    XSelectInput(m_display, m_rootWindow.window(), events);
-
-    // Fetching all top level windows.
-    Window root;
-    Window parent;
-    Window* children;
-    unsigned int childCount;
-
-    XQueryTree(m_display, m_rootWindow.window(), &root, &parent, &children, &childCount);
-
-    for (unsigned int i = 0; i < childCount; i++) {
-        createWindow(children[i]);
-    }
-    if (children) {
-        XFree(children);
-    }
+    XSelectInput(display(), rootWindow().window(), events);
 }
 
 // Destructor
@@ -63,8 +47,13 @@ BaseScreen::~BaseScreen() { }
 //--- WINDOW MANIPULATION ----------------------------------------------
 
 // Creates a new window and inserts it into the list of windows.
-void BaseScreen::createWindow(const BaseCompWindow &window) {
-    m_windows.push_back(window);
+void BaseScreen::createWindow(Window window) {
+    std::list<BaseCompWindow>::iterator it = getWindowIterator(window);
+    if (it == m_windows.end()) {
+        m_windows.push_back(createWindowObject(window));
+    } else {
+        // TODO: Throw something.
+    }
 }
 
 // Destroys a window on this screen.
@@ -98,7 +87,18 @@ void BaseScreen::unmapWindow(Window window) {
 }
 
 
-//--- INTERNAL CONVENIENCE FUNCTIONS -----------------------------------
+// Returns the specified window.
+BaseCompWindow &BaseScreen::getWindow(Window window) {
+    return *getWindowIterator(window);
+}
+
+// Creates a new window object from its XID.
+BaseCompWindow BaseScreen::createWindowObject(Window window) {
+    return BaseCompWindow(window);
+}
+
+
+//--- INTERNAL FUNCTIONS -------------------------------------------------------
 
 /** Returns an iterator of m_windows that points to the given window. */
 std::list<BaseCompWindow>::iterator BaseScreen::getWindowIterator(Window window) {

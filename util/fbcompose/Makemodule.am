@@ -41,7 +41,9 @@ fbcompose_SOURCES = \
 	util/fbcompose/CompositorConfig.hh \
 	util/fbcompose/CompositorConfig.cc \
 	util/fbcompose/Constants.hh \
-	util/fbcompose/Exceptions.hh
+	util/fbcompose/Exceptions.hh \
+	util/fbcompose/XRenderAutoScreen.hh util/fbcompose/XRenderAutoScreen.cc \
+	util/fbcompose/XRenderAutoWindow.hh util/fbcompose/XRenderAutoWindow.cc
 
 #  FLUXBOX_SRC_DIR=	../../src/
 # INCLUDES= 		-I$(top_srcdir)/src -I$(top_srcdir)/src/FbTk

@@ -42,7 +42,6 @@ namespace FbCompositor {
     class Compositor;
     class CompositorConfig;
     class IndexOutOfBoundsException;
-    class SingletonException;
 
     /**
      * Main class for the compositor.
@@ -116,7 +115,6 @@ namespace FbCompositor {
 
         /** Error base of the X Damage extension. */
         int m_damageErrorBase;
-
     };
 
 

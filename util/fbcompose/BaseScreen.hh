@@ -47,7 +47,7 @@ namespace FbCompositor {
         BaseScreen(int screenNumber);
 
         /** Destructor. */
-        ~BaseScreen();
+        virtual ~BaseScreen();
 
 
         //--- ACCESSORS --------------------------------------------------------
@@ -57,6 +57,9 @@ namespace FbCompositor {
 
         /** \returns the list of windows on the screen (const version). */
         const std::list<BaseCompWindow> &allWindows() const throw();
+
+        /** \returns the current connection to the X server. */
+        Display *display() throw();
 
         /** \returns screen's root window. */
         BaseCompWindow &rootWindow() throw();
@@ -69,22 +72,32 @@ namespace FbCompositor {
 
 
         //--- WINDOW MANIPULATION ----------------------------------------------
-
+        
         /** Creates a new window and inserts it into the list of windows. */
-        void createWindow(const BaseCompWindow &window);
+        void createWindow(Window window);
 
         /** Destroys a window on this screen. */
-        void destroyWindow(Window window);
+        virtual void destroyWindow(Window window);
 
         /** Maps a window on this screen. */
-        void mapWindow(Window window);
+        virtual void mapWindow(Window window);
 
         /** Unmaps a window on this screen. */
-        void unmapWindow(Window window);
+        virtual void unmapWindow(Window window);
+
+
+    protected:
+        //--- PROTECTED FUNCTIONS ----------------------------------------------
+
+        /** Returns the specified window. */
+        BaseCompWindow &getWindow(Window window);
+
+        /** Creates a window object from its XID. */
+        virtual BaseCompWindow createWindowObject(Window window);
 
 
     private:
-        //--- INTERNAL CONVENIENCE FUNCTIONS -----------------------------------
+        //--- INTERNAL FUNCTIONS -----------------------------------------------
 
         /** Returns an iterator of m_windows that points to the given window. */
         std::list<BaseCompWindow>::iterator getWindowIterator(Window windowXID);
@@ -116,6 +129,11 @@ namespace FbCompositor {
     // Returns all of screen's windows (const version).
     inline const std::list<BaseCompWindow> &BaseScreen::allWindows() const throw() {
         return m_windows;
+    }
+
+    // Returns the current connection to the X server.
+    inline Display *BaseScreen::display() throw() {
+        return m_display;
     }
 
     // Returns screen's root window.

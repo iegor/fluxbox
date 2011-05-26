@@ -22,6 +22,7 @@
 
 
 #include "Compositor.hh"
+#include "XRenderAutoScreen.hh"
 
 #include <X11/extensions/Xcomposite.h>
 #include <X11/extensions/Xdamage.h>
@@ -45,7 +46,18 @@ Compositor::Compositor(const CompositorConfig &config) throw(ConfigException) :
     int screenCount = XScreenCount(display());
     m_screens.reserve(screenCount);
     for (int i = 0; i < screenCount; i++) {
-        m_screens.push_back(BaseScreen(i));
+        switch (m_renderingMode) {
+        case RM_OpenGL :
+            break;
+        case RM_XRenderManual :
+            break;
+        case RM_XRenderAuto :
+            m_screens.push_back(XRenderAutoScreen(i));
+            break;
+        default:
+            // TODO: Throw something.
+            break;
+        }
     }
 }
 
@@ -115,7 +127,7 @@ void Compositor::eventLoop() {
                 std::cout << "  ConfigureNotify on " << event.xconfigure.window << std::endl;
                 break;
             case CreateNotify :
-                m_screens[eventScreen].createWindow(BaseCompWindow(event.xcreatewindow.window));
+                m_screens[eventScreen].createWindow(event.xcreatewindow.window);
                 std::cout << "  CreateNotify on " << event.xcreatewindow.window << std::endl;
                 break;
             case DestroyNotify :

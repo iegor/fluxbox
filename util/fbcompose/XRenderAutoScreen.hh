@@ -1,4 +1,4 @@
-/** BaseCompWindow.hh file for the fluxbox compositor. */
+/** XRenderAutoScreen.hh file for the fluxbox compositor. */
 
 // Copyright (c) 2011 Gediminas Liktaras (gliktaras at gmail dot com)
 //
@@ -21,71 +21,58 @@
 // THE SOFTWARE.
 
 
-#ifndef FBCOMPOSITOR_WINDOW_HH
-#define FBCOMPOSITOR_WINDOW_HH
+#ifndef FBCOMPOSITOR_XRENDERAUTOSCREEN_HH
+#define FBCOMPOSITOR_XRENDERAUTOSCREEN_HH
 
-#include "FbTk/FbWindow.hh"
-
-#include <X11/Xlib.h>
-
-#include <iosfwd>
+#include "BaseScreen.hh"
+#include "BaseCompWindow.hh"
 
 
 namespace FbCompositor {
 
     class BaseCompWindow;
-
-    /** << output stream operator for the BaseCompWindow class. */
-    std::ostream &operator<<(std::ostream& out, const BaseCompWindow& window);
+    class XRenderAutoScreen;
 
 
     /**
-     * Base class for composited windows.
+     * Manages screen in XRender auto mode.
+     *
+     * This class is, strictly speaking, necessary, since pretty much
+     * everything is handled by the X server in the XRender auto mode. I will
+     * use this class to lay out the interface for other screen management
+     * classes and for testing purposes.
      */
-    class BaseCompWindow : public FbTk::FbWindow {
-
-        //--- FRIEND OPERATORS -------------------------------------------------
-        friend std::ostream &operator<<(std::ostream& out, const BaseCompWindow& window);
-
+    class XRenderAutoScreen : public BaseScreen {
     public:
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
-
+        
         /** Constructor. */
-        BaseCompWindow(Window windowXID);
+        XRenderAutoScreen(int screenNumber);
 
         /** Destructor. */
-        virtual ~BaseCompWindow();
-
-
-        //--- ACCESSORS --------------------------------------------------------
-
-        /** Returns whether the screen is mapped or not. */
-        bool isMapped() const throw();
+        ~XRenderAutoScreen();
 
 
         //--- WINDOW MANIPULATION ----------------------------------------------
+        
+        /** Destroys a window on this screen. */
+        void destroyWindow(Window window);
 
-        /** Marks the window as mapped. */
-        void setMapped() throw();
+        /** Maps a window on this screen. */
+        void mapWindow(Window window);
 
-        /** Marks the window as unmapped. */
-        void setUnmapped() throw();
+        /** Unmaps a window on this screen. */
+        void unmapWindow(Window window);
 
-    private:
-        //--- WINDOW ATTRIBUTES ------------------------------------------------
 
-        /** Window's map state. */
-        bool m_isMapped;
+    protected:
+        //--- PROTECTED FUNCTIONS ----------------------------------------------
+
+        /** Creates a window object from its XID. */
+        BaseCompWindow createWindowObject(Window window);
     };
-
-
-    //--- INLINE FUNCTIONS -------------------------------------------------
-
-    // Returns whether the window is mapped or not.
-    inline bool BaseCompWindow::isMapped() const throw() {
-        return m_isMapped;
-    }
 
 }
 
-#endif  // FBCOMPOSITOR_WINDOW_HH
+
+#endif  // FBCOMPOSITOR_XRENDERAUTOSCREEN_HH
