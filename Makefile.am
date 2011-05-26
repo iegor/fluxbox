@@ -80,6 +80,7 @@ include src/Makemodule.am
 include src/tests/Makemodule.am
 include util/Makemodule.am
 include util/fbrun/Makemodule.am
+include util/fbcompose/Makemodule.am
 
 uninstall-hook:
 	rmdir $(DESTDIR)$(pkgdatadir)

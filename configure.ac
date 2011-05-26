@@ -185,6 +185,11 @@ AC_COMPILE_IFELSE([
 	AC_MSG_RESULT([no])
 ])
 
+dnl Dependencies for fbcompose
+dnl TODO: Replace with something more permanent and optional
+AC_CHECK_LIB([Xcomposite], [XCompositeQueryExtension])
+AC_CHECK_LIB([Xdamage], [XDamageQueryExtnsion])
+
 AM_ICONV
 AS_IF([test x$am_cv_proto_iconv_arg1 = "xconst"], [
 	AC_DEFINE([HAVE_CONST_ICONV], [1], [Is second argument of iconv() is of type 'const char **' or 'char **'])

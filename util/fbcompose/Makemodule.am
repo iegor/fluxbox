@@ -1,0 +1,54 @@
+## Makefile.am file for the fluxbox compositor.
+
+# Copyright (c) 2011 Gediminas Liktaras (gliktaras at gmail dot com)
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+
+bin_PROGRAMS += fbcompose
+
+fbcompose_CPPFLAGS = \
+	$(AM_CPPFLAGS) \
+	-I$(src_incdir) \
+	-I$(top_scrdir)/src/FbTk
+
+fbcompose_CXXFLAGS = \
+	$(AM_CXXFLAGS) \
+	-Wall \
+	-Werror
+
+fbcompose_SOURCES = \
+	util/fbcompose/main.cc \
+	util/fbcompose/Compositor.hh \
+	util/fbcompose/Compositor.cc \
+	util/fbcompose/CompositorConfig.hh \
+	util/fbcompose/CompositorConfig.cc \
+	util/fbcompose/Constants.hh \
+	util/fbcompose/Exceptions.hh \
+	util/fbcompose/Screen.hh \
+	util/fbcompose/Screen.cc \
+	util/fbcompose/Window.hh \
+	util/fbcompose/Window.cc \
+
+#  FLUXBOX_SRC_DIR=	../../src/
+# INCLUDES= 		-I$(top_srcdir)/src -I$(top_srcdir)/src/FbTk
+
+# fbcompose_LDADD=	${FLUXBOX_SRC_DIR}FbTk/libFbTk.a
+
+# ${FLUXBOX_SRC_DIR}FbTk/libFbTk.a:
+# 	cd ${FLUXBOX_SRC_DIR}FbTk && make
