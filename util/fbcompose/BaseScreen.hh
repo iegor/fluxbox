@@ -73,27 +73,33 @@ namespace FbCompositor {
 
         //--- WINDOW MANIPULATION ----------------------------------------------
         
-        /** Creates a new window and inserts it into the list of windows. */
+        /** Creates a new window on this creen. */
         void createWindow(Window window);
 
         /** Destroys a window on this screen. */
-        virtual void destroyWindow(Window window);
+        void destroyWindow(Window window);
 
         /** Maps a window on this screen. */
-        virtual void mapWindow(Window window);
+        void mapWindow(Window window);
 
         /** Unmaps a window on this screen. */
-        virtual void unmapWindow(Window window);
+        void unmapWindow(Window window);
 
 
     protected:
-        //--- PROTECTED FUNCTIONS ----------------------------------------------
-
-        /** Returns the specified window. */
-        BaseCompWindow &getWindow(Window window);
+        //--- SPECIALIZED WINDOW MANIPULATION FUNCTIONS ------------------------
 
         /** Creates a window object from its XID. */
         virtual BaseCompWindow createWindowObject(Window window);
+
+        /** Cleans up a window object before it is deleted. */
+        virtual void cleanupWindowObject(BaseCompWindow &window);
+
+        /** Maps a window object. */
+        virtual void mapWindowObject(BaseCompWindow &window);
+
+        /** Unmaps a window object. */
+        virtual void unmapWindowObject(BaseCompWindow &window);
 
 
     private:

@@ -55,25 +55,20 @@ XRenderAutoScreen::~XRenderAutoScreen() { }
 
 //--- WINDOW MANIPULATION ------------------------------------------------------
 
-// Destroys a window on this screen.
-void XRenderAutoScreen::destroyWindow(Window window) {
-    BaseScreen::destroyWindow(window);
-}
-
-// Maps a window on this screen.
-void XRenderAutoScreen::mapWindow(Window window) {
-    BaseScreen::mapWindow(window);
-}
-
-// Unmaps a window on this screen.
-void XRenderAutoScreen::unmapWindow(Window window) {
-    BaseScreen::unmapWindow(window);
-}
-
-
-//--- PROTECTED FUNCTIONS ------------------------------------------------------
-
 // Creates a window object from its XID.
 BaseCompWindow XRenderAutoScreen::createWindowObject(Window window) {
     return XRenderAutoWindow(window);
+}
+
+// Cleans up a window object before it is deleted.
+void XRenderAutoScreen::cleanupWindowObject(BaseCompWindow &window) { }
+
+// Maps a window object.
+void XRenderAutoScreen::mapWindowObject(BaseCompWindow &window) {
+    window.setMapped();
+}
+
+// Unmaps a window object.
+void XRenderAutoScreen::unmapWindowObject(BaseCompWindow &window) {
+    window.setUnmapped();
 }

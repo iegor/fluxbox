@@ -53,23 +53,20 @@ namespace FbCompositor {
         ~XRenderAutoScreen();
 
 
-        //--- WINDOW MANIPULATION ----------------------------------------------
-        
-        /** Destroys a window on this screen. */
-        void destroyWindow(Window window);
-
-        /** Maps a window on this screen. */
-        void mapWindow(Window window);
-
-        /** Unmaps a window on this screen. */
-        void unmapWindow(Window window);
-
-
     protected:
-        //--- PROTECTED FUNCTIONS ----------------------------------------------
+        //--- WINDOW MANIPULATION ----------------------------------------------
 
         /** Creates a window object from its XID. */
         BaseCompWindow createWindowObject(Window window);
+
+        /** Cleans up a window object before it is deleted. */
+        void cleanupWindowObject(BaseCompWindow &window);
+
+        /** Maps a window object. */
+        void mapWindowObject(BaseCompWindow &window);
+
+        /** Unmaps a window object. */
+        void unmapWindowObject(BaseCompWindow &window);
     };
 
 }

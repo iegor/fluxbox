@@ -36,8 +36,8 @@ BaseScreen::BaseScreen(int screenNumber) :
     m_screenNumber(screenNumber),
     m_rootWindow(XRootWindow(m_display, m_screenNumber)) {
 
-    long events = ExposureMask | PropertyChangeMask | StructureNotifyMask | SubstructureNotifyMask;
-    XSelectInput(display(), rootWindow().window(), events);
+    long eventMask = ExposureMask | PropertyChangeMask | StructureNotifyMask | SubstructureNotifyMask;
+    m_rootWindow.setEventMask(eventMask);
 }
 
 // Destructor
@@ -60,6 +60,7 @@ void BaseScreen::createWindow(Window window) {
 void BaseScreen::destroyWindow(Window window) {
     std::list<BaseCompWindow>::iterator it = getWindowIterator(window);
     if (it != m_windows.end()) {
+        cleanupWindowObject(*it);
         m_windows.erase(it);
     } else {
         // TODO: Throw something.
@@ -70,7 +71,7 @@ void BaseScreen::destroyWindow(Window window) {
 void BaseScreen::mapWindow(Window window) {
     std::list<BaseCompWindow>::iterator it = getWindowIterator(window);
     if (it != m_windows.end()) {
-        it->setMapped();
+        mapWindowObject(*it);
     } else {
         // TODO: Throw something.
     }
@@ -80,21 +81,31 @@ void BaseScreen::mapWindow(Window window) {
 void BaseScreen::unmapWindow(Window window) {
     std::list<BaseCompWindow>::iterator it = getWindowIterator(window);
     if (it != m_windows.end()) {
-        it->setUnmapped();
+        unmapWindowObject(*it);
     } else {
         // TODO: Throw something.
     }
 }
 
 
-// Returns the specified window.
-BaseCompWindow &BaseScreen::getWindow(Window window) {
-    return *getWindowIterator(window);
-}
+//--- SPECIALIZED WINDOW MANIPULATION FUNCTIONS --------------------------------
 
 // Creates a new window object from its XID.
 BaseCompWindow BaseScreen::createWindowObject(Window window) {
     return BaseCompWindow(window);
+}
+
+// Cleans up a window object before it is deleted.
+void BaseScreen::cleanupWindowObject(BaseCompWindow &window) { }
+
+// Maps a window object.
+void BaseScreen::mapWindowObject(BaseCompWindow &window) {
+    window.setMapped();
+}
+
+// Unmaps a window object.
+void BaseScreen::unmapWindowObject(BaseCompWindow &window) {
+    window.setUnmapped();
 }
 
 
