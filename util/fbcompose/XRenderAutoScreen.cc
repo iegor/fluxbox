@@ -43,6 +43,7 @@ XRenderAutoScreen::XRenderAutoScreen(int screenNumber) :
 
     for (unsigned int i = 0; i < childCount; i++) {
         createWindow(children[i]);
+        // XSelectInput(display(), children[i], ExposureMask);     // TODO: Is this needed?
     }
     if (children) {
         XFree(children);
