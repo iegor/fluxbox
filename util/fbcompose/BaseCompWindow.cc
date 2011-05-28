@@ -37,21 +37,40 @@ BaseCompWindow::BaseCompWindow(Window windowXID) :
     XWindowAttributes xwa;
     XGetWindowAttributes(display(), window(), &xwa);
 
+    m_class = xwa.c_class;
     m_isMapped = (xwa.map_state != IsUnmapped);
+
+    if (m_class == InputOutput) {
+        m_damage = XDamageCreate(display(), window(), XDamageReportNonEmpty);
+    } else {
+        m_damage = 0;
+    }
+    m_isDamaged = false;
 }
 
 // Destructor.
-BaseCompWindow::~BaseCompWindow() { }
+BaseCompWindow::~BaseCompWindow() {
+    if (!m_damage) {
+        XDamageDestroy(display(), m_damage);
+    }
+}
 
 
 //--- WINDOW MANIPULATION ----------------------------------------------
 
-/** Marks the window as mapped. */
+// Marks the window as damaged.
+// TODO: Do we need anything more sophisticated than this?
+void BaseCompWindow::setDamaged() throw() {
+    if (!m_damage) return;
+    m_isDamaged = true;
+}
+
+// Marks the window as mapped.
 void BaseCompWindow::setMapped() throw() {
     m_isMapped = true;
 }
 
-/** Marks the window as unmapped. */
+// Marks the window as unmapped.
 void BaseCompWindow::setUnmapped() throw() {
     m_isMapped = false;
 }
@@ -63,6 +82,6 @@ void BaseCompWindow::setUnmapped() throw() {
 std::ostream &FbCompositor::operator<<(std::ostream& out, const BaseCompWindow& w) {
     out << "Window " << w.window() << ": Geometry[" << w.x() << "," << w.y()
         << "," << w.width() << "," << w.height() << " " << w.borderWidth()
-        << "] Depth[" << w.depth() << "] " << w.isMapped();
+        << "] Depth[" << w.depth() << "] " << w.isMapped() << " " << w.isDamaged();
     return out;
 }

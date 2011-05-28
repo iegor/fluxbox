@@ -65,9 +65,6 @@ namespace FbCompositor {
         /** \returns the reference to a particular screen. */
         BaseScreen &getScreen(int screenNumber) throw(IndexOutOfBoundsException);
 
-        /** \returns the reference to a particular screen (const version). */
-        const BaseScreen &getScreen(int screenNumber) const throw(IndexOutOfBoundsException);
-
         /** \returns the application's rendering mode. */
         RenderingMode renderingMode() const;
 
@@ -99,7 +96,7 @@ namespace FbCompositor {
         RenderingMode m_renderingMode;
 
         /** The array of available screens. */
-        std::vector<BaseScreen> m_screens;
+        std::vector<BaseScreen*> m_screens;
 
 
         //--- EXTENSION BASE VARIABLES -----------------------------------------
@@ -130,15 +127,7 @@ namespace FbCompositor {
         if ((screenNumber < 0) || (screenNumber >= screenCount())) {
             throw IndexOutOfBoundsException("getScreen(int) was given a bad index.");
         }
-        return m_screens[screenNumber];
-    }
-
-    // Returns a particular screen (const version).
-    inline const BaseScreen &Compositor::getScreen(int screenNumber) const throw(IndexOutOfBoundsException) {
-        if ((screenNumber < 0) || (screenNumber >= screenCount())) {
-            throw IndexOutOfBoundsException("getScreen(int) was given a bad index.");
-        }
-        return m_screens[screenNumber];
+        return *m_screens[screenNumber];
     }
 
     // Returns the rendering mode.

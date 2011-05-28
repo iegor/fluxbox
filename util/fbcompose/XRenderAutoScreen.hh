@@ -57,10 +57,13 @@ namespace FbCompositor {
         //--- WINDOW MANIPULATION ----------------------------------------------
 
         /** Creates a window object from its XID. */
-        BaseCompWindow createWindowObject(Window window);
+        BaseCompWindow *createWindowObject(Window window);
 
         /** Cleans up a window object before it is deleted. */
         void cleanupWindowObject(BaseCompWindow &window);
+
+        /** Damages a window object. */
+        void damageWindowObject(BaseCompWindow &window);
 
         /** Maps a window object. */
         void mapWindowObject(BaseCompWindow &window);

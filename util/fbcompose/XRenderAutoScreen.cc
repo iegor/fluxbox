@@ -56,12 +56,18 @@ XRenderAutoScreen::~XRenderAutoScreen() { }
 //--- WINDOW MANIPULATION ------------------------------------------------------
 
 // Creates a window object from its XID.
-BaseCompWindow XRenderAutoScreen::createWindowObject(Window window) {
-    return XRenderAutoWindow(window);
+BaseCompWindow *XRenderAutoScreen::createWindowObject(Window window) {
+    XRenderAutoWindow *newWindow = new XRenderAutoWindow(window);
+    return newWindow;
 }
 
 // Cleans up a window object before it is deleted.
 void XRenderAutoScreen::cleanupWindowObject(BaseCompWindow &window) { }
+
+// Damages a window object.
+void XRenderAutoScreen::damageWindowObject(BaseCompWindow &window) {
+    window.setDamaged();
+}
 
 // Maps a window object.
 void XRenderAutoScreen::mapWindowObject(BaseCompWindow &window) {

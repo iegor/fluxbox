@@ -27,6 +27,7 @@
 #include "FbTk/FbWindow.hh"
 
 #include <X11/Xlib.h>
+#include <X11/extensions/Xdamage.h>
 
 #include <iosfwd>
 
@@ -59,11 +60,20 @@ namespace FbCompositor {
 
         //--- ACCESSORS --------------------------------------------------------
 
+        /** Returns whether the window is damaged or not. */
+        bool isDamaged() const throw();
+
         /** Returns whether the screen is mapped or not. */
         bool isMapped() const throw();
 
+        /** Returns the window's class. */
+        int windowClass() const throw();
+
 
         //--- WINDOW MANIPULATION ----------------------------------------------
+
+        /** Marks the window as damaged. */
+        void setDamaged() throw();
 
         /** Marks the window as mapped. */
         void setMapped() throw();
@@ -74,6 +84,15 @@ namespace FbCompositor {
     private:
         //--- WINDOW ATTRIBUTES ------------------------------------------------
 
+        /** Window's class. */
+        int m_class;
+
+        /** Window's damage object. */
+        Damage m_damage;
+
+        /** Window's damage state. */
+        bool m_isDamaged;
+
         /** Window's map state. */
         bool m_isMapped;
     };
@@ -81,9 +100,19 @@ namespace FbCompositor {
 
     //--- INLINE FUNCTIONS -------------------------------------------------
 
+    // Returns whether the window is damaged or not.
+    inline bool BaseCompWindow::isDamaged() const throw() {
+        return m_isDamaged;
+    }
+
     // Returns whether the window is mapped or not.
     inline bool BaseCompWindow::isMapped() const throw() {
         return m_isMapped;
+    }
+
+    // Returns the window's class.
+    inline int BaseCompWindow::windowClass() const throw() {
+        return m_class;
     }
 
 }

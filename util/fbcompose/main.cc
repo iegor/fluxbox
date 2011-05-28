@@ -49,9 +49,9 @@ int main(int argc, char **argv) {
             std::cout << "Root window of screen " << i << ": "
                       << app.getScreen(i).rootWindow() << std::endl;
 
-            std::list<BaseCompWindow>::const_iterator it = app.getScreen(i).allWindows().begin();
+            std::list<BaseCompWindow*>::const_iterator it = app.getScreen(i).allWindows().begin();
             while (it != app.getScreen(i).allWindows().end()) {
-                std::cout << "  " << *it << std::endl;
+                std::cout << "  " << **it << std::endl;
                 it++;
             }
         }

@@ -53,10 +53,10 @@ namespace FbCompositor {
         //--- ACCESSORS --------------------------------------------------------
 
         /** \returns the list of windows on the screen. */
-        std::list<BaseCompWindow> &allWindows() throw();
+        std::list<BaseCompWindow*> &allWindows() throw();
 
         /** \returns the list of windows on the screen (const version). */
-        const std::list<BaseCompWindow> &allWindows() const throw();
+        const std::list<BaseCompWindow*> &allWindows() const throw();
 
         /** \returns the current connection to the X server. */
         Display *display() throw();
@@ -73,8 +73,11 @@ namespace FbCompositor {
 
         //--- WINDOW MANIPULATION ----------------------------------------------
         
-        /** Creates a new window on this creen. */
+        /** Creates a new window on this screen. */
         void createWindow(Window window);
+
+        /** Damages a window on this screen. */
+        void damageWindow(Window window);
 
         /** Destroys a window on this screen. */
         void destroyWindow(Window window);
@@ -90,10 +93,13 @@ namespace FbCompositor {
         //--- SPECIALIZED WINDOW MANIPULATION FUNCTIONS ------------------------
 
         /** Creates a window object from its XID. */
-        virtual BaseCompWindow createWindowObject(Window window);
+        virtual BaseCompWindow *createWindowObject(Window window);
 
         /** Cleans up a window object before it is deleted. */
         virtual void cleanupWindowObject(BaseCompWindow &window);
+
+        /** Damages a window object. */
+        virtual void damageWindowObject(BaseCompWindow &window);
 
         /** Maps a window object. */
         virtual void mapWindowObject(BaseCompWindow &window);
@@ -106,7 +112,7 @@ namespace FbCompositor {
         //--- INTERNAL FUNCTIONS -----------------------------------------------
 
         /** Returns an iterator of m_windows that points to the given window. */
-        std::list<BaseCompWindow>::iterator getWindowIterator(Window windowXID);
+        std::list<BaseCompWindow*>::iterator getWindowIterator(Window windowXID);
 
 
         //--- PRIVATE VARIABLES ------------------------------------------------
@@ -121,19 +127,19 @@ namespace FbCompositor {
         BaseCompWindow m_rootWindow;
 
         /** Screen's windows. */
-        std::list<BaseCompWindow> m_windows;
+        std::list<BaseCompWindow*> m_windows;
     };
 
 
     //--- INLINE FUNCTIONS -----------------------------------------------------
 
     // Returns all of screen's windows (const version).
-    inline std::list<BaseCompWindow> &BaseScreen::allWindows() throw() {
+    inline std::list<BaseCompWindow*> &BaseScreen::allWindows() throw() {
         return m_windows;
     }
 
     // Returns all of screen's windows (const version).
-    inline const std::list<BaseCompWindow> &BaseScreen::allWindows() const throw() {
+    inline const std::list<BaseCompWindow*> &BaseScreen::allWindows() const throw() {
         return m_windows;
     }
 

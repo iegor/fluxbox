@@ -52,7 +52,7 @@ Compositor::Compositor(const CompositorConfig &config) throw(ConfigException) :
         case RM_XRenderManual :
             break;
         case RM_XRenderAuto :
-            m_screens.push_back(XRenderAutoScreen(i));
+            m_screens.push_back(new XRenderAutoScreen(i));
             break;
         default:
             // TODO: Throw something.
@@ -113,13 +113,15 @@ void Compositor::eventLoop() {
 
             int eventScreen = -1;
             for (unsigned int i = 0; i < m_screens.size(); i++) {
-                if (event.xany.window == m_screens[i].rootWindow().window()) {
+                if (event.xany.window == m_screens[i]->rootWindow().window()) {
                     eventScreen = i;
                     break;
                 }
             }
             if (eventScreen < 0) {
-                // TODO: Do something here.
+                XWindowAttributes xwa;
+                XGetWindowAttributes(display(), event.xany.window, &xwa);
+                eventScreen = XScreenNumberOfScreen(xwa.screen);
             }
 
             switch (event.type) {
@@ -127,30 +129,37 @@ void Compositor::eventLoop() {
                 std::cout << "  ConfigureNotify on " << event.xconfigure.window << std::endl;
                 break;
             case CreateNotify :
-                m_screens[eventScreen].createWindow(event.xcreatewindow.window);
+                m_screens[eventScreen]->createWindow(event.xcreatewindow.window);
                 std::cout << "  CreateNotify on " << event.xcreatewindow.window << std::endl;
                 break;
             case DestroyNotify :
-                m_screens[eventScreen].destroyWindow(event.xdestroywindow.window);
+                m_screens[eventScreen]->destroyWindow(event.xdestroywindow.window);
                 std::cout << "  DestroyNotify on " << event.xdestroywindow.window << std::endl;
                 break;
             case Expose :
                 std::cout << "  Expose on " << event.xexpose.window << std::endl;
                 break;
             case MapNotify :
-                m_screens[eventScreen].mapWindow(event.xmap.window);
+                m_screens[eventScreen]->mapWindow(event.xmap.window);
                 std::cout << "  MapNotify on " << event.xmap.window << std::endl;
                 break;
             case PropertyNotify :
                 std::cout << "  PropertyNotify on " << event.xproperty.window << std::endl;
                 break;
             case UnmapNotify :
-                m_screens[eventScreen].unmapWindow(event.xunmap.window);
+                m_screens[eventScreen]->unmapWindow(event.xunmap.window);
                 std::cout << "  UnmapNotify on " << event.xunmap.window << std::endl;
                 break;
-            default:
-                std::cout << "Event " << event.xany.type << " on screen " << eventScreen
-                          << " and window " << event.xany.window << std::endl;
+            default :
+                if (event.type == (m_damageEventBase + XDamageNotify)) {
+                    XDamageNotifyEvent damageEvent = *((XDamageNotifyEvent*) &event);
+                    m_screens[eventScreen]->damageWindow(damageEvent.drawable);
+                    std::cout << "  DamageNotify on " << damageEvent.drawable << std::endl;
+                } else {
+                    std::cout << "Event " << event.xany.type << " on screen " << eventScreen
+                              << " and window " << event.xany.window << std::endl;
+                }
+
                 break;
             }
         }

@@ -48,9 +48,20 @@ BaseScreen::~BaseScreen() { }
 
 // Creates a new window and inserts it into the list of windows.
 void BaseScreen::createWindow(Window window) {
-    std::list<BaseCompWindow>::iterator it = getWindowIterator(window);
+    std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
     if (it == m_windows.end()) {
-        m_windows.push_back(createWindowObject(window));
+        BaseCompWindow *newWindow = createWindowObject(window);
+        m_windows.push_back(newWindow);
+    } else {
+        // TODO: Throw something.
+    }
+}
+
+// Damages a window on this screen.
+void BaseScreen::damageWindow(Window window) {
+    std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
+    if (it != m_windows.end()) {
+        damageWindowObject(**it);
     } else {
         // TODO: Throw something.
     }
@@ -58,9 +69,10 @@ void BaseScreen::createWindow(Window window) {
 
 // Destroys a window on this screen.
 void BaseScreen::destroyWindow(Window window) {
-    std::list<BaseCompWindow>::iterator it = getWindowIterator(window);
+    std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
     if (it != m_windows.end()) {
-        cleanupWindowObject(*it);
+        cleanupWindowObject(**it);
+        delete *it;
         m_windows.erase(it);
     } else {
         // TODO: Throw something.
@@ -69,9 +81,9 @@ void BaseScreen::destroyWindow(Window window) {
 
 // Maps a window on this screen.
 void BaseScreen::mapWindow(Window window) {
-    std::list<BaseCompWindow>::iterator it = getWindowIterator(window);
+    std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
     if (it != m_windows.end()) {
-        mapWindowObject(*it);
+        mapWindowObject(**it);
     } else {
         // TODO: Throw something.
     }
@@ -79,9 +91,9 @@ void BaseScreen::mapWindow(Window window) {
 
 // Unmaps a window on this screen.
 void BaseScreen::unmapWindow(Window window) {
-    std::list<BaseCompWindow>::iterator it = getWindowIterator(window);
+    std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
     if (it != m_windows.end()) {
-        unmapWindowObject(*it);
+        unmapWindowObject(**it);
     } else {
         // TODO: Throw something.
     }
@@ -91,12 +103,18 @@ void BaseScreen::unmapWindow(Window window) {
 //--- SPECIALIZED WINDOW MANIPULATION FUNCTIONS --------------------------------
 
 // Creates a new window object from its XID.
-BaseCompWindow BaseScreen::createWindowObject(Window window) {
-    return BaseCompWindow(window);
+BaseCompWindow *BaseScreen::createWindowObject(Window window) {
+    BaseCompWindow *newWindow = new BaseCompWindow(window);
+    return newWindow;
 }
 
 // Cleans up a window object before it is deleted.
 void BaseScreen::cleanupWindowObject(BaseCompWindow &window) { }
+
+// Damages a window object.
+void BaseScreen::damageWindowObject(BaseCompWindow &window) {
+    window.setDamaged();
+}
 
 // Maps a window object.
 void BaseScreen::mapWindowObject(BaseCompWindow &window) {
@@ -112,10 +130,10 @@ void BaseScreen::unmapWindowObject(BaseCompWindow &window) {
 //--- INTERNAL FUNCTIONS -------------------------------------------------------
 
 /** Returns an iterator of m_windows that points to the given window. */
-std::list<BaseCompWindow>::iterator BaseScreen::getWindowIterator(Window window) {
-    std::list<BaseCompWindow>::iterator it = m_windows.begin();
+std::list<BaseCompWindow*>::iterator BaseScreen::getWindowIterator(Window window) {
+    std::list<BaseCompWindow*>::iterator it = m_windows.begin();
     while (it != m_windows.end()) {
-        if (window == (*it).window()) {
+        if (window == (*it)->window()) {
             break;
         }
         it++;
