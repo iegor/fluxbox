@@ -89,6 +89,26 @@ void BaseScreen::mapWindow(Window window) {
     }
 }
 
+// Updates window's configuration.
+void BaseScreen::reconfigureWindow(const XConfigureEvent &event) {
+    std::list<BaseCompWindow*>::iterator it = getWindowIterator(event.window);
+    if (it != m_windows.end()) {
+        reconfigureWindowObject(**it);
+
+        BaseCompWindow *currentWindow = *it;
+        m_windows.erase(it);
+
+        if(event.above == None) {
+            m_windows.push_front(currentWindow);
+        } else {
+            it = getWindowIterator(event.above);
+            m_windows.insert(it, currentWindow);
+        }
+    } else {
+        // TODO: Throw something.
+    }
+}
+
 // Unmaps a window on this screen.
 void BaseScreen::unmapWindow(Window window) {
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
@@ -119,6 +139,13 @@ void BaseScreen::damageWindowObject(BaseCompWindow &window) {
 // Maps a window object.
 void BaseScreen::mapWindowObject(BaseCompWindow &window) {
     window.setMapped();
+}
+
+// Updates configuration of a window object.
+// TODO: Improve reconfiguration - take values from XConfigureEvent object,
+// rather than make a separate X call to get window's parameters.
+void BaseScreen::reconfigureWindowObject(BaseCompWindow &window) {
+    window.updateGeometry();
 }
 
 // Unmaps a window object.

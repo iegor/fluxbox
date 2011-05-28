@@ -126,6 +126,7 @@ void Compositor::eventLoop() {
 
             switch (event.type) {
             case ConfigureNotify :
+                m_screens[eventScreen]->reconfigureWindow(event.xconfigure);
                 std::cout << "  ConfigureNotify on " << event.xconfigure.window << std::endl;
                 break;
             case CreateNotify :

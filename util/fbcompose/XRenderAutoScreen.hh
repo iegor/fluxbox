@@ -68,6 +68,9 @@ namespace FbCompositor {
         /** Maps a window object. */
         void mapWindowObject(BaseCompWindow &window);
 
+        /** Updates window's configuration. */
+        void reconfigureWindowObject(BaseCompWindow &window);
+
         /** Unmaps a window object. */
         void unmapWindowObject(BaseCompWindow &window);
     };

@@ -85,6 +85,9 @@ namespace FbCompositor {
         /** Maps a window on this screen. */
         void mapWindow(Window window);
 
+        /** Updates window's configuration. */
+        void reconfigureWindow(const XConfigureEvent &event);
+
         /** Unmaps a window on this screen. */
         void unmapWindow(Window window);
 
@@ -103,6 +106,9 @@ namespace FbCompositor {
 
         /** Maps a window object. */
         virtual void mapWindowObject(BaseCompWindow &window);
+
+        /** Updates configuration of a window object. */
+        virtual void reconfigureWindowObject(BaseCompWindow &window);
 
         /** Unmaps a window object. */
         virtual void unmapWindowObject(BaseCompWindow &window);

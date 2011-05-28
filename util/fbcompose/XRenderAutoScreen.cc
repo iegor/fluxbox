@@ -74,6 +74,11 @@ void XRenderAutoScreen::mapWindowObject(BaseCompWindow &window) {
     window.setMapped();
 }
 
+// Updates window's configuration.
+void XRenderAutoScreen::reconfigureWindowObject(BaseCompWindow &window) {
+    window.updateGeometry();
+}
+
 // Unmaps a window object.
 void XRenderAutoScreen::unmapWindowObject(BaseCompWindow &window) {
     window.setUnmapped();
