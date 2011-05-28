@@ -91,6 +91,9 @@ namespace FbCompositor {
         /** Unmaps a window on this screen. */
         void unmapWindow(Window window);
 
+        /** Updates the value of some window's property. */
+        void updateWindowProperty(Window window, Atom property, int state);
+
 
     protected:
         //--- SPECIALIZED WINDOW MANIPULATION FUNCTIONS ------------------------
@@ -113,12 +116,27 @@ namespace FbCompositor {
         /** Unmaps a window object. */
         virtual void unmapWindowObject(BaseCompWindow &window);
 
+        /** Updates the value of some window's property. */
+        virtual void updateWindowObjectProperty(BaseCompWindow &window, Atom property, int state);
+
 
     private:
         //--- INTERNAL FUNCTIONS -----------------------------------------------
 
         /** Returns an iterator of m_windows that points to the given window. */
         std::list<BaseCompWindow*>::iterator getWindowIterator(Window windowXID);
+
+
+        //--- PROPERTIES OF INTEREST -------------------------------------------
+
+        /** Property that denotes the currently active window. */
+        Atom m_activeWindowAtom;
+
+        /** Property that denotes the index of active workspace. */
+        Atom m_workspaceAtom;
+
+        /** Property that denotes the number of workspaces. */
+        Atom m_workspaceCountAtom;
 
 
         //--- PRIVATE VARIABLES ------------------------------------------------

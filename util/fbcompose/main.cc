@@ -49,11 +49,18 @@ int main(int argc, char **argv) {
             std::cout << "Root window of screen " << i << ": "
                       << app.getScreen(i).rootWindow() << std::endl;
 
+            int nProperties;
+            Atom *properties = XListProperties(app.display(), app.getScreen(i).rootWindow().window(), &nProperties);
+            for(int j = 0; j < nProperties; j++) {
+                std::cout << "    " << XGetAtomName(app.display(), properties[j]) << std::endl;
+            }
+
             std::list<BaseCompWindow*>::const_iterator it = app.getScreen(i).allWindows().begin();
             while (it != app.getScreen(i).allWindows().end()) {
                 std::cout << "  " << **it << std::endl;
                 it++;
             }
+
         }
 
         app.eventLoop();

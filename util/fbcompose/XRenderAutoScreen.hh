@@ -73,6 +73,9 @@ namespace FbCompositor {
 
         /** Unmaps a window object. */
         void unmapWindowObject(BaseCompWindow &window);
+
+        /** Updates the value of some window's property. */
+        void updateWindowObjectProperty(BaseCompWindow &window, Atom property, int state);
     };
 
 }

@@ -138,7 +138,7 @@ void Compositor::eventLoop() {
                 std::cout << "  DestroyNotify on " << event.xdestroywindow.window << std::endl;
                 break;
             case Expose :
-                if(event.xexpose.count == 0) {
+                if (event.xexpose.count == 0) {
                     m_screens[eventScreen]->damageWindow(event.xexpose.window);
                 }
                 std::cout << "  Expose on " << event.xexpose.window << " (" << event.xexpose.count << ")" << std::endl;
@@ -148,7 +148,9 @@ void Compositor::eventLoop() {
                 std::cout << "  MapNotify on " << event.xmap.window << std::endl;
                 break;
             case PropertyNotify :
-                std::cout << "  PropertyNotify on " << event.xproperty.window << std::endl;
+                m_screens[eventScreen]->updateWindowProperty(event.xproperty.window, event.xproperty.atom, event.xproperty.state);
+                std::cout << "  PropertyNotify on " << event.xproperty.window << " (" 
+                          << XGetAtomName(display(), event.xproperty.atom) << ")" << std::endl;
                 break;
             case UnmapNotify :
                 m_screens[eventScreen]->unmapWindow(event.xunmap.window);

@@ -36,6 +36,16 @@ BaseScreen::BaseScreen(int screenNumber) :
     m_screenNumber(screenNumber),
     m_rootWindow(XRootWindow(m_display, m_screenNumber)) {
 
+    m_activeWindowAtom = XInternAtom(m_display, "_NET_ACTIVE_WINDOW", false);
+    m_workspaceAtom = XInternAtom(m_display, "_WIN_WORKSPACE", false);
+    m_workspaceCountAtom = XInternAtom(m_display, "_WIN_WORKSPACE_COUNT", false);
+
+    if((m_activeWindowAtom == None)
+            || (m_workspaceAtom == None)
+            || (m_workspaceCountAtom == None)) {
+        // TODO: Do something.
+    }
+
     long eventMask = ExposureMask | PropertyChangeMask | StructureNotifyMask | SubstructureNotifyMask;
     m_rootWindow.setEventMask(eventMask);
 }
@@ -119,6 +129,20 @@ void BaseScreen::unmapWindow(Window window) {
     }
 }
 
+// Updates the value of some window's property.
+void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
+    if(window == m_rootWindow.window()) {
+        // TODO.
+    }
+
+    std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
+    if (it != m_windows.end()) {
+        updateWindowObjectProperty(**it, property, state);
+    } else {
+        // TODO: Throw something.
+    }
+}
+
 
 //--- SPECIALIZED WINDOW MANIPULATION FUNCTIONS --------------------------------
 
@@ -153,10 +177,13 @@ void BaseScreen::unmapWindowObject(BaseCompWindow &window) {
     window.setUnmapped();
 }
 
+// Updates the value of some window's property.
+void BaseScreen::updateWindowObjectProperty(BaseCompWindow &window, Atom property, int state) { }
+
 
 //--- INTERNAL FUNCTIONS -------------------------------------------------------
 
-/** Returns an iterator of m_windows that points to the given window. */
+// Returns an iterator of m_windows that points to the given window.
 std::list<BaseCompWindow*>::iterator BaseScreen::getWindowIterator(Window window) {
     std::list<BaseCompWindow*>::iterator it = m_windows.begin();
     while (it != m_windows.end()) {

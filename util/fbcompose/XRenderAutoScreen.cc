@@ -84,3 +84,6 @@ void XRenderAutoScreen::reconfigureWindowObject(BaseCompWindow &window) {
 void XRenderAutoScreen::unmapWindowObject(BaseCompWindow &window) {
     window.setUnmapped();
 }
+
+// Updates the value of some window's property.
+void XRenderAutoScreen::updateWindowObjectProperty(BaseCompWindow &window, Atom property, int state) { }
