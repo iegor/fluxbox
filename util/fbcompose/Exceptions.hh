@@ -37,13 +37,7 @@ namespace FbCompositor {
      */
     class CompositorException : public std::exception {
     public:
-        /**
-         * Public constructor.
-         *
-         * \param mainMessage The main exception message (returned by what()).
-         * \param detailMessage Detailed exception message (returned by
-         *        whatMore()).
-         */
+        /** The constructor. */
         CompositorException(std::string errorMessage) throw() :
             m_errorMessage(errorMessage) {}
 

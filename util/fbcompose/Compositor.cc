@@ -70,7 +70,6 @@ Compositor::~Compositor() { }
 // Initializes X's extensions.
 void Compositor::initXExtensions() throw(ConfigException) {
     if (!XCompositeQueryExtension(display(), &m_compositeEventBase, &m_compositeErrorBase)) {
-        XCloseDisplay(display());
         throw ConfigException("XComposite extension not available.");
     }
 
@@ -80,12 +79,10 @@ void Compositor::initXExtensions() throw(ConfigException) {
 
     if ((compositeMajor < MIN_XCOMPOSITE_MAJOR_VERSION)
             || ((compositeMajor == MIN_XCOMPOSITE_MAJOR_VERSION) && (compositeMinor < MIN_XCOMPOSITE_MINOR_VERSION))) {
-        XCloseDisplay(display());
         throw ConfigException("Unsupported XComposite extension version.");
     }
 
     if (!XDamageQueryExtension(display(), &m_damageEventBase, &m_damageErrorBase)) {
-        XCloseDisplay(display());
         throw ConfigException("XDamage extension not available.");
     }
 
@@ -95,7 +92,6 @@ void Compositor::initXExtensions() throw(ConfigException) {
 
     if ((damageMajor < MIN_XDAMAGE_MAJOR_VERSION)
             || ((damageMajor == MIN_XDAMAGE_MAJOR_VERSION) && (damageMinor < MIN_XDAMAGE_MINOR_VERSION))) {
-        XCloseDisplay(display());
         throw ConfigException("Unsupported XDamage extension version.");
     }
 }
@@ -160,7 +156,7 @@ void Compositor::eventLoop() {
                 break;
             default :
                 if (event.type == (m_damageEventBase + XDamageNotify)) {
-                    XDamageNotifyEvent damageEvent = *((XDamageNotifyEvent*) &event);
+                    XDamageNotifyEvent damageEvent = *((XDamageNotifyEvent*) &event);   // TODO: Better cast.
                     m_screens[eventScreen]->damageWindow(damageEvent.drawable);
                     std::cout << "  DamageNotify on " << damageEvent.drawable << std::endl;
                 } else {

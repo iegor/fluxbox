@@ -217,8 +217,8 @@ std::list<BaseCompWindow*>::iterator BaseScreen::getWindowIterator(Window window
 std::ostream &FbCompositor::operator<<(std::ostream& out, const BaseScreen& s) {
     out << "SCREEN NUMBER " << s.m_screenNumber << ":" << std::endl
         << "  Properties" << std::endl
-        << "    Active window XID: " << s.activeWindow() << std::endl
-        << "    Number of workspaces: " << s.workspaceCount() << std::endl
+        << "    Active window XID: " << s.m_activeWindowXID << std::endl
+        << "    Number of workspaces: " << s.m_workspaceCount << std::endl
         << "    Current workspace: " << s.m_currentWorkspace << std::endl
         << "  Windows" << std::endl;
 

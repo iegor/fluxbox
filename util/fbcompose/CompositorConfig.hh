@@ -75,7 +75,7 @@ namespace FbCompositor {
 
     //--- INLINE FUNCTIONS -----------------------------------------------------
 
-    // \returns the display name.
+    // Returns the display name.
     inline const std::string &CompositorConfig::displayName() const throw() {
         return m_displayName;
     }
