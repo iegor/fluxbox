@@ -106,10 +106,12 @@ void Compositor::initXExtensions() throw(ConfigException) {
 // The event loop.
 void Compositor::eventLoop() {
     XEvent event;
+    bool changesOccured = false;
 
     while (!done()) {
         while (XPending(display())) {
             XNextEvent(display(), &event);
+            changesOccured = true;
 
             int eventScreen = -1;
             for (unsigned int i = 0; i < m_screens.size(); i++) {
@@ -140,8 +142,8 @@ void Compositor::eventLoop() {
             case Expose :
                 if (event.xexpose.count == 0) {
                     m_screens[eventScreen]->damageWindow(event.xexpose.window);
+                    std::cout << "  Expose on " << event.xexpose.window << " (" << event.xexpose.count << ")" << std::endl;
                 }
-                std::cout << "  Expose on " << event.xexpose.window << " (" << event.xexpose.count << ")" << std::endl;
                 break;
             case MapNotify :
                 m_screens[eventScreen]->mapWindow(event.xmap.window);
@@ -164,10 +166,19 @@ void Compositor::eventLoop() {
                 } else {
                     std::cout << "Event " << event.xany.type << " on screen " << eventScreen
                               << " and window " << event.xany.window << std::endl;
+                    changesOccured = false;
                 }
-
                 break;
             }
+        }
+
+        if (changesOccured) {
+            std::cout << m_screens.size() << " screen(s) available." << std::endl;
+            for (unsigned int i = 0; i < m_screens.size(); i++) {
+                std::cout << *m_screens[i];
+            }
+            std::cout << "======================================" << std::endl;
+            changesOccured = false;
         }
 
         // TODO: Draw the screen here.

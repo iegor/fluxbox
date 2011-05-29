@@ -25,6 +25,8 @@
 
 #include "FbTk/App.hh"
 
+#include <ostream>
+
 using namespace FbCompositor;
 
 
@@ -45,6 +47,10 @@ BaseScreen::BaseScreen(int screenNumber) :
             || (m_workspaceCountAtom == None)) {
         // TODO: Do something.
     }
+
+    m_activeWindowXID = m_rootWindow.windowProperty(m_activeWindowAtom)[0];
+    m_currentWorkspace = m_rootWindow.cardinalProperty(m_workspaceAtom)[0];
+    m_workspaceCount = m_rootWindow.cardinalProperty(m_workspaceCountAtom)[0];
 
     long eventMask = ExposureMask | PropertyChangeMask | StructureNotifyMask | SubstructureNotifyMask;
     m_rootWindow.setEventMask(eventMask);
@@ -202,4 +208,25 @@ std::list<BaseCompWindow*>::iterator BaseScreen::getWindowIterator(Window window
         it++;
     }
     return it;
+}
+
+
+//--- FRIEND OPERATORS -------------------------------------------------
+
+// << output stream operator for the BaseScreen class.
+std::ostream &FbCompositor::operator<<(std::ostream& out, const BaseScreen& s) {
+    out << "SCREEN NUMBER " << s.m_screenNumber << ":" << std::endl
+        << "  Properties" << std::endl
+        << "    Active window XID: " << s.activeWindow() << std::endl
+        << "    Number of workspaces: " << s.workspaceCount() << std::endl
+        << "    Current workspace: " << s.m_currentWorkspace << std::endl
+        << "  Windows" << std::endl;
+
+    std::list<BaseCompWindow*>::const_iterator it = s.m_windows.begin();
+    while(it != s.m_windows.end()) {
+        out << "    " << **it << std::endl;
+        it++;
+    }
+
+    return out;
 }

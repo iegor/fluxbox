@@ -28,6 +28,7 @@
 
 #include <X11/Xlib.h>
 
+#include <iosfwd>
 #include <list>
 
 
@@ -36,10 +37,17 @@ namespace FbCompositor {
     class BaseCompWindow;
     class BaseScreen;
 
+    /** << output stream operator for the BaseScreen class. */
+    std::ostream &operator<<(std::ostream& out, const BaseScreen& s);
+
     /**
      * Base class for screen managing classes.
      */
     class BaseScreen {
+
+        //--- FRIEND OPERATORS -------------------------------------------------
+        friend std::ostream &operator<<(std::ostream& out, const BaseScreen& s);
+
     public:
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 

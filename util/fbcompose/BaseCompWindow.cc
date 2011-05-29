@@ -122,7 +122,7 @@ bool BaseCompWindow::rawPropertyData(Atom propertyAtom, Atom propertyType,
 
     if (property(propertyAtom, 0, 0x7fffffff, False, propertyType,
                  &actualType, &actualFormat, itemCount_return, &bytesLeft, data_return)) {
-        if (itemCount_return > 0) {
+        if (*itemCount_return > 0) {
             return true;
         }
     }
