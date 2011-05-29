@@ -114,13 +114,13 @@ void BaseCompWindow::setUnmapped() throw() {
 //--- internal functions -------------------------------------------------------
 
 // Reads and returns raw property contents.
-bool BaseCompWindow::rawPropertyData(Atom propertyAtom, Atom propertyType, 
+bool BaseCompWindow::rawPropertyData(Atom propertyAtom, Atom propertyType,
                                      unsigned long *itemCount_return, unsigned char **data_return) {
     Atom actualType;
     int actualFormat;
     unsigned long bytesLeft;
 
-    if (property(propertyAtom, 0, 0x7fffffff, False, propertyType, 
+    if (property(propertyAtom, 0, 0x7fffffff, False, propertyType,
                  &actualType, &actualFormat, itemCount_return, &bytesLeft, data_return)) {
         if (itemCount_return > 0) {
             return true;

@@ -40,7 +40,7 @@ BaseScreen::BaseScreen(int screenNumber) :
     m_workspaceAtom = XInternAtom(m_display, "_WIN_WORKSPACE", false);
     m_workspaceCountAtom = XInternAtom(m_display, "_WIN_WORKSPACE_COUNT", false);
 
-    if((m_activeWindowAtom == None)
+    if ((m_activeWindowAtom == None)
             || (m_workspaceAtom == None)
             || (m_workspaceCountAtom == None)) {
         // TODO: Do something.
@@ -108,7 +108,7 @@ void BaseScreen::reconfigureWindow(const XConfigureEvent &event) {
         BaseCompWindow *currentWindow = *it;
         m_windows.erase(it);
 
-        if(event.above == None) {
+        if (event.above == None) {
             m_windows.push_front(currentWindow);
         } else {
             it = getWindowIterator(event.above);

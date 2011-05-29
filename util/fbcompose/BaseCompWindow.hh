@@ -95,7 +95,7 @@ namespace FbCompositor {
         //--- INTERNAL FUNCTIONS -----------------------------------------------
 
         /** Returns the raw contents of a property. */
-        bool rawPropertyData(Atom propertyAtom, Atom propertyType, 
+        bool rawPropertyData(Atom propertyAtom, Atom propertyType,
                              unsigned long *itemCount_return, unsigned char **data_return);
 
 

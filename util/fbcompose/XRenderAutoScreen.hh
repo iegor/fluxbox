@@ -45,7 +45,7 @@ namespace FbCompositor {
     class XRenderAutoScreen : public BaseScreen {
     public:
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
-        
+
         /** Constructor. */
         XRenderAutoScreen(int screenNumber);
 

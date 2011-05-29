@@ -149,7 +149,7 @@ void Compositor::eventLoop() {
                 break;
             case PropertyNotify :
                 m_screens[eventScreen]->updateWindowProperty(event.xproperty.window, event.xproperty.atom, event.xproperty.state);
-                std::cout << "  PropertyNotify on " << event.xproperty.window << " (" 
+                std::cout << "  PropertyNotify on " << event.xproperty.window << " ("
                           << XGetAtomName(display(), event.xproperty.atom) << ")" << std::endl;
                 break;
             case UnmapNotify :

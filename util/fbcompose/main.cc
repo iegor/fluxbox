@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
 
             int nProperties;
             Atom *properties = XListProperties(app.display(), app.getScreen(i).rootWindow().window(), &nProperties);
-            for(int j = 0; j < nProperties; j++) {
+            for (int j = 0; j < nProperties; j++) {
                 std::cout << "    " << XGetAtomName(app.display(), properties[j]) << std::endl;
             }
 

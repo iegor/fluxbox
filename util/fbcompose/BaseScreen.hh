@@ -51,7 +51,7 @@ namespace FbCompositor {
 
 
         //--- ACCESSORS --------------------------------------------------------
-        
+
         /** \returns the active window XID. */
         Window activeWindow() const throw();
 
@@ -81,7 +81,7 @@ namespace FbCompositor {
 
 
         //--- WINDOW MANIPULATION ----------------------------------------------
-        
+
         /** Creates a new window on this screen. */
         void createWindow(Window window);
 
