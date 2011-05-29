@@ -30,6 +30,7 @@
 #include <X11/extensions/Xdamage.h>
 
 #include <iosfwd>
+#include <vector>
 
 
 namespace FbCompositor {
@@ -70,6 +71,15 @@ namespace FbCompositor {
         int windowClass() const throw();
 
 
+        //--- PROPERTY ACCESS --------------------------------------------------
+
+        /** Returns the specified cardinal property. */
+        std::vector<long> cardinalProperty(Atom propertyAtom);
+
+        /** Returns the specified window property. */
+        std::vector<Window> windowProperty(Atom propertyAtom);
+
+
         //--- WINDOW MANIPULATION ----------------------------------------------
 
         /** Marks the window as damaged. */
@@ -82,6 +92,13 @@ namespace FbCompositor {
         void setUnmapped() throw();
 
     private:
+        //--- INTERNAL FUNCTIONS -----------------------------------------------
+
+        /** Returns the raw contents of a property. */
+        bool rawPropertyData(Atom propertyAtom, Atom propertyType, 
+                             unsigned long *itemCount_return, unsigned char **data_return);
+
+
         //--- WINDOW ATTRIBUTES ------------------------------------------------
 
         /** Window's class. */
@@ -98,7 +115,7 @@ namespace FbCompositor {
     };
 
 
-    //--- INLINE FUNCTIONS -------------------------------------------------
+    //--- INLINE FUNCTIONS -----------------------------------------------------
 
     // Returns whether the window is damaged or not.
     inline bool BaseCompWindow::isDamaged() const throw() {

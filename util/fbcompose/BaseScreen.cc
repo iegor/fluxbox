@@ -131,8 +131,17 @@ void BaseScreen::unmapWindow(Window window) {
 
 // Updates the value of some window's property.
 void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
-    if(window == m_rootWindow.window()) {
-        // TODO.
+    // TODO: Should we check for existence of values? It is a rather sensible
+    // assumption that the root window will have all the needed properties.
+
+    if ((window == m_rootWindow.window()) && (state == PropertyNewValue)) {
+        if (property == m_activeWindowAtom) {
+            m_activeWindowXID = m_rootWindow.windowProperty(m_activeWindowAtom)[0];
+        } else if (property == m_workspaceAtom) {
+            m_currentWorkspace = m_rootWindow.cardinalProperty(m_workspaceAtom)[0];
+        } else if (property == m_workspaceCountAtom) {
+            m_workspaceCount = m_rootWindow.cardinalProperty(m_workspaceCountAtom)[0];
+        }
     }
 
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);

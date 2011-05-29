@@ -60,7 +60,6 @@ int main(int argc, char **argv) {
                 std::cout << "  " << **it << std::endl;
                 it++;
             }
-
         }
 
         app.eventLoop();

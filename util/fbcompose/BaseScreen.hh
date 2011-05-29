@@ -51,12 +51,18 @@ namespace FbCompositor {
 
 
         //--- ACCESSORS --------------------------------------------------------
+        
+        /** \returns the active window XID. */
+        Window activeWindow() const throw();
 
         /** \returns the list of windows on the screen. */
         std::list<BaseCompWindow*> &allWindows() throw();
 
         /** \returns the list of windows on the screen (const version). */
         const std::list<BaseCompWindow*> &allWindows() const throw();
+
+        /** \returns the index of the current workspace. */
+        int currentWorkspace() const throw();
 
         /** \returns the current connection to the X server. */
         Display *display() throw();
@@ -69,6 +75,9 @@ namespace FbCompositor {
 
         /** \returns screen's number. */
         int screenNumber() const throw();
+
+        /** \returns the index of the currently active workspace. */
+        int workspaceCount() const throw();
 
 
         //--- WINDOW MANIPULATION ----------------------------------------------
@@ -152,10 +161,25 @@ namespace FbCompositor {
 
         /** Screen's windows. */
         std::list<BaseCompWindow*> m_windows;
+
+
+        /** XID of the active window. */
+        Window m_activeWindowXID;
+
+        /** The index of the current workspace. */
+        int m_currentWorkspace;
+
+        /** The total number of workspaces. */
+        int m_workspaceCount;
     };
 
 
     //--- INLINE FUNCTIONS -----------------------------------------------------
+
+    // Returns the active window XID.
+    inline Window BaseScreen::activeWindow() const throw() {
+        return m_activeWindowXID;
+    }
 
     // Returns all of screen's windows (const version).
     inline std::list<BaseCompWindow*> &BaseScreen::allWindows() throw() {
@@ -165,6 +189,11 @@ namespace FbCompositor {
     // Returns all of screen's windows (const version).
     inline const std::list<BaseCompWindow*> &BaseScreen::allWindows() const throw() {
         return m_windows;
+    }
+
+    // Returns the index of the current workspace.
+    inline int BaseScreen::currentWorkspace() const throw() {
+        return m_currentWorkspace;
     }
 
     // Returns the current connection to the X server.
@@ -187,6 +216,10 @@ namespace FbCompositor {
         return m_screenNumber;
     }
 
+    // Returns the index of the currently active workspace.
+    inline int BaseScreen::workspaceCount() const throw() {
+        return m_workspaceCount;
+    }
 }
 
 

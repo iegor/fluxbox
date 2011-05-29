@@ -23,6 +23,8 @@
 
 #include "BaseCompWindow.hh"
 
+#include <X11/Xatom.h>
+
 #include <ostream>
 
 using namespace FbCompositor;
@@ -56,7 +58,40 @@ BaseCompWindow::~BaseCompWindow() {
 }
 
 
-//--- WINDOW MANIPULATION ----------------------------------------------
+//--- PROPERTY ACCESS ----------------------------------------------------------
+
+// Returns the specified cardinal property.
+// This function was overriden, because it would return only one value of the
+// property, regardless of how many values there are in it.
+std::vector<long> BaseCompWindow::cardinalProperty(Atom propertyAtom) {
+    unsigned long nItems;
+    long *data;
+
+    if (rawPropertyData(propertyAtom, XA_CARDINAL, &nItems, reinterpret_cast<unsigned char**>(&data))) {
+        std::vector<long> actualData(data, data + nItems);
+        XFree(data);
+        return actualData;
+    }
+
+    return std::vector<long>();
+}
+
+// Returns the specified window property.
+std::vector<Window> BaseCompWindow::windowProperty(Atom propertyAtom) {
+    unsigned long nItems;
+    Window *data;
+
+    if (rawPropertyData(propertyAtom, XA_WINDOW, &nItems, reinterpret_cast<unsigned char**>(&data))) {
+        std::vector<Window> actualData(data, data + nItems);
+        XFree(data);
+        return actualData;
+    }
+
+    return std::vector<Window>();
+}
+
+
+//--- WINDOW MANIPULATION ------------------------------------------------------
 
 // Marks the window as damaged.
 // TODO: Do we need anything more sophisticated than this?
@@ -75,6 +110,25 @@ void BaseCompWindow::setUnmapped() throw() {
     m_isMapped = false;
 }
 
+
+//--- internal functions -------------------------------------------------------
+
+// Reads and returns raw property contents.
+bool BaseCompWindow::rawPropertyData(Atom propertyAtom, Atom propertyType, 
+                                     unsigned long *itemCount_return, unsigned char **data_return) {
+    Atom actualType;
+    int actualFormat;
+    unsigned long bytesLeft;
+
+    if (property(propertyAtom, 0, 0x7fffffff, False, propertyType, 
+                 &actualType, &actualFormat, itemCount_return, &bytesLeft, data_return)) {
+        if (itemCount_return > 0) {
+            return true;
+        }
+    }
+
+    return false;
+}
 
 //--- OPERATORS ----------------------------------------------------------------
 
