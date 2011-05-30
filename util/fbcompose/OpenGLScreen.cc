@@ -1,4 +1,4 @@
-/** XRenderAutoScreen.cc file for the fluxbox compositor. */
+/** OpenGLScreen.cc file for the fluxbox compositor. */
 
 // Copyright (c) 2011 Gediminas Liktaras (gliktaras at gmail dot com)
 //
@@ -21,8 +21,8 @@
 // THE SOFTWARE.
 
 
-#include "XRenderAutoScreen.hh"
-#include "XRenderAutoWindow.hh"
+#include "OpenGLScreen.hh"
+#include "OpenGLWindow.hh"
 
 using namespace FbCompositor;
 
@@ -30,7 +30,7 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-XRenderAutoScreen::XRenderAutoScreen(int screenNumber) :
+OpenGLScreen::OpenGLScreen(int screenNumber) :
     BaseScreen(screenNumber) {
 
     // Fetching all top level windows.
@@ -43,7 +43,6 @@ XRenderAutoScreen::XRenderAutoScreen(int screenNumber) :
 
     for (unsigned int i = 0; i < childCount; i++) {
         createWindow(children[i]);
-        // XSelectInput(display(), children[i], ExposureMask);     // TODO: Is this needed?
     }
     if (children) {
         XFree(children);
@@ -51,39 +50,39 @@ XRenderAutoScreen::XRenderAutoScreen(int screenNumber) :
 }
 
 // Destructor.
-XRenderAutoScreen::~XRenderAutoScreen() { }
+OpenGLScreen::~OpenGLScreen() { }
 
 
 //--- WINDOW MANIPULATION ------------------------------------------------------
 
 // Creates a window object from its XID.
-BaseCompWindow *XRenderAutoScreen::createWindowObject(Window window) {
-    XRenderAutoWindow *newWindow = new XRenderAutoWindow(window);
+BaseCompWindow *OpenGLScreen::createWindowObject(Window window) {
+    OpenGLWindow *newWindow = new OpenGLWindow(window);
     return newWindow;
 }
 
 // Cleans up a window object before it is deleted.
-void XRenderAutoScreen::cleanupWindowObject(BaseCompWindow &window) { }
+void OpenGLScreen::cleanupWindowObject(BaseCompWindow &window) { }
 
 // Damages a window object.
-void XRenderAutoScreen::damageWindowObject(BaseCompWindow &window) {
+void OpenGLScreen::damageWindowObject(BaseCompWindow &window) {
     window.setDamaged();
 }
 
 // Maps a window object.
-void XRenderAutoScreen::mapWindowObject(BaseCompWindow &window) {
+void OpenGLScreen::mapWindowObject(BaseCompWindow &window) {
     window.setMapped();
 }
 
 // Updates window's configuration.
-void XRenderAutoScreen::reconfigureWindowObject(BaseCompWindow &window) {
+void OpenGLScreen::reconfigureWindowObject(BaseCompWindow &window) {
     window.updateGeometry();
 }
 
 // Unmaps a window object.
-void XRenderAutoScreen::unmapWindowObject(BaseCompWindow &window) {
+void OpenGLScreen::unmapWindowObject(BaseCompWindow &window) {
     window.setUnmapped();
 }
 
 // Updates the value of some window's property.
-void XRenderAutoScreen::updateWindowObjectProperty(BaseCompWindow &window, Atom property, int state) { }
+void OpenGLScreen::updateWindowObjectProperty(BaseCompWindow &window, Atom property, int state) { }

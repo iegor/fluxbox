@@ -1,4 +1,4 @@
-/** XRenderAutoWindow.cc file for the fluxbox compositor. */
+/** OpenGLWindow.cc file for the fluxbox compositor. */
 
 // Copyright (c) 2011 Gediminas Liktaras (gliktaras at gmail dot com)
 //
@@ -21,7 +21,7 @@
 // THE SOFTWARE.
 
 
-#include "XRenderAutoWindow.hh"
+#include "OpenGLWindow.hh"
 
 using namespace FbCompositor;
 
@@ -29,9 +29,9 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-XRenderAutoWindow::XRenderAutoWindow(Window windowXID) :
+OpenGLWindow::OpenGLWindow(Window windowXID) :
     BaseCompWindow(windowXID) {
 }
 
 // Destructor.
-XRenderAutoWindow::~XRenderAutoWindow() { }
+OpenGLWindow::~OpenGLWindow() { }

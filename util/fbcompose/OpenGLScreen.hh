@@ -1,4 +1,4 @@
-/** XRenderAutoWindow.hh file for the fluxbox compositor. */
+/** OpenGLScreen.hh file for the fluxbox compositor. */
 
 // Copyright (c) 2011 Gediminas Liktaras (gliktaras at gmail dot com)
 //
@@ -21,30 +21,59 @@
 // THE SOFTWARE.
 
 
-#ifndef FBCOMPOSITOR_XRENDERAUTOWINDOW_HH
-#define FBCOMPOSITOR_XRENDERAUTOWINDOW_HH
+#ifndef FBCOMPOSITOR_XRENDERAUTOSCREEN_HH
+#define FBCOMPOSITOR_XRENDERAUTOSCREEN_HH
 
+#include "BaseScreen.hh"
 #include "BaseCompWindow.hh"
 
 
 namespace FbCompositor {
 
+    class BaseCompWindow;
+    class OpenGLScreen;
+
+
     /**
-     * Manages windows in XRender auto mode.
-     *
-     * Like XRenderAutoScreen, this is a class for testing the overall
-     * structure of the program.
+     * Manages screen in OpenGL rendering mode.
      */
-    class XRenderAutoWindow : public BaseCompWindow {
+    class OpenGLScreen : public BaseScreen {
     public:
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        XRenderAutoWindow(Window windowXID);
+        OpenGLScreen(int screenNumber);
 
         /** Destructor. */
-        virtual ~XRenderAutoWindow();
+        ~OpenGLScreen();
+
+
+    protected:
+        //--- WINDOW MANIPULATION ----------------------------------------------
+
+        /** Creates a window object from its XID. */
+        BaseCompWindow *createWindowObject(Window window);
+
+        /** Cleans up a window object before it is deleted. */
+        void cleanupWindowObject(BaseCompWindow &window);
+
+        /** Damages a window object. */
+        void damageWindowObject(BaseCompWindow &window);
+
+        /** Maps a window object. */
+        void mapWindowObject(BaseCompWindow &window);
+
+        /** Updates window's configuration. */
+        void reconfigureWindowObject(BaseCompWindow &window);
+
+        /** Unmaps a window object. */
+        void unmapWindowObject(BaseCompWindow &window);
+
+        /** Updates the value of some window's property. */
+        void updateWindowObjectProperty(BaseCompWindow &window, Atom property, int state);
     };
+
 }
 
-#endif  // FBCOMPOSITOR_XRENDERAUTOWINDOW_HH
+
+#endif  // FBCOMPOSITOR_XRENDERAUTOSCREEN_HH

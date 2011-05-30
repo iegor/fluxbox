@@ -22,7 +22,7 @@
 
 
 #include "Compositor.hh"
-#include "XRenderAutoScreen.hh"
+#include "OpenGLScreen.hh"
 
 #include <X11/extensions/Xcomposite.h>
 #include <X11/extensions/Xdamage.h>
@@ -52,8 +52,7 @@ Compositor::Compositor(const CompositorConfig &config) throw(ConfigException) :
     for (int i = 0; i < screenCount; i++) {
         switch (m_renderingMode) {
         case RM_OpenGL :
-            // TODO: Replace with actual OpenGL screen class.
-            m_screens.push_back(new XRenderAutoScreen(i));
+            m_screens.push_back(new OpenGLScreen(i));
             break;
         case RM_XRender :
             break;
@@ -67,6 +66,11 @@ Compositor::Compositor(const CompositorConfig &config) throw(ConfigException) :
 
         getCMSelectionOwnership(i);
     }
+
+    // We must flush outgoing queue, otherwise selection ownership requests
+    // might not get sent to the server. This is only a problem with
+    // RM_ServerAuto rendering mode.
+    XFlush(display());
 }
 
 // Destructor.
