@@ -53,7 +53,7 @@ BaseCompWindow::BaseCompWindow(Window windowXID) :
 
 // Destructor.
 BaseCompWindow::~BaseCompWindow() {
-    if (!m_damage) {
+    if (m_damage) {
         XDamageDestroy(display(), m_damage);
     }
 }
