@@ -135,6 +135,11 @@ namespace FbCompositor {
         return m_renderingMode;
     }
 
+
+    //--- ERROR HANDLERS -------------------------------------------------------
+
+    /** Custom X error handler. */
+    int handleXError(Display *display, XErrorEvent *error);
 }
 
 
