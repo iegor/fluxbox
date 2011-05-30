@@ -86,6 +86,9 @@ namespace FbCompositor {
 
         //--- INITIALIZATION FUNCTIONS -----------------------------------------
 
+        /** Acquire the ownership of compositing manager selections. */
+        void getCMSelectionOwnership(int screenNumber) throw(ConfigException);
+
         /** Initializes X's extensions. */
         void initXExtensions() throw(ConfigException);
 

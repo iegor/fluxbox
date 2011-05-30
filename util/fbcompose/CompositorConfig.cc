@@ -35,7 +35,7 @@ using namespace FbCompositor;
 // Constructor.
 CompositorConfig::CompositorConfig(int argc, char **argv) throw(ConfigException) :
     m_displayName(""),
-    m_renderingMode(RM_XRenderAuto) {
+    m_renderingMode(RM_ServerAuto) {
 }
 
 // Destructor.

@@ -44,7 +44,7 @@ namespace FbCompositor {
     //--- ENUMERATIONS ---------------------------------------------------------
 
     /** Rendering mode enumeration. */
-    enum RenderingMode { RM_OpenGL, RM_XRenderManual, RM_XRenderAuto };
+    enum RenderingMode { RM_OpenGL, RM_XRender, RM_ServerAuto };
 
 }
 

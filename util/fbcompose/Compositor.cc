@@ -26,8 +26,10 @@
 
 #include <X11/extensions/Xcomposite.h>
 #include <X11/extensions/Xdamage.h>
+#include <X11/Xutil.h>
 
 #include <iostream>
+#include <sstream>
 
 using namespace FbCompositor;
 
@@ -50,16 +52,20 @@ Compositor::Compositor(const CompositorConfig &config) throw(ConfigException) :
     for (int i = 0; i < screenCount; i++) {
         switch (m_renderingMode) {
         case RM_OpenGL :
-            break;
-        case RM_XRenderManual :
-            break;
-        case RM_XRenderAuto :
+            // TODO: Replace with actual OpenGL screen class.
             m_screens.push_back(new XRenderAutoScreen(i));
+            break;
+        case RM_XRender :
+            break;
+        case RM_ServerAuto :
+            XCompositeRedirectSubwindows(display(), XRootWindow(display(), i), CompositeRedirectAutomatic);
             break;
         default:
             // TODO: Throw something.
             break;
         }
+
+        getCMSelectionOwnership(i);
     }
 }
 
@@ -68,6 +74,24 @@ Compositor::~Compositor() { }
 
 
 //--- INITIALIZATION FUNCTIONS -----------------------------------------
+
+// Acquires the ownership of compositing manager selections.
+void Compositor::getCMSelectionOwnership(int screenNumber) throw(ConfigException) {
+    std::stringstream ss;
+    ss << "_NET_WM_CM_S" << screenNumber;
+    Atom cmAtom = XInternAtom(display(), ss.str().c_str(), False);
+
+    Window curOwner = XGetSelectionOwner(display(), cmAtom);
+    if (curOwner != None) {
+        // TODO: More detailed message - what is the other program?
+        throw ConfigException("Another compositing manager is running.");
+    }
+
+    // TODO: Better way of obtaining program's name in SetWMProperties.
+    curOwner = XCreateSimpleWindow(display(), XRootWindow(display(), screenNumber), 0, 0, 1, 1, 0, None, None);
+    XmbSetWMProperties(display(), curOwner, "fbcompose", "fbcompose", NULL, 0, NULL, NULL, NULL);
+    XSetSelectionOwner(display(), cmAtom, curOwner, CurrentTime);
+}
 
 // Initializes X's extensions.
 void Compositor::initXExtensions() throw(ConfigException) {
@@ -107,6 +131,10 @@ void Compositor::eventLoop() {
     bool changesOccured = false;
 
     while (!done()) {
+        if (m_renderingMode == RM_ServerAuto) {
+            continue;
+        }
+
         while (XPending(display())) {
             XNextEvent(display(), &event);
             changesOccured = true;
@@ -171,6 +199,8 @@ void Compositor::eventLoop() {
         }
 
         if (changesOccured) {
+            // TODO: Draw the screen here.
+
             std::cout << m_screens.size() << " screen(s) available." << std::endl;
             for (unsigned int i = 0; i < m_screens.size(); i++) {
                 std::cout << *m_screens[i];
@@ -178,8 +208,6 @@ void Compositor::eventLoop() {
             std::cout << "======================================" << std::endl;
             changesOccured = false;
         }
-
-        // TODO: Draw the screen here.
     }
 }
 
