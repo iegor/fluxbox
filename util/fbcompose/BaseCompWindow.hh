@@ -61,22 +61,25 @@ namespace FbCompositor {
 
         //--- ACCESSORS --------------------------------------------------------
 
-        /** Returns whether the window is damaged or not. */
+        /** \returns the window's contents as a pixmap. */
+        Pixmap contents() const throw();
+
+        /** \returns whether the window is damaged or not. */
         bool isDamaged() const throw();
 
-        /** Returns whether the screen is mapped or not. */
+        /** \returns whether the screen is mapped or not. */
         bool isMapped() const throw();
 
-        /** Returns the window's class. */
+        /** \returns the window's class. */
         int windowClass() const throw();
 
 
         //--- PROPERTY ACCESS --------------------------------------------------
 
-        /** Returns the specified cardinal property. */
+        /** \returns the specified cardinal property. */
         std::vector<long> cardinalProperty(Atom propertyAtom);
 
-        /** Returns the specified window property. */
+        /** \returns the specified window property. */
         std::vector<Window> windowProperty(Atom propertyAtom);
 
 
@@ -91,6 +94,9 @@ namespace FbCompositor {
         /** Marks the window as unmapped. */
         void setUnmapped() throw();
 
+        /** Updates the window's contents. */
+        void updateContents() throw();
+
     private:
         //--- INTERNAL FUNCTIONS -----------------------------------------------
 
@@ -104,6 +110,9 @@ namespace FbCompositor {
         /** Window's class. */
         int m_class;
 
+        /** Window's content pixmap. */
+        Pixmap m_contents;
+
         /** Window's damage object. */
         Damage m_damage;
 
@@ -116,6 +125,11 @@ namespace FbCompositor {
 
 
     //--- INLINE FUNCTIONS -----------------------------------------------------
+
+    // Returns the window's contents as a pixmap.
+    inline Pixmap BaseCompWindow::contents() const throw() {
+        return m_contents;
+    }
 
     // Returns whether the window is damaged or not.
     inline bool BaseCompWindow::isDamaged() const throw() {

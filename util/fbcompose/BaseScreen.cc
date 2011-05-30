@@ -25,6 +25,8 @@
 
 #include "FbTk/App.hh"
 
+#include <X11/extensions/Xcomposite.h>
+
 #include <ostream>
 
 using namespace FbCompositor;
@@ -54,6 +56,8 @@ BaseScreen::BaseScreen(int screenNumber) :
 
     long eventMask = ExposureMask | PropertyChangeMask | StructureNotifyMask | SubstructureNotifyMask;
     m_rootWindow.setEventMask(eventMask);
+
+    XCompositeRedirectSubwindows(m_display, m_rootWindow.window(), CompositeRedirectManual);
 }
 
 // Destructor

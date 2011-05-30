@@ -23,6 +23,7 @@
 
 #include "BaseCompWindow.hh"
 
+#include <X11/extensions/Xcomposite.h>
 #include <X11/Xatom.h>
 
 #include <ostream>
@@ -110,8 +111,16 @@ void BaseCompWindow::setUnmapped() throw() {
     m_isMapped = false;
 }
 
+// Updates the window's contents.
+void BaseCompWindow::updateContents() throw() {
+    if (m_contents) {
+        XFreePixmap(display(), m_contents);
+    }
+    m_contents = XCompositeNameWindowPixmap(display(), window());
+}
 
-//--- internal functions -------------------------------------------------------
+
+//--- INTERNAL FUNCTIONS -------------------------------------------------------
 
 // Reads and returns raw property contents.
 bool BaseCompWindow::rawPropertyData(Atom propertyAtom, Atom propertyType,
