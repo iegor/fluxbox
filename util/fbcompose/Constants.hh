@@ -28,6 +28,12 @@ namespace FbCompositor {
 
     //--- MINIMUM EXTENSION VERSIONS -------------------------------------------
 
+    /** Minimum major version for the GLX extension. */
+    const int MIN_GLX_MAJOR_VERSION = 1;
+
+    /** Minimum minor version for the GLX extension. */
+    const int MIN_GLX_MINOR_VERSION = 4;
+
     /** Minimum major version for the XComposite extension. */
     const int MIN_XCOMPOSITE_MAJOR_VERSION = 0;
 

@@ -187,8 +187,9 @@ AC_COMPILE_IFELSE([
 
 dnl Dependencies for fbcompose
 dnl TODO: Replace with something more permanent and optional
-AC_CHECK_LIB([Xcomposite], [XCompositeQueryExtension])
-AC_CHECK_LIB([Xdamage], [XDamageQueryExtnsion])
+AC_CHECK_LIB([GL],[glXQueryExtension])
+AC_CHECK_LIB([Xcomposite],[XCompositeQueryExtension])
+AC_CHECK_LIB([Xdamage],[XDamageQueryExtnsion])
 
 AM_ICONV
 AS_IF([test x$am_cv_proto_iconv_arg1 = "xconst"], [

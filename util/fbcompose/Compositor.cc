@@ -24,6 +24,7 @@
 #include "Compositor.hh"
 #include "OpenGLScreen.hh"
 
+#include <GL/glx.h>
 #include <X11/extensions/Xcomposite.h>
 #include <X11/extensions/Xdamage.h>
 #include <X11/Xutil.h>
@@ -45,6 +46,9 @@ Compositor::Compositor(const CompositorConfig &config) throw(ConfigException) :
     XSetErrorHandler(&handleXError);
 
     initXExtensions();
+    if (m_renderingMode == RM_OpenGL) {
+        initOpenGL();
+    }
 
     // Setting up screens.
     int screenCount = XScreenCount(display());
@@ -97,8 +101,26 @@ void Compositor::getCMSelectionOwnership(int screenNumber) throw(ConfigException
     XSetSelectionOwner(display(), cmAtom, curOwner, CurrentTime);
 }
 
+// Makes sure that OpenGL on this machine meets the compositor's requirements.
+void Compositor::initOpenGL() throw(ConfigException) {
+    // GLX extension.
+    if (!glXQueryExtension(display(), &m_glxEventBase, &m_glxErrorBase)) {
+        throw ConfigException("GLX extension not available.");
+    }
+
+    int glxMajor;
+    int glxMinor;
+    glXQueryVersion(display(), &glxMajor, &glxMinor);
+
+    if ((glxMajor < MIN_XCOMPOSITE_MAJOR_VERSION)
+            || ((glxMajor == MIN_XCOMPOSITE_MAJOR_VERSION) && (glxMinor < MIN_XCOMPOSITE_MINOR_VERSION))) {
+        throw ConfigException("Unsupported GLX extension version.");
+    }
+}
+
 // Initializes X's extensions.
 void Compositor::initXExtensions() throw(ConfigException) {
+    // XComposite extension.
     if (!XCompositeQueryExtension(display(), &m_compositeEventBase, &m_compositeErrorBase)) {
         throw ConfigException("XComposite extension not available.");
     }
@@ -112,6 +134,7 @@ void Compositor::initXExtensions() throw(ConfigException) {
         throw ConfigException("Unsupported XComposite extension version.");
     }
 
+    // XDamage extension.
     if (!XDamageQueryExtension(display(), &m_damageEventBase, &m_damageErrorBase)) {
         throw ConfigException("XDamage extension not available.");
     }
