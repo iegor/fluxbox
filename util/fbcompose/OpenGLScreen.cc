@@ -39,8 +39,17 @@ OpenGLScreen::OpenGLScreen(int screenNumber) :
     BaseScreen(screenNumber) {
 
     initRenderingSurface();
+    getTopLevelWindows();
+}
 
-    // Fetching all top level windows.
+// Destructor.
+OpenGLScreen::~OpenGLScreen() { }
+
+
+//--- INITIALIZATION FUNCTIONS -------------------------------------------------
+
+// Read and stores all top level windows.
+void OpenGLScreen::getTopLevelWindows() {
     Window root;
     Window parent;
     Window* children;
@@ -55,12 +64,6 @@ OpenGLScreen::OpenGLScreen(int screenNumber) :
         XFree(children);
     }
 }
-
-// Destructor.
-OpenGLScreen::~OpenGLScreen() { }
-
-
-//--- INITIALIZATION FUNCTIONS -------------------------------------------------
 
 // Initializes the rendering surface.
 void OpenGLScreen::initRenderingSurface() {
@@ -97,8 +100,9 @@ void OpenGLScreen::initRenderingSurface() {
     wa.colormap = mainColormap;
     long waMask = CWColormap;
 
-    m_renderingWindow = XCreateWindow(display(), compOverlay, 0, 0, 500, 500, 0,
+    m_renderingWindow = XCreateWindow(display(), compOverlay, 0, 0, rootWindow().width(), rootWindow().height(), 0,
                                       mainVisual->depth, InputOutput, mainVisual->visual, waMask, &wa);
+    XmbSetWMProperties(display(), m_renderingWindow, "fbcompose", "fbcompose", NULL, 0, NULL, NULL, NULL);
     XMapWindow(display(), m_renderingWindow);
 
     // Creating a GLX handle for the above window.
@@ -156,7 +160,7 @@ void OpenGLScreen::updateWindowObjectProperty(BaseCompWindow &window, Atom prope
 void OpenGLScreen::renderScreen() {
     glXMakeCurrent(display(), m_glxRenderingWindow, m_glxContext);
 
-    glClearColor(0, 0, 0, 1);
+    glClearColor(1, 1, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT);
 
     std::list<BaseCompWindow*>::const_iterator it = allWindows().begin();

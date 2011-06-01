@@ -86,6 +86,9 @@ namespace FbCompositor {
     private:
         //--- INITIALIZATION FUNCTIONS -----------------------------------------
 
+        /** Read and stores all top level windows. */
+        void getTopLevelWindows();
+
         /** Initializes the rendering surface. */
         void initRenderingSurface();
 
