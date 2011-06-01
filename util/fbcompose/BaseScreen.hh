@@ -63,12 +63,6 @@ namespace FbCompositor {
         /** \returns the active window XID. */
         Window activeWindow() const throw();
 
-        /** \returns the list of windows on the screen. */
-        std::list<BaseCompWindow*> &allWindows() throw();
-
-        /** \returns the list of windows on the screen (const version). */
-        const std::list<BaseCompWindow*> &allWindows() const throw();
-
         /** \returns the index of the current workspace. */
         int currentWorkspace() const throw();
 
@@ -112,7 +106,19 @@ namespace FbCompositor {
         void updateWindowProperty(Window window, Atom property, int state);
 
 
+        //--- SCREEN RENDERING -------------------------------------------------
+
+        /** Renders the screen's contents. */
+        virtual void renderScreen();
+
+
     protected:
+        //--- PROTECTED ACCESSORS ----------------------------------------------
+
+        /** \returns the list of windows on the screen. */
+        const std::list<BaseCompWindow*> &allWindows() const throw();
+
+
         //--- SPECIALIZED WINDOW MANIPULATION FUNCTIONS ------------------------
 
         /** Creates a window object from its XID. */
@@ -189,12 +195,7 @@ namespace FbCompositor {
         return m_activeWindowXID;
     }
 
-    // Returns all of screen's windows (const version).
-    inline std::list<BaseCompWindow*> &BaseScreen::allWindows() throw() {
-        return m_windows;
-    }
-
-    // Returns all of screen's windows (const version).
+    // Returns all of screen's windows.
     inline const std::list<BaseCompWindow*> &BaseScreen::allWindows() const throw() {
         return m_windows;
     }

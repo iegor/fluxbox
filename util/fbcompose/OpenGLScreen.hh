@@ -26,11 +26,15 @@
 
 #include "BaseScreen.hh"
 #include "BaseCompWindow.hh"
+#include "Exceptions.hh"
+
+#include <GL/glx.h>
 
 
 namespace FbCompositor {
 
     class BaseCompWindow;
+    class ConfigException;
     class OpenGLScreen;
 
 
@@ -46,6 +50,12 @@ namespace FbCompositor {
 
         /** Destructor. */
         ~OpenGLScreen();
+
+
+        //--- SCREEN RENDERING -------------------------------------------------
+
+        /** Renders the screen's contents. */
+        void renderScreen();
 
 
     protected:
@@ -71,6 +81,28 @@ namespace FbCompositor {
 
         /** Updates the value of some window's property. */
         void updateWindowObjectProperty(BaseCompWindow &window, Atom property, int state);
+
+
+    private:
+        //--- INITIALIZATION FUNCTIONS -----------------------------------------
+
+        /** Initializes the rendering surface. */
+        void initRenderingSurface();
+
+
+        //--- RENDERING-RELATED VARIABLES --------------------------------------
+
+        /** The main FBConfig. */
+        GLXFBConfig m_fbConfig;
+
+        /** The GLX context. */
+        GLXContext m_glxContext;
+
+        /** GLX version of m_renderingWindow. */
+        GLXWindow m_glxRenderingWindow;
+
+        /** The window that is used for rendering. */
+        Window m_renderingWindow;
     };
 
 }

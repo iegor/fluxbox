@@ -24,6 +24,11 @@
 #include "OpenGLScreen.hh"
 #include "OpenGLWindow.hh"
 
+#include <X11/extensions/Xcomposite.h>
+
+#include <list>
+#include <iostream>
+
 using namespace FbCompositor;
 
 
@@ -32,6 +37,8 @@ using namespace FbCompositor;
 // Constructor.
 OpenGLScreen::OpenGLScreen(int screenNumber) :
     BaseScreen(screenNumber) {
+
+    initRenderingSurface();
 
     // Fetching all top level windows.
     Window root;
@@ -51,6 +58,61 @@ OpenGLScreen::OpenGLScreen(int screenNumber) :
 
 // Destructor.
 OpenGLScreen::~OpenGLScreen() { }
+
+
+//--- INITIALIZATION FUNCTIONS -------------------------------------------------
+
+// Initializes the rendering surface.
+void OpenGLScreen::initRenderingSurface() {
+    // TODO: Better context creation (GL 3.0 etc).
+    // TODO: Better failure handling with FBConfigs.
+
+    // Creating arrays of FBConfig attributes.
+    static const int PREFERRED_FBCONFIG_ATTRIBUTES[] = {
+        GLX_RENDER_TYPE, GLX_RGBA_BIT,
+        GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT,
+        GLX_DOUBLEBUFFER, true,
+        GLX_RED_SIZE, 8,
+        GLX_GREEN_SIZE, 8,
+        GLX_BLUE_SIZE, 8,
+        None
+    };
+
+    // Selecting the FBConfig.
+    int nConfigs;
+    GLXFBConfig *fbConfigs = glXChooseFBConfig(display(), screenNumber(),
+                                               PREFERRED_FBCONFIG_ATTRIBUTES, &nConfigs);
+    if (!fbConfigs) {
+        throw ConfigException("Screen does not support the required GLXFBConfig.");
+    }
+    m_fbConfig = fbConfigs[0];
+
+    // Creating an X window for rendering.
+    Window compOverlay = XCompositeGetOverlayWindow(display(), rootWindow().window());
+
+    XVisualInfo *mainVisual = glXGetVisualFromFBConfig(display(), m_fbConfig);
+    Colormap mainColormap = XCreateColormap(display(), rootWindow().window(), mainVisual->visual, AllocNone);
+
+    XSetWindowAttributes wa;
+    wa.colormap = mainColormap;
+    long waMask = CWColormap;
+
+    m_renderingWindow = XCreateWindow(display(), compOverlay, 0, 0, 500, 500, 0,
+                                      mainVisual->depth, InputOutput, mainVisual->visual, waMask, &wa);
+    XMapWindow(display(), m_renderingWindow);
+
+    // Creating a GLX handle for the above window.
+    m_glxRenderingWindow = glXCreateWindow(display(), m_fbConfig, m_renderingWindow, NULL);
+    if (!m_glxRenderingWindow) {
+        throw ConfigException("Cannot create the rendering surface.");
+    }
+
+    // Creating the GLX rendering context.
+    m_glxContext = glXCreateNewContext(display(), m_fbConfig, GLX_RGBA_TYPE, NULL, false);
+    if (!m_glxContext) {
+        throw ConfigException("Cannot create the rendering context.");
+    }
+}
 
 
 //--- WINDOW MANIPULATION ------------------------------------------------------
@@ -86,3 +148,21 @@ void OpenGLScreen::unmapWindowObject(BaseCompWindow &window) {
 
 // Updates the value of some window's property.
 void OpenGLScreen::updateWindowObjectProperty(BaseCompWindow &window, Atom property, int state) { }
+
+
+//--- SCREEN RENDERING ---------------------------------------------------------
+
+// Renders the screen's contents.
+void OpenGLScreen::renderScreen() {
+    glXMakeCurrent(display(), m_glxRenderingWindow, m_glxContext);
+
+    glClearColor(0, 0, 0, 1);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    std::list<BaseCompWindow*>::const_iterator it = allWindows().begin();
+    while(it != allWindows().end()) {
+        it++;
+    }
+
+    glXSwapBuffers (display(), m_glxRenderingWindow);
+}

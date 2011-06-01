@@ -200,6 +200,12 @@ void BaseScreen::unmapWindowObject(BaseCompWindow &window) {
 void BaseScreen::updateWindowObjectProperty(BaseCompWindow &window, Atom property, int state) { }
 
 
+//--- SCREEN RENDERING ---------------------------------------------------------
+
+// Renders the screen's contents.
+void BaseScreen::renderScreen() { }
+
+
 //--- INTERNAL FUNCTIONS -------------------------------------------------------
 
 // Returns an iterator of m_windows that points to the given window.

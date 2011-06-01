@@ -38,7 +38,7 @@ namespace FbCompositor {
     const int MIN_XCOMPOSITE_MAJOR_VERSION = 0;
 
     /** Minimum minor version for the XComposite extension. */
-    const int MIN_XCOMPOSITE_MINOR_VERSION = 2;
+    const int MIN_XCOMPOSITE_MINOR_VERSION = 3;
 
     /** Minimum major version for the XDamage extension. */
     const int MIN_XDAMAGE_MAJOR_VERSION = 1;
