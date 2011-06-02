@@ -24,7 +24,6 @@
 #include "Compositor.hh"
 #include "OpenGLScreen.hh"
 
-#include <GL/glew.h>
 #include <GL/glx.h>
 #include <X11/extensions/Xcomposite.h>
 #include <X11/extensions/Xdamage.h>
@@ -48,7 +47,7 @@ Compositor::Compositor(const CompositorConfig &config) throw(ConfigException) :
 
     initXExtensions();
     if (m_renderingMode == RM_OpenGL) {
-        initOpenGL();
+        initGLX();
     }
 
     // Setting up screens.
@@ -72,9 +71,6 @@ Compositor::Compositor(const CompositorConfig &config) throw(ConfigException) :
         getCMSelectionOwnership(i);
     }
 
-    // We must flush outgoing queue, otherwise selection ownership requests
-    // might not get sent to the server. This is only a problem with
-    // RM_ServerAuto rendering mode.
     XFlush(display());
 }
 
@@ -102,8 +98,8 @@ void Compositor::getCMSelectionOwnership(int screenNumber) throw(ConfigException
     XSetSelectionOwner(display(), cmAtom, curOwner, CurrentTime);
 }
 
-// Makes sure that OpenGL on this machine meets the compositor's requirements.
-void Compositor::initOpenGL() throw(ConfigException) {
+// Initializes the GLX extension.
+void Compositor::initGLX() throw(ConfigException) {
     // GLX extension.
     if (!glXQueryExtension(display(), &m_glxEventBase, &m_glxErrorBase)) {
         throw ConfigException("GLX extension not available.");

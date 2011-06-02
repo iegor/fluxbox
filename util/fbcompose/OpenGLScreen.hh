@@ -89,11 +89,17 @@ namespace FbCompositor {
     private:
         //--- INITIALIZATION FUNCTIONS -----------------------------------------
 
+        /** Checks for the appropriate OpenGL version. */
+        void checkOpenGLVersion();
+
         /** Read and stores all top level windows. */
         void getTopLevelWindows();
 
-        /** Initializes the rendering surface and context. */
+        /** Initializes the rendering context. */
         void initRenderingContext();
+
+        /** Initializes the rendering surface. */
+        void initRenderingSurface();
 
         /** Initializes shaders. */
         void initShaders();
@@ -105,7 +111,7 @@ namespace FbCompositor {
         void renderWindow(OpenGLWindow &window);
 
 
-        //--- RENDERING-RELATED VARIABLES --------------------------------------
+        //--- MAIN RENDERING-RELATED VARIABLES ---------------------------------
 
         /** The main FBConfig. */
         GLXFBConfig m_fbConfig;
@@ -113,16 +119,18 @@ namespace FbCompositor {
         /** The GLX context. */
         GLXContext m_glxContext;
 
-        /** GLX version of m_renderingWindow. */
+        /** GLX handle to the rendering window. */
         GLXWindow m_glxRenderingWindow;
 
-        /** The window that is used for rendering. */
+        /** Rendering window. */
         Window m_renderingWindow;
+
+
+        //--- SHADER-RELATED ---------------------------------------------------
         
         /** The shader program. */
         GLuint m_shaderProgram;
     };
-
 }
 
 

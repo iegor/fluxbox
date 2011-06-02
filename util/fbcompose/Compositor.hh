@@ -89,8 +89,8 @@ namespace FbCompositor {
         /** Acquire the ownership of compositing manager selections. */
         void getCMSelectionOwnership(int screenNumber) throw(ConfigException);
 
-        /** Makes sure that OpenGL on this machine meets the compositor's requirements. */
-        void initOpenGL() throw(ConfigException);
+        /** Initializes GLX extension. */
+        void initGLX() throw(ConfigException);
 
         /** Initializes X's extensions. */
         void initXExtensions() throw(ConfigException);

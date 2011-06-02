@@ -28,6 +28,7 @@
 
 #include <list>
 #include <iostream>
+#include <sstream>
 #include <cstring>
 
 using namespace FbCompositor;
@@ -40,6 +41,8 @@ OpenGLScreen::OpenGLScreen(int screenNumber) :
     BaseScreen(screenNumber) {
 
     initRenderingContext();
+    checkOpenGLVersion();
+    initRenderingSurface();
     // initShaders();
     getTopLevelWindows();
 }
@@ -50,29 +53,10 @@ OpenGLScreen::~OpenGLScreen() { }
 
 //--- INITIALIZATION FUNCTIONS -------------------------------------------------
 
-// Read and stores all top level windows.
-void OpenGLScreen::getTopLevelWindows() {
-    Window root;
-    Window parent;
-    Window* children;
-    unsigned int childCount;
 
-    XQueryTree(display(), rootWindow().window(), &root, &parent, &children, &childCount);
-
-    for (unsigned int i = 0; i < childCount; i++) {
-        createWindow(children[i]);
-    }
-    if (children) {
-        XFree(children);
-    }
-}
-
-// Initializes the rendering surface and context.
+// Initializes the rendering context.
 void OpenGLScreen::initRenderingContext() {
-    // TODO: Better context creation (GL 3.0 etc).
-    // TODO: Better failure handling with FBConfigs.
-
-    // Creating arrays of FBConfig attributes.
+    // Selecting the framebuffer configuration.
     static const int PREFERRED_FBCONFIG_ATTRIBUTES[] = {
         GLX_RENDER_TYPE, GLX_RGBA_BIT,
         GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT,
@@ -83,27 +67,51 @@ void OpenGLScreen::initRenderingContext() {
         None
     };
 
-    // Selecting the FBConfig.
     int nConfigs;
-    GLXFBConfig *fbConfigs = glXChooseFBConfig(display(), screenNumber(),
-                                               PREFERRED_FBCONFIG_ATTRIBUTES, &nConfigs);
+    GLXFBConfig *fbConfigs = glXChooseFBConfig(display(), screenNumber(), PREFERRED_FBCONFIG_ATTRIBUTES, &nConfigs);
     if (!fbConfigs) {
+        // TODO: Better failure handling (i.e. fallback configurations).
         throw ConfigException("Screen does not support the required GLXFBConfig.");
     }
     m_fbConfig = fbConfigs[0];
 
+    // Creating the GLX rendering context.
+    m_glxContext = glXCreateNewContext(display(), m_fbConfig, GLX_RGBA_TYPE, NULL, True);
+    if (!m_glxContext) {
+        throw ConfigException("Cannot create the OpenGL rendering context.");
+    }
+    glXMakeCurrent(display(), m_glxRenderingWindow, m_glxContext);
+
+    // Initialize GLEW.
+    GLenum glewErr = glewInit();
+    if(glewErr != GLEW_OK) {
+        std::stringstream ss;
+        ss << "GLEW Error: " << (const char*)(glewGetErrorString(glewErr));
+        throw ConfigException(ss.str().c_str());
+    }
+}
+
+// Checks for the appropriate OpenGL version.
+void OpenGLScreen::checkOpenGLVersion() {
+    if (!GLEW_VERSION_2_1) {
+        throw ConfigException("OpenGL 2.1 not available.");
+    }
+}
+
+// Initializes the rendering surface.
+void OpenGLScreen::initRenderingSurface() {
     // Creating an X window for rendering.
     Window compOverlay = XCompositeGetOverlayWindow(display(), rootWindow().window());
 
-    XVisualInfo *mainVisual = glXGetVisualFromFBConfig(display(), m_fbConfig);
-    Colormap mainColormap = XCreateColormap(display(), rootWindow().window(), mainVisual->visual, AllocNone);
+    XVisualInfo *visualInfo = glXGetVisualFromFBConfig(display(), m_fbConfig);
+    Colormap colormap = XCreateColormap(display(), rootWindow().window(), visualInfo->visual, AllocNone);
 
     XSetWindowAttributes wa;
-    wa.colormap = mainColormap;
+    wa.colormap = colormap;
     long waMask = CWColormap;
 
     m_renderingWindow = XCreateWindow(display(), compOverlay, 0, 0, rootWindow().width(), rootWindow().height(), 0,
-                                      mainVisual->depth, InputOutput, mainVisual->visual, waMask, &wa);
+                                      visualInfo->depth, InputOutput, visualInfo->visual, waMask, &wa);
     XmbSetWMProperties(display(), m_renderingWindow, "fbcompose", "fbcompose", NULL, 0, NULL, NULL, NULL);
     XMapWindow(display(), m_renderingWindow);
 
@@ -112,24 +120,6 @@ void OpenGLScreen::initRenderingContext() {
     if (!m_glxRenderingWindow) {
         throw ConfigException("Cannot create the rendering surface.");
     }
-
-    // Creating the GLX rendering context.
-    // Self note: use glXCreateContextAttribsARB for OpenGL>=3.0
-    m_glxContext = glXCreateNewContext(display(), m_fbConfig, GLX_RGBA_TYPE, NULL, True);
-    if (!m_glxContext) {
-        throw ConfigException("Cannot create the rendering context.");
-    }
-    glXMakeCurrent(display(), m_glxRenderingWindow, m_glxContext);
-
-    // GLEW
-    GLenum glewErr = glewInit();
-    if(glewErr != GLEW_OK) {
-        throw ConfigException((const char*)glewGetErrorString(glewErr));
-    }
-    if (!GLEW_VERSION_2_0) {
-        throw ConfigException("OpenGL 2.0 not available.");
-    }
-    
 }
 
 // Initializes shaders.
@@ -221,6 +211,23 @@ void OpenGLScreen::initShaders() {
     }
 }
 
+// Read and store all top level windows.
+void OpenGLScreen::getTopLevelWindows() {
+    Window root;
+    Window parent;
+    Window *children;
+    unsigned int childCount;
+
+    XQueryTree(display(), rootWindow().window(), &root, &parent, &children, &childCount);
+    for (unsigned int i = 0; i < childCount; i++) {
+        createWindow(children[i]);
+    }
+
+    if (children) {
+        XFree(children);
+    }
+}
+
 
 //--- WINDOW MANIPULATION ------------------------------------------------------
 
@@ -268,6 +275,7 @@ void OpenGLScreen::renderScreen() {
 
     std::list<BaseCompWindow*>::const_iterator it = allWindows().begin();
     while(it != allWindows().end()) {
+        renderWindow(*(dynamic_cast<OpenGLWindow*>(*it)));
         it++;
     }
 
