@@ -127,19 +127,21 @@ void OpenGLScreen::initRenderingSurface() {
 void OpenGLScreen::initShaders() {
     // Vertex shader source code (TODO: move somewhere else when everything is working).
     GLchar vShaderSource[] =
-        "#version 110\n"
+        "#version 120\n"
+        "\n"
+        "attribute vec2 fb_Position;\n"
         "\n"
         "void main() {\n"
-        "    gl_Position = ftransform();\n"
+        "    gl_Position = vec4(fb_Position, 0.0, 1.0);\n"
         "}";
     GLint vShaderSourceLength = (GLint)strlen(vShaderSource);
 
     // Fragment shader source code (TODO: move somewhere else when everything is working).
     GLchar fShaderSource[] =
-        "#version 110\n"
+        "#version 120\n"
         "\n"
         "void main() {\n"
-        "    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);\n"
+        "    gl_FragColor = vec4(1.0, 0.0, 0.0, 0.5);\n"
         "}";
     GLint fShaderSourceLength = (GLint)strlen(fShaderSource);
 
@@ -164,6 +166,7 @@ void OpenGLScreen::getTopLevelWindows() {
         XFree(children);
     }
 }
+
 
 //--- CONVENIENCE OPENGL WRAPPERS ----------------------------------------------
 
@@ -285,13 +288,35 @@ void OpenGLScreen::renderScreen() {
     glClearColor(1, 1, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    std::list<BaseCompWindow*>::const_iterator it = allWindows().begin();
-    while(it != allWindows().end()) {
-        renderWindow(*(dynamic_cast<OpenGLWindow*>(*it)));
-        it++;
-    }
+    glUseProgram(m_shaderProgram);
 
-    glXSwapBuffers (display(), m_glxRenderingWindow);
+    GLfloat vertexArray[8] = { 0.5, 0.5, 0.5, -0.5, -0.5, -0.5, -0.5, 0.5 };
+    GLuint vertexBuffer;
+    glGenBuffers(1, &vertexBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 8, (const GLvoid*)(vertexArray), GL_STATIC_DRAW);
+
+    GLuint position = glGetAttribLocation(m_shaderProgram, "fb_Position");
+    glVertexAttribPointer(position, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
+    glEnableVertexAttribArray(position);
+
+    GLint elementArray[4] = { 0, 1, 2, 3 };
+    GLuint elementBuffer;
+    glGenBuffers(1, &elementBuffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLint) * 4, (const GLvoid*)(elementArray), GL_STATIC_DRAW);
+
+    glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, (void*)0);
+
+    glDisableVertexAttribArray(position);
+
+    // std::list<BaseCompWindow*>::const_iterator it = allWindows().begin();
+    // while(it != allWindows().end()) {
+    //     renderWindow(*(dynamic_cast<OpenGLWindow*>(*it)));
+    //     it++;
+    // }
+
+    glXSwapBuffers(display(), m_glxRenderingWindow);
 }
 
 // A function to render a particular window onto the screen.
