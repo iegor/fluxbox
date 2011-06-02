@@ -29,6 +29,7 @@
 #include <list>
 #include <iostream>
 #include <sstream>
+#include <string>
 #include <cstring>
 
 using namespace FbCompositor;
@@ -43,7 +44,7 @@ OpenGLScreen::OpenGLScreen(int screenNumber) :
     initRenderingContext();
     checkOpenGLVersion();
     initRenderingSurface();
-    // initShaders();
+    initShaders();
     getTopLevelWindows();
 }
 
@@ -124,8 +125,6 @@ void OpenGLScreen::initRenderingSurface() {
 
 // Initializes shaders.
 void OpenGLScreen::initShaders() {
-    GLint status;
-
     // Vertex shader source code (TODO: move somewhere else when everything is working).
     GLchar vShaderSource[] =
         "#version 110\n"
@@ -144,71 +143,9 @@ void OpenGLScreen::initShaders() {
         "}";
     GLint fShaderSourceLength = (GLint)strlen(fShaderSource);
 
-    // Creating the vertex shader.
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    if (!vertexShader) {
-        throw ConfigException("Cannot create a vertex shader.");
-    }
-
-    glShaderSource(vertexShader, 1, (const GLchar**)(&vShaderSource), &vShaderSourceLength);
-    glCompileShader(vertexShader);
-
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &status);
-    if (!status) {
-        GLsizei infoLogSize;
-        GLchar infoLog[256];    // TODO: REMOVE MAGIC NUMBER
-        glGetShaderInfoLog(vertexShader, 256, &infoLogSize, infoLog);
-
-        glDeleteShader(vertexShader);
-
-        throw ConfigException(infoLog);
-    }
-
-    // Creating the fragment shader.
-    GLuint fragmentShader = glCreateShader(GL_VERTEX_SHADER);
-    if (!fragmentShader) {
-        throw ConfigException("Cannot create a fragment shader.");
-    }
-
-    glShaderSource(fragmentShader, 1, (const GLchar**)(&fShaderSource), &fShaderSourceLength);
-    glCompileShader(fragmentShader);
-
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &status);
-    if (!status) {
-        GLsizei infoLogSize;
-        GLchar infoLog[256];    // TODO: REMOVE MAGIC NUMBER
-        glGetShaderInfoLog(fragmentShader, 256, &infoLogSize, infoLog);
-
-        glDeleteShader(vertexShader);
-        glDeleteShader(fragmentShader);
-
-        throw ConfigException(infoLog);
-    }
-
-    // Creating the shader program.
-    m_shaderProgram = glCreateProgram();
-    if (!m_shaderProgram) {
-        throw ConfigException("Cannot create a shader program.");
-    }
-
-    glAttachShader(m_shaderProgram, vertexShader);
-    glAttachShader(m_shaderProgram, fragmentShader);
-    glLinkProgram(m_shaderProgram);
-
-    glGetProgramiv(m_shaderProgram, GL_LINK_STATUS, &status);
-    if (!status) {
-        GLsizei infoLogSize;
-        GLchar infoLog[256];    // TODO: REMOVE MAGIC NUMBER
-        glGetProgramInfoLog(m_shaderProgram, 256, &infoLogSize, infoLog);
-
-        glDetachShader(m_shaderProgram, vertexShader);
-        glDetachShader(m_shaderProgram, fragmentShader);
-        glDeleteProgram(m_shaderProgram);
-        glDeleteShader(vertexShader);
-        glDeleteShader(fragmentShader);
-
-        throw ConfigException(infoLog);
-    }
+    m_vertexShader = createShader(GL_VERTEX_SHADER, vShaderSourceLength, vShaderSource);
+    m_fragmentShader = createShader(GL_FRAGMENT_SHADER, fShaderSourceLength, fShaderSource);
+    m_shaderProgram = createShaderProgram(m_vertexShader, 0, m_fragmentShader);
 }
 
 // Read and store all top level windows.
@@ -226,6 +163,81 @@ void OpenGLScreen::getTopLevelWindows() {
     if (children) {
         XFree(children);
     }
+}
+
+//--- CONVENIENCE OPENGL WRAPPERS ----------------------------------------------
+
+// Creates a shader.
+GLuint OpenGLScreen::createShader(GLenum shaderType, GLint sourceLength, const GLchar *source) {
+    std::string shaderName;
+    if (shaderType == GL_VERTEX_SHADER) {
+        shaderName = "vertex";
+    } else if (shaderType == GL_GEOMETRY_SHADER) {
+        shaderName = "geometry";
+    } else if (shaderType == GL_FRAGMENT_SHADER) {
+        shaderName = "fragment";
+    } else {
+        throw ConfigException("createShader() was given an invalid shader type.");
+    }
+
+    GLuint shader = glCreateShader(shaderType);
+    if (!shader) {
+        std::stringstream ss;
+        ss << "Could not create " << shaderName << " shader.";
+        throw ConfigException(ss.str());
+    }
+
+    glShaderSource(shader, 1, &source, &sourceLength);
+    glCompileShader(shader);
+
+    GLint compileStatus;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
+
+    if (!compileStatus) {
+        GLsizei infoLogSize;
+        GLchar infoLog[INFO_LOG_BUFFER_SIZE];
+        glGetShaderInfoLog(shader, INFO_LOG_BUFFER_SIZE, &infoLogSize, infoLog);
+
+        std::stringstream ss;
+        ss << "Error in compilation of the " << shaderName << " shader: " << (const char*)(infoLog);
+        throw ConfigException(ss.str());
+    }
+
+    return shader;
+}
+
+// Creates a shader program.
+GLuint OpenGLScreen::createShaderProgram(GLuint vertexShader, GLuint geometryShader, GLuint fragmentShader) {
+    GLuint program = glCreateProgram();
+    if (!program) {
+        throw ConfigException("Cannot create a shader program.");
+    }
+
+    if (vertexShader) {
+        glAttachShader(program, vertexShader);
+    }
+    if (geometryShader) {
+        glAttachShader(program, geometryShader);
+    }
+    if (fragmentShader) {
+        glAttachShader(program, fragmentShader);
+    }
+    glLinkProgram(program);
+
+    GLint linkStatus;
+    glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
+
+    if (!linkStatus) {
+        GLsizei infoLogSize;
+        GLchar infoLog[INFO_LOG_BUFFER_SIZE];
+        glGetProgramInfoLog(program, INFO_LOG_BUFFER_SIZE, &infoLogSize, infoLog);
+
+        std::stringstream ss;
+        ss << "Error in linking of the shader program: " << (const char*)(infoLog);
+        throw ConfigException(ss.str());
+    }
+
+    return program;
 }
 
 

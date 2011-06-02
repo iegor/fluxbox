@@ -87,6 +87,12 @@ namespace FbCompositor {
 
 
     private:
+        //--- CONSTANTS --------------------------------------------------------
+        
+        /** Size of the info log buffer. */
+        static const int INFO_LOG_BUFFER_SIZE = 256;
+
+
         //--- INITIALIZATION FUNCTIONS -----------------------------------------
 
         /** Checks for the appropriate OpenGL version. */
@@ -103,6 +109,15 @@ namespace FbCompositor {
 
         /** Initializes shaders. */
         void initShaders();
+
+
+        //--- CONVENIENCE OPENGL WRAPPERS --------------------------------------
+
+        /** Creates a shader. */
+        GLuint createShader(GLenum shaderType, GLint sourceLength, const GLchar *source);
+
+        /** Creates a shader program. */
+        GLuint createShaderProgram(GLuint vertexShader, GLuint geometryShader, GLuint fragmentShader);
 
 
         //--- RENDERING FUNCTIONS ----------------------------------------------
@@ -127,6 +142,12 @@ namespace FbCompositor {
 
 
         //--- SHADER-RELATED ---------------------------------------------------
+
+        /** The vertex shader. */
+        GLuint m_vertexShader;
+
+        /** The fragment shader. */
+        GLuint m_fragmentShader;
         
         /** The shader program. */
         GLuint m_shaderProgram;
