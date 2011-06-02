@@ -24,6 +24,7 @@
 #include "Compositor.hh"
 #include "OpenGLScreen.hh"
 
+#include <GL/glew.h>
 #include <GL/glx.h>
 #include <X11/extensions/Xcomposite.h>
 #include <X11/extensions/Xdamage.h>

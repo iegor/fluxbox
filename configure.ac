@@ -187,6 +187,7 @@ AC_COMPILE_IFELSE([
 
 dnl Dependencies for fbcompose
 dnl TODO: Replace with something more permanent and optional
+AC_CHECK_LIB([GLEW],[glewInit])
 AC_CHECK_LIB([GL],[glXQueryExtension])
 AC_CHECK_LIB([Xcomposite],[XCompositeQueryExtension])
 AC_CHECK_LIB([Xdamage],[XDamageQueryExtnsion])

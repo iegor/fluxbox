@@ -28,6 +28,7 @@
 
 #include <list>
 #include <iostream>
+#include <cstring>
 
 using namespace FbCompositor;
 
@@ -38,7 +39,8 @@ using namespace FbCompositor;
 OpenGLScreen::OpenGLScreen(int screenNumber) :
     BaseScreen(screenNumber) {
 
-    initRenderingSurface();
+    initRenderingContext();
+    // initShaders();
     getTopLevelWindows();
 }
 
@@ -65,8 +67,8 @@ void OpenGLScreen::getTopLevelWindows() {
     }
 }
 
-// Initializes the rendering surface.
-void OpenGLScreen::initRenderingSurface() {
+// Initializes the rendering surface and context.
+void OpenGLScreen::initRenderingContext() {
     // TODO: Better context creation (GL 3.0 etc).
     // TODO: Better failure handling with FBConfigs.
 
@@ -112,9 +114,110 @@ void OpenGLScreen::initRenderingSurface() {
     }
 
     // Creating the GLX rendering context.
-    m_glxContext = glXCreateNewContext(display(), m_fbConfig, GLX_RGBA_TYPE, NULL, false);
+    // Self note: use glXCreateContextAttribsARB for OpenGL>=3.0
+    m_glxContext = glXCreateNewContext(display(), m_fbConfig, GLX_RGBA_TYPE, NULL, True);
     if (!m_glxContext) {
         throw ConfigException("Cannot create the rendering context.");
+    }
+    glXMakeCurrent(display(), m_glxRenderingWindow, m_glxContext);
+
+    // GLEW
+    GLenum glewErr = glewInit();
+    if(glewErr != GLEW_OK) {
+        throw ConfigException((const char*)glewGetErrorString(glewErr));
+    }
+    if (!GLEW_VERSION_2_0) {
+        throw ConfigException("OpenGL 2.0 not available.");
+    }
+    
+}
+
+// Initializes shaders.
+void OpenGLScreen::initShaders() {
+    GLint status;
+
+    // Vertex shader source code (TODO: move somewhere else when everything is working).
+    GLchar vShaderSource[] =
+        "#version 110\n"
+        "\n"
+        "void main() {\n"
+        "    gl_Position = ftransform();\n"
+        "}";
+    GLint vShaderSourceLength = (GLint)strlen(vShaderSource);
+
+    // Fragment shader source code (TODO: move somewhere else when everything is working).
+    GLchar fShaderSource[] =
+        "#version 110\n"
+        "\n"
+        "void main() {\n"
+        "    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);\n"
+        "}";
+    GLint fShaderSourceLength = (GLint)strlen(fShaderSource);
+
+    // Creating the vertex shader.
+    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    if (!vertexShader) {
+        throw ConfigException("Cannot create a vertex shader.");
+    }
+
+    glShaderSource(vertexShader, 1, (const GLchar**)(&vShaderSource), &vShaderSourceLength);
+    glCompileShader(vertexShader);
+
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &status);
+    if (!status) {
+        GLsizei infoLogSize;
+        GLchar infoLog[256];    // TODO: REMOVE MAGIC NUMBER
+        glGetShaderInfoLog(vertexShader, 256, &infoLogSize, infoLog);
+
+        glDeleteShader(vertexShader);
+
+        throw ConfigException(infoLog);
+    }
+
+    // Creating the fragment shader.
+    GLuint fragmentShader = glCreateShader(GL_VERTEX_SHADER);
+    if (!fragmentShader) {
+        throw ConfigException("Cannot create a fragment shader.");
+    }
+
+    glShaderSource(fragmentShader, 1, (const GLchar**)(&fShaderSource), &fShaderSourceLength);
+    glCompileShader(fragmentShader);
+
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &status);
+    if (!status) {
+        GLsizei infoLogSize;
+        GLchar infoLog[256];    // TODO: REMOVE MAGIC NUMBER
+        glGetShaderInfoLog(fragmentShader, 256, &infoLogSize, infoLog);
+
+        glDeleteShader(vertexShader);
+        glDeleteShader(fragmentShader);
+
+        throw ConfigException(infoLog);
+    }
+
+    // Creating the shader program.
+    m_shaderProgram = glCreateProgram();
+    if (!m_shaderProgram) {
+        throw ConfigException("Cannot create a shader program.");
+    }
+
+    glAttachShader(m_shaderProgram, vertexShader);
+    glAttachShader(m_shaderProgram, fragmentShader);
+    glLinkProgram(m_shaderProgram);
+
+    glGetProgramiv(m_shaderProgram, GL_LINK_STATUS, &status);
+    if (!status) {
+        GLsizei infoLogSize;
+        GLchar infoLog[256];    // TODO: REMOVE MAGIC NUMBER
+        glGetProgramInfoLog(m_shaderProgram, 256, &infoLogSize, infoLog);
+
+        glDetachShader(m_shaderProgram, vertexShader);
+        glDetachShader(m_shaderProgram, fragmentShader);
+        glDeleteProgram(m_shaderProgram);
+        glDeleteShader(vertexShader);
+        glDeleteShader(fragmentShader);
+
+        throw ConfigException(infoLog);
     }
 }
 
@@ -169,4 +272,8 @@ void OpenGLScreen::renderScreen() {
     }
 
     glXSwapBuffers (display(), m_glxRenderingWindow);
+}
+
+// A function to render a particular window onto the screen.
+void OpenGLScreen::renderWindow(OpenGLWindow &window) {
 }

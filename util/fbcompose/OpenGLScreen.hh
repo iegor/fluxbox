@@ -27,7 +27,9 @@
 #include "BaseScreen.hh"
 #include "BaseCompWindow.hh"
 #include "Exceptions.hh"
+#include "OpenGLWindow.hh"
 
+#include <GL/glew.h>
 #include <GL/glx.h>
 
 
@@ -36,6 +38,7 @@ namespace FbCompositor {
     class BaseCompWindow;
     class ConfigException;
     class OpenGLScreen;
+    class OpenGLWindow;
 
 
     /**
@@ -89,8 +92,17 @@ namespace FbCompositor {
         /** Read and stores all top level windows. */
         void getTopLevelWindows();
 
-        /** Initializes the rendering surface. */
-        void initRenderingSurface();
+        /** Initializes the rendering surface and context. */
+        void initRenderingContext();
+
+        /** Initializes shaders. */
+        void initShaders();
+
+
+        //--- RENDERING FUNCTIONS ----------------------------------------------
+
+        /** A function to render a particular window onto the screen. */
+        void renderWindow(OpenGLWindow &window);
 
 
         //--- RENDERING-RELATED VARIABLES --------------------------------------
@@ -106,6 +118,9 @@ namespace FbCompositor {
 
         /** The window that is used for rendering. */
         Window m_renderingWindow;
+        
+        /** The shader program. */
+        GLuint m_shaderProgram;
     };
 
 }
