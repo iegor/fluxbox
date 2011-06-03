@@ -285,26 +285,26 @@ void OpenGLScreen::updateWindowObjectProperty(BaseCompWindow &window, Atom prope
 void OpenGLScreen::renderScreen() {
     glXMakeCurrent(display(), m_glxRenderingWindow, m_glxContext);
 
+    glUseProgram(m_shaderProgram);
+
     glClearColor(1, 1, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glUseProgram(m_shaderProgram);
-
-    GLfloat vertexArray[8] = { 0.5, 0.5, 0.5, -0.5, -0.5, -0.5, -0.5, 0.5 };
+    GLfloat vertexArray[8] = { 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5, -0.5 };
     GLuint vertexBuffer;
     glGenBuffers(1, &vertexBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 8, (const GLvoid*)(vertexArray), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexArray), (const GLvoid*)(vertexArray), GL_STATIC_DRAW);
 
     GLuint position = glGetAttribLocation(m_shaderProgram, "fb_Position");
     glVertexAttribPointer(position, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
     glEnableVertexAttribArray(position);
 
-    GLint elementArray[4] = { 0, 1, 2, 3 };
+    GLushort elementArray[4] = { 0, 1, 2, 3 };
     GLuint elementBuffer;
     glGenBuffers(1, &elementBuffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLint) * 4, (const GLvoid*)(elementArray), GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elementArray), (const GLvoid*)(elementArray), GL_STATIC_DRAW);
 
     glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, (void*)0);
 
