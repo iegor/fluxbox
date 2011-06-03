@@ -64,7 +64,13 @@ BaseScreen::BaseScreen(int screenNumber) :
 BaseScreen::~BaseScreen() { }
 
 
-//--- WINDOW MANIPULATION ----------------------------------------------
+//--- OTHER INITIALIZATION -----------------------------------------------------
+
+// Initializes all of the windows on the screen.
+void BaseScreen::initWindows() { }
+
+
+//--- WINDOW MANIPULATION ------------------------------------------------------
 
 // Creates a new window and inserts it into the list of windows.
 void BaseScreen::createWindow(Window window) {

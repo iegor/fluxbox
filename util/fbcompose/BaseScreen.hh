@@ -58,6 +58,12 @@ namespace FbCompositor {
         virtual ~BaseScreen();
 
 
+        //--- OTHER INITIALIZATION ---------------------------------------------
+
+        /** Initializes all of the windows on the screen. */
+        virtual void initWindows();
+
+
         //--- ACCESSORS --------------------------------------------------------
 
         /** \returns the active window XID. */

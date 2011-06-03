@@ -45,7 +45,6 @@ OpenGLScreen::OpenGLScreen(int screenNumber) :
     checkOpenGLVersion();
     initRenderingSurface();
     initShaders();
-    getTopLevelWindows();
 }
 
 // Destructor.
@@ -61,6 +60,26 @@ OpenGLScreen::~OpenGLScreen() {
     glXDestroyWindow(display(), m_glxRenderingWindow);
     glXDestroyContext(display(), m_glxContext);
     XDestroyWindow(display(), m_renderingWindow);
+}
+
+
+//--- OTHER INITIALIZATION ---------------------------------------------
+
+// Initializes all of the windows on the screen.
+void OpenGLScreen::initWindows() {
+    Window root;
+    Window parent;
+    Window *children;
+    unsigned int childCount;
+
+    XQueryTree(display(), rootWindow().window(), &root, &parent, &children, &childCount);
+    for (unsigned int i = 0; i < childCount; i++) {
+        createWindow(children[i]);
+    }
+
+    if (children) {
+        XFree(children);
+    }
 }
 
 
@@ -159,23 +178,6 @@ void OpenGLScreen::initShaders() {
     m_vertexShader = createShader(GL_VERTEX_SHADER, vShaderSourceLength, vShaderSource);
     m_fragmentShader = createShader(GL_FRAGMENT_SHADER, fShaderSourceLength, fShaderSource);
     m_shaderProgram = createShaderProgram(m_vertexShader, 0, m_fragmentShader);
-}
-
-// Read and store all top level windows.
-void OpenGLScreen::getTopLevelWindows() {
-    Window root;
-    Window parent;
-    Window *children;
-    unsigned int childCount;
-
-    XQueryTree(display(), rootWindow().window(), &root, &parent, &children, &childCount);
-    for (unsigned int i = 0; i < childCount; i++) {
-        createWindow(children[i]);
-    }
-
-    if (children) {
-        XFree(children);
-    }
 }
 
 

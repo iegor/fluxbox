@@ -71,6 +71,10 @@ Compositor::Compositor(const CompositorConfig &config) throw(ConfigException) :
         getCMSelectionOwnership(i);
     }
 
+    for (int i = 0; i < screenCount; i++) {
+        m_screens[i]->initWindows();
+    }
+
     XFlush(display());
 }
 

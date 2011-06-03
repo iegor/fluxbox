@@ -55,11 +55,16 @@ namespace FbCompositor {
         ~OpenGLScreen();
 
 
+        //--- OTHER INITIALIZATION ---------------------------------------------
+
+        /** Initializes all of the windows on the screen. */
+        void initWindows();
+
+
         //--- SCREEN RENDERING -------------------------------------------------
 
         /** Renders the screen's contents. */
         void renderScreen();
-
 
     protected:
         //--- WINDOW MANIPULATION ----------------------------------------------
@@ -85,7 +90,6 @@ namespace FbCompositor {
         /** Updates the value of some window's property. */
         void updateWindowObjectProperty(BaseCompWindow *window, Atom property, int state);
 
-
     private:
         //--- CONSTANTS --------------------------------------------------------
         
@@ -97,9 +101,6 @@ namespace FbCompositor {
 
         /** Checks for the appropriate OpenGL version. */
         void checkOpenGLVersion();
-
-        /** Read and stores all top level windows. */
-        void getTopLevelWindows();
 
         /** Initializes the rendering context. */
         void initRenderingContext();
