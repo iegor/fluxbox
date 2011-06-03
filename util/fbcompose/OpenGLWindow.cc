@@ -23,6 +23,12 @@
 
 #include "OpenGLWindow.hh"
 
+#include "Compositor.hh"
+
+#include "FbTk/App.hh"
+
+#include <iostream>
+
 using namespace FbCompositor;
 
 
@@ -31,7 +37,41 @@ using namespace FbCompositor;
 // Constructor.
 OpenGLWindow::OpenGLWindow(Window windowXID) :
     BaseCompWindow(windowXID) {
+
+    // THIS WILL BE FIXED.
+    m_rootWidth = 1600;
+    m_rootHeight = 900;
+
+    // Create buffers.
+    glGenBuffers(1, &m_vertexBuffer);
+    glGenBuffers(1, &m_elementBuffer);
+
+    // Fill buffers.
+    updateArrays();
+
+    for (int i = 0; i < 4; i++) {
+        m_elementArray[i] = i;
+    }
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementBuffer);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(m_elementArray), (const GLvoid*)(m_elementArray), GL_STATIC_DRAW);
 }
 
 // Destructor.
-OpenGLWindow::~OpenGLWindow() { }
+OpenGLWindow::~OpenGLWindow() {
+    glDeleteBuffers(1, &m_vertexBuffer);
+    glDeleteBuffers(1, &m_elementBuffer);
+}
+
+
+//--- WINDOW UPDATE FUNCTIONS ------------------------------------------
+
+// Update window's vertex and element arrays.
+void OpenGLWindow::updateArrays() {
+    m_vertexArray[0] = m_vertexArray[4] = ((x() * 2.0) / m_rootWidth) - 1.0;
+    m_vertexArray[2] = m_vertexArray[6] = (((x() + width()) * 2.0) / m_rootWidth) - 1.0;
+    m_vertexArray[1] = m_vertexArray[3] = 1.0 - ((y() * 2.0) / m_rootHeight);
+    m_vertexArray[5] = m_vertexArray[7] = 1.0 - (((y() + height()) * 2.0) / m_rootHeight);
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(m_vertexArray), (const GLvoid*)(m_vertexArray), GL_STATIC_DRAW);
+}

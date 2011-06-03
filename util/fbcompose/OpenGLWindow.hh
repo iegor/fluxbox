@@ -26,6 +26,9 @@
 
 #include "BaseCompWindow.hh"
 
+#include <GL/glew.h>
+#include <GL/gl.h>
+
 
 namespace FbCompositor {
 
@@ -33,7 +36,7 @@ namespace FbCompositor {
      * Manages windows in OpenGL rendering mode.
      */
     class OpenGLWindow : public BaseCompWindow {
-    public:
+    public :
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
@@ -41,7 +44,59 @@ namespace FbCompositor {
 
         /** Destructor. */
         virtual ~OpenGLWindow();
+
+
+        //--- ACCESSORS --------------------------------------------------------
+
+        /** \returns the element buffer. */
+        GLuint elementBuffer() const throw();
+
+        /** \returns the vertex buffer. */
+        GLuint vertexBuffer() const throw();
+
+
+        //--- WINDOW UPDATE FUNCTIONS ------------------------------------------
+
+        /** Update window's vertex and element arrays. */
+        void updateArrays();
+
+    private :
+        //--- RENDERING-RELATED VARIABLES --------------------------------------
+
+        /** Window's vertex array. */
+        GLfloat m_vertexArray[8];
+
+        /** Window's vertex buffer. */
+        GLuint m_vertexBuffer;
+
+        /** Window's element array. */
+        GLushort m_elementArray[4];
+
+        /** Window's element buffer. */
+        GLuint m_elementBuffer;
+
+
+        //--- OTHER VARIABLES --------------------------------------------------
+
+        /** Width of the root window of the window's screen. */
+        int m_rootWidth;
+
+        /** Height of the root window of the window's screen. */
+        int m_rootHeight;
     };
+
+
+    //--- INLINE FUNCTIONS -------------------------------------------------
+
+    // Returns the element buffer.
+    inline GLuint OpenGLWindow::elementBuffer() const throw() {
+        return m_elementBuffer;
+    }
+
+    // Returns the vertex buffer.
+    inline GLuint OpenGLWindow::vertexBuffer() const throw() {
+        return m_vertexBuffer;
+    }
 }
 
 #endif  // FBCOMPOSITOR_XRENDERAUTOWINDOW_HH

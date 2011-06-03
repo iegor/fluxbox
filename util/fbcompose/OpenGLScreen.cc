@@ -49,7 +49,19 @@ OpenGLScreen::OpenGLScreen(int screenNumber) :
 }
 
 // Destructor.
-OpenGLScreen::~OpenGLScreen() { }
+OpenGLScreen::~OpenGLScreen() {
+    XUnmapWindow(display(), m_renderingWindow);
+
+    glDetachShader(m_shaderProgram, m_vertexShader);
+    glDetachShader(m_shaderProgram, m_fragmentShader);
+    glDeleteProgram(m_shaderProgram);
+    glDeleteShader(m_vertexShader);
+    glDeleteShader(m_fragmentShader);
+
+    glXDestroyWindow(display(), m_glxRenderingWindow);
+    glXDestroyContext(display(), m_glxContext);
+    XDestroyWindow(display(), m_renderingWindow);
+}
 
 
 //--- INITIALIZATION FUNCTIONS -------------------------------------------------
@@ -268,6 +280,7 @@ void OpenGLScreen::mapWindowObject(BaseCompWindow &window) {
 // Updates window's configuration.
 void OpenGLScreen::reconfigureWindowObject(BaseCompWindow &window) {
     window.updateGeometry();
+    (dynamic_cast<OpenGLWindow*>(&window))->updateArrays();
 }
 
 // Unmaps a window object.
@@ -290,8 +303,10 @@ void OpenGLScreen::renderScreen() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     std::list<BaseCompWindow*>::const_iterator it = allWindows().begin();
-    while(it != allWindows().end()) {
-        renderWindow(*(dynamic_cast<OpenGLWindow*>(*it)));
+    while (it != allWindows().end()) {
+        if ((*it)->isMapped()) {
+            renderWindow(*(dynamic_cast<OpenGLWindow*>(*it)));
+        }
         it++;
     }
 
@@ -305,30 +320,9 @@ void OpenGLScreen::renderWindow(OpenGLWindow &window) {
         return;
     }
 
-    if (!window.isMapped()) {
-        return;
-    }
-
-    // Create and load the vertex array.
-    // TODO: Is there an easier way to normalize these values?
-    GLfloat xLow  = ((window.x() * 2.0) / rootWindow().width()) - 1.0;
-    GLfloat xHigh = (((window.x() + window.width()) * 2.0) / rootWindow().width()) - 1.0;
-    GLfloat yLow  = 1.0 - ((window.y() * 2.0) / rootWindow().height());
-    GLfloat yHigh = 1.0 - (((window.y() + window.height()) * 2.0) / rootWindow().height());
-    GLfloat vertexArray[8] = { xLow, yLow, xHigh, yLow, xLow, yHigh, xHigh, yHigh };
-
-    GLuint vertexBuffer;
-    glGenBuffers(1, &vertexBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexArray), (const GLvoid*)(vertexArray), GL_STATIC_DRAW);
-
-    // Create and load the element array.
-    GLushort elementArray[4] = { 0, 1, 2, 3 };
-
-    GLuint elementBuffer;
-    glGenBuffers(1, &elementBuffer);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elementArray), (const GLvoid*)(elementArray), GL_STATIC_DRAW);
+    // Load vertex and element arrays.
+    glBindBuffer(GL_ARRAY_BUFFER, window.vertexBuffer());
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, window.elementBuffer());
 
     // Set up the attributes.
     GLuint pointPos = glGetAttribLocation(m_shaderProgram, "fb_PointPos");
@@ -340,6 +334,4 @@ void OpenGLScreen::renderWindow(OpenGLWindow &window) {
 
     // Cleanup.
     glDisableVertexAttribArray(pointPos);
-    glDeleteBuffers(1, &vertexBuffer);
-    glDeleteBuffers(1, &elementBuffer);
 }
