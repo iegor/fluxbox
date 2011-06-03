@@ -161,8 +161,12 @@ void OpenGLScreen::initShaders() {
         "\n"
         "attribute vec2 fb_PointPos;\n"
         "\n"
+        "varying vec2 fb_TexCoord;\n"
+        "\n"
         "void main() {\n"
         "    gl_Position = vec4(fb_PointPos, 0.0, 1.0);\n"
+        "    fb_TexCoord.x = (fb_PointPos.x + 1.0) * 0.5;\n"
+        "    fb_TexCoord.y = 1.0 - (fb_PointPos.y + 1.0) * 0.5;\n"
         "}";
     GLint vShaderSourceLength = (GLint)strlen(vShaderSource);
 
@@ -170,8 +174,12 @@ void OpenGLScreen::initShaders() {
     GLchar fShaderSource[] =
         "#version 120\n"
         "\n"
+        "uniform sampler2D fb_Texture;\n"
+        "\n"
+        "varying vec2 fb_TexCoord;\n"
+        "\n"
         "void main() {\n"
-        "    gl_FragColor = vec4(1.0, 0.0, 0.0, 0.5);\n"
+        "    gl_FragColor = texture2D(fb_Texture, fb_TexCoord);\n"
         "}";
     GLint fShaderSourceLength = (GLint)strlen(fShaderSource);
 
@@ -333,6 +341,32 @@ void OpenGLScreen::renderWindow(OpenGLWindow &window) {
     GLuint pointPos = glGetAttribLocation(m_shaderProgram, "fb_PointPos");
     glVertexAttribPointer(pointPos, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
     glEnableVertexAttribArray(pointPos);
+
+    // Set up the texture uniforms.
+    window.updateContents();
+    XImage *image = XGetImage(display(), window.contents(), 0, 0, window.width(), window.height(), AllPlanes, ZPixmap);
+    if (!image) {
+        throw CompositorException("Cannot create window's XImage.");
+    }
+
+    GLuint texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, window.width(), window.height(), 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)(&(image->data[0])));
+    XDestroyImage(image);
+
+    GLuint texturePos = glGetUniformLocation(m_shaderProgram, "fb_Texture");
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glUniform1i(texturePos, 0);
 
     // Rendering.
     glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, (void*)0);
