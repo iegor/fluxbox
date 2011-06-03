@@ -122,25 +122,26 @@ namespace FbCompositor {
         //--- SPECIALIZED WINDOW MANIPULATION FUNCTIONS ------------------------
 
         /** Creates a window object from its XID. */
+        // TODO: Make pure virtual.
         virtual BaseCompWindow *createWindowObject(Window window);
 
         /** Cleans up a window object before it is deleted. */
-        virtual void cleanupWindowObject(BaseCompWindow &window);
+        virtual void cleanupWindowObject(BaseCompWindow *window);
 
         /** Damages a window object. */
-        virtual void damageWindowObject(BaseCompWindow &window);
+        virtual void damageWindowObject(BaseCompWindow *window);
 
         /** Maps a window object. */
-        virtual void mapWindowObject(BaseCompWindow &window);
+        virtual void mapWindowObject(BaseCompWindow *window);
 
         /** Updates configuration of a window object. */
-        virtual void reconfigureWindowObject(BaseCompWindow &window);
+        virtual void reconfigureWindowObject(BaseCompWindow *window);
 
         /** Unmaps a window object. */
-        virtual void unmapWindowObject(BaseCompWindow &window);
+        virtual void unmapWindowObject(BaseCompWindow *window);
 
         /** Updates the value of some window's property. */
-        virtual void updateWindowObjectProperty(BaseCompWindow &window, Atom property, int state);
+        virtual void updateWindowObjectProperty(BaseCompWindow *window, Atom property, int state);
 
 
     private:

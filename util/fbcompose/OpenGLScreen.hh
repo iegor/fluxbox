@@ -68,22 +68,22 @@ namespace FbCompositor {
         BaseCompWindow *createWindowObject(Window window);
 
         /** Cleans up a window object before it is deleted. */
-        void cleanupWindowObject(BaseCompWindow &window);
+        void cleanupWindowObject(BaseCompWindow *window);
 
         /** Damages a window object. */
-        void damageWindowObject(BaseCompWindow &window);
+        void damageWindowObject(BaseCompWindow *window);
 
         /** Maps a window object. */
-        void mapWindowObject(BaseCompWindow &window);
+        void mapWindowObject(BaseCompWindow *window);
 
         /** Updates window's configuration. */
-        void reconfigureWindowObject(BaseCompWindow &window);
+        void reconfigureWindowObject(BaseCompWindow *window);
 
         /** Unmaps a window object. */
-        void unmapWindowObject(BaseCompWindow &window);
+        void unmapWindowObject(BaseCompWindow *window);
 
         /** Updates the value of some window's property. */
-        void updateWindowObjectProperty(BaseCompWindow &window, Atom property, int state);
+        void updateWindowObjectProperty(BaseCompWindow *window, Atom property, int state);
 
 
     private:

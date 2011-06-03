@@ -81,7 +81,7 @@ void BaseScreen::createWindow(Window window) {
 void BaseScreen::damageWindow(Window window) {
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
     if (it != m_windows.end()) {
-        damageWindowObject(**it);
+        damageWindowObject(*it);
     } else {
         // TODO: Throw something.
     }
@@ -91,7 +91,7 @@ void BaseScreen::damageWindow(Window window) {
 void BaseScreen::destroyWindow(Window window) {
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
     if (it != m_windows.end()) {
-        cleanupWindowObject(**it);
+        cleanupWindowObject(*it);
         delete *it;
         m_windows.erase(it);
     } else {
@@ -103,7 +103,7 @@ void BaseScreen::destroyWindow(Window window) {
 void BaseScreen::mapWindow(Window window) {
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
     if (it != m_windows.end()) {
-        mapWindowObject(**it);
+        mapWindowObject(*it);
     } else {
         // TODO: Throw something.
     }
@@ -113,7 +113,7 @@ void BaseScreen::mapWindow(Window window) {
 void BaseScreen::reconfigureWindow(const XConfigureEvent &event) {
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(event.window);
     if (it != m_windows.end()) {
-        reconfigureWindowObject(**it);
+        reconfigureWindowObject(*it);
 
         BaseCompWindow *currentWindow = *it;
         m_windows.erase(it);
@@ -133,7 +133,7 @@ void BaseScreen::reconfigureWindow(const XConfigureEvent &event) {
 void BaseScreen::unmapWindow(Window window) {
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
     if (it != m_windows.end()) {
-        unmapWindowObject(**it);
+        unmapWindowObject(*it);
     } else {
         // TODO: Throw something.
     }
@@ -156,7 +156,7 @@ void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
 
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
     if (it != m_windows.end()) {
-        updateWindowObjectProperty(**it, property, state);
+        updateWindowObjectProperty(*it, property, state);
     } else {
         // TODO: Throw something.
     }
@@ -165,39 +165,33 @@ void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
 
 //--- SPECIALIZED WINDOW MANIPULATION FUNCTIONS --------------------------------
 
-// Creates a new window object from its XID.
-BaseCompWindow *BaseScreen::createWindowObject(Window window) {
-    BaseCompWindow *newWindow = new BaseCompWindow(window);
-    return newWindow;
-}
-
 // Cleans up a window object before it is deleted.
-void BaseScreen::cleanupWindowObject(BaseCompWindow &window) { }
+void BaseScreen::cleanupWindowObject(BaseCompWindow *window) { }
 
 // Damages a window object.
-void BaseScreen::damageWindowObject(BaseCompWindow &window) {
-    window.setDamaged();
+void BaseScreen::damageWindowObject(BaseCompWindow *window) {
+    window->setDamaged();
 }
 
 // Maps a window object.
-void BaseScreen::mapWindowObject(BaseCompWindow &window) {
-    window.setMapped();
+void BaseScreen::mapWindowObject(BaseCompWindow *window) {
+    window->setMapped();
 }
 
 // Updates configuration of a window object.
 // TODO: Improve reconfiguration - take values from XConfigureEvent object,
 // rather than make a separate X call to get window's parameters.
-void BaseScreen::reconfigureWindowObject(BaseCompWindow &window) {
-    window.updateGeometry();
+void BaseScreen::reconfigureWindowObject(BaseCompWindow *window) {
+    window->updateGeometry();
 }
 
 // Unmaps a window object.
-void BaseScreen::unmapWindowObject(BaseCompWindow &window) {
-    window.setUnmapped();
+void BaseScreen::unmapWindowObject(BaseCompWindow *window) {
+    window->setUnmapped();
 }
 
 // Updates the value of some window's property.
-void BaseScreen::updateWindowObjectProperty(BaseCompWindow &window, Atom property, int state) { }
+void BaseScreen::updateWindowObjectProperty(BaseCompWindow *window, Atom property, int state) { }
 
 
 //--- SCREEN RENDERING ---------------------------------------------------------

@@ -66,7 +66,6 @@ OpenGLScreen::~OpenGLScreen() {
 
 //--- INITIALIZATION FUNCTIONS -------------------------------------------------
 
-
 // Initializes the rendering context.
 void OpenGLScreen::initRenderingContext() {
     // Selecting the framebuffer configuration.
@@ -265,31 +264,35 @@ BaseCompWindow *OpenGLScreen::createWindowObject(Window window) {
 }
 
 // Cleans up a window object before it is deleted.
-void OpenGLScreen::cleanupWindowObject(BaseCompWindow &window) { }
+void OpenGLScreen::cleanupWindowObject(BaseCompWindow *window) {
+    BaseScreen::cleanupWindowObject(window);
+}
 
 // Damages a window object.
-void OpenGLScreen::damageWindowObject(BaseCompWindow &window) {
-    window.setDamaged();
+void OpenGLScreen::damageWindowObject(BaseCompWindow *window) {
+    BaseScreen::damageWindowObject(window);
 }
 
 // Maps a window object.
-void OpenGLScreen::mapWindowObject(BaseCompWindow &window) {
-    window.setMapped();
+void OpenGLScreen::mapWindowObject(BaseCompWindow *window) {
+    BaseScreen::mapWindowObject(window);
 }
 
 // Updates window's configuration.
-void OpenGLScreen::reconfigureWindowObject(BaseCompWindow &window) {
-    window.updateGeometry();
-    (dynamic_cast<OpenGLWindow*>(&window))->updateArrays();
+void OpenGLScreen::reconfigureWindowObject(BaseCompWindow *window) {
+    BaseScreen::reconfigureWindowObject(window);
+    (dynamic_cast<OpenGLWindow*>(window))->updateArrays();
 }
 
 // Unmaps a window object.
-void OpenGLScreen::unmapWindowObject(BaseCompWindow &window) {
-    window.setUnmapped();
+void OpenGLScreen::unmapWindowObject(BaseCompWindow *window) {
+    BaseScreen::unmapWindowObject(window);
 }
 
 // Updates the value of some window's property.
-void OpenGLScreen::updateWindowObjectProperty(BaseCompWindow &window, Atom property, int state) { }
+void OpenGLScreen::updateWindowObjectProperty(BaseCompWindow *window, Atom property, int state) {
+    BaseScreen::updateWindowObjectProperty(window, property, state);
+}
 
 
 //--- SCREEN RENDERING ---------------------------------------------------------
