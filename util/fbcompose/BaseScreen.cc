@@ -165,6 +165,12 @@ void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
 
 //--- SPECIALIZED WINDOW MANIPULATION FUNCTIONS --------------------------------
 
+// Creates a new window object from its XID.
+BaseCompWindow *BaseScreen::createWindowObject(Window window) {
+    BaseCompWindow *newWindow = new BaseCompWindow(window);
+    return newWindow;
+}
+
 // Cleans up a window object before it is deleted.
 void BaseScreen::cleanupWindowObject(BaseCompWindow *window) { }
 
