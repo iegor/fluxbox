@@ -129,10 +129,10 @@ void OpenGLScreen::initShaders() {
     GLchar vShaderSource[] =
         "#version 120\n"
         "\n"
-        "attribute vec2 fb_Position;\n"
+        "attribute vec2 fb_PointPos;\n"
         "\n"
         "void main() {\n"
-        "    gl_Position = vec4(fb_Position, 0.0, 1.0);\n"
+        "    gl_Position = vec4(fb_PointPos, 0.0, 1.0);\n"
         "}";
     GLint vShaderSourceLength = (GLint)strlen(vShaderSource);
 
@@ -284,41 +284,62 @@ void OpenGLScreen::updateWindowObjectProperty(BaseCompWindow &window, Atom prope
 // Renders the screen's contents.
 void OpenGLScreen::renderScreen() {
     glXMakeCurrent(display(), m_glxRenderingWindow, m_glxContext);
-
     glUseProgram(m_shaderProgram);
 
     glClearColor(1, 1, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    GLfloat vertexArray[8] = { 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5, -0.5 };
-    GLuint vertexBuffer;
-    glGenBuffers(1, &vertexBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexArray), (const GLvoid*)(vertexArray), GL_STATIC_DRAW);
-
-    GLuint position = glGetAttribLocation(m_shaderProgram, "fb_Position");
-    glVertexAttribPointer(position, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
-    glEnableVertexAttribArray(position);
-
-    GLushort elementArray[4] = { 0, 1, 2, 3 };
-    GLuint elementBuffer;
-    glGenBuffers(1, &elementBuffer);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elementArray), (const GLvoid*)(elementArray), GL_STATIC_DRAW);
-
-    glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, (void*)0);
-
-    glDisableVertexAttribArray(position);
-
-    // std::list<BaseCompWindow*>::const_iterator it = allWindows().begin();
-    // while(it != allWindows().end()) {
-    //     renderWindow(*(dynamic_cast<OpenGLWindow*>(*it)));
-    //     it++;
-    // }
+    std::list<BaseCompWindow*>::const_iterator it = allWindows().begin();
+    while(it != allWindows().end()) {
+        renderWindow(*(dynamic_cast<OpenGLWindow*>(*it)));
+        it++;
+    }
 
     glXSwapBuffers(display(), m_glxRenderingWindow);
 }
 
 // A function to render a particular window onto the screen.
 void OpenGLScreen::renderWindow(OpenGLWindow &window) {
+    // Temporary hack until we stop tracking windows belonging to the compositor.
+    if (window.window() == 102) {
+        return;
+    }
+
+    if (!window.isMapped()) {
+        return;
+    }
+
+    // Create and load the vertex array.
+    // TODO: Is there an easier way to normalize these values?
+    GLfloat xLow  = ((window.x() * 2.0) / rootWindow().width()) - 1.0;
+    GLfloat xHigh = (((window.x() + window.width()) * 2.0) / rootWindow().width()) - 1.0;
+    GLfloat yLow  = 1.0 - ((window.y() * 2.0) / rootWindow().height());
+    GLfloat yHigh = 1.0 - (((window.y() + window.height()) * 2.0) / rootWindow().height());
+    GLfloat vertexArray[8] = { xLow, yLow, xHigh, yLow, xLow, yHigh, xHigh, yHigh };
+
+    GLuint vertexBuffer;
+    glGenBuffers(1, &vertexBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexArray), (const GLvoid*)(vertexArray), GL_STATIC_DRAW);
+
+    // Create and load the element array.
+    GLushort elementArray[4] = { 0, 1, 2, 3 };
+
+    GLuint elementBuffer;
+    glGenBuffers(1, &elementBuffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elementArray), (const GLvoid*)(elementArray), GL_STATIC_DRAW);
+
+    // Set up the attributes.
+    GLuint pointPos = glGetAttribLocation(m_shaderProgram, "fb_PointPos");
+    glVertexAttribPointer(pointPos, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
+    glEnableVertexAttribArray(pointPos);
+
+    // Rendering.
+    glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, (void*)0);
+
+    // Cleanup.
+    glDisableVertexAttribArray(pointPos);
+    glDeleteBuffers(1, &vertexBuffer);
+    glDeleteBuffers(1, &elementBuffer);
 }
