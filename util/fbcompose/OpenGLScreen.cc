@@ -160,13 +160,13 @@ void OpenGLScreen::initShaders() {
         "#version 120\n"
         "\n"
         "attribute vec2 fb_PointPos;\n"
+        "attribute vec2 fb_TexCoord;\n"
         "\n"
-        "varying vec2 fb_TexCoord;\n"
+        "varying vec2 fb_TexCoordVar;\n"
         "\n"
         "void main() {\n"
         "    gl_Position = vec4(fb_PointPos, 0.0, 1.0);\n"
-        "    fb_TexCoord.x = (fb_PointPos.x + 1.0) * 0.5;\n"
-        "    fb_TexCoord.y = 1.0 - (fb_PointPos.y + 1.0) * 0.5;\n"
+        "    fb_TexCoordVar = fb_TexCoord;\n"
         "}";
     GLint vShaderSourceLength = (GLint)strlen(vShaderSource);
 
@@ -176,10 +176,10 @@ void OpenGLScreen::initShaders() {
         "\n"
         "uniform sampler2D fb_Texture;\n"
         "\n"
-        "varying vec2 fb_TexCoord;\n"
+        "varying vec2 fb_TexCoordVar;\n"
         "\n"
         "void main() {\n"
-        "    gl_FragColor = texture2D(fb_Texture, fb_TexCoord);\n"
+        "    gl_FragColor = texture2D(fb_Texture, fb_TexCoordVar);\n"
         "}";
     GLint fShaderSourceLength = (GLint)strlen(fShaderSource);
 
@@ -342,6 +342,17 @@ void OpenGLScreen::renderWindow(OpenGLWindow &window) {
     glVertexAttribPointer(pointPos, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
     glEnableVertexAttribArray(pointPos);
 
+    GLfloat texCoords[8] = { 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0 };
+    GLuint texBuf;
+    glGenBuffers(1, &texBuf);
+    glBindBuffer(GL_ARRAY_BUFFER, texBuf);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(texCoords), (const GLvoid*)(texCoords), GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ARRAY_BUFFER, texBuf);
+    GLuint texAttr = glGetAttribLocation(m_shaderProgram, "fb_TexCoord");
+    glVertexAttribPointer(texAttr, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
+    glEnableVertexAttribArray(texAttr);
+
     // Set up the texture uniforms.
     window.updateContents();
     XImage *image = XGetImage(display(), window.contents(), 0, 0, window.width(), window.height(), AllPlanes, ZPixmap);
@@ -373,4 +384,5 @@ void OpenGLScreen::renderWindow(OpenGLWindow &window) {
 
     // Cleanup.
     glDisableVertexAttribArray(pointPos);
+    glDisableVertexAttribArray(texAttr);
 }
