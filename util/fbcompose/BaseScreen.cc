@@ -128,6 +128,7 @@ void BaseScreen::reconfigureWindow(const XConfigureEvent &event) {
             m_windows.push_front(currentWindow);
         } else {
             it = getWindowIterator(event.above);
+            it++;
             m_windows.insert(it, currentWindow);
         }
     } else {
