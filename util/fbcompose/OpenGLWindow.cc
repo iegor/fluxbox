@@ -91,9 +91,9 @@ OpenGLWindow::~OpenGLWindow() {
 // Update the appropriate window's arrays.
 void OpenGLWindow::updateArrays() {
     m_windowPosArray[0] = m_windowPosArray[4] = ((x() * 2.0) / m_rootWidth) - 1.0;
-    m_windowPosArray[2] = m_windowPosArray[6] = (((x() + width()) * 2.0) / m_rootWidth) - 1.0;
+    m_windowPosArray[2] = m_windowPosArray[6] = (((x() + realWidth()) * 2.0) / m_rootWidth) - 1.0;
     m_windowPosArray[1] = m_windowPosArray[3] = 1.0 - ((y() * 2.0) / m_rootHeight);
-    m_windowPosArray[5] = m_windowPosArray[7] = 1.0 - (((y() + height()) * 2.0) / m_rootHeight);
+    m_windowPosArray[5] = m_windowPosArray[7] = 1.0 - (((y() + realHeight()) * 2.0) / m_rootHeight);
 
     glBindBuffer(GL_ARRAY_BUFFER, m_windowPosBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(m_windowPosArray), (const GLvoid*)(m_windowPosArray), GL_STATIC_DRAW);
@@ -105,11 +105,11 @@ void OpenGLWindow::updateContents() {
 
     glBindTexture(GL_TEXTURE_2D, contentTexture());
 
-    XImage *image = XGetImage(display(), contents(), 0, 0, width(), height(), AllPlanes, ZPixmap);
+    XImage *image = XGetImage(display(), contents(), 0, 0, realWidth(), realHeight(), AllPlanes, ZPixmap);
     if (!image) {
         throw CompositorException("Cannot create window's XImage.");
     }
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width(), height(), 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)(&(image->data[0])));
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, realWidth(), realHeight(), 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)(&(image->data[0])));
     XDestroyImage(image);
 }

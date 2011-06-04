@@ -74,6 +74,13 @@ namespace FbCompositor {
         int windowClass() const throw();
 
 
+        /** \returns the window's height with borders factored in. */
+        int realHeight() const throw();
+
+        /** \returns the window's width with borders factored in. */
+        int realWidth() const throw();
+
+
         //--- PROPERTY ACCESS --------------------------------------------------
 
         /** \returns the specified cardinal property. */
@@ -139,6 +146,16 @@ namespace FbCompositor {
     // Returns whether the window is mapped or not.
     inline bool BaseCompWindow::isMapped() const throw() {
         return m_isMapped;
+    }
+
+    // Returns the window's height with borders factored in.
+    inline int BaseCompWindow::realHeight() const throw() {
+        return height() + 2 * borderWidth();
+    }
+
+    // Returns the window's width with borders factored in.
+    inline int BaseCompWindow::realWidth() const throw() {
+        return width() + 2 * borderWidth();
     }
 
     // Returns the window's class.
