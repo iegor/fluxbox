@@ -95,7 +95,7 @@ namespace FbCompositor {
         void setUnmapped() throw();
 
         /** Updates the window's contents. */
-        void updateContents() throw();
+        virtual void updateContents();
 
     private:
         //--- INTERNAL FUNCTIONS -----------------------------------------------

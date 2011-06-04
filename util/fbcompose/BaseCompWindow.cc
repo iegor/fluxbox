@@ -112,7 +112,7 @@ void BaseCompWindow::setUnmapped() throw() {
 }
 
 // Updates the window's contents.
-void BaseCompWindow::updateContents() throw() {
+void BaseCompWindow::updateContents() {
     if (m_contents) {
         XFreePixmap(display(), m_contents);
     }

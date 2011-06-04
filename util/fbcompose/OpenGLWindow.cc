@@ -27,6 +27,8 @@
 
 #include "FbTk/App.hh"
 
+#include <X11/Xutil.h>
+
 #include <iostream>
 
 using namespace FbCompositor;
@@ -41,36 +43,73 @@ OpenGLWindow::OpenGLWindow(Window windowXID) :
     m_rootWidth = dynamic_cast<Compositor*>(FbTk::App::instance())->getScreen(screenNumber()).rootWindow().width();
     m_rootHeight = dynamic_cast<Compositor*>(FbTk::App::instance())->getScreen(screenNumber()).rootWindow().height();
 
-    // Create buffers.
-    glGenBuffers(1, &m_vertexBuffer);
+    // Create OpenGL elements.
+    glGenTextures(1, &m_contentTexture);
     glGenBuffers(1, &m_elementBuffer);
+    glGenBuffers(1, &m_texturePosBuffer);
+    glGenBuffers(1, &m_windowPosBuffer);
 
-    // Fill buffers.
+    // Fill window position array.
     updateArrays();
 
-    for (int i = 0; i < 4; i++) {
-        m_elementArray[i] = i;
-    }
+    // Fill element array.
+    m_elementArray[0] = 0;
+    m_elementArray[1] = 1;
+    m_elementArray[2] = 2;
+    m_elementArray[3] = 3;
+
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(m_elementArray), (const GLvoid*)(m_elementArray), GL_STATIC_DRAW);
+
+    // Fill texture position array.
+    m_texturePosArray[0] = m_texturePosArray[1] = m_texturePosArray[3] = m_texturePosArray[4] = 0.0;
+    m_texturePosArray[2] = m_texturePosArray[5] = m_texturePosArray[6] = m_texturePosArray[7] = 1.0;
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_texturePosBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(m_texturePosArray), (const GLvoid*)(m_texturePosArray), GL_STATIC_DRAW);
+
+    // Initialize the content texture.
+    glBindTexture(GL_TEXTURE_2D, m_contentTexture);
+
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
 // Destructor.
 OpenGLWindow::~OpenGLWindow() {
-    glDeleteBuffers(1, &m_vertexBuffer);
+    glDeleteTextures(1, &m_contentTexture);
     glDeleteBuffers(1, &m_elementBuffer);
+    glDeleteBuffers(1, &m_texturePosBuffer);
+    glDeleteBuffers(1, &m_windowPosBuffer);
 }
 
 
 //--- WINDOW UPDATE FUNCTIONS ------------------------------------------
 
-// Update window's vertex and element arrays.
+// Update the appropriate window's arrays.
 void OpenGLWindow::updateArrays() {
-    m_vertexArray[0] = m_vertexArray[4] = ((x() * 2.0) / m_rootWidth) - 1.0;
-    m_vertexArray[2] = m_vertexArray[6] = (((x() + width()) * 2.0) / m_rootWidth) - 1.0;
-    m_vertexArray[1] = m_vertexArray[3] = 1.0 - ((y() * 2.0) / m_rootHeight);
-    m_vertexArray[5] = m_vertexArray[7] = 1.0 - (((y() + height()) * 2.0) / m_rootHeight);
+    m_windowPosArray[0] = m_windowPosArray[4] = ((x() * 2.0) / m_rootWidth) - 1.0;
+    m_windowPosArray[2] = m_windowPosArray[6] = (((x() + width()) * 2.0) / m_rootWidth) - 1.0;
+    m_windowPosArray[1] = m_windowPosArray[3] = 1.0 - ((y() * 2.0) / m_rootHeight);
+    m_windowPosArray[5] = m_windowPosArray[7] = 1.0 - (((y() + height()) * 2.0) / m_rootHeight);
 
-    glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(m_vertexArray), (const GLvoid*)(m_vertexArray), GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, m_windowPosBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(m_windowPosArray), (const GLvoid*)(m_windowPosArray), GL_STATIC_DRAW);
+}
+
+// Updates the window's contents.
+void OpenGLWindow::updateContents() {
+    BaseCompWindow::updateContents();
+
+    glBindTexture(GL_TEXTURE_2D, contentTexture());
+
+    XImage *image = XGetImage(display(), contents(), 0, 0, width(), height(), AllPlanes, ZPixmap);
+    if (!image) {
+        throw CompositorException("Cannot create window's XImage.");
+    }
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width(), height(), 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)(&(image->data[0])));
+    XDestroyImage(image);
 }

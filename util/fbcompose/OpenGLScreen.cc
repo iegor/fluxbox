@@ -159,14 +159,14 @@ void OpenGLScreen::initShaders() {
     GLchar vShaderSource[] =
         "#version 120\n"
         "\n"
-        "attribute vec2 fb_PointPos;\n"
-        "attribute vec2 fb_TexCoord;\n"
+        "attribute vec2 fb_InitPointPos;\n"
+        "attribute vec2 fb_InitTexCoord;\n"
         "\n"
-        "varying vec2 fb_TexCoordVar;\n"
+        "varying vec2 fb_TexCoord;\n"
         "\n"
         "void main() {\n"
-        "    gl_Position = vec4(fb_PointPos, 0.0, 1.0);\n"
-        "    fb_TexCoordVar = fb_TexCoord;\n"
+        "    gl_Position = vec4(fb_InitPointPos, 0.0, 1.0);\n"
+        "    fb_TexCoord = fb_InitTexCoord;\n"
         "}";
     GLint vShaderSourceLength = (GLint)strlen(vShaderSource);
 
@@ -176,10 +176,10 @@ void OpenGLScreen::initShaders() {
         "\n"
         "uniform sampler2D fb_Texture;\n"
         "\n"
-        "varying vec2 fb_TexCoordVar;\n"
+        "varying vec2 fb_TexCoord;\n"
         "\n"
         "void main() {\n"
-        "    gl_FragColor = texture2D(fb_Texture, fb_TexCoordVar);\n"
+        "    gl_FragColor = texture2D(fb_Texture, fb_TexCoord);\n"
         "}";
     GLint fShaderSourceLength = (GLint)strlen(fShaderSource);
 
@@ -333,56 +333,37 @@ void OpenGLScreen::renderWindow(OpenGLWindow &window) {
         return;
     }
 
-    // Load vertex and element arrays.
-    glBindBuffer(GL_ARRAY_BUFFER, window.vertexBuffer());
+    // TODO: Fix the content refresh issue.
+    window.updateContents();
+
+    // Load window position vertex array.
+    glBindBuffer(GL_ARRAY_BUFFER, window.windowPosBuffer());
+
+    GLuint windowPosAttrib = glGetAttribLocation(m_shaderProgram, "fb_InitPointPos");
+    glVertexAttribPointer(windowPosAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
+    glEnableVertexAttribArray(windowPosAttrib);
+
+    // Load texture position vertex array.
+    glBindBuffer(GL_ARRAY_BUFFER, window.texturePosBuffer());
+
+    GLuint texPosAttrib = glGetAttribLocation(m_shaderProgram, "fb_InitTexCoord");
+    glVertexAttribPointer(texPosAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
+    glEnableVertexAttribArray(texPosAttrib);
+
+    // Load element array.
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, window.elementBuffer());
 
-    // Set up the attributes.
-    GLuint pointPos = glGetAttribLocation(m_shaderProgram, "fb_PointPos");
-    glVertexAttribPointer(pointPos, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
-    glEnableVertexAttribArray(pointPos);
-
-    GLfloat texCoords[8] = { 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0 };
-    GLuint texBuf;
-    glGenBuffers(1, &texBuf);
-    glBindBuffer(GL_ARRAY_BUFFER, texBuf);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(texCoords), (const GLvoid*)(texCoords), GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ARRAY_BUFFER, texBuf);
-    GLuint texAttr = glGetAttribLocation(m_shaderProgram, "fb_TexCoord");
-    glVertexAttribPointer(texAttr, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
-    glEnableVertexAttribArray(texAttr);
-
     // Set up the texture uniforms.
-    window.updateContents();
-    XImage *image = XGetImage(display(), window.contents(), 0, 0, window.width(), window.height(), AllPlanes, ZPixmap);
-    if (!image) {
-        throw CompositorException("Cannot create window's XImage.");
-    }
-
-    GLuint texture;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, window.width(), window.height(), 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)(&(image->data[0])));
-    XDestroyImage(image);
-
     GLuint texturePos = glGetUniformLocation(m_shaderProgram, "fb_Texture");
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    glBindTexture(GL_TEXTURE_2D, window.contentTexture());
     glUniform1i(texturePos, 0);
 
     // Rendering.
     glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, (void*)0);
 
     // Cleanup.
-    glDisableVertexAttribArray(pointPos);
-    glDisableVertexAttribArray(texAttr);
+    glDisableVertexAttribArray(windowPosAttrib);
+    glDisableVertexAttribArray(texPosAttrib);
 }

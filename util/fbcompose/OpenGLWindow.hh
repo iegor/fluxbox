@@ -48,32 +48,51 @@ namespace FbCompositor {
 
         //--- ACCESSORS --------------------------------------------------------
 
+        /** \returns the window's contents as a OpenGL texture. */
+        GLuint contentTexture() const throw();
+
         /** \returns the element buffer. */
         GLuint elementBuffer() const throw();
 
-        /** \returns the vertex buffer. */
-        GLuint vertexBuffer() const throw();
+        /** \returns the texture position buffer. */
+        GLuint texturePosBuffer() const throw();
+
+        /** \returns the window position buffer. */
+        GLuint windowPosBuffer() const throw();
 
 
         //--- WINDOW UPDATE FUNCTIONS ------------------------------------------
 
-        /** Update window's vertex and element arrays. */
+        /** Update the appropriate window's arrays. */
         void updateArrays();
+
+        /** Updates the window's contents. */
+        void updateContents();
+
 
     private :
         //--- RENDERING-RELATED VARIABLES --------------------------------------
 
-        /** Window's vertex array. */
-        GLfloat m_vertexArray[8];
-
-        /** Window's vertex buffer. */
-        GLuint m_vertexBuffer;
+        /** Window's content texture. */
+        GLuint m_contentTexture;
 
         /** Window's element array. */
         GLushort m_elementArray[4];
 
         /** Window's element buffer. */
         GLuint m_elementBuffer;
+
+        /** Window texture position array. */
+        GLfloat m_texturePosArray[8];
+
+        /** Window texture position buffer. */
+        GLuint m_texturePosBuffer;
+
+        /** Window position array. */
+        GLfloat m_windowPosArray[8];
+
+        /** Window position buffer. */
+        GLuint m_windowPosBuffer;
 
 
         //--- OTHER VARIABLES --------------------------------------------------
@@ -88,14 +107,24 @@ namespace FbCompositor {
 
     //--- INLINE FUNCTIONS -------------------------------------------------
 
+    // Returns the window's contents as a OpenGL texture.
+    inline GLuint OpenGLWindow::contentTexture() const throw() {
+        return m_contentTexture;
+    }
+
     // Returns the element buffer.
     inline GLuint OpenGLWindow::elementBuffer() const throw() {
         return m_elementBuffer;
     }
 
-    // Returns the vertex buffer.
-    inline GLuint OpenGLWindow::vertexBuffer() const throw() {
-        return m_vertexBuffer;
+    // Returns the texture position buffer.
+    inline GLuint OpenGLWindow::texturePosBuffer() const throw() {
+        return m_texturePosBuffer;
+    }
+
+    // Returns the window position buffer.
+    inline GLuint OpenGLWindow::windowPosBuffer() const throw() {
+        return m_windowPosBuffer;
     }
 }
 
