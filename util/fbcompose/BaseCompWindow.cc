@@ -117,6 +117,8 @@ void BaseCompWindow::updateContents() {
         XFreePixmap(display(), m_contents);
     }
     m_contents = XCompositeNameWindowPixmap(display(), window());
+
+    XDamageSubtract(display(), m_damage, None, None);
     m_isDamaged = false;
 }
 
