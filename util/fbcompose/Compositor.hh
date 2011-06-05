@@ -41,7 +41,8 @@ namespace FbCompositor {
     class BaseScreen;
     class Compositor;
     class CompositorConfig;
-    class IndexOutOfBoundsException;
+    class InitException;
+    class RuntimeException;
 
     /**
      * Main class for the compositor.
@@ -51,7 +52,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        Compositor(const CompositorConfig &configuration) throw(ConfigException);
+        Compositor(const CompositorConfig &configuration) throw(InitException);
 
         /** Destructor. */
         ~Compositor();
@@ -60,13 +61,13 @@ namespace FbCompositor {
         //--- ACCESSORS --------------------------------------------------------
 
         /** \returns The number of available screens. */
-        int screenCount() const;
+        int screenCount() const throw();
 
         /** \returns the reference to a particular screen. */
-        BaseScreen &getScreen(int screenNumber) throw(IndexOutOfBoundsException);
+        BaseScreen &getScreen(int screenNumber) throw(RuntimeException);
 
         /** \returns the application's rendering mode. */
-        RenderingMode renderingMode() const;
+        RenderingMode renderingMode() const throw();
 
 
         //--- EVENT LOOP -------------------------------------------------------
@@ -87,15 +88,15 @@ namespace FbCompositor {
         //--- INITIALIZATION FUNCTIONS -----------------------------------------
 
         /** Acquire the ownership of compositing manager selections. */
-        void getCMSelectionOwnership(int screenNumber) throw(ConfigException);
+        void getCMSelectionOwnership(int screenNumber) throw(InitException);
 
         /** Initializes all relevant X's extensions. */
-        void initAllExtensions() throw(ConfigException);
+        void initAllExtensions() throw(InitException);
 
         /** Initializes a particular X server extension. */
         void initExtension(const char *extensionName, QueryExtensionFunction extensionFunc,
                            QueryVersionFunction versionFunc, const int minMajorVer, const int minMinorVer,
-                           int *eventBase, int *errorBase) throw(ConfigException);
+                           int *eventBase, int *errorBase) throw(InitException);
 
 
         //--- COMPOSITOR VARIABLES ---------------------------------------------
@@ -144,20 +145,20 @@ namespace FbCompositor {
     //--- INLINE FUNCTIONS -----------------------------------------------------
 
     // Returns the number of screens.
-    inline int Compositor::screenCount() const {
+    inline int Compositor::screenCount() const throw() {
         return m_screens.size();
     }
 
     // Returns a particular screen.
-    inline BaseScreen &Compositor::getScreen(int screenNumber) throw(IndexOutOfBoundsException) {
+    inline BaseScreen &Compositor::getScreen(int screenNumber) throw(RuntimeException) {
         if ((screenNumber < 0) || (screenNumber >= screenCount())) {
-            throw IndexOutOfBoundsException("getScreen(int) was given a bad index.");
+            throw RuntimeException("getScreen(int) was given an out of bounds index.");
         }
         return *m_screens[screenNumber];
     }
 
     // Returns the rendering mode.
-    inline RenderingMode Compositor::renderingMode() const {
+    inline RenderingMode Compositor::renderingMode() const throw() {
         return m_renderingMode;
     }
 

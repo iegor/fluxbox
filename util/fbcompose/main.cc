@@ -22,9 +22,9 @@
 
 
 #include "Compositor.hh"
+#include "Exceptions.hh"
 
 #include <X11/Xlib.h>
-#include <X11/X.h>
 
 #include <iostream>
 #include <cstdlib>

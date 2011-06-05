@@ -37,7 +37,7 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-OpenGLWindow::OpenGLWindow(Window windowXID) :
+OpenGLWindow::OpenGLWindow(Window windowXID) throw() :
     BaseCompWindow(windowXID) {
 
     m_rootWidth = dynamic_cast<Compositor*>(FbTk::App::instance())->getScreen(screenNumber()).rootWindow().width();
@@ -78,7 +78,7 @@ OpenGLWindow::OpenGLWindow(Window windowXID) :
 }
 
 // Destructor.
-OpenGLWindow::~OpenGLWindow() {
+OpenGLWindow::~OpenGLWindow() throw() {
     glDeleteTextures(1, &m_contentTexture);
     glDeleteBuffers(1, &m_elementBuffer);
     glDeleteBuffers(1, &m_texturePosBuffer);
@@ -89,7 +89,7 @@ OpenGLWindow::~OpenGLWindow() {
 //--- WINDOW UPDATE FUNCTIONS ------------------------------------------
 
 // Update the appropriate window's arrays.
-void OpenGLWindow::updateArrays() {
+void OpenGLWindow::updateArrays() throw() {
     m_windowPosArray[0] = m_windowPosArray[4] = ((x() * 2.0) / m_rootWidth) - 1.0;
     m_windowPosArray[2] = m_windowPosArray[6] = (((x() + realWidth()) * 2.0) / m_rootWidth) - 1.0;
     m_windowPosArray[1] = m_windowPosArray[3] = 1.0 - ((y() * 2.0) / m_rootHeight);
@@ -100,14 +100,14 @@ void OpenGLWindow::updateArrays() {
 }
 
 // Updates the window's contents.
-void OpenGLWindow::updateContents() {
+void OpenGLWindow::updateContents() throw(RuntimeException) {
     BaseCompWindow::updateContents();
 
     glBindTexture(GL_TEXTURE_2D, contentTexture());
 
     XImage *image = XGetImage(display(), contents(), 0, 0, realWidth(), realHeight(), AllPlanes, ZPixmap);
     if (!image) {
-        throw CompositorException("Cannot create window's XImage.");
+        throw RuntimeException("Cannot create window's XImage.");
     }
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, realWidth(), realHeight(), 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)(&(image->data[0])));

@@ -40,7 +40,7 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // The constructor.
-Compositor::Compositor(const CompositorConfig &config) throw(ConfigException) :
+Compositor::Compositor(const CompositorConfig &config) throw(InitException) :
     App(config.displayName().c_str()) {
 
     m_renderingMode = config.renderingMode();
@@ -87,7 +87,7 @@ Compositor::~Compositor() { }
 //--- INITIALIZATION FUNCTIONS -----------------------------------------
 
 // Acquires the ownership of compositing manager selections.
-void Compositor::getCMSelectionOwnership(int screenNumber) throw(ConfigException) {
+void Compositor::getCMSelectionOwnership(int screenNumber) throw(InitException) {
     std::stringstream ss;
     ss << "_NET_WM_CM_S" << screenNumber;
     Atom cmAtom = XInternAtom(display(), ss.str().c_str(), False);
@@ -95,7 +95,7 @@ void Compositor::getCMSelectionOwnership(int screenNumber) throw(ConfigException
     Window curOwner = XGetSelectionOwner(display(), cmAtom);
     if (curOwner != None) {
         // TODO: More detailed message - what is the other program?
-        throw ConfigException("Another compositing manager is running.");
+        throw InitException("Another compositing manager is running.");
     }
 
     // TODO: Better way of obtaining program's name in SetWMProperties.
@@ -105,7 +105,7 @@ void Compositor::getCMSelectionOwnership(int screenNumber) throw(ConfigException
 }
 
 // Initializes X's extensions.
-void Compositor::initAllExtensions() throw(ConfigException) {
+void Compositor::initAllExtensions() throw(InitException) {
     if (m_renderingMode == RM_OpenGL) {
         initExtension("GLX", &glXQueryExtension, &glXQueryVersion, 1, 4, &m_glxEventBase, &m_glxErrorBase);
         initExtension("XComposite", &XCompositeQueryExtension, &XCompositeQueryVersion, 0, 3, &m_compositeEventBase, &m_compositeErrorBase);
@@ -113,34 +113,34 @@ void Compositor::initAllExtensions() throw(ConfigException) {
         initExtension("XFixes", &XFixesQueryExtension, &XFixesQueryVersion, 2, 0, &m_fixesEventBase, &m_fixesErrorBase);
         initExtension("XShape", &XShapeQueryExtension, &XShapeQueryVersion, 1, 1, &m_shapeEventBase, &m_shapeErrorBase);
     } else if (m_renderingMode == RM_ServerAuto) {
-        initExtension("XComposite", &XCompositeQueryExtension, &XCompositeQueryVersion, 0, 2, &m_compositeEventBase, &m_compositeErrorBase);
+        initExtension("XComposite", &XCompositeQueryExtension, &XCompositeQueryVersion, 0, 1, &m_compositeEventBase, &m_compositeErrorBase);
     }
 }
 
 // Initializes a particular X server extension.
 void Compositor::initExtension(const char *extensionName, QueryExtensionFunction extensionFunc,
                                QueryVersionFunction versionFunc, const int minMajorVer, const int minMinorVer,
-                               int *eventBase, int *errorBase) throw(ConfigException) {
+                               int *eventBase, int *errorBase) throw(InitException) {
     int majorVer;
     int minorVer;
 
     if (!(*extensionFunc)(display(), eventBase, errorBase)) {
         std::stringstream ss;
         ss << extensionName << " extension is not present.";
-        throw ConfigException(ss.str());
+        throw InitException(ss.str());
     }
 
     if (!(*versionFunc)(display(), &majorVer, &minorVer)) {
         std::stringstream ss;
         ss << "Could not query the version of " << extensionName << " extension.";
-        throw ConfigException(ss.str());
+        throw InitException(ss.str());
     }
 
     if ((majorVer < minMajorVer) || ((majorVer == minMajorVer) && (minorVer < minMinorVer))) {
         std::stringstream ss;
         ss << "Unsupported " << extensionName << " extension version (required >=" << minMajorVer
            << "." << minMinorVer << ", got " << majorVer << "." << minorVer << ").";
-        throw ConfigException(ss.str());
+        throw InitException(ss.str());
     }
 }
 

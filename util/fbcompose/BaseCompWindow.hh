@@ -53,10 +53,10 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        BaseCompWindow(Window windowXID);
+        BaseCompWindow(Window windowXID) throw();
 
         /** Destructor. */
-        virtual ~BaseCompWindow();
+        virtual ~BaseCompWindow() throw();
 
 
         //--- ACCESSORS --------------------------------------------------------

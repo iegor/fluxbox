@@ -36,7 +36,7 @@
 namespace FbCompositor {
 
     class BaseCompWindow;
-    class ConfigException;
+    class InitException;
     class OpenGLScreen;
     class OpenGLWindow;
 
@@ -100,25 +100,25 @@ namespace FbCompositor {
         //--- INITIALIZATION FUNCTIONS -----------------------------------------
 
         /** Checks for the appropriate OpenGL version. */
-        void checkOpenGLVersion();
+        void checkOpenGLVersion() throw(InitException);
 
         /** Initializes the rendering context. */
-        void initRenderingContext();
+        void initRenderingContext() throw(InitException);
 
         /** Initializes the rendering surface. */
-        void initRenderingSurface();
+        void initRenderingSurface() throw(InitException);
 
         /** Initializes shaders. */
-        void initShaders();
+        void initShaders() throw(InitException);
 
 
         //--- CONVENIENCE OPENGL WRAPPERS --------------------------------------
 
         /** Creates a shader. */
-        GLuint createShader(GLenum shaderType, GLint sourceLength, const GLchar *source);
+        GLuint createShader(GLenum shaderType, GLint sourceLength, const GLchar *source) throw(InitException);
 
         /** Creates a shader program. */
-        GLuint createShaderProgram(GLuint vertexShader, GLuint geometryShader, GLuint fragmentShader);
+        GLuint createShaderProgram(GLuint vertexShader, GLuint geometryShader, GLuint fragmentShader) throw(InitException);
 
 
         //--- RENDERING FUNCTIONS ----------------------------------------------

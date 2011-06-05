@@ -32,6 +32,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+
 #include <cstring>
 
 using namespace FbCompositor;
@@ -88,7 +89,7 @@ void OpenGLScreen::initWindows() {
 //--- INITIALIZATION FUNCTIONS -------------------------------------------------
 
 // Initializes the rendering context.
-void OpenGLScreen::initRenderingContext() {
+void OpenGLScreen::initRenderingContext() throw(InitException) {
     // Selecting the framebuffer configuration.
     static const int PREFERRED_FBCONFIG_ATTRIBUTES[] = {
         GLX_RENDER_TYPE, GLX_RGBA_BIT,
@@ -104,14 +105,14 @@ void OpenGLScreen::initRenderingContext() {
     GLXFBConfig *fbConfigs = glXChooseFBConfig(display(), screenNumber(), PREFERRED_FBCONFIG_ATTRIBUTES, &nConfigs);
     if (!fbConfigs) {
         // TODO: Better failure handling (i.e. fallback configurations).
-        throw ConfigException("Screen does not support the required GLXFBConfig.");
+        throw InitException("Screen does not support the required GLXFBConfig.");
     }
     m_fbConfig = fbConfigs[0];
 
     // Creating the GLX rendering context.
     m_glxContext = glXCreateNewContext(display(), m_fbConfig, GLX_RGBA_TYPE, NULL, True);
     if (!m_glxContext) {
-        throw ConfigException("Cannot create the OpenGL rendering context.");
+        throw InitException("Cannot create the OpenGL rendering context.");
     }
     glXMakeCurrent(display(), m_glxRenderingWindow, m_glxContext);
 
@@ -120,19 +121,19 @@ void OpenGLScreen::initRenderingContext() {
     if(glewErr != GLEW_OK) {
         std::stringstream ss;
         ss << "GLEW Error: " << (const char*)(glewGetErrorString(glewErr));
-        throw ConfigException(ss.str().c_str());
+        throw InitException(ss.str().c_str());
     }
 }
 
 // Checks for the appropriate OpenGL version.
-void OpenGLScreen::checkOpenGLVersion() {
+void OpenGLScreen::checkOpenGLVersion() throw(InitException) {
     if (!GLEW_VERSION_2_1) {
-        throw ConfigException("OpenGL 2.1 not available.");
+        throw InitException("OpenGL 2.1 not available.");
     }
 }
 
 // Initializes the rendering surface.
-void OpenGLScreen::initRenderingSurface() {
+void OpenGLScreen::initRenderingSurface() throw(InitException) {
     // Creating an X window for rendering.
     Window compOverlay = XCompositeGetOverlayWindow(display(), rootWindow().window());
 
@@ -157,12 +158,12 @@ void OpenGLScreen::initRenderingSurface() {
     // Creating a GLX handle for the above window.
     m_glxRenderingWindow = glXCreateWindow(display(), m_fbConfig, m_renderingWindow, NULL);
     if (!m_glxRenderingWindow) {
-        throw ConfigException("Cannot create the rendering surface.");
+        throw InitException("Cannot create the rendering surface.");
     }
 }
 
 // Initializes shaders.
-void OpenGLScreen::initShaders() {
+void OpenGLScreen::initShaders() throw(InitException) {
     // Vertex shader source code (TODO: move somewhere else when everything is working).
     GLchar vShaderSource[] =
         "#version 120\n"
@@ -200,7 +201,7 @@ void OpenGLScreen::initShaders() {
 //--- CONVENIENCE OPENGL WRAPPERS ----------------------------------------------
 
 // Creates a shader.
-GLuint OpenGLScreen::createShader(GLenum shaderType, GLint sourceLength, const GLchar *source) {
+GLuint OpenGLScreen::createShader(GLenum shaderType, GLint sourceLength, const GLchar *source) throw(InitException) {
     std::string shaderName;
     if (shaderType == GL_VERTEX_SHADER) {
         shaderName = "vertex";
@@ -209,14 +210,14 @@ GLuint OpenGLScreen::createShader(GLenum shaderType, GLint sourceLength, const G
     } else if (shaderType == GL_FRAGMENT_SHADER) {
         shaderName = "fragment";
     } else {
-        throw ConfigException("createShader() was given an invalid shader type.");
+        throw InitException("createShader() was given an invalid shader type.");
     }
 
     GLuint shader = glCreateShader(shaderType);
     if (!shader) {
         std::stringstream ss;
         ss << "Could not create " << shaderName << " shader.";
-        throw ConfigException(ss.str());
+        throw InitException(ss.str());
     }
 
     glShaderSource(shader, 1, &source, &sourceLength);
@@ -232,17 +233,17 @@ GLuint OpenGLScreen::createShader(GLenum shaderType, GLint sourceLength, const G
 
         std::stringstream ss;
         ss << "Error in compilation of the " << shaderName << " shader: " << (const char*)(infoLog);
-        throw ConfigException(ss.str());
+        throw InitException(ss.str());
     }
 
     return shader;
 }
 
 // Creates a shader program.
-GLuint OpenGLScreen::createShaderProgram(GLuint vertexShader, GLuint geometryShader, GLuint fragmentShader) {
+GLuint OpenGLScreen::createShaderProgram(GLuint vertexShader, GLuint geometryShader, GLuint fragmentShader) throw(InitException) {
     GLuint program = glCreateProgram();
     if (!program) {
-        throw ConfigException("Cannot create a shader program.");
+        throw InitException("Cannot create a shader program.");
     }
 
     if (vertexShader) {
@@ -266,7 +267,7 @@ GLuint OpenGLScreen::createShaderProgram(GLuint vertexShader, GLuint geometrySha
 
         std::stringstream ss;
         ss << "Error in linking of the shader program: " << (const char*)(infoLog);
-        throw ConfigException(ss.str());
+        throw InitException(ss.str());
     }
 
     return program;

@@ -25,12 +25,18 @@
 #define FBCOMPOSITOR_XRENDERAUTOWINDOW_HH
 
 #include "BaseCompWindow.hh"
+#include "Exceptions.hh"
 
 #include <GL/glew.h>
 #include <GL/gl.h>
 
 
 namespace FbCompositor {
+
+    class BaseCompWindow;
+    class OpenGLWindow;
+    class RuntimeException;
+
 
     /**
      * Manages windows in OpenGL rendering mode.
@@ -40,10 +46,10 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        OpenGLWindow(Window windowXID);
+        OpenGLWindow(Window windowXID) throw();
 
         /** Destructor. */
-        virtual ~OpenGLWindow();
+        virtual ~OpenGLWindow() throw();
 
 
         //--- ACCESSORS --------------------------------------------------------
@@ -64,10 +70,10 @@ namespace FbCompositor {
         //--- WINDOW UPDATE FUNCTIONS ------------------------------------------
 
         /** Update the appropriate window's arrays. */
-        void updateArrays();
+        void updateArrays() throw();
 
         /** Updates the window's contents. */
-        void updateContents();
+        void updateContents() throw(RuntimeException);
 
 
     private :

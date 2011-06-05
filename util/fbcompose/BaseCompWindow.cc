@@ -34,7 +34,7 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-BaseCompWindow::BaseCompWindow(Window windowXID) :
+BaseCompWindow::BaseCompWindow(Window windowXID) throw() :
     FbTk::FbWindow(windowXID) {
 
     XWindowAttributes xwa;
@@ -52,7 +52,7 @@ BaseCompWindow::BaseCompWindow(Window windowXID) :
 }
 
 // Destructor.
-BaseCompWindow::~BaseCompWindow() {
+BaseCompWindow::~BaseCompWindow() throw() {
     if (m_damage) {
         XDamageDestroy(display(), m_damage);
     }

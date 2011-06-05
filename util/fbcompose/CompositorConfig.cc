@@ -23,10 +23,6 @@
 
 #include "CompositorConfig.hh"
 
-#include <X11/Xlib.h>
-#include <X11/extensions/Xcomposite.h>
-#include <X11/extensions/Xdamage.h>
-
 using namespace FbCompositor;
 
 
@@ -39,4 +35,4 @@ CompositorConfig::CompositorConfig(int argc, char **argv) throw(ConfigException)
 }
 
 // Destructor.
-CompositorConfig::~CompositorConfig() {}
+CompositorConfig::~CompositorConfig() throw() {}

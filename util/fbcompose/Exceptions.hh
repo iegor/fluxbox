@@ -56,8 +56,8 @@ namespace FbCompositor {
     //--- DERIVED EXCEPTIONS ---------------------------------------------------
 
     /**
-     * This exception is thrown whenever an error occurs while processing the
-     * compositor's configuration data.
+     * This exception is thrown whenever an error condition is encountered
+     * when processing the configuration data.
      */
     class ConfigException : public CompositorException {
     public:
@@ -71,19 +71,33 @@ namespace FbCompositor {
 
 
     /**
-     * This exception is thrown whenever the an out of bounds index is supplied
-     * to a function.
+     * This exception is thrown whenever an error condition is encountered in
+     * initialization of compositor's components.
      */
-    class IndexOutOfBoundsException : public CompositorException {
+    class InitException : public CompositorException {
     public:
         /** Public constructor. */
-        IndexOutOfBoundsException(std::string errorMessage) throw() :
+        InitException(std::string errorMessage) throw() :
             CompositorException(errorMessage) {}
 
         /** Destructor. */
-        virtual ~IndexOutOfBoundsException() throw() {}
+        virtual ~InitException() throw() {}
     };
 
+
+    /**
+     * This exception is thrown whenever an error condition is encountered when
+     * the compositor has been initialized and is running.
+     */
+    class RuntimeException : public CompositorException {
+    public:
+        /** Public constructor. */
+        RuntimeException(std::string errorMessage) throw() :
+            CompositorException(errorMessage) {}
+
+        /** Destructor. */
+        virtual ~RuntimeException() throw() {}
+    };
 }
 
 #endif  // FBCOMPOSITOR_EXCEPTIONS_HH

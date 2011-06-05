@@ -50,7 +50,7 @@ namespace FbCompositor {
         CompositorConfig(int argc, char **argv) throw(ConfigException);
 
         /** Destructor. */
-        ~CompositorConfig();
+        ~CompositorConfig() throw();
 
 
         //--- ACCESSORS --------------------------------------------------------
