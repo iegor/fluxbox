@@ -102,6 +102,8 @@ void Compositor::getCMSelectionOwnership(int screenNumber) throw(InitException) 
     curOwner = XCreateSimpleWindow(display(), XRootWindow(display(), screenNumber), -10, -10, 1, 1, 0, None, None);
     XmbSetWMProperties(display(), curOwner, "fbcompose", "fbcompose", NULL, 0, NULL, NULL, NULL);
     XSetSelectionOwner(display(), cmAtom, curOwner, CurrentTime);
+
+    m_screens[screenNumber]->addWindowToIgnoreList(curOwner);
 }
 
 // Initializes X's extensions.

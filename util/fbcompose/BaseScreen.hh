@@ -90,6 +90,9 @@ namespace FbCompositor {
 
         //--- WINDOW MANIPULATION ----------------------------------------------
 
+        /** Adds a window to ignore list, stops tracking it if it is being tracked. */
+        void addWindowToIgnoreList(Window window);
+
         /** Creates a new window on this screen. */
         void createWindow(Window window);
 
@@ -182,6 +185,9 @@ namespace FbCompositor {
 
         /** Screen's windows. */
         std::list<BaseCompWindow*> m_windows;
+
+        /** Windows that should be ignored. */
+        std::vector<Window> m_ignoreList;
 
 
         /** XID of the active window. */

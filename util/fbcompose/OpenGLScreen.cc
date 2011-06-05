@@ -155,6 +155,9 @@ void OpenGLScreen::initRenderingSurface() throw(InitException) {
     XFixesSetWindowShapeRegion(display(), m_renderingWindow, ShapeInput, 0, 0, emptyRegion);
     XFixesDestroyRegion(display(), emptyRegion);
 
+    addWindowToIgnoreList(compOverlay);
+    addWindowToIgnoreList(m_renderingWindow);
+
     // Creating a GLX handle for the above window.
     m_glxRenderingWindow = glXCreateWindow(display(), m_fbConfig, m_renderingWindow, NULL);
     if (!m_glxRenderingWindow) {
@@ -337,12 +340,7 @@ void OpenGLScreen::renderScreen() {
 
 // A function to render a particular window onto the screen.
 void OpenGLScreen::renderWindow(OpenGLWindow &window) {
-    // Temporary hack until we stop tracking windows belonging to the compositor.
-    if (window.window() == 102) {
-        return;
-    }
-
-    // TODO: Fix the content refresh issue.
+    // TODO: Still needed...
     window.updateContents();
 
     // Load window position vertex array.

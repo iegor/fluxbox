@@ -27,6 +27,7 @@
 
 #include <X11/extensions/Xcomposite.h>
 
+#include <algorithm>
 #include <ostream>
 
 using namespace FbCompositor;
@@ -72,8 +73,20 @@ void BaseScreen::initWindows() { }
 
 //--- WINDOW MANIPULATION ------------------------------------------------------
 
+// Adds a window to ignore list, stops tracking it if it is being tracked.
+void BaseScreen::addWindowToIgnoreList(Window window) {
+    if (find(m_ignoreList.begin(), m_ignoreList.end(), window) == m_ignoreList.end()) {
+        destroyWindow(window);
+        m_ignoreList.push_back(window);
+    }
+}
+
 // Creates a new window and inserts it into the list of windows.
 void BaseScreen::createWindow(Window window) {
+    if (find(m_ignoreList.begin(), m_ignoreList.end(), window) != m_ignoreList.end()) {
+        return;
+    }
+
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
     if (it == m_windows.end()) {
         BaseCompWindow *newWindow = createWindowObject(window);
@@ -240,10 +253,18 @@ std::ostream &FbCompositor::operator<<(std::ostream& out, const BaseScreen& s) {
         << "  Windows" << std::endl;
 
     std::list<BaseCompWindow*>::const_iterator it = s.m_windows.begin();
-    while(it != s.m_windows.end()) {
+    while (it != s.m_windows.end()) {
         out << "    " << **it << std::endl;
         it++;
     }
+
+    out << "  Ignore list" << std::endl << "    ";
+    std::vector<Window>::const_iterator it2 = s.m_ignoreList.begin();
+    while (it2 != s.m_ignoreList.end()) {
+        out << *it2 << " ";
+        it2++;
+    }
+    out << std::endl;
 
     return out;
 }
