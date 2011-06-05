@@ -246,9 +246,9 @@ int FbCompositor::handleXError(Display *display, XErrorEvent *error) {
     char errorText[ERROR_TEXT_LENGTH];
     XGetErrorText(display, error->error_code, errorText, ERROR_TEXT_LENGTH);
 
-    std::cerr << "X Error: " << errorText << " (errorCode=" << error->error_code
-              << ", majorOpCode=" << error->request_code << ", minorOpCode="
-              << error->minor_code << ", resourceId=" << std::hex << error->resourceid
+    std::cerr << "X Error: " << errorText << " (errorCode=" << int(error->error_code)
+              << ", majorOpCode=" << int(error->request_code) << ", minorOpCode="
+              << int(error->minor_code) << ", resourceId=" << std::hex << error->resourceid
               << std::dec << ")" << std::endl;
     return 0;
 }

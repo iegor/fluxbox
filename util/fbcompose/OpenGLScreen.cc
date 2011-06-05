@@ -45,8 +45,8 @@ OpenGLScreen::OpenGLScreen(int screenNumber) :
     BaseScreen(screenNumber) {
 
     initRenderingContext();
-    checkOpenGLVersion();
     initRenderingSurface();
+    initGlew();
     initShaders();
 }
 
@@ -114,22 +114,6 @@ void OpenGLScreen::initRenderingContext() throw(InitException) {
     if (!m_glxContext) {
         throw InitException("Cannot create the OpenGL rendering context.");
     }
-    glXMakeCurrent(display(), m_glxRenderingWindow, m_glxContext);
-
-    // Initialize GLEW.
-    GLenum glewErr = glewInit();
-    if(glewErr != GLEW_OK) {
-        std::stringstream ss;
-        ss << "GLEW Error: " << (const char*)(glewGetErrorString(glewErr));
-        throw InitException(ss.str().c_str());
-    }
-}
-
-// Checks for the appropriate OpenGL version.
-void OpenGLScreen::checkOpenGLVersion() throw(InitException) {
-    if (!GLEW_VERSION_2_1) {
-        throw InitException("OpenGL 2.1 not available.");
-    }
 }
 
 // Initializes the rendering surface.
@@ -164,6 +148,25 @@ void OpenGLScreen::initRenderingSurface() throw(InitException) {
         throw InitException("Cannot create the rendering surface.");
     }
 }
+
+// Initializes GLEW.
+void OpenGLScreen::initGlew() throw(InitException) {
+    glXMakeCurrent(display(), m_glxRenderingWindow, m_glxContext);
+
+    // Initialize GLEW.
+    GLenum glewErr = glewInit();
+    if(glewErr != GLEW_OK) {
+        std::stringstream ss;
+        ss << "GLEW Error: " << (const char*)(glewGetErrorString(glewErr));
+        throw InitException(ss.str().c_str());
+    }
+
+    // Check for an appropriate OpenGL version.
+    if (!GLEW_VERSION_2_1) {
+        throw InitException("OpenGL 2.1 not available.");
+    }
+}
+
 
 // Initializes shaders.
 void OpenGLScreen::initShaders() throw(InitException) {

@@ -99,8 +99,8 @@ namespace FbCompositor {
 
         //--- INITIALIZATION FUNCTIONS -----------------------------------------
 
-        /** Checks for the appropriate OpenGL version. */
-        void checkOpenGLVersion() throw(InitException);
+        /** Initializes GLEW. */
+        void initGlew() throw(InitException);
 
         /** Initializes the rendering context. */
         void initRenderingContext() throw(InitException);

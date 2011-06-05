@@ -102,7 +102,9 @@ void OpenGLWindow::updateArrays() throw() {
 // Updates the window's contents.
 void OpenGLWindow::updateContents() throw(RuntimeException) {
     BaseCompWindow::updateContents();
+    XFlush(display());
 
+    // TODO: Proper window updates ought to fix some of the problems here.
     if (contents() != None) {
         glBindTexture(GL_TEXTURE_2D, contentTexture());
 
