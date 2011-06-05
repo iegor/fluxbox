@@ -46,6 +46,12 @@ namespace FbCompositor {
     /** Minimum minor version for the XDamage extension. */
     const int MIN_XDAMAGE_MINOR_VERSION = 0;
 
+    /** Minimum major version for the XFixes extension. */
+    const int MIN_XFIXES_MAJOR_VERSION = 2;
+
+    /** Minimum minor version for the XFixes extension. */
+    const int MIN_XFIXES_MINOR_VERSION = 0;
+
 
     //--- ENUMERATIONS ---------------------------------------------------------
 

@@ -27,6 +27,7 @@
 #include <GL/glx.h>
 #include <X11/extensions/Xcomposite.h>
 #include <X11/extensions/Xdamage.h>
+#include <X11/extensions/Xfixes.h>
 #include <X11/Xutil.h>
 
 #include <iostream>
@@ -147,6 +148,20 @@ void Compositor::initXExtensions() throw(ConfigException) {
     if ((damageMajor < MIN_XDAMAGE_MAJOR_VERSION)
             || ((damageMajor == MIN_XDAMAGE_MAJOR_VERSION) && (damageMinor < MIN_XDAMAGE_MINOR_VERSION))) {
         throw ConfigException("Unsupported XDamage extension version.");
+    }
+
+    // XFixes extension.
+    if (!XFixesQueryExtension(display(), &m_fixesEventBase, &m_fixesErrorBase)) {
+        throw ConfigException("XFixes extension not available.");
+    }
+
+    int fixesMajor;
+    int fixesMinor;
+    XFixesQueryVersion(display(), &fixesMajor, &fixesMinor);
+
+    if ((fixesMajor < MIN_XDAMAGE_MAJOR_VERSION)
+            || ((fixesMajor == MIN_XDAMAGE_MAJOR_VERSION) && (fixesMinor < MIN_XDAMAGE_MINOR_VERSION))) {
+        throw ConfigException("Unsupported XFixes extension version.");
     }
 }
 

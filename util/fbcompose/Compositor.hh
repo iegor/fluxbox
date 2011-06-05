@@ -124,6 +124,12 @@ namespace FbCompositor {
 
         /** Error base of the GLX extension. */
         int m_glxErrorBase;
+
+        /** Event base of the X Fixes extension. */
+        int m_fixesEventBase;
+
+        /** Error base of the X Fixes extension. */
+        int m_fixesErrorBase;
     };
 
 

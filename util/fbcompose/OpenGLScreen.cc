@@ -24,7 +24,9 @@
 #include "OpenGLScreen.hh"
 #include "OpenGLWindow.hh"
 
+#include <X11/extensions/shape.h>
 #include <X11/extensions/Xcomposite.h>
+#include <X11/extensions/Xfixes.h>
 
 #include <list>
 #include <iostream>
@@ -145,6 +147,12 @@ void OpenGLScreen::initRenderingSurface() {
                                       visualInfo->depth, InputOutput, visualInfo->visual, waMask, &wa);
     XmbSetWMProperties(display(), m_renderingWindow, "fbcompose", "fbcompose", NULL, 0, NULL, NULL, NULL);
     XMapWindow(display(), m_renderingWindow);
+
+    // Make sure the overlays do not consume any input events.
+    XserverRegion emptyRegion = XFixesCreateRegion(display(), NULL, 0);
+    XFixesSetWindowShapeRegion(display(), compOverlay, ShapeInput, 0, 0, emptyRegion);
+    XFixesSetWindowShapeRegion(display(), m_renderingWindow, ShapeInput, 0, 0, emptyRegion);
+    XFixesDestroyRegion(display(), emptyRegion);
 
     // Creating a GLX handle for the above window.
     m_glxRenderingWindow = glXCreateWindow(display(), m_fbConfig, m_renderingWindow, NULL);
