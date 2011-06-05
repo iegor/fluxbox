@@ -90,12 +90,12 @@ namespace FbCompositor {
         void getCMSelectionOwnership(int screenNumber) throw(ConfigException);
 
         /** Initializes all relevant X's extensions. */
-        void initExtensions() throw(ConfigException);
+        void initAllExtensions() throw(ConfigException);
 
         /** Initializes a particular X server extension. */
-        void initXExtension(const char *extensionName, QueryExtensionFunction extensionFunc,
-                            QueryVersionFunction versionFunc, const int minMajorVer, const int minMinorVer,
-                            int *eventBase, int *errorBase) throw(ConfigException);
+        void initExtension(const char *extensionName, QueryExtensionFunction extensionFunc,
+                           QueryVersionFunction versionFunc, const int minMajorVer, const int minMinorVer,
+                           int *eventBase, int *errorBase) throw(ConfigException);
 
 
         //--- COMPOSITOR VARIABLES ---------------------------------------------

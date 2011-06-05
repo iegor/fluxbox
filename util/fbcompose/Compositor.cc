@@ -47,7 +47,7 @@ Compositor::Compositor(const CompositorConfig &config) throw(ConfigException) :
 
     XSetErrorHandler(&handleXError);
 
-    initExtensions();
+    initAllExtensions();
 
     // Set up screens.
     int screenCount = XScreenCount(display());
@@ -69,8 +69,12 @@ Compositor::Compositor(const CompositorConfig &config) throw(ConfigException) :
 
         getCMSelectionOwnership(i);
     }
-    for (int i = 0; i < screenCount; i++) {
-        m_screens[i]->initWindows();
+
+    // Set up windows.
+    if (m_renderingMode != RM_ServerAuto) {
+        for (size_t i = 0; i < m_screens.size(); i++) {
+            m_screens[i]->initWindows();
+        }
     }
 
     XFlush(display());
@@ -95,28 +99,28 @@ void Compositor::getCMSelectionOwnership(int screenNumber) throw(ConfigException
     }
 
     // TODO: Better way of obtaining program's name in SetWMProperties.
-    curOwner = XCreateSimpleWindow(display(), XRootWindow(display(), screenNumber), 0, 0, 1, 1, 0, None, None);
+    curOwner = XCreateSimpleWindow(display(), XRootWindow(display(), screenNumber), -10, -10, 1, 1, 0, None, None);
     XmbSetWMProperties(display(), curOwner, "fbcompose", "fbcompose", NULL, 0, NULL, NULL, NULL);
     XSetSelectionOwner(display(), cmAtom, curOwner, CurrentTime);
 }
 
 // Initializes X's extensions.
-void Compositor::initExtensions() throw(ConfigException) {
+void Compositor::initAllExtensions() throw(ConfigException) {
     if (m_renderingMode == RM_OpenGL) {
-        initXExtension("GLX", &glXQueryExtension, &glXQueryVersion, 1, 4, &m_glxEventBase, &m_glxErrorBase);
-        initXExtension("XComposite", &XCompositeQueryExtension, &XCompositeQueryVersion, 0, 3, &m_compositeEventBase, &m_compositeErrorBase);
-        initXExtension("XDamage", &XDamageQueryExtension, &XDamageQueryVersion, 1, 0, &m_damageEventBase, &m_damageErrorBase);
-        initXExtension("XFixes", &XFixesQueryExtension, &XFixesQueryVersion, 2, 0, &m_fixesEventBase, &m_fixesErrorBase);
-        initXExtension("XShape", &XShapeQueryExtension, &XShapeQueryVersion, 1, 1, &m_shapeEventBase, &m_shapeErrorBase);
+        initExtension("GLX", &glXQueryExtension, &glXQueryVersion, 1, 4, &m_glxEventBase, &m_glxErrorBase);
+        initExtension("XComposite", &XCompositeQueryExtension, &XCompositeQueryVersion, 0, 3, &m_compositeEventBase, &m_compositeErrorBase);
+        initExtension("XDamage", &XDamageQueryExtension, &XDamageQueryVersion, 1, 0, &m_damageEventBase, &m_damageErrorBase);
+        initExtension("XFixes", &XFixesQueryExtension, &XFixesQueryVersion, 2, 0, &m_fixesEventBase, &m_fixesErrorBase);
+        initExtension("XShape", &XShapeQueryExtension, &XShapeQueryVersion, 1, 1, &m_shapeEventBase, &m_shapeErrorBase);
     } else if (m_renderingMode == RM_ServerAuto) {
-        initXExtension("XComposite", &XCompositeQueryExtension, &XCompositeQueryVersion, 0, 2, &m_compositeEventBase, &m_compositeErrorBase);
+        initExtension("XComposite", &XCompositeQueryExtension, &XCompositeQueryVersion, 0, 2, &m_compositeEventBase, &m_compositeErrorBase);
     }
 }
 
 // Initializes a particular X server extension.
-void Compositor::initXExtension(const char *extensionName, QueryExtensionFunction extensionFunc,
-                                QueryVersionFunction versionFunc, const int minMajorVer, const int minMinorVer,
-                                int *eventBase, int *errorBase) throw(ConfigException) {
+void Compositor::initExtension(const char *extensionName, QueryExtensionFunction extensionFunc,
+                               QueryVersionFunction versionFunc, const int minMajorVer, const int minMinorVer,
+                               int *eventBase, int *errorBase) throw(ConfigException) {
     int majorVer;
     int minorVer;
 
