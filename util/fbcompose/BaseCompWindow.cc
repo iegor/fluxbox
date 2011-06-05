@@ -48,6 +48,7 @@ BaseCompWindow::BaseCompWindow(Window windowXID) throw() :
     } else {
         m_damage = 0;
     }
+    m_contents = None;
     m_isDamaged = false;
 }
 

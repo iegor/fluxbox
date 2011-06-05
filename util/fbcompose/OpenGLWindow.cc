@@ -103,13 +103,15 @@ void OpenGLWindow::updateArrays() throw() {
 void OpenGLWindow::updateContents() throw(RuntimeException) {
     BaseCompWindow::updateContents();
 
-    glBindTexture(GL_TEXTURE_2D, contentTexture());
+    if (contents() != None) {
+        glBindTexture(GL_TEXTURE_2D, contentTexture());
 
-    XImage *image = XGetImage(display(), contents(), 0, 0, realWidth(), realHeight(), AllPlanes, ZPixmap);
-    if (!image) {
-        throw RuntimeException("Cannot create window's XImage.");
+        XImage *image = XGetImage(display(), contents(), 0, 0, realWidth(), realHeight(), AllPlanes, ZPixmap);
+        if (!image) {
+            throw RuntimeException("Cannot create window's XImage.");
+        }
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, realWidth(), realHeight(), 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)(&(image->data[0])));
+        XDestroyImage(image);
     }
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, realWidth(), realHeight(), 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)(&(image->data[0])));
-    XDestroyImage(image);
 }
