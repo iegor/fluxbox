@@ -104,12 +104,12 @@ void OpenGLWindow::updateContents() throw(RuntimeException) {
     BaseCompWindow::updateContents();
     XFlush(display());
 
-    // TODO: Proper window updates ought to fix some of the problems here.
     if (contents() != None) {
         glBindTexture(GL_TEXTURE_2D, contentTexture());
 
         XImage *image = XGetImage(display(), contents(), 0, 0, realWidth(), realHeight(), AllPlanes, ZPixmap);
         if (!image) {
+            // TODO: There are still crashes here.
             throw RuntimeException("Cannot create window's XImage.");
         }
 
