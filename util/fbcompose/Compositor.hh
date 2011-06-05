@@ -89,11 +89,13 @@ namespace FbCompositor {
         /** Acquire the ownership of compositing manager selections. */
         void getCMSelectionOwnership(int screenNumber) throw(ConfigException);
 
-        /** Initializes GLX extension. */
-        void initGLX() throw(ConfigException);
+        /** Initializes all relevant X's extensions. */
+        void initExtensions() throw(ConfigException);
 
-        /** Initializes X's extensions. */
-        void initXExtensions() throw(ConfigException);
+        /** Initializes a particular X server extension. */
+        void initXExtension(const char *extensionName, QueryExtensionFunction extensionFunc,
+                            QueryVersionFunction versionFunc, const int minMajorVer, const int minMinorVer,
+                            int *eventBase, int *errorBase) throw(ConfigException);
 
 
         //--- COMPOSITOR VARIABLES ---------------------------------------------
@@ -130,6 +132,12 @@ namespace FbCompositor {
 
         /** Error base of the X Fixes extension. */
         int m_fixesErrorBase;
+
+        /** Event base of the X Shape extension. */
+        int m_shapeEventBase;
+
+        /** Error base of the X Shape extension. */
+        int m_shapeErrorBase;
     };
 
 

@@ -25,6 +25,7 @@
 #include "OpenGLScreen.hh"
 
 #include <GL/glx.h>
+#include <X11/extensions/shape.h>
 #include <X11/extensions/Xcomposite.h>
 #include <X11/extensions/Xdamage.h>
 #include <X11/extensions/Xfixes.h>
@@ -46,12 +47,9 @@ Compositor::Compositor(const CompositorConfig &config) throw(ConfigException) :
 
     XSetErrorHandler(&handleXError);
 
-    initXExtensions();
-    if (m_renderingMode == RM_OpenGL) {
-        initGLX();
-    }
+    initExtensions();
 
-    // Setting up screens.
+    // Set up screens.
     int screenCount = XScreenCount(display());
     m_screens.reserve(screenCount);
     for (int i = 0; i < screenCount; i++) {
@@ -71,7 +69,6 @@ Compositor::Compositor(const CompositorConfig &config) throw(ConfigException) :
 
         getCMSelectionOwnership(i);
     }
-
     for (int i = 0; i < screenCount; i++) {
         m_screens[i]->initWindows();
     }
@@ -103,68 +100,45 @@ void Compositor::getCMSelectionOwnership(int screenNumber) throw(ConfigException
     XSetSelectionOwner(display(), cmAtom, curOwner, CurrentTime);
 }
 
-// Initializes the GLX extension.
-void Compositor::initGLX() throw(ConfigException) {
-    // GLX extension.
-    if (!glXQueryExtension(display(), &m_glxEventBase, &m_glxErrorBase)) {
-        throw ConfigException("GLX extension not available.");
-    }
-
-    int glxMajor;
-    int glxMinor;
-    glXQueryVersion(display(), &glxMajor, &glxMinor);
-
-    if ((glxMajor < MIN_XCOMPOSITE_MAJOR_VERSION)
-            || ((glxMajor == MIN_XCOMPOSITE_MAJOR_VERSION) && (glxMinor < MIN_XCOMPOSITE_MINOR_VERSION))) {
-        throw ConfigException("Unsupported GLX extension version.");
-    }
-}
-
 // Initializes X's extensions.
-void Compositor::initXExtensions() throw(ConfigException) {
-    // XComposite extension.
-    if (!XCompositeQueryExtension(display(), &m_compositeEventBase, &m_compositeErrorBase)) {
-        throw ConfigException("XComposite extension not available.");
-    }
-
-    int compositeMajor;
-    int compositeMinor;
-    XCompositeQueryVersion(display(), &compositeMajor, &compositeMinor);
-
-    if ((compositeMajor < MIN_XCOMPOSITE_MAJOR_VERSION)
-            || ((compositeMajor == MIN_XCOMPOSITE_MAJOR_VERSION) && (compositeMinor < MIN_XCOMPOSITE_MINOR_VERSION))) {
-        throw ConfigException("Unsupported XComposite extension version.");
-    }
-
-    // XDamage extension.
-    if (!XDamageQueryExtension(display(), &m_damageEventBase, &m_damageErrorBase)) {
-        throw ConfigException("XDamage extension not available.");
-    }
-
-    int damageMajor;
-    int damageMinor;
-    XDamageQueryVersion(display(), &damageMajor, &damageMinor);
-
-    if ((damageMajor < MIN_XDAMAGE_MAJOR_VERSION)
-            || ((damageMajor == MIN_XDAMAGE_MAJOR_VERSION) && (damageMinor < MIN_XDAMAGE_MINOR_VERSION))) {
-        throw ConfigException("Unsupported XDamage extension version.");
-    }
-
-    // XFixes extension.
-    if (!XFixesQueryExtension(display(), &m_fixesEventBase, &m_fixesErrorBase)) {
-        throw ConfigException("XFixes extension not available.");
-    }
-
-    int fixesMajor;
-    int fixesMinor;
-    XFixesQueryVersion(display(), &fixesMajor, &fixesMinor);
-
-    if ((fixesMajor < MIN_XDAMAGE_MAJOR_VERSION)
-            || ((fixesMajor == MIN_XDAMAGE_MAJOR_VERSION) && (fixesMinor < MIN_XDAMAGE_MINOR_VERSION))) {
-        throw ConfigException("Unsupported XFixes extension version.");
+void Compositor::initExtensions() throw(ConfigException) {
+    if (m_renderingMode == RM_OpenGL) {
+        initXExtension("GLX", &glXQueryExtension, &glXQueryVersion, 1, 4, &m_glxEventBase, &m_glxErrorBase);
+        initXExtension("XComposite", &XCompositeQueryExtension, &XCompositeQueryVersion, 0, 3, &m_compositeEventBase, &m_compositeErrorBase);
+        initXExtension("XDamage", &XDamageQueryExtension, &XDamageQueryVersion, 1, 0, &m_damageEventBase, &m_damageErrorBase);
+        initXExtension("XFixes", &XFixesQueryExtension, &XFixesQueryVersion, 2, 0, &m_fixesEventBase, &m_fixesErrorBase);
+        initXExtension("XShape", &XShapeQueryExtension, &XShapeQueryVersion, 1, 1, &m_shapeEventBase, &m_shapeErrorBase);
+    } else if (m_renderingMode == RM_ServerAuto) {
+        initXExtension("XComposite", &XCompositeQueryExtension, &XCompositeQueryVersion, 0, 2, &m_compositeEventBase, &m_compositeErrorBase);
     }
 }
 
+// Initializes a particular X server extension.
+void Compositor::initXExtension(const char *extensionName, QueryExtensionFunction extensionFunc,
+                                QueryVersionFunction versionFunc, const int minMajorVer, const int minMinorVer,
+                                int *eventBase, int *errorBase) throw(ConfigException) {
+    int majorVer;
+    int minorVer;
+
+    if (!(*extensionFunc)(display(), eventBase, errorBase)) {
+        std::stringstream ss;
+        ss << extensionName << " extension is not present.";
+        throw ConfigException(ss.str());
+    }
+
+    if (!(*versionFunc)(display(), &majorVer, &minorVer)) {
+        std::stringstream ss;
+        ss << "Could not query the version of " << extensionName << " extension.";
+        throw ConfigException(ss.str());
+    }
+
+    if ((majorVer < minMajorVer) || ((majorVer == minMajorVer) && (minorVer < minMinorVer))) {
+        std::stringstream ss;
+        ss << "Unsupported " << extensionName << " extension version (required >=" << minMajorVer
+           << "." << minMinorVer << ", got " << majorVer << "." << minorVer << ").";
+        throw ConfigException(ss.str());
+    }
+}
 
 //--- EVENT LOOP ---------------------------------------------------------------
 

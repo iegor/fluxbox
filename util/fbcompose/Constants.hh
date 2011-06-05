@@ -24,39 +24,24 @@
 #ifndef FBCOMPOSITOR_CONSTANTS_HH
 #define FBCOMPOSITOR_CONSTANTS_HH
 
+#include <X11/Xlib.h>
+
+
 namespace FbCompositor {
-
-    //--- MINIMUM EXTENSION VERSIONS -------------------------------------------
-
-    /** Minimum major version for the GLX extension. */
-    const int MIN_GLX_MAJOR_VERSION = 1;
-
-    /** Minimum minor version for the GLX extension. */
-    const int MIN_GLX_MINOR_VERSION = 4;
-
-    /** Minimum major version for the XComposite extension. */
-    const int MIN_XCOMPOSITE_MAJOR_VERSION = 0;
-
-    /** Minimum minor version for the XComposite extension. */
-    const int MIN_XCOMPOSITE_MINOR_VERSION = 3;
-
-    /** Minimum major version for the XDamage extension. */
-    const int MIN_XDAMAGE_MAJOR_VERSION = 1;
-
-    /** Minimum minor version for the XDamage extension. */
-    const int MIN_XDAMAGE_MINOR_VERSION = 0;
-
-    /** Minimum major version for the XFixes extension. */
-    const int MIN_XFIXES_MAJOR_VERSION = 2;
-
-    /** Minimum minor version for the XFixes extension. */
-    const int MIN_XFIXES_MINOR_VERSION = 0;
-
 
     //--- ENUMERATIONS ---------------------------------------------------------
 
     /** Rendering mode enumeration. */
     enum RenderingMode { RM_OpenGL, RM_XRender, RM_ServerAuto };
+
+
+    //--- TYPEDEFS -------------------------------------------------------------
+
+    /** A pointer to an X query extension function. */
+    typedef Bool (*QueryExtensionFunction)(Display*, int*, int*);
+
+    /** A pointer to an X query version function. */
+    typedef Status (*QueryVersionFunction)(Display*, int*, int*);
 
 }
 
