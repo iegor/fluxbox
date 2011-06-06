@@ -27,6 +27,7 @@
 #include <X11/Xatom.h>
 
 #include <ostream>
+#include <iostream>
 
 using namespace FbCompositor;
 
@@ -53,11 +54,7 @@ BaseCompWindow::BaseCompWindow(Window windowXID) throw() :
 }
 
 // Destructor.
-BaseCompWindow::~BaseCompWindow() throw() {
-    if (m_damage) {
-        XDamageDestroy(display(), m_damage);
-    }
-}
+BaseCompWindow::~BaseCompWindow() throw() { }
 
 
 //--- PROPERTY ACCESS ----------------------------------------------------------
@@ -98,7 +95,6 @@ std::vector<Window> BaseCompWindow::windowProperty(Atom propertyAtom) {
 // Marks the window as damaged.
 // TODO: Do we need anything more sophisticated than this?
 void BaseCompWindow::setDamaged() throw() {
-    if (!m_damage) return;
     m_isDamaged = true;
 }
 
@@ -114,13 +110,24 @@ void BaseCompWindow::setUnmapped() throw() {
 
 // Updates the window's contents.
 void BaseCompWindow::updateContents() {
+    // FIXME: Sometimes, XCompositeNameWindowPixmap fails with a BadWindow
+    // error for some reason, whenever one destroys a window. I do not yet know
+    // what invalidates the window() XID, but XCompositeNameWindowPixmap
+    // updates the m_contents pixmap, so this error condition cannot be caught
+    // later. My guess is that the X server simply destroys the window before
+    // the compositor gets a chance to process the two prior damage and unmap
+    // events.
+
     if (m_contents) {
         XFreePixmap(display(), m_contents);
+        m_contents = None;
     }
     m_contents = XCompositeNameWindowPixmap(display(), window());
 
-    XDamageSubtract(display(), m_damage, None, None);
-    m_isDamaged = false;
+    if (m_contents) {
+        XDamageSubtract(display(), m_damage, None, None);
+        m_isDamaged = false;
+    }
 }
 
 

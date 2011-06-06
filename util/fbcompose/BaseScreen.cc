@@ -118,6 +118,12 @@ void BaseScreen::destroyWindow(Window window) {
     }
 }
 
+// Checks whether a given window is managed by the current screen.
+bool BaseScreen::isWindowManaged(Window window) {
+    std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
+    return (it != m_windows.end());
+}
+
 // Maps a window on this screen.
 void BaseScreen::mapWindow(Window window) {
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);

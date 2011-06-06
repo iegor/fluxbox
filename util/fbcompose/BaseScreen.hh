@@ -102,6 +102,9 @@ namespace FbCompositor {
         /** Destroys a window on this screen. */
         void destroyWindow(Window window);
 
+        /** Checks whether a given window is managed by the current screen. */
+        bool isWindowManaged(Window window);
+
         /** Maps a window on this screen. */
         void mapWindow(Window window);
 

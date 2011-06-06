@@ -99,6 +99,12 @@ namespace FbCompositor {
                            int *eventBase, int *errorBase) throw(InitException);
 
 
+        //--- INTERNAL FUNCTIONS -----------------------------------------------
+
+        /** Locates the screen an event affects. Returns -1 on failure. */
+        int screenOfEvent(const XEvent &event);
+
+
         //--- COMPOSITOR VARIABLES ---------------------------------------------
 
         /** Rendering mode in use. */

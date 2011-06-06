@@ -343,8 +343,9 @@ void OpenGLScreen::renderScreen() {
 
 // A function to render a particular window onto the screen.
 void OpenGLScreen::renderWindow(OpenGLWindow &window) {
-    // TODO: Still needed...
-    window.updateContents();
+    if (window.isDamaged()) {
+        window.updateContents();
+    }
 
     // Load window position vertex array.
     glBindBuffer(GL_ARRAY_BUFFER, window.windowPosBuffer());

@@ -45,6 +45,7 @@ Compositor::Compositor(const CompositorConfig &config) throw(InitException) :
 
     m_renderingMode = config.renderingMode();
 
+    XSynchronize(display(), True);
     XSetErrorHandler(&handleXError);
 
     initAllExtensions();
@@ -162,17 +163,10 @@ void Compositor::eventLoop() {
             XNextEvent(display(), &event);
             changesOccured = true;
 
-            int eventScreen = -1;
-            for (unsigned int i = 0; i < m_screens.size(); i++) {
-                if (event.xany.window == m_screens[i]->rootWindow().window()) {
-                    eventScreen = i;
-                    break;
-                }
-            }
+            int eventScreen = screenOfEvent(event);
             if (eventScreen < 0) {
-                XWindowAttributes xwa;
-                XGetWindowAttributes(display(), event.xany.window, &xwa);
-                eventScreen = XScreenNumberOfScreen(xwa.screen);
+                std::cout << "  Cannot deduce which screen request " << event.xany.serial << " affects, skipping." << std::endl;
+                continue;
             }
 
             switch (event.type) {
@@ -231,9 +225,30 @@ void Compositor::eventLoop() {
                 std::cout << *m_screens[i];
             }
             std::cout << "======================================" << std::endl;
+
             changesOccured = false;
         }
     }
+}
+
+
+//--- INTERNAL FUNCTIONS -----------------------------------------------
+
+// Locates the screen an event affects. Returns -1 on failure.
+int Compositor::screenOfEvent(const XEvent &event) {
+    for (size_t i = 0; i < m_screens.size(); i++) {
+        if (event.xany.window == m_screens[i]->rootWindow().window()) {
+            return i;
+        }
+    }
+
+    for (size_t i = 0; i < m_screens.size(); i++) {
+        if (m_screens[i]->isWindowManaged(event.xany.window)) {
+            return i;
+        }
+    }
+
+    return -1;
 }
 
 
