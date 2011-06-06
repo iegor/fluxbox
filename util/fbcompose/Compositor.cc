@@ -111,7 +111,7 @@ void Compositor::getCMSelectionOwnership(int screenNumber) throw(InitException) 
 void Compositor::initAllExtensions() throw(InitException) {
     if (m_renderingMode == RM_OpenGL) {
         initExtension("GLX", &glXQueryExtension, &glXQueryVersion, 1, 4, &m_glxEventBase, &m_glxErrorBase);
-        initExtension("XComposite", &XCompositeQueryExtension, &XCompositeQueryVersion, 0, 3, &m_compositeEventBase, &m_compositeErrorBase);
+        initExtension("XComposite", &XCompositeQueryExtension, &XCompositeQueryVersion, 0, 4, &m_compositeEventBase, &m_compositeErrorBase);
         initExtension("XDamage", &XDamageQueryExtension, &XDamageQueryVersion, 1, 0, &m_damageEventBase, &m_damageErrorBase);
         initExtension("XFixes", &XFixesQueryExtension, &XFixesQueryVersion, 2, 0, &m_fixesEventBase, &m_fixesErrorBase);
         initExtension("XShape", &XShapeQueryExtension, &XShapeQueryVersion, 1, 1, &m_shapeEventBase, &m_shapeErrorBase);
@@ -165,7 +165,7 @@ void Compositor::eventLoop() {
 
             int eventScreen = screenOfEvent(event);
             if (eventScreen < 0) {
-                std::cout << "  Cannot deduce which screen request " << event.xany.serial << " affects, skipping." << std::endl;
+                std::cout << "  Event " << event.xany.serial << " does not affect any managed windows, skipping." << std::endl;
                 continue;
             }
 
@@ -197,6 +197,15 @@ void Compositor::eventLoop() {
                 std::cout << "  PropertyNotify on " << event.xproperty.window << " ("
                           << XGetAtomName(display(), event.xproperty.atom) << ")" << std::endl;
                 break;
+            case ReparentNotify :
+                if (event.xreparent.parent == m_screens[eventScreen]->rootWindow().window()) {
+                    m_screens[eventScreen]->createWindow(event.xreparent.window);
+                } else {
+                    m_screens[eventScreen]->destroyWindow(event.xreparent.window);
+                }
+                std::cout << "  ReparentNotify on " << event.xreparent.window << " (parent "
+                          << event.xreparent.parent << ")" << std::endl;
+                break;
             case UnmapNotify :
                 m_screens[eventScreen]->unmapWindow(event.xunmap.window);
                 std::cout << "  UnmapNotify on " << event.xunmap.window << std::endl;
@@ -220,11 +229,11 @@ void Compositor::eventLoop() {
                 m_screens[i]->renderScreen();
             }
 
-            std::cout << m_screens.size() << " screen(s) available." << std::endl;
-            for (unsigned int i = 0; i < m_screens.size(); i++) {
-                std::cout << *m_screens[i];
-            }
-            std::cout << "======================================" << std::endl;
+            // std::cout << m_screens.size() << " screen(s) available." << std::endl;
+            // for (unsigned int i = 0; i < m_screens.size(); i++) {
+            //     std::cout << *m_screens[i];
+            // }
+            // std::cout << "======================================" << std::endl;
 
             changesOccured = false;
         }
