@@ -159,6 +159,8 @@ void Compositor::eventLoop() {
             continue;
         }
 
+        XFlush(display());
+
         while (XPending(display())) {
             XNextEvent(display(), &event);
             changesOccured = true;

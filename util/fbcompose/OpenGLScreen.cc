@@ -98,6 +98,7 @@ void OpenGLScreen::initRenderingContext() throw(InitException) {
         GLX_RED_SIZE, 8,
         GLX_GREEN_SIZE, 8,
         GLX_BLUE_SIZE, 8,
+        GLX_ALPHA_SIZE, 8,
         None
     };
 
@@ -327,7 +328,10 @@ void OpenGLScreen::renderScreen() {
     glXMakeCurrent(display(), m_glxRenderingWindow, m_glxContext);
     glUseProgram(m_shaderProgram);
 
-    glClearColor(1, 1, 0, 1);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glClearColor(0.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
 
     std::list<BaseCompWindow*>::const_iterator it = allWindows().begin();

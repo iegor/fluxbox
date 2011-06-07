@@ -112,7 +112,7 @@ void OpenGLWindow::updateContents() throw(RuntimeException) {
             return;
         }
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, realWidth(), realHeight(), 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)(&(image->data[0])));
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, realWidth(), realHeight(), 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)(&(image->data[0])));
         XDestroyImage(image);
     }
 }
