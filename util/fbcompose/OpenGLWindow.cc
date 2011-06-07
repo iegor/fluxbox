@@ -45,28 +45,10 @@ OpenGLWindow::OpenGLWindow(Window windowXID) throw() :
 
     // Create OpenGL elements.
     glGenTextures(1, &m_contentTexture);
-    glGenBuffers(1, &m_elementBuffer);
-    glGenBuffers(1, &m_texturePosBuffer);
     glGenBuffers(1, &m_windowPosBuffer);
 
     // Fill window position array.
     updateArrays();
-
-    // Fill element array.
-    m_elementArray[0] = 0;
-    m_elementArray[1] = 1;
-    m_elementArray[2] = 2;
-    m_elementArray[3] = 3;
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementBuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(m_elementArray), (const GLvoid*)(m_elementArray), GL_STATIC_DRAW);
-
-    // Fill texture position array.
-    m_texturePosArray[0] = m_texturePosArray[1] = m_texturePosArray[3] = m_texturePosArray[4] = 0.0;
-    m_texturePosArray[2] = m_texturePosArray[5] = m_texturePosArray[6] = m_texturePosArray[7] = 1.0;
-
-    glBindBuffer(GL_ARRAY_BUFFER, m_texturePosBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(m_texturePosArray), (const GLvoid*)(m_texturePosArray), GL_STATIC_DRAW);
 
     // Initialize the content texture.
     glBindTexture(GL_TEXTURE_2D, m_contentTexture);
@@ -80,8 +62,6 @@ OpenGLWindow::OpenGLWindow(Window windowXID) throw() :
 // Destructor.
 OpenGLWindow::~OpenGLWindow() throw() {
     glDeleteTextures(1, &m_contentTexture);
-    glDeleteBuffers(1, &m_elementBuffer);
-    glDeleteBuffers(1, &m_texturePosBuffer);
     glDeleteBuffers(1, &m_windowPosBuffer);
 }
 

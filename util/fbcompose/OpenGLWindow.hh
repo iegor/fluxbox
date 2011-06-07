@@ -57,12 +57,6 @@ namespace FbCompositor {
         /** \returns the window's contents as a OpenGL texture. */
         GLuint contentTexture() const throw();
 
-        /** \returns the element buffer. */
-        GLuint elementBuffer() const throw();
-
-        /** \returns the texture position buffer. */
-        GLuint texturePosBuffer() const throw();
-
         /** \returns the window position buffer. */
         GLuint windowPosBuffer() const throw();
 
@@ -81,18 +75,6 @@ namespace FbCompositor {
 
         /** Window's content texture. */
         GLuint m_contentTexture;
-
-        /** Window's element array. */
-        GLushort m_elementArray[4];
-
-        /** Window's element buffer. */
-        GLuint m_elementBuffer;
-
-        /** Window texture position array. */
-        GLfloat m_texturePosArray[8];
-
-        /** Window texture position buffer. */
-        GLuint m_texturePosBuffer;
 
         /** Window position array. */
         GLfloat m_windowPosArray[8];
@@ -116,16 +98,6 @@ namespace FbCompositor {
     // Returns the window's contents as a OpenGL texture.
     inline GLuint OpenGLWindow::contentTexture() const throw() {
         return m_contentTexture;
-    }
-
-    // Returns the element buffer.
-    inline GLuint OpenGLWindow::elementBuffer() const throw() {
-        return m_elementBuffer;
-    }
-
-    // Returns the texture position buffer.
-    inline GLuint OpenGLWindow::texturePosBuffer() const throw() {
-        return m_texturePosBuffer;
     }
 
     // Returns the window position buffer.

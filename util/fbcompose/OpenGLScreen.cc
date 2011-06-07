@@ -38,6 +38,36 @@
 using namespace FbCompositor;
 
 
+//--- CONSTANTS ----------------------------------------------------------------
+
+// The preferred framebuffer configuration.
+const int OpenGLScreen::PREFERRED_FBCONFIG_ATTRIBUTES[] = {
+    GLX_RENDER_TYPE, GLX_RGBA_BIT,
+    GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT,
+    GLX_DOUBLEBUFFER, true,
+    GLX_RED_SIZE, 8,
+    GLX_GREEN_SIZE, 8,
+    GLX_BLUE_SIZE, 8,
+    GLX_ALPHA_SIZE, 8,
+    None
+};
+
+// Default element array for texture rendering.
+const GLushort OpenGLScreen::DEFAULT_ELEMENT_ARRAY[] = {
+    0, 1, 2, 3
+};
+
+// Default primitive position array for texture rendering.
+const GLfloat OpenGLScreen::DEFAULT_PRIM_POS_ARRAY[] = {
+    -1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0
+};
+
+// Default texture position array for texture rendering.
+const GLfloat OpenGLScreen::DEFAULT_TEX_POS_ARRAY[] = {
+    0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0
+};
+
+
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
@@ -48,6 +78,8 @@ OpenGLScreen::OpenGLScreen(int screenNumber) :
     initRenderingSurface();
     initGlew();
     initShaders();
+    createDefaultBuffers();
+    createBackgroundTexture();
 }
 
 // Destructor.
@@ -59,6 +91,11 @@ OpenGLScreen::~OpenGLScreen() {
     glDeleteProgram(m_shaderProgram);
     glDeleteShader(m_vertexShader);
     glDeleteShader(m_fragmentShader);
+
+    glDeleteTextures(1, &m_backgroundTexture);
+    glDeleteBuffers(1, &m_defaultElementBuffer);
+    glDeleteBuffers(1, &m_defaultPrimPosBuffer);
+    glDeleteBuffers(1, &m_defaultTexPosBuffer);
 
     glXDestroyWindow(display(), m_glxRenderingWindow);
     glXDestroyContext(display(), m_glxContext);
@@ -90,18 +127,6 @@ void OpenGLScreen::initWindows() {
 
 // Initializes the rendering context.
 void OpenGLScreen::initRenderingContext() throw(InitException) {
-    // Selecting the framebuffer configuration.
-    static const int PREFERRED_FBCONFIG_ATTRIBUTES[] = {
-        GLX_RENDER_TYPE, GLX_RGBA_BIT,
-        GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT,
-        GLX_DOUBLEBUFFER, true,
-        GLX_RED_SIZE, 8,
-        GLX_GREEN_SIZE, 8,
-        GLX_BLUE_SIZE, 8,
-        GLX_ALPHA_SIZE, 8,
-        None
-    };
-
     int nConfigs;
     GLXFBConfig *fbConfigs = glXChooseFBConfig(display(), screenNumber(), PREFERRED_FBCONFIG_ATTRIBUTES, &nConfigs);
     if (!fbConfigs) {
@@ -168,7 +193,6 @@ void OpenGLScreen::initGlew() throw(InitException) {
     }
 }
 
-
 // Initializes shaders.
 void OpenGLScreen::initShaders() throw(InitException) {
     // Vertex shader source code (TODO: move somewhere else when everything is working).
@@ -202,6 +226,46 @@ void OpenGLScreen::initShaders() throw(InitException) {
     m_vertexShader = createShader(GL_VERTEX_SHADER, vShaderSourceLength, vShaderSource);
     m_fragmentShader = createShader(GL_FRAGMENT_SHADER, fShaderSourceLength, fShaderSource);
     m_shaderProgram = createShaderProgram(m_vertexShader, 0, m_fragmentShader);
+}
+
+// Creates default texture rendering buffers.
+void OpenGLScreen::createDefaultBuffers() {
+    glGenBuffers(1, &m_defaultElementBuffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_defaultElementBuffer);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(DEFAULT_ELEMENT_ARRAY),
+                 (const GLvoid*)(DEFAULT_ELEMENT_ARRAY), GL_STATIC_DRAW);
+
+    glGenBuffers(1, &m_defaultPrimPosBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, m_defaultPrimPosBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(DEFAULT_PRIM_POS_ARRAY),
+                 (const GLvoid*)(DEFAULT_PRIM_POS_ARRAY), GL_STATIC_DRAW);
+
+    glGenBuffers(1, &m_defaultTexPosBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, m_defaultTexPosBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(DEFAULT_TEX_POS_ARRAY),
+                 (const GLvoid*)(DEFAULT_TEX_POS_ARRAY), GL_STATIC_DRAW);
+}
+
+// Creates the background texture.
+void OpenGLScreen::createBackgroundTexture() throw(InitException) {
+    Atom bgPixmapAtom = XInternAtom(display(), "_XROOTPMAP_ID", False);
+    Pixmap bgPixmap = rootWindow().pixmapProperty(bgPixmapAtom)[0];
+
+    glGenTextures(1, &m_backgroundTexture);
+    glBindTexture(GL_TEXTURE_2D, m_backgroundTexture);
+
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    XImage *image = XGetImage(display(), bgPixmap, 0, 0, rootWindow().width(), rootWindow().height(), AllPlanes, ZPixmap);
+    if (!image) {
+        throw InitException("Cannot create background texture.");
+    }
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, rootWindow().width(), rootWindow().height(),
+                 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)(&(image->data[0])));
+    XDestroyImage(image);
 }
 
 
@@ -331,8 +395,10 @@ void OpenGLScreen::renderScreen() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glClearColor(1.0, 1.0, 1.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
+
+    renderBackground();
 
     std::list<BaseCompWindow*>::const_iterator it = allWindows().begin();
     while (it != allWindows().end()) {
@@ -345,34 +411,44 @@ void OpenGLScreen::renderScreen() {
     glXSwapBuffers(display(), m_glxRenderingWindow);
 }
 
+// A function to render the desktop background.
+void OpenGLScreen::renderBackground() {
+    renderTexture(m_defaultPrimPosBuffer, m_defaultTexPosBuffer, m_defaultElementBuffer, m_backgroundTexture);
+}
+
 // A function to render a particular window onto the screen.
 void OpenGLScreen::renderWindow(OpenGLWindow &window) {
     if (window.isDamaged()) {
         window.updateContents();
     }
 
-    // Load window position vertex array.
-    glBindBuffer(GL_ARRAY_BUFFER, window.windowPosBuffer());
+    renderTexture(window.windowPosBuffer(), m_defaultTexPosBuffer, m_defaultElementBuffer, window.contentTexture());
+}
+
+// A function to render some texture onto the screen.
+void OpenGLScreen::renderTexture(GLuint primPosBuffer, GLuint texturePosBuffer, GLuint elementBuffer, GLuint texture) {
+    // Load primitive position vertex array.
+    glBindBuffer(GL_ARRAY_BUFFER, primPosBuffer);
 
     GLuint windowPosAttrib = glGetAttribLocation(m_shaderProgram, "fb_InitPointPos");
     glVertexAttribPointer(windowPosAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
     glEnableVertexAttribArray(windowPosAttrib);
 
     // Load texture position vertex array.
-    glBindBuffer(GL_ARRAY_BUFFER, window.texturePosBuffer());
+    glBindBuffer(GL_ARRAY_BUFFER, texturePosBuffer);
 
     GLuint texPosAttrib = glGetAttribLocation(m_shaderProgram, "fb_InitTexCoord");
     glVertexAttribPointer(texPosAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
     glEnableVertexAttribArray(texPosAttrib);
 
     // Load element array.
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, window.elementBuffer());
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
 
     // Set up the texture uniforms.
     GLuint texturePos = glGetUniformLocation(m_shaderProgram, "fb_Texture");
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, window.contentTexture());
+    glBindTexture(GL_TEXTURE_2D, texture);
     glUniform1i(texturePos, 0);
 
     // Rendering.

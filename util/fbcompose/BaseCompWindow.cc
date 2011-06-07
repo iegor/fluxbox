@@ -75,6 +75,20 @@ std::vector<long> BaseCompWindow::cardinalProperty(Atom propertyAtom) {
     return std::vector<long>();
 }
 
+// Returns the specified pixmap property.
+std::vector<Pixmap> BaseCompWindow::pixmapProperty(Atom propertyAtom) {
+    unsigned long nItems;
+    Pixmap *data;
+
+    if (rawPropertyData(propertyAtom, XA_PIXMAP, &nItems, reinterpret_cast<unsigned char**>(&data))) {
+        std::vector<Pixmap> actualData(data, data + nItems);
+        XFree(data);
+        return actualData;
+    }
+
+    return std::vector<Pixmap>();
+}
+
 // Returns the specified window property.
 std::vector<Window> BaseCompWindow::windowProperty(Atom propertyAtom) {
     unsigned long nItems;

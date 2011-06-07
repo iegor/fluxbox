@@ -66,6 +66,7 @@ namespace FbCompositor {
         /** Renders the screen's contents. */
         void renderScreen();
 
+
     protected:
         //--- WINDOW MANIPULATION ----------------------------------------------
 
@@ -90,14 +91,34 @@ namespace FbCompositor {
         /** Updates the value of some window's property. */
         void updateWindowObjectProperty(BaseCompWindow *window, Atom property, int state);
 
+
     private:
         //--- CONSTANTS --------------------------------------------------------
         
         /** Size of the info log buffer. */
         static const int INFO_LOG_BUFFER_SIZE = 256;
 
+        /** Preferred framebuffer configuration. */
+        static const int PREFERRED_FBCONFIG_ATTRIBUTES[];
+
+
+        /** Default element array for texture rendering. */
+        static const GLushort DEFAULT_ELEMENT_ARRAY[];
+
+        /** Default primitive position array for texture rendering. */
+        static const GLfloat DEFAULT_PRIM_POS_ARRAY[];
+
+        /** Default texture position array for texture rendering. */
+        static const GLfloat DEFAULT_TEX_POS_ARRAY[];
+
 
         //--- INITIALIZATION FUNCTIONS -----------------------------------------
+
+        /** Creates the background texture. */
+        void createBackgroundTexture() throw(InitException);
+
+        /** Creates default texture rendering buffers. */
+        void createDefaultBuffers();
 
         /** Initializes GLEW. */
         void initGlew() throw(InitException);
@@ -123,8 +144,14 @@ namespace FbCompositor {
 
         //--- RENDERING FUNCTIONS ----------------------------------------------
 
-        /** A function to render a particular window onto the screen. */
+        /** Render the desktop background. */
+        void renderBackground();
+
+        /** Render a particular window onto the screen. */
         void renderWindow(OpenGLWindow &window);
+
+        /** Render some texture onto the screen. */
+        void renderTexture(GLuint primPosBuffer, GLuint texturePosBuffer, GLuint elementBuffer, GLuint texture);
 
 
         //--- MAIN RENDERING-RELATED VARIABLES ---------------------------------
@@ -140,6 +167,19 @@ namespace FbCompositor {
 
         /** Rendering window. */
         Window m_renderingWindow;
+
+
+        /** Default element buffer. */
+        GLuint m_defaultElementBuffer;
+
+        /** Default primitive position buffer. */
+        GLuint m_defaultPrimPosBuffer;
+
+        /** Default texture position buffer. */
+        GLuint m_defaultTexPosBuffer;
+
+        /** The background texture. */
+        GLuint m_backgroundTexture;
 
 
         //--- SHADER-RELATED ---------------------------------------------------

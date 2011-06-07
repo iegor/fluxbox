@@ -86,6 +86,9 @@ namespace FbCompositor {
         /** \returns the specified cardinal property. */
         std::vector<long> cardinalProperty(Atom propertyAtom);
 
+        /** \returns the specified pixmap property. */
+        std::vector<Pixmap> pixmapProperty(Atom propertyAtom);
+
         /** \returns the specified window property. */
         std::vector<Window> windowProperty(Atom propertyAtom);
 
