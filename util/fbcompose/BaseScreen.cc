@@ -41,9 +41,9 @@ BaseScreen::BaseScreen(int screenNumber) :
     m_screenNumber(screenNumber),
     m_rootWindow(XRootWindow(m_display, m_screenNumber)) {
 
-    m_activeWindowAtom = XInternAtom(m_display, "_NET_ACTIVE_WINDOW", false);
-    m_workspaceAtom = XInternAtom(m_display, "_WIN_WORKSPACE", false);
-    m_workspaceCountAtom = XInternAtom(m_display, "_WIN_WORKSPACE_COUNT", false);
+    m_activeWindowAtom = XInternAtom(m_display, "_NET_ACTIVE_WINDOW", False);
+    m_workspaceAtom = XInternAtom(m_display, "_WIN_WORKSPACE", False);
+    m_workspaceCountAtom = XInternAtom(m_display, "_WIN_WORKSPACE_COUNT", False);
 
     if ((m_activeWindowAtom == None)
             || (m_workspaceAtom == None)

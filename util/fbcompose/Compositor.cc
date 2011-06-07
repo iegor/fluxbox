@@ -227,12 +227,12 @@ void Compositor::eventLoop() {
         }
 
         if (changesOccured) {
-            for (unsigned int i = 0; i < m_screens.size(); i++) {
+            for (size_t i = 0; i < m_screens.size(); i++) {
                 m_screens[i]->renderScreen();
             }
 
             // std::cout << m_screens.size() << " screen(s) available." << std::endl;
-            // for (unsigned int i = 0; i < m_screens.size(); i++) {
+            // for (size_t i = 0; i < m_screens.size(); i++) {
             //     std::cout << *m_screens[i];
             // }
             // std::cout << "======================================" << std::endl;

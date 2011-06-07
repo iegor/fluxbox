@@ -107,6 +107,7 @@ namespace FbCompositor {
         /** Updates the window's contents. */
         virtual void updateContents();
 
+
     private:
         //--- INTERNAL FUNCTIONS -----------------------------------------------
 
