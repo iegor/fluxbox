@@ -29,6 +29,7 @@
 #include "Exceptions.hh"
 #include "OpenGLWindow.hh"
 
+#include <GL/glxew.h>
 #include <GL/glew.h>
 #include <GL/glx.h>
 
@@ -119,6 +120,9 @@ namespace FbCompositor {
 
         /** Creates default texture rendering buffers. */
         void createDefaultBuffers();
+
+        /** Early initialization of GLX function pointers. */
+        void earlyInitGLXPointers() throw(InitException);
 
         /** Initializes GLEW. */
         void initGlew() throw(InitException);

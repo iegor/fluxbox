@@ -74,6 +74,7 @@ const GLfloat OpenGLScreen::DEFAULT_TEX_POS_ARRAY[] = {
 OpenGLScreen::OpenGLScreen(int screenNumber) :
     BaseScreen(screenNumber) {
 
+    earlyInitGLXPointers();
     initRenderingContext();
     initRenderingSurface();
     initGlew();
@@ -124,6 +125,35 @@ void OpenGLScreen::initWindows() {
 
 
 //--- INITIALIZATION FUNCTIONS -------------------------------------------------
+
+// Early initialization of GLX functions.
+// We need GLX functions to create an OpenGL context and initialize GLEW. But
+// using GLXEW zeroes the pointers, since glewInit() initializes them. And we
+// have to use GLXEW to have easy access to GLX's extensions. So, this function
+// performs minimal function initialization - just enough to create a context.
+void OpenGLScreen::earlyInitGLXPointers() throw(InitException) {
+    glXCreateNewContext = (PFNGLXCREATENEWCONTEXTPROC)glXGetProcAddress((GLubyte*)"glXCreateNewContext");
+    if (!glXCreateNewContext) {
+        throw InitException("Cannot initialize glXCreateNewContext function.");
+    }
+
+    glXChooseFBConfig = (PFNGLXCHOOSEFBCONFIGPROC)glXGetProcAddress((GLubyte*)"glXChooseFBConfig");
+    if (!glXChooseFBConfig) {
+        throw InitException("Cannot initialize glXChooseFBConfig function.");
+    }
+
+    glXGetVisualFromFBConfig = (PFNGLXGETVISUALFROMFBCONFIGPROC)glXGetProcAddress((GLubyte*)"glXGetVisualFromFBConfig");
+    if (!glXGetVisualFromFBConfig) {
+        throw InitException("Cannot initialize glXGetVisualFromFBConfig function.");
+    }
+
+    glXCreateWindow = (PFNGLXCREATEWINDOWPROC)glXGetProcAddress((GLubyte*)"glXCreateWindow");
+    if (!glXCreateWindow) {
+        throw InitException("Cannot initialize glXCreateWindow function.");
+    }
+
+    // TODO: glXMakeCurrent?
+}
 
 // Initializes the rendering context.
 void OpenGLScreen::initRenderingContext() throw(InitException) {
@@ -349,7 +379,7 @@ GLuint OpenGLScreen::createShaderProgram(GLuint vertexShader, GLuint geometrySha
 
 // Creates a window object from its XID.
 BaseCompWindow *OpenGLScreen::createWindowObject(Window window) {
-    OpenGLWindow *newWindow = new OpenGLWindow(window);
+    OpenGLWindow *newWindow = new OpenGLWindow(window, m_fbConfig);
     return newWindow;
 }
 

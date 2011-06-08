@@ -37,9 +37,10 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-OpenGLWindow::OpenGLWindow(Window windowXID) throw() :
+OpenGLWindow::OpenGLWindow(Window windowXID, GLXFBConfig fbConfig) throw() :
     BaseCompWindow(windowXID) {
 
+    m_fbConfig = fbConfig;
     m_rootWidth = dynamic_cast<Compositor*>(FbTk::App::instance())->getScreen(screenNumber()).rootWindow().width();
     m_rootHeight = dynamic_cast<Compositor*>(FbTk::App::instance())->getScreen(screenNumber()).rootWindow().height();
 

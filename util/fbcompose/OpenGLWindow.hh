@@ -27,7 +27,8 @@
 #include "BaseCompWindow.hh"
 #include "Exceptions.hh"
 
-#include <GL/glew.h>
+#include <GL/glxew.h>
+#include <GL/glx.h>
 #include <GL/gl.h>
 
 
@@ -46,7 +47,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        OpenGLWindow(Window windowXID) throw();
+        OpenGLWindow(Window windowXID, GLXFBConfig fbConfig) throw();
 
         /** Destructor. */
         virtual ~OpenGLWindow() throw();
@@ -75,6 +76,9 @@ namespace FbCompositor {
 
         /** Window's content texture. */
         GLuint m_contentTexture;
+
+        /** Screen's FBConfig. */
+        GLXFBConfig m_fbConfig;
 
         /** Window position array. */
         GLfloat m_windowPosArray[8];
