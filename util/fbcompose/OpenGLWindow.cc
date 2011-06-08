@@ -33,6 +33,19 @@
 
 using namespace FbCompositor;
 
+//--- CONSTANTS ----------------------------------------------------------------
+
+#ifdef GLXEW_EXT_texture_from_pixmap
+
+// Attributes of the contents' GLX pixmap.
+const int OpenGLWindow::TEX_PIXMAP_ATTRIBUTES[] = {
+    GLX_TEXTURE_TARGET_EXT, GLX_TEXTURE_2D_EXT,
+    GLX_TEXTURE_FORMAT_EXT, GLX_TEXTURE_FORMAT_RGB_EXT,
+    None
+};
+
+#endif  // GLXEW_EXT_texture_from_pixmap
+
 
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
@@ -58,6 +71,10 @@ OpenGLWindow::OpenGLWindow(Window windowXID, GLXFBConfig fbConfig) throw() :
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+#ifdef GLXEW_EXT_texture_from_pixmap
+    m_glxContents = 0;
+#endif
 }
 
 // Destructor.
@@ -85,6 +102,18 @@ void OpenGLWindow::updateContents() throw(RuntimeException) {
     BaseCompWindow::updateContents();
 
     if (contents()) {
+
+#ifdef GLXEW_EXT_texture_from_pixmap
+        if (m_glxContents) {
+            glXDestroyPixmap(display(), m_glxContents);
+            m_glxContents = 0;
+        }
+        m_glxContents = glXCreatePixmap(display(), m_fbConfig, contents(), TEX_PIXMAP_ATTRIBUTES);
+
+        glBindTexture(GL_TEXTURE_2D, contentTexture());
+        glXBindTexImageEXT(display(), m_glxContents, GLX_FRONT_LEFT_EXT, NULL);
+
+#else
         glBindTexture(GL_TEXTURE_2D, contentTexture());
 
         XImage *image = XGetImage(display(), contents(), 0, 0, realWidth(), realHeight(), AllPlanes, ZPixmap);
@@ -95,5 +124,7 @@ void OpenGLWindow::updateContents() throw(RuntimeException) {
 
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, realWidth(), realHeight(), 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)(&(image->data[0])));
         XDestroyImage(image);
+
+#endif  // GLXEW_EXT_texture_from_pixmap
     }
 }
