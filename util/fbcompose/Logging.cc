@@ -1,4 +1,4 @@
-/** main.cc file for the fluxbox compositor. */
+/** Logging.cc file for the fluxbox compositor. */
 
 // Copyright (c) 2011 Gediminas Liktaras (gliktaras at gmail dot com)
 //
@@ -21,36 +21,25 @@
 // THE SOFTWARE.
 
 
-#include "Compositor.hh"
-#include "Exceptions.hh"
 #include "Logging.hh"
-
-#include <X11/Xlib.h>
-
-#include <iostream>
-#include <cstdlib>
 
 using namespace FbCompositor;
 
 
-/**
- * The entry point.
- *
- * \param argc The number of command line arguments.
- * \param argv An array of strings, containing the arguments themselves.
- * \returns Application's exit status.
- */
-int main(int argc, char **argv) {
-    try {
-        Logger::setLoggingLevel(LOG_LEVEL_INFO);
+//--- STATIC VARIABLES ---------------------------------------------------------
 
-        CompositorConfig config(argc, argv);
-        Compositor app(config);
-        app.eventLoop();
-    } catch(CompositorException e) {
-        fbLog_error << e.what() << std::endl;
-        return EXIT_FAILURE;
-    }
+// Initial logging level.
+int Logger::m_level = LOG_LEVEL_NONE;
 
-    return EXIT_SUCCESS;
+
+//--- FUNCTIONS ----------------------------------------------------------------
+
+// Returns the current logging level.
+int Logger::loggingLevel() {
+    return m_level;
+}
+
+// Sets a new logging level.
+void Logger::setLoggingLevel(int newLevel) {
+    m_level = newLevel;
 }

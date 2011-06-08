@@ -22,6 +22,7 @@
 
 
 #include "Compositor.hh"
+#include "Logging.hh"
 #include "OpenGLScreen.hh"
 
 #include <GL/glx.h>
@@ -49,6 +50,7 @@ Compositor::Compositor(const CompositorConfig &config) throw(InitException) :
     XSetErrorHandler(&handleXError);
 
     initAllExtensions();
+
 
     // Set up screens.
     int screenCount = XScreenCount(display());
@@ -167,37 +169,37 @@ void Compositor::eventLoop() {
 
             int eventScreen = screenOfEvent(event);
             if (eventScreen < 0) {
-                std::cout << "  Event " << event.xany.serial << " does not affect any managed windows, skipping." << std::endl;
+                fbLog_info << "Event " << event.xany.serial << " does not affect any managed windows, skipping." << std::endl;
                 continue;
             }
 
             switch (event.type) {
             case ConfigureNotify :
                 m_screens[eventScreen]->reconfigureWindow(event.xconfigure);
-                std::cout << "  ConfigureNotify on " << event.xconfigure.window << std::endl;
+                fbLog_info << "ConfigureNotify on " << event.xconfigure.window << std::endl;
                 break;
             case CreateNotify :
                 m_screens[eventScreen]->createWindow(event.xcreatewindow.window);
-                std::cout << "  CreateNotify on " << event.xcreatewindow.window << std::endl;
+                fbLog_info << "CreateNotify on " << event.xcreatewindow.window << std::endl;
                 break;
             case DestroyNotify :
                 m_screens[eventScreen]->destroyWindow(event.xdestroywindow.window);
-                std::cout << "  DestroyNotify on " << event.xdestroywindow.window << std::endl;
+                fbLog_info << "DestroyNotify on " << event.xdestroywindow.window << std::endl;
                 break;
             case Expose :
                 if (event.xexpose.count == 0) {
                     m_screens[eventScreen]->damageWindow(event.xexpose.window);
-                    std::cout << "  Expose on " << event.xexpose.window << " (" << event.xexpose.count << ")" << std::endl;
+                    fbLog_info << "Expose on " << event.xexpose.window << " (" << event.xexpose.count << ")" << std::endl;
                 }
                 break;
             case MapNotify :
                 m_screens[eventScreen]->mapWindow(event.xmap.window);
-                std::cout << "  MapNotify on " << event.xmap.window << std::endl;
+                fbLog_info << "MapNotify on " << event.xmap.window << std::endl;
                 break;
             case PropertyNotify :
                 m_screens[eventScreen]->updateWindowProperty(event.xproperty.window, event.xproperty.atom, event.xproperty.state);
-                std::cout << "  PropertyNotify on " << event.xproperty.window << " ("
-                          << XGetAtomName(display(), event.xproperty.atom) << ")" << std::endl;
+                fbLog_info << "PropertyNotify on " << event.xproperty.window << " ("
+                           << XGetAtomName(display(), event.xproperty.atom) << ")" << std::endl;
                 break;
             case ReparentNotify :
                 if (event.xreparent.parent == m_screens[eventScreen]->rootWindow().window()) {
@@ -205,21 +207,21 @@ void Compositor::eventLoop() {
                 } else {
                     m_screens[eventScreen]->destroyWindow(event.xreparent.window);
                 }
-                std::cout << "  ReparentNotify on " << event.xreparent.window << " (parent "
-                          << event.xreparent.parent << ")" << std::endl;
+                fbLog_info << "ReparentNotify on " << event.xreparent.window << " (parent "
+                           << event.xreparent.parent << ")" << std::endl;
                 break;
             case UnmapNotify :
                 m_screens[eventScreen]->unmapWindow(event.xunmap.window);
-                std::cout << "  UnmapNotify on " << event.xunmap.window << std::endl;
+                fbLog_info << "UnmapNotify on " << event.xunmap.window << std::endl;
                 break;
             default :
                 if (event.type == (m_damageEventBase + XDamageNotify)) {
                     XDamageNotifyEvent damageEvent = *((XDamageNotifyEvent*) &event);   // TODO: Better cast.
                     m_screens[eventScreen]->damageWindow(damageEvent.drawable);
-                    std::cout << "  DamageNotify on " << damageEvent.drawable << std::endl;
+                    fbLog_info << "DamageNotify on " << damageEvent.drawable << std::endl;
                 } else {
-                    std::cout << "Event " << event.xany.type << " on screen " << eventScreen
-                              << " and window " << event.xany.window << std::endl;
+                    fbLog_info << "Event " << event.xany.type << " on screen " << eventScreen
+                               << " and window " << event.xany.window << std::endl;
                     changesOccured = false;
                 }
                 break;
@@ -231,11 +233,11 @@ void Compositor::eventLoop() {
                 m_screens[i]->renderScreen();
             }
 
-            // std::cout << m_screens.size() << " screen(s) available." << std::endl;
-            // for (size_t i = 0; i < m_screens.size(); i++) {
-            //     std::cout << *m_screens[i];
-            // }
-            // std::cout << "======================================" << std::endl;
+            fbLog_debug << m_screens.size() << " screen(s) available." << std::endl;
+            for (size_t i = 0; i < m_screens.size(); i++) {
+                fbLog_debug << *m_screens[i];
+            }
+            fbLog_debug << "======================================" << std::endl;
 
             changesOccured = false;
         }
@@ -272,9 +274,9 @@ int FbCompositor::handleXError(Display *display, XErrorEvent *error) {
     char errorText[ERROR_TEXT_LENGTH];
     XGetErrorText(display, error->error_code, errorText, ERROR_TEXT_LENGTH);
 
-    std::cerr << "X Error: " << errorText << " (errorCode=" << int(error->error_code)
-              << ", majorOpCode=" << int(error->request_code) << ", minorOpCode="
-              << int(error->minor_code) << ", resourceId=" << std::hex << error->resourceid
-              << std::dec << ")" << std::endl;
+    fbLog_warn << "X Error: " << errorText << " (errorCode=" << int(error->error_code)
+               << ", majorOpCode=" << int(error->request_code) << ", minorOpCode="
+               << int(error->minor_code) << ", resourceId=" << std::hex << error->resourceid
+               << std::dec << ")" << std::endl;
     return 0;
 }
