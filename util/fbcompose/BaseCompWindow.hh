@@ -62,7 +62,7 @@ namespace FbCompositor {
         //--- ACCESSORS --------------------------------------------------------
 
         /** \returns the window's contents as a pixmap. */
-        Pixmap contents() const throw();
+        Pixmap contentPixmap() const throw();
 
         /** \returns whether the window is damaged or not. */
         bool isDamaged() const throw();
@@ -95,8 +95,11 @@ namespace FbCompositor {
 
         //--- WINDOW MANIPULATION ----------------------------------------------
 
-        /** Marks the window as damaged. */
-        void setDamaged() throw();
+        /** Adds damage to a window. */
+        virtual void addDamage(XRectangle area) throw();
+
+        /** Reconfigures a window. */
+        void reconfigure(const XConfigureEvent &event) throw();
 
         /** Marks the window as mapped. */
         void setMapped() throw();
@@ -107,6 +110,24 @@ namespace FbCompositor {
         /** Updates the window's contents. */
         virtual void updateContents();
 
+
+    protected:
+        //--- PROTECTED ACCESSORS ----------------------------------------------
+
+        /** \returns the vector, containing the damaged window's areas. */
+        const std::vector<XRectangle> &damagedArea() const throw();
+
+        /** \returns whether the window has been resized since the last update. */
+        bool isResized() const throw();
+
+
+        //--- PROTECTED WINDOW MANIPULATION ------------------------------------
+
+        /** Removes all damage from the window. */
+        void clearDamage() throw();
+
+        /** Updates the window's content pixmap. */
+        void updateContentPixmap() throw();
 
     private:
         //--- INTERNAL FUNCTIONS -----------------------------------------------
@@ -122,34 +143,47 @@ namespace FbCompositor {
         int m_class;
 
         /** Window's content pixmap. */
-        Pixmap m_contents;
+        Pixmap m_contentPixmap;
 
         /** Window's damage object. */
         Damage m_damage;
 
-        /** Window's damage state. */
-        bool m_isDamaged;
+        /** A list of damaged rectangles. */
+        std::vector<XRectangle> m_damagedArea;
 
         /** Window's map state. */
         bool m_isMapped;
+
+        /** Shows whether the window has been resized after the last update. */
+        bool m_isResized;
     };
 
 
     //--- INLINE FUNCTIONS -----------------------------------------------------
 
     // Returns the window's contents as a pixmap.
-    inline Pixmap BaseCompWindow::contents() const throw() {
-        return m_contents;
+    inline Pixmap BaseCompWindow::contentPixmap() const throw() {
+        return m_contentPixmap;
+    }
+
+    // Returns the vector, containing the damaged window's areas.
+    inline const std::vector<XRectangle> &BaseCompWindow::damagedArea() const throw() {
+        return m_damagedArea;
     }
 
     // Returns whether the window is damaged or not.
     inline bool BaseCompWindow::isDamaged() const throw() {
-        return m_isDamaged;
+        return (!m_damagedArea.empty());
     }
 
     // Returns whether the window is mapped or not.
     inline bool BaseCompWindow::isMapped() const throw() {
         return m_isMapped;
+    }
+
+    // Returns whether the window has been resized since the last update.
+    inline bool BaseCompWindow::isResized() const throw() {
+        return m_isResized;
     }
 
     // Returns the window's height with borders factored in.

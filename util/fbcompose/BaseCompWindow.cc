@@ -43,14 +43,14 @@ BaseCompWindow::BaseCompWindow(Window windowXID) throw() :
 
     m_class = xwa.c_class;
     m_isMapped = (xwa.map_state != IsUnmapped);
+    m_isResized = true;
 
     if (m_class == InputOutput) {
-        m_damage = XDamageCreate(display(), window(), XDamageReportNonEmpty);
+        m_damage = XDamageCreate(display(), window(), XDamageReportDeltaRectangles);
     } else {
         m_damage = 0;
     }
-    m_contents = None;
-    m_isDamaged = false;
+    m_contentPixmap = None;
 }
 
 // Destructor.
@@ -106,10 +106,21 @@ std::vector<Window> BaseCompWindow::windowProperty(Atom propertyAtom) {
 
 //--- WINDOW MANIPULATION ------------------------------------------------------
 
-// Marks the window as damaged.
-// TODO: Do we need anything more sophisticated than this?
-void BaseCompWindow::setDamaged() throw() {
-    m_isDamaged = true;
+// Adds damage to a window.
+void BaseCompWindow::addDamage(XRectangle area) throw() {
+    m_damagedArea.push_back(area);
+}
+
+// Reconfigures a window.
+void BaseCompWindow::reconfigure(const XConfigureEvent &event) throw() {
+    unsigned int oldBorderWidth = borderWidth();
+    unsigned int oldHeight = height();
+    unsigned int oldWidth = width();
+    updateGeometry();
+
+    if ((borderWidth() != oldBorderWidth) || (height() != oldHeight) || (width() != oldWidth)) {
+        m_isResized = true;
+    }
 }
 
 // Marks the window as mapped.
@@ -124,24 +135,29 @@ void BaseCompWindow::setUnmapped() throw() {
 
 // Updates the window's contents.
 void BaseCompWindow::updateContents() {
-    // FIXME: Sometimes, XCompositeNameWindowPixmap fails with a BadWindow
-    // error for some reason, whenever one destroys a window. I do not yet know
-    // what invalidates the window() XID, but XCompositeNameWindowPixmap
-    // updates the m_contents pixmap, so this error condition cannot be caught
-    // later. My guess is that the X server simply destroys the window before
-    // the compositor gets a chance to process the two prior damage and unmap
-    // events.
+    updateContentPixmap();
+    clearDamage();
+}
 
-    if (m_contents) {
-        XFreePixmap(display(), m_contents);
-        m_contents = None;
-    }
-    m_contents = XCompositeNameWindowPixmap(display(), window());
 
-    if (m_contents) {
-        XDamageSubtract(display(), m_damage, None, None);
-        m_isDamaged = false;
+//--- PROTECTED WINDOW MANIPULATION --------------------------------------------
+
+// Removes all damage from the window.
+void BaseCompWindow::clearDamage() throw() {
+    m_damagedArea.clear();
+    m_isResized = false;
+}
+
+// Updates the window's content pixmap.
+void BaseCompWindow::updateContentPixmap() throw() {
+    if (m_contentPixmap) {
+        XFreePixmap(display(), m_contentPixmap);
+        m_contentPixmap = None;
     }
+    m_contentPixmap = XCompositeNameWindowPixmap(display(), window());
+
+    // We must reset the damage status here, otherwise we may miss damage events.
+    XDamageSubtract(display(), m_damage, None, None);
 }
 
 

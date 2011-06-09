@@ -97,7 +97,7 @@ namespace FbCompositor {
         void createWindow(Window window);
 
         /** Damages a window on this screen. */
-        void damageWindow(Window window);
+        void damageWindow(Window window, XRectangle area);
 
         /** Destroys a window on this screen. */
         void destroyWindow(Window window);
@@ -141,13 +141,13 @@ namespace FbCompositor {
         virtual void cleanupWindowObject(BaseCompWindow *window);
 
         /** Damages a window object. */
-        virtual void damageWindowObject(BaseCompWindow *window);
+        virtual void damageWindowObject(BaseCompWindow *window, XRectangle area);
 
         /** Maps a window object. */
         virtual void mapWindowObject(BaseCompWindow *window);
 
         /** Updates configuration of a window object. */
-        virtual void reconfigureWindowObject(BaseCompWindow *window);
+        virtual void reconfigureWindowObject(BaseCompWindow *window, const XConfigureEvent &event);
 
         /** Unmaps a window object. */
         virtual void unmapWindowObject(BaseCompWindow *window);

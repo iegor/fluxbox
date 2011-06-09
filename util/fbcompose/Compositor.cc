@@ -154,6 +154,7 @@ void Compositor::initExtension(const char *extensionName, QueryExtensionFunction
 // The event loop.
 void Compositor::eventLoop() {
     XEvent event;
+    XRectangle exposedArea;
     bool changesOccured = false;
 
     while (!done()) {
@@ -187,10 +188,12 @@ void Compositor::eventLoop() {
                 fbLog_info << "DestroyNotify on " << event.xdestroywindow.window << std::endl;
                 break;
             case Expose :
-                if (event.xexpose.count == 0) {
-                    m_screens[eventScreen]->damageWindow(event.xexpose.window);
-                    fbLog_info << "Expose on " << event.xexpose.window << " (" << event.xexpose.count << ")" << std::endl;
-                }
+                exposedArea.x = event.xexpose.x;
+                exposedArea.y = event.xexpose.y;
+                exposedArea.width = event.xexpose.width;
+                exposedArea.height = event.xexpose.height;
+                m_screens[eventScreen]->damageWindow(event.xexpose.window, exposedArea);
+                fbLog_info << "Expose on " << event.xexpose.window << std::endl;
                 break;
             case MapNotify :
                 m_screens[eventScreen]->mapWindow(event.xmap.window);
@@ -217,7 +220,7 @@ void Compositor::eventLoop() {
             default :
                 if (event.type == (m_damageEventBase + XDamageNotify)) {
                     XDamageNotifyEvent damageEvent = *((XDamageNotifyEvent*) &event);   // TODO: Better cast.
-                    m_screens[eventScreen]->damageWindow(damageEvent.drawable);
+                    m_screens[eventScreen]->damageWindow(damageEvent.drawable, damageEvent.area);
                     fbLog_info << "DamageNotify on " << damageEvent.drawable << std::endl;
                 } else {
                     fbLog_info << "Event " << event.xany.type << " on screen " << eventScreen

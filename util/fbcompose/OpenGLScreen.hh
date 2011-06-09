@@ -78,13 +78,13 @@ namespace FbCompositor {
         void cleanupWindowObject(BaseCompWindow *window);
 
         /** Damages a window object. */
-        void damageWindowObject(BaseCompWindow *window);
+        void damageWindowObject(BaseCompWindow *window, XRectangle area);
 
         /** Maps a window object. */
         void mapWindowObject(BaseCompWindow *window);
 
         /** Updates window's configuration. */
-        void reconfigureWindowObject(BaseCompWindow *window);
+        void reconfigureWindowObject(BaseCompWindow *window, const XConfigureEvent &event);
 
         /** Unmaps a window object. */
         void unmapWindowObject(BaseCompWindow *window);

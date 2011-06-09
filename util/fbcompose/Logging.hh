@@ -24,6 +24,8 @@
 #ifndef FBCOMPOSITOR_LOGGING_HH
 #define FBCOMPOSITOR_LOGGING_HH
 
+#include <iostream>
+
 
 namespace FbCompositor {
 

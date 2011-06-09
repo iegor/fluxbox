@@ -389,8 +389,8 @@ void OpenGLScreen::cleanupWindowObject(BaseCompWindow *window) {
 }
 
 // Damages a window object.
-void OpenGLScreen::damageWindowObject(BaseCompWindow *window) {
-    BaseScreen::damageWindowObject(window);
+void OpenGLScreen::damageWindowObject(BaseCompWindow *window, XRectangle area) {
+    BaseScreen::damageWindowObject(window, area);
 }
 
 // Maps a window object.
@@ -399,8 +399,8 @@ void OpenGLScreen::mapWindowObject(BaseCompWindow *window) {
 }
 
 // Updates window's configuration.
-void OpenGLScreen::reconfigureWindowObject(BaseCompWindow *window) {
-    BaseScreen::reconfigureWindowObject(window);
+void OpenGLScreen::reconfigureWindowObject(BaseCompWindow *window, const XConfigureEvent &event) {
+    BaseScreen::reconfigureWindowObject(window, event);
     (dynamic_cast<OpenGLWindow*>(window))->updateArrays();
 }
 

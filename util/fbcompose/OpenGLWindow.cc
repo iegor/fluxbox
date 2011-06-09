@@ -21,14 +21,15 @@
 // THE SOFTWARE.
 
 
-#include "OpenGLWindow.hh"
-
 #include "Compositor.hh"
+#include "Logging.hh"
+#include "OpenGLWindow.hh"
 
 #include "FbTk/App.hh"
 
 #include <X11/Xutil.h>
 
+#include <algorithm>
 #include <iostream>
 
 using namespace FbCompositor;
@@ -99,32 +100,48 @@ void OpenGLWindow::updateArrays() throw() {
 
 // Updates the window's contents.
 void OpenGLWindow::updateContents() throw(RuntimeException) {
-    BaseCompWindow::updateContents();
+    updateContentPixmap();
 
-    if (contents()) {
+    if (contentPixmap()) {
 
 #ifdef GLXEW_EXT_texture_from_pixmap
         if (m_glxContents) {
             glXDestroyPixmap(display(), m_glxContents);
             m_glxContents = 0;
         }
-        m_glxContents = glXCreatePixmap(display(), m_fbConfig, contents(), TEX_PIXMAP_ATTRIBUTES);
+        m_glxContents = glXCreatePixmap(display(), m_fbConfig, contentPixmap(), TEX_PIXMAP_ATTRIBUTES);
 
         glBindTexture(GL_TEXTURE_2D, contentTexture());
         glXBindTexImageEXT(display(), m_glxContents, GLX_FRONT_LEFT_EXT, NULL);
 
 #else
-        glBindTexture(GL_TEXTURE_2D, contentTexture());
-
-        XImage *image = XGetImage(display(), contents(), 0, 0, realWidth(), realHeight(), AllPlanes, ZPixmap);
+        XImage *image = XGetImage(display(), contentPixmap(), 0, 0, realWidth(), realHeight(), AllPlanes, ZPixmap);
         if (!image) {
-            // throw RuntimeException("Cannot create window's XImage.");
+            fbLog_warn << "Cannot create XImage for window " << window() << ". It's probably nothing - skipping." << std::endl;
             return;
         }
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, realWidth(), realHeight(), 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)(&(image->data[0])));
+        glBindTexture(GL_TEXTURE_2D, m_contentTexture);
+
+        if (isResized()) {
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, realWidth(), realHeight(), 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)(&(image->data[0])));
+        } else {
+            XImage *subImage;
+            for (size_t i = 0; i < damagedArea().size(); i++) {
+                int damageWidth = std::min(damagedArea()[i].width + 1, realWidth());
+                int damageHeight = std::min(damagedArea()[i].height + 1, realHeight());
+
+                subImage = XSubImage(image, damagedArea()[i].x, damagedArea()[i].y, damageWidth, damageHeight);
+                glTexSubImage2D(GL_TEXTURE_2D, 0, damagedArea()[i].x, damagedArea()[i].y, damageWidth,
+                                damageHeight, GL_BGRA, GL_UNSIGNED_BYTE, (void*)(&(subImage->data[0])));
+                XDestroyImage(subImage);
+            }
+        }
+
         XDestroyImage(image);
 
 #endif  // GLXEW_EXT_texture_from_pixmap
     }
+
+    clearDamage();
 }

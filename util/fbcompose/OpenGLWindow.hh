@@ -87,15 +87,14 @@ namespace FbCompositor {
         GLuint m_windowPosBuffer;
 
 
-#ifdef GLXEW_EXT_texture_from_pixmap
         //--- texture_from_pixmap EXTENSION SPECIFIC ---------------------------
 
+#ifdef GLXEW_EXT_texture_from_pixmap
         /** Attributes of the contents' GLX pixmap. */
         static const int TEX_PIXMAP_ATTRIBUTES[];
 
         /** The GLX pixmap of window's contents. */
         GLXPixmap m_glxContents;
-
 #endif  // GLXEW_EXT_texture_from_pixmap
 
 
