@@ -68,7 +68,21 @@ BaseScreen::~BaseScreen() { }
 //--- OTHER INITIALIZATION -----------------------------------------------------
 
 // Initializes all of the windows on the screen.
-void BaseScreen::initWindows() { }
+void BaseScreen::initWindows() {
+    Window root;
+    Window parent;
+    Window *children;
+    unsigned int childCount;
+
+    XQueryTree(display(), rootWindow().window(), &root, &parent, &children, &childCount);
+    for (unsigned int i = 0; i < childCount; i++) {
+        createWindow(children[i]);
+    }
+
+    if (children) {
+        XFree(children);
+    }
+}
 
 
 //--- WINDOW MANIPULATION ------------------------------------------------------
@@ -100,7 +114,7 @@ void BaseScreen::createWindow(Window window) {
 void BaseScreen::damageWindow(Window window, XRectangle area) {
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
     if (it != m_windows.end()) {
-        damageWindowObject(*it, area);
+        (*it)->addDamage(area);
     } else {
         // TODO: Throw something.
     }
@@ -110,7 +124,6 @@ void BaseScreen::damageWindow(Window window, XRectangle area) {
 void BaseScreen::destroyWindow(Window window) {
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
     if (it != m_windows.end()) {
-        cleanupWindowObject(*it);
         delete *it;
         m_windows.erase(it);
     } else {
@@ -128,7 +141,7 @@ bool BaseScreen::isWindowManaged(Window window) {
 void BaseScreen::mapWindow(Window window) {
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
     if (it != m_windows.end()) {
-        mapWindowObject(*it);
+        (*it)->setMapped();
     } else {
         // TODO: Throw something.
     }
@@ -138,7 +151,7 @@ void BaseScreen::mapWindow(Window window) {
 void BaseScreen::reconfigureWindow(const XConfigureEvent &event) {
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(event.window);
     if (it != m_windows.end()) {
-        reconfigureWindowObject(*it, event);
+        (*it)->reconfigure(event);
 
         BaseCompWindow *currentWindow = *it;
         m_windows.erase(it);
@@ -163,7 +176,7 @@ void BaseScreen::reconfigureWindow(const XConfigureEvent &event) {
 void BaseScreen::unmapWindow(Window window) {
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
     if (it != m_windows.end()) {
-        unmapWindowObject(*it);
+        (*it)->setUnmapped();
     } else {
         // TODO: Throw something.
     }
@@ -186,52 +199,11 @@ void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
 
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
     if (it != m_windows.end()) {
-        updateWindowObjectProperty(*it, property, state);
+        (*it)->updateProperty(property, state);
     } else {
         // TODO: Throw something.
     }
 }
-
-
-//--- SPECIALIZED WINDOW MANIPULATION FUNCTIONS --------------------------------
-
-// Creates a new window object from its XID.
-BaseCompWindow *BaseScreen::createWindowObject(Window window) {
-    BaseCompWindow *newWindow = new BaseCompWindow(window);
-    return newWindow;
-}
-
-// Cleans up a window object before it is deleted.
-void BaseScreen::cleanupWindowObject(BaseCompWindow *window) { }
-
-// Damages a window object.
-void BaseScreen::damageWindowObject(BaseCompWindow *window, XRectangle area) {
-    window->addDamage(area);
-}
-
-// Maps a window object.
-void BaseScreen::mapWindowObject(BaseCompWindow *window) {
-    window->setMapped();
-}
-
-// Updates configuration of a window object.
-void BaseScreen::reconfigureWindowObject(BaseCompWindow *window, const XConfigureEvent &event) {
-    window->reconfigure(event);
-}
-
-// Unmaps a window object.
-void BaseScreen::unmapWindowObject(BaseCompWindow *window) {
-    window->setUnmapped();
-}
-
-// Updates the value of some window's property.
-void BaseScreen::updateWindowObjectProperty(BaseCompWindow *window, Atom property, int state) { }
-
-
-//--- SCREEN RENDERING ---------------------------------------------------------
-
-// Renders the screen's contents.
-void BaseScreen::renderScreen() { }
 
 
 //--- INTERNAL FUNCTIONS -------------------------------------------------------

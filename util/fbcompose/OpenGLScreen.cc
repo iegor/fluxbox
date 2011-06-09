@@ -104,26 +104,6 @@ OpenGLScreen::~OpenGLScreen() {
 }
 
 
-//--- OTHER INITIALIZATION ---------------------------------------------
-
-// Initializes all of the windows on the screen.
-void OpenGLScreen::initWindows() {
-    Window root;
-    Window parent;
-    Window *children;
-    unsigned int childCount;
-
-    XQueryTree(display(), rootWindow().window(), &root, &parent, &children, &childCount);
-    for (unsigned int i = 0; i < childCount; i++) {
-        createWindow(children[i]);
-    }
-
-    if (children) {
-        XFree(children);
-    }
-}
-
-
 //--- INITIALIZATION FUNCTIONS -------------------------------------------------
 
 // Early initialization of GLX functions.
@@ -381,37 +361,6 @@ GLuint OpenGLScreen::createShaderProgram(GLuint vertexShader, GLuint geometrySha
 BaseCompWindow *OpenGLScreen::createWindowObject(Window window) {
     OpenGLWindow *newWindow = new OpenGLWindow(window, m_fbConfig);
     return newWindow;
-}
-
-// Cleans up a window object before it is deleted.
-void OpenGLScreen::cleanupWindowObject(BaseCompWindow *window) {
-    BaseScreen::cleanupWindowObject(window);
-}
-
-// Damages a window object.
-void OpenGLScreen::damageWindowObject(BaseCompWindow *window, XRectangle area) {
-    BaseScreen::damageWindowObject(window, area);
-}
-
-// Maps a window object.
-void OpenGLScreen::mapWindowObject(BaseCompWindow *window) {
-    BaseScreen::mapWindowObject(window);
-}
-
-// Updates window's configuration.
-void OpenGLScreen::reconfigureWindowObject(BaseCompWindow *window, const XConfigureEvent &event) {
-    BaseScreen::reconfigureWindowObject(window, event);
-    (dynamic_cast<OpenGLWindow*>(window))->updateArrays();
-}
-
-// Unmaps a window object.
-void OpenGLScreen::unmapWindowObject(BaseCompWindow *window) {
-    BaseScreen::unmapWindowObject(window);
-}
-
-// Updates the value of some window's property.
-void OpenGLScreen::updateWindowObjectProperty(BaseCompWindow *window, Atom property, int state) {
-    BaseScreen::updateWindowObjectProperty(window, property, state);
 }
 
 

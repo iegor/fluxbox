@@ -63,7 +63,7 @@ OpenGLWindow::OpenGLWindow(Window windowXID, GLXFBConfig fbConfig) throw() :
     glGenBuffers(1, &m_windowPosBuffer);
 
     // Fill window position array.
-    updateArrays();
+    updateWindowPosArray();
 
     // Initialize the content texture.
     glBindTexture(GL_TEXTURE_2D, m_contentTexture);
@@ -87,15 +87,10 @@ OpenGLWindow::~OpenGLWindow() throw() {
 
 //--- WINDOW UPDATE FUNCTIONS ------------------------------------------
 
-// Update the appropriate window's arrays.
-void OpenGLWindow::updateArrays() throw() {
-    m_windowPosArray[0] = m_windowPosArray[4] = ((x() * 2.0) / m_rootWidth) - 1.0;
-    m_windowPosArray[2] = m_windowPosArray[6] = (((x() + realWidth()) * 2.0) / m_rootWidth) - 1.0;
-    m_windowPosArray[1] = m_windowPosArray[3] = 1.0 - ((y() * 2.0) / m_rootHeight);
-    m_windowPosArray[5] = m_windowPosArray[7] = 1.0 - (((y() + realHeight()) * 2.0) / m_rootHeight);
-
-    glBindBuffer(GL_ARRAY_BUFFER, m_windowPosBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(m_windowPosArray), (const GLvoid*)(m_windowPosArray), GL_STATIC_DRAW);
+// Reconfigures the window.
+void OpenGLWindow::reconfigure(const XConfigureEvent &event) throw() {
+    BaseCompWindow::reconfigure(event);
+    updateWindowPosArray();
 }
 
 // Updates the window's contents.
@@ -144,4 +139,18 @@ void OpenGLWindow::updateContents() throw(RuntimeException) {
     }
 
     clearDamage();
+}
+
+
+//--- INTERNAL FUNCTIONS -----------------------------------------------00000000
+
+// Updates the window position vertex array.
+void OpenGLWindow::updateWindowPosArray() throw() {
+    m_windowPosArray[0] = m_windowPosArray[4] = ((x() * 2.0) / m_rootWidth) - 1.0;
+    m_windowPosArray[2] = m_windowPosArray[6] = (((x() + realWidth()) * 2.0) / m_rootWidth) - 1.0;
+    m_windowPosArray[1] = m_windowPosArray[3] = 1.0 - ((y() * 2.0) / m_rootHeight);
+    m_windowPosArray[5] = m_windowPosArray[7] = 1.0 - (((y() + realHeight()) * 2.0) / m_rootHeight);
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_windowPosBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(m_windowPosArray), (const GLvoid*)(m_windowPosArray), GL_STATIC_DRAW);
 }

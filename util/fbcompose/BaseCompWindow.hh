@@ -95,20 +95,23 @@ namespace FbCompositor {
 
         //--- WINDOW MANIPULATION ----------------------------------------------
 
-        /** Adds damage to a window. */
+        /** Add damage to a window. */
         virtual void addDamage(XRectangle area) throw();
 
-        /** Reconfigures a window. */
-        void reconfigure(const XConfigureEvent &event) throw();
+        /** Reconfigure a window. */
+        virtual void reconfigure(const XConfigureEvent &event) throw();
 
-        /** Marks the window as mapped. */
-        void setMapped() throw();
+        /** Mark the window as mapped. */
+        virtual void setMapped() throw();
 
-        /** Marks the window as unmapped. */
-        void setUnmapped() throw();
+        /** Mark the window as unmapped. */
+        virtual void setUnmapped() throw();
 
-        /** Updates the window's contents. */
+        /** Update the window's contents. */
         virtual void updateContents();
+
+        /** Update window's property. */
+        virtual void updateProperty(Atom property, int state);
 
 
     protected:

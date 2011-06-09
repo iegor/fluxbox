@@ -64,14 +64,20 @@ namespace FbCompositor {
 
         //--- WINDOW UPDATE FUNCTIONS ------------------------------------------
 
-        /** Update the appropriate window's arrays. */
-        void updateArrays() throw();
+        /** Reconfigures a window. */
+        void reconfigure(const XConfigureEvent &event) throw();
 
         /** Updates the window's contents. */
         void updateContents() throw(RuntimeException);
 
 
     private :
+        //--- INTERNAL FUNCTIONS -----------------------------------------------
+
+        /** Updates the window position vertex array. */
+        void updateWindowPosArray() throw();
+
+
         //--- RENDERING-RELATED VARIABLES --------------------------------------
 
         /** Window's content texture. */

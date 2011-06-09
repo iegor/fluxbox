@@ -56,12 +56,6 @@ namespace FbCompositor {
         ~OpenGLScreen();
 
 
-        //--- OTHER INITIALIZATION ---------------------------------------------
-
-        /** Initializes all of the windows on the screen. */
-        void initWindows();
-
-
         //--- SCREEN RENDERING -------------------------------------------------
 
         /** Renders the screen's contents. */
@@ -73,24 +67,6 @@ namespace FbCompositor {
 
         /** Creates a window object from its XID. */
         BaseCompWindow *createWindowObject(Window window);
-
-        /** Cleans up a window object before it is deleted. */
-        void cleanupWindowObject(BaseCompWindow *window);
-
-        /** Damages a window object. */
-        void damageWindowObject(BaseCompWindow *window, XRectangle area);
-
-        /** Maps a window object. */
-        void mapWindowObject(BaseCompWindow *window);
-
-        /** Updates window's configuration. */
-        void reconfigureWindowObject(BaseCompWindow *window, const XConfigureEvent &event);
-
-        /** Unmaps a window object. */
-        void unmapWindowObject(BaseCompWindow *window);
-
-        /** Updates the value of some window's property. */
-        void updateWindowObjectProperty(BaseCompWindow *window, Atom property, int state);
 
 
     private:

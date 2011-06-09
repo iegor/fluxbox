@@ -61,7 +61,7 @@ namespace FbCompositor {
         //--- OTHER INITIALIZATION ---------------------------------------------
 
         /** Initializes all of the windows on the screen. */
-        virtual void initWindows();
+        void initWindows();
 
 
         //--- ACCESSORS --------------------------------------------------------
@@ -121,7 +121,7 @@ namespace FbCompositor {
         //--- SCREEN RENDERING -------------------------------------------------
 
         /** Renders the screen's contents. */
-        virtual void renderScreen();
+        virtual void renderScreen() = 0;
 
 
     protected:
@@ -134,26 +134,7 @@ namespace FbCompositor {
         //--- SPECIALIZED WINDOW MANIPULATION FUNCTIONS ------------------------
 
         /** Creates a window object from its XID. */
-        // TODO: Make pure virtual.
-        virtual BaseCompWindow *createWindowObject(Window window);
-
-        /** Cleans up a window object before it is deleted. */
-        virtual void cleanupWindowObject(BaseCompWindow *window);
-
-        /** Damages a window object. */
-        virtual void damageWindowObject(BaseCompWindow *window, XRectangle area);
-
-        /** Maps a window object. */
-        virtual void mapWindowObject(BaseCompWindow *window);
-
-        /** Updates configuration of a window object. */
-        virtual void reconfigureWindowObject(BaseCompWindow *window, const XConfigureEvent &event);
-
-        /** Unmaps a window object. */
-        virtual void unmapWindowObject(BaseCompWindow *window);
-
-        /** Updates the value of some window's property. */
-        virtual void updateWindowObjectProperty(BaseCompWindow *window, Atom property, int state);
+        virtual BaseCompWindow *createWindowObject(Window window) = 0;
 
 
     private:

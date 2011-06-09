@@ -106,12 +106,12 @@ std::vector<Window> BaseCompWindow::windowProperty(Atom propertyAtom) {
 
 //--- WINDOW MANIPULATION ------------------------------------------------------
 
-// Adds damage to a window.
+// Add damage to a window.
 void BaseCompWindow::addDamage(XRectangle area) throw() {
     m_damagedArea.push_back(area);
 }
 
-// Reconfigures a window.
+// Reconfigure a window.
 void BaseCompWindow::reconfigure(const XConfigureEvent &event) throw() {
     unsigned int oldBorderWidth = borderWidth();
     unsigned int oldHeight = height();
@@ -123,21 +123,24 @@ void BaseCompWindow::reconfigure(const XConfigureEvent &event) throw() {
     }
 }
 
-// Marks the window as mapped.
+// Mark the window as mapped.
 void BaseCompWindow::setMapped() throw() {
     m_isMapped = true;
 }
 
-// Marks the window as unmapped.
+// Mark the window as unmapped.
 void BaseCompWindow::setUnmapped() throw() {
     m_isMapped = false;
 }
 
-// Updates the window's contents.
+// Update the window's contents.
 void BaseCompWindow::updateContents() {
     updateContentPixmap();
     clearDamage();
 }
+
+// Update window's property.
+void BaseCompWindow::updateProperty(Atom property, int state) { }
 
 
 //--- PROTECTED WINDOW MANIPULATION --------------------------------------------
