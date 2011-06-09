@@ -142,7 +142,7 @@ void OpenGLWindow::updateContents() throw(RuntimeException) {
 }
 
 
-//--- INTERNAL FUNCTIONS -----------------------------------------------00000000
+//--- INTERNAL FUNCTIONS -------------------------------------------------------
 
 // Updates the window position vertex array.
 void OpenGLWindow::updateWindowPosArray() throw() {
