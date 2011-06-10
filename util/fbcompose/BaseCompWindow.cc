@@ -23,11 +23,12 @@
 
 #include "BaseCompWindow.hh"
 
+#include <X11/extensions/shape.h>
 #include <X11/extensions/Xcomposite.h>
 #include <X11/Xatom.h>
 
+#include <algorithm>
 #include <ostream>
-#include <iostream>
 
 using namespace FbCompositor;
 
@@ -45,6 +46,11 @@ BaseCompWindow::BaseCompWindow(Window windowXID) throw() :
     m_isMapped = (xwa.map_state != IsUnmapped);
     m_isResized = true;
 
+    m_clipShapeChanged = true;
+    m_clipShapeRects = 0;
+    m_clipShapeRectCount = 0;
+    m_clipShapeRectOrder = Unsorted;
+
     if (m_class == InputOutput) {
         m_damage = XDamageCreate(display(), window(), XDamageReportDeltaRectangles);
     } else {
@@ -54,7 +60,11 @@ BaseCompWindow::BaseCompWindow(Window windowXID) throw() :
 }
 
 // Destructor.
-BaseCompWindow::~BaseCompWindow() throw() { }
+BaseCompWindow::~BaseCompWindow() throw() {
+    if (m_clipShapeRects) {
+        XFree(m_clipShapeRects);
+    }
+}
 
 
 //--- PROPERTY ACCESS ----------------------------------------------------------
@@ -108,6 +118,8 @@ std::vector<Window> BaseCompWindow::windowProperty(Atom propertyAtom) {
 
 // Add damage to a window.
 void BaseCompWindow::addDamage(XRectangle area) throw() {
+    area.height = std::min(area.height + 1, (int)realHeight());
+    area.width = std::min(area.width + 1, (int)realWidth());
     m_damagedArea.push_back(area);
 }
 
@@ -119,8 +131,14 @@ void BaseCompWindow::reconfigure(const XConfigureEvent &event) throw() {
     updateGeometry();
 
     if ((borderWidth() != oldBorderWidth) || (height() != oldHeight) || (width() != oldWidth)) {
+        setClipShapeChanged();
         m_isResized = true;
     }
+}
+
+// Set the clip shape as changed.
+void BaseCompWindow::setClipShapeChanged() throw() {
+    m_clipShapeChanged = true;
 }
 
 // Mark the window as mapped.
@@ -136,7 +154,24 @@ void BaseCompWindow::setUnmapped() throw() {
 // Update the window's contents.
 void BaseCompWindow::updateContents() {
     updateContentPixmap();
+    if (m_clipShapeChanged) {
+        updateShape();
+    }
+
     clearDamage();
+}
+
+// Update the window's clip shape.
+void BaseCompWindow::updateShape() throw() {
+    if (m_clipShapeRects) {
+        XFree(m_clipShapeRects);
+    }
+
+    m_clipShapeRects = XShapeGetRectangles(display(), window(), ShapeClip, &m_clipShapeRectCount, &m_clipShapeRectOrder);
+    for (int i = 0; i < m_clipShapeRectCount; i++) {
+        m_clipShapeRects[i].height = std::min(m_clipShapeRects[i].height + 2 * borderWidth(), realHeight());
+        m_clipShapeRects[i].width = std::min(m_clipShapeRects[i].width + 2 * borderWidth(), realWidth());
+    }
 }
 
 // Update window's property.
@@ -147,20 +182,21 @@ void BaseCompWindow::updateProperty(Atom property, int state) { }
 
 // Removes all damage from the window.
 void BaseCompWindow::clearDamage() throw() {
+    m_clipShapeChanged = false;
     m_damagedArea.clear();
     m_isResized = false;
 }
 
 // Updates the window's content pixmap.
 void BaseCompWindow::updateContentPixmap() throw() {
+    // We must reset the damage here, otherwise we may miss damage events.
+    XDamageSubtract(display(), m_damage, None, None);
+
     if (m_contentPixmap) {
         XFreePixmap(display(), m_contentPixmap);
         m_contentPixmap = None;
     }
     m_contentPixmap = XCompositeNameWindowPixmap(display(), window());
-
-    // We must reset the damage status here, otherwise we may miss damage events.
-    XDamageSubtract(display(), m_damage, None, None);
 }
 
 

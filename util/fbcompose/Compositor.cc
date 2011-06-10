@@ -222,6 +222,10 @@ void Compositor::eventLoop() {
                     XDamageNotifyEvent damageEvent = *((XDamageNotifyEvent*) &event);   // TODO: Better cast.
                     m_screens[eventScreen]->damageWindow(damageEvent.drawable, damageEvent.area);
                     fbLog_info << "DamageNotify on " << damageEvent.drawable << std::endl;
+                } else if (event.type == (m_shapeEventBase + ShapeNotify)) {
+                    XShapeEvent shapeEvent = *((XShapeEvent*) &event);      // TODO: Better cast.
+                    m_screens[eventScreen]->updateShape(shapeEvent.window);
+                    fbLog_info << "ShapeNotify on " << shapeEvent.window << std::endl;
                 } else {
                     fbLog_info << "Event " << event.xany.type << " on screen " << eventScreen
                                << " and window " << event.xany.window << std::endl;

@@ -75,10 +75,10 @@ namespace FbCompositor {
 
 
         /** \returns the window's height with borders factored in. */
-        int realHeight() const throw();
+        unsigned int realHeight() const throw();
 
         /** \returns the window's width with borders factored in. */
-        int realWidth() const throw();
+        unsigned int realWidth() const throw();
 
 
         //--- PROPERTY ACCESS --------------------------------------------------
@@ -101,6 +101,9 @@ namespace FbCompositor {
         /** Reconfigure a window. */
         virtual void reconfigure(const XConfigureEvent &event) throw();
 
+        /** Set the clip shape as changed. */
+        void setClipShapeChanged() throw();
+
         /** Mark the window as mapped. */
         virtual void setMapped() throw();
 
@@ -117,6 +120,19 @@ namespace FbCompositor {
     protected:
         //--- PROTECTED ACCESSORS ----------------------------------------------
 
+        /** \returns whether the chip shape changed since the last update. */
+        int clipShapeChanged() const throw();
+
+        /** \returns the number of rectangles that make up the clip shape. */
+        int clipShapeRectCount() const throw();
+
+        /** \returns the ordering of rectangles that make up the clip shape. */
+        int clipShapeRectOrder() const throw();
+
+        /** \returns the rectangles that make up the clip shape. */
+        XRectangle *clipShapeRects() const throw();
+
+
         /** \returns the vector, containing the damaged window's areas. */
         const std::vector<XRectangle> &damagedArea() const throw();
 
@@ -132,6 +148,10 @@ namespace FbCompositor {
         /** Updates the window's content pixmap. */
         void updateContentPixmap() throw();
 
+        /** Update the window's clip shape. */
+        virtual void updateShape() throw();
+
+
     private:
         //--- INTERNAL FUNCTIONS -----------------------------------------------
 
@@ -145,6 +165,10 @@ namespace FbCompositor {
         /** Window's class. */
         int m_class;
 
+        /** Window's map state. */
+        bool m_isMapped;
+
+
         /** Window's content pixmap. */
         Pixmap m_contentPixmap;
 
@@ -154,15 +178,45 @@ namespace FbCompositor {
         /** A list of damaged rectangles. */
         std::vector<XRectangle> m_damagedArea;
 
-        /** Window's map state. */
-        bool m_isMapped;
-
-        /** Shows whether the window has been resized after the last update. */
+        /** Shows whether the window has been resized since the last update. */
         bool m_isResized;
+
+
+        /** The number of rectangles of window's clip shape. */
+        int m_clipShapeRectCount;
+
+        /** The ordering of window clip shape rectangles. */
+        int m_clipShapeRectOrder;
+
+        /** Rectangles, that make up the window's clip shape. */
+        XRectangle *m_clipShapeRects;
+
+        /** Shows whether the clip shape changed since the last update. */
+        bool m_clipShapeChanged;
     };
 
 
     //--- INLINE FUNCTIONS -----------------------------------------------------
+
+    // Returns whether the chip shape changed since the last update.
+    inline int BaseCompWindow::clipShapeChanged() const throw() {
+        return m_clipShapeChanged;
+    }
+
+    // Returns the number of rectangles that make up the clip shape.
+    inline int BaseCompWindow::clipShapeRectCount() const throw() {
+        return m_clipShapeRectCount;
+    }
+
+    // Returns the ordering of rectangles that make up the clip shape.
+    inline int BaseCompWindow::clipShapeRectOrder() const throw() {
+        return m_clipShapeRectOrder;
+    }
+
+    // Returns the rectangles that make up the clip shape.
+    inline XRectangle *BaseCompWindow::clipShapeRects() const throw() {
+        return m_clipShapeRects;
+    }
 
     // Returns the window's contents as a pixmap.
     inline Pixmap BaseCompWindow::contentPixmap() const throw() {
@@ -190,12 +244,12 @@ namespace FbCompositor {
     }
 
     // Returns the window's height with borders factored in.
-    inline int BaseCompWindow::realHeight() const throw() {
+    inline unsigned int BaseCompWindow::realHeight() const throw() {
         return height() + 2 * borderWidth();
     }
 
     // Returns the window's width with borders factored in.
-    inline int BaseCompWindow::realWidth() const throw() {
+    inline unsigned int BaseCompWindow::realWidth() const throw() {
         return width() + 2 * borderWidth();
     }
 

@@ -25,6 +25,7 @@
 
 #include "FbTk/App.hh"
 
+#include <X11/extensions/shape.h>
 #include <X11/extensions/Xcomposite.h>
 
 #include <algorithm>
@@ -167,6 +168,16 @@ void BaseScreen::reconfigureWindow(const XConfigureEvent &event) {
                 m_windows.insert(it, currentWindow);
             }
         }
+    } else {
+        // TODO: Throw something.
+    }
+}
+
+// Updates window's shape.
+void BaseScreen::updateShape(Window window) {
+    std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
+    if (it != m_windows.end()) {
+        (*it)->setClipShapeChanged();
     } else {
         // TODO: Throw something.
     }

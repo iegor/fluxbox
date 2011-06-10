@@ -111,6 +111,9 @@ namespace FbCompositor {
         /** Updates window's configuration. */
         void reconfigureWindow(const XConfigureEvent &event);
 
+        /** Updates window's shape. */
+        void updateShape(Window window);
+
         /** Unmaps a window on this screen. */
         void unmapWindow(Window window);
 
