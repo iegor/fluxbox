@@ -281,8 +281,11 @@ namespace FbCompositor {
     // Convenience function for accessing properties with a single value.
     template<class T>
     T BaseCompWindow::singlePropertyValue(Atom propertyAtom, T defaultValue, const char *propertyName) {
-        std::vector<T> values = propertyValue<T>(propertyAtom);
+        if (!propertyAtom) {
+            return defaultValue;
+        }
 
+        std::vector<T> values = propertyValue<T>(propertyAtom);
         if (values.size() == 0) {
             if (!propertyName) {
                 propertyName = XGetAtomName(display(), propertyAtom);

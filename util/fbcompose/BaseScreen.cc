@@ -43,20 +43,16 @@ BaseScreen::BaseScreen(int screenNumber) :
     m_screenNumber(screenNumber),
     m_rootWindow(XRootWindow(m_display, m_screenNumber)) {
 
+    // Set up atoms and properties.
     m_activeWindowAtom = XInternAtom(m_display, "_NET_ACTIVE_WINDOW", False);
     m_workspaceAtom = XInternAtom(m_display, "_WIN_WORKSPACE", False);
     m_workspaceCountAtom = XInternAtom(m_display, "_WIN_WORKSPACE_COUNT", False);
-
-    if ((m_activeWindowAtom == None)
-            || (m_workspaceAtom == None)
-            || (m_workspaceCountAtom == None)) {
-        // TODO: Do something.
-    }
 
     m_activeWindowXID = m_rootWindow.singlePropertyValue<Window>(m_activeWindowAtom, 0);
     m_currentWorkspace = m_rootWindow.singlePropertyValue<long>(m_workspaceAtom, 0);
     m_workspaceCount = m_rootWindow.singlePropertyValue<long>(m_workspaceCountAtom, 1);
 
+    // Set up root window.
     long eventMask = ExposureMask | PropertyChangeMask | StructureNotifyMask | SubstructureNotifyMask;
     m_rootWindow.setEventMask(eventMask);
 
@@ -182,9 +178,6 @@ void BaseScreen::unmapWindow(Window window) {
 
 // Updates the value of some window's property.
 void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
-    // TODO: Should we check for existence of values? It is a rather sensible
-    // assumption that the root window will have all the needed properties.
-
     if ((window == m_rootWindow.window()) && (state == PropertyNewValue)) {
         if (property == m_activeWindowAtom) {
             m_activeWindowXID = m_rootWindow.singlePropertyValue<Window>(m_activeWindowAtom, 0);
