@@ -101,37 +101,36 @@ void OpenGLWindow::updateContents() throw(RuntimeException) {
     }
 
     if (contentPixmap()) {
-
-#ifdef GLXEW_EXT_texture_from_pixmap
         // Create a new pixmap that contains the correct alpha values for the clip shape.
-        Pixmap clippedContents = XCreatePixmap(display(), window(), realWidth(), realHeight(), depth());
+        Pixmap clippedPixmap = XCreatePixmap(display(), window(), realWidth(), realHeight(), depth());
 
-        GC gc = XCreateGC(display(), contentPixmap(), 0, 0);
+        GC gc = XCreateGC(display(), clippedPixmap, 0, 0);
         XSetGraphicsExposures(display(), gc, False);
 
         XSetForeground(display(), gc, 0x00000000);
-        XFillRectangle(display(), clippedContents, gc, 0, 0, realWidth(), realHeight());
+        XFillRectangle(display(), clippedPixmap, gc, 0, 0, realWidth(), realHeight());
 
         XSetForeground(display(), gc, 0xff000000);
         XSetClipRectangles(display(), gc, 0, 0, clipShapeRects(), clipShapeRectCount(), Unsorted);  // TODO: Fix rect order errors.
-        XFillRectangle(display(), clippedContents, gc, 0, 0, realWidth(), realHeight());
+        XFillRectangle(display(), clippedPixmap, gc, 0, 0, realWidth(), realHeight());
 
         XSetPlaneMask(display(), gc, 0x00ffffff);
-        XCopyArea(display(), contentPixmap(), clippedContents, gc, 0, 0, realWidth(), realHeight(), 0, 0);
+        XCopyArea(display(), contentPixmap(), clippedPixmap, gc, 0, 0, realWidth(), realHeight(), 0, 0);
 
+#ifdef GLXEW_EXT_texture_from_pixmap
         // Bind the pixmap to a GLX texture.
         if (m_glxContents) {
             glXDestroyPixmap(display(), m_glxContents);
             m_glxContents = 0;
         }
-        m_glxContents = glXCreatePixmap(display(), m_fbConfig, clippedContents, TEX_PIXMAP_ATTRIBUTES);
+        m_glxContents = glXCreatePixmap(display(), m_fbConfig, clippedPixmap, TEX_PIXMAP_ATTRIBUTES);
 
         glBindTexture(GL_TEXTURE_2D, contentTexture());
         glXBindTexImageEXT(display(), m_glxContents, GLX_FRONT_LEFT_EXT, NULL);
 
 #else
         // Convert the content pixmap to an XImage to access its raw contents.
-        XImage *image = XGetImage(display(), contentPixmap(), 0, 0, realWidth(), realHeight(), AllPlanes, ZPixmap);
+        XImage *image = XGetImage(display(), clippedPixmap, 0, 0, realWidth(), realHeight(), AllPlanes, ZPixmap);
         if (!image) {
             fbLog_warn << "Cannot create XImage for window " << window() << ". It's probably nothing - skipping." << std::endl;
             return;
@@ -139,23 +138,14 @@ void OpenGLWindow::updateContents() throw(RuntimeException) {
 
         // Update the texture.
         glBindTexture(GL_TEXTURE_2D, m_contentTexture);
-
-        if (isResized()) {
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, realWidth(), realHeight(), 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)(&(image->data[0])));
-        } else {
-            XImage *subImage;
-            for (size_t i = 0; i < damagedArea().size(); i++) {
-                subImage = XSubImage(image, damagedArea()[i].x, damagedArea()[i].y,
-                                     damagedArea()[i].width, damagedArea()[i].height);
-                glTexSubImage2D(GL_TEXTURE_2D, 0, damagedArea()[i].x, damagedArea()[i].y, damagedArea()[i].width,
-                                damagedArea()[i].height, GL_BGRA, GL_UNSIGNED_BYTE, (void*)(&(subImage->data[0])));
-                XDestroyImage(subImage);
-            }
-        }
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, realWidth(), realHeight(), 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)(&(image->data[0])));
 
         XDestroyImage(image);
 
 #endif  // GLXEW_EXT_texture_from_pixmap
+
+        XFreePixmap(display(), clippedPixmap);
+        XFreeGC(display(), gc);
     }
 
     clearDamage();
