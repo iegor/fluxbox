@@ -50,3 +50,4 @@ Makefile.in
 /util/fbcompose/fbcompose
 /version.h
 tags
+.*.sw[a-p]
