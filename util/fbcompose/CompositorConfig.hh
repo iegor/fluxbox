@@ -56,7 +56,7 @@ namespace FbCompositor {
         //--- ACCESSORS --------------------------------------------------------
 
         /** \returns the display name. */
-        const std::string &displayName() const throw();
+        const FbTk::FbString &displayName() const throw();
 
         /** \returns the selected rendering mode. */
         RenderingMode renderingMode() const throw();
@@ -66,7 +66,7 @@ namespace FbCompositor {
         //--- PRIVATE VARIABLES ------------------------------------------------
 
         /** The name of the display we want to use. */
-        std::string m_displayName;
+        FbTk::FbString m_displayName;
 
         /** Selected rendering mode. */
         RenderingMode m_renderingMode;
@@ -76,7 +76,7 @@ namespace FbCompositor {
     //--- INLINE FUNCTIONS -----------------------------------------------------
 
     // Returns the display name.
-    inline const std::string &CompositorConfig::displayName() const throw() {
+    inline const FbTk::FbString &CompositorConfig::displayName() const throw() {
         return m_displayName;
     }
 

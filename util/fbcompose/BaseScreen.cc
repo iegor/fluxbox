@@ -96,7 +96,7 @@ void BaseScreen::createWindow(Window window) {
         BaseCompWindow *newWindow = createWindowObject(window);
         m_windows.push_back(newWindow);
     } else {
-        // TODO: Throw something.
+        fbLog_warn << "Attempted to create a window twice (" << window << ")" << std::endl;
     }
 }
 
@@ -106,7 +106,7 @@ void BaseScreen::damageWindow(Window window, XRectangle area) {
     if (it != m_windows.end()) {
         (*it)->addDamage(area);
     } else {
-        // TODO: Throw something.
+        fbLog_warn << "Attempted to damage an untracked window (" << window << ")" << std::endl;
     }
 }
 
@@ -117,7 +117,7 @@ void BaseScreen::destroyWindow(Window window) {
         delete *it;
         m_windows.erase(it);
     } else {
-        // TODO: Throw something.
+        fbLog_warn << "Attempted to destroy an untracked window (" << window << ")" << std::endl;
     }
 }
 
@@ -127,7 +127,7 @@ void BaseScreen::mapWindow(Window window) {
     if (it != m_windows.end()) {
         (*it)->setMapped();
     } else {
-        // TODO: Throw something.
+        fbLog_warn << "Attempted to map an untracked window (" << window << ")" << std::endl;
     }
 }
 
@@ -152,7 +152,7 @@ void BaseScreen::reconfigureWindow(const XConfigureEvent &event) {
             }
         }
     } else {
-        // TODO: Throw something.
+        fbLog_warn << "Attempted to reparent an untracked window (" << event.window << ")" << std::endl;
     }
 }
 
@@ -162,7 +162,7 @@ void BaseScreen::updateShape(Window window) {
     if (it != m_windows.end()) {
         (*it)->setClipShapeChanged();
     } else {
-        // TODO: Throw something.
+        fbLog_warn << "Attempted to update the shape of an untracked window (" << window << ")" << std::endl;
     }
 }
 
@@ -172,7 +172,7 @@ void BaseScreen::unmapWindow(Window window) {
     if (it != m_windows.end()) {
         (*it)->setUnmapped();
     } else {
-        // TODO: Throw something.
+        fbLog_warn << "Attempted to unmap an untracked window (" << window << ")" << std::endl;
     }
 }
 
@@ -192,7 +192,9 @@ void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
     if (it != m_windows.end()) {
         (*it)->updateProperty(property, state);
     } else {
-        // TODO: Throw something.
+        if (window != rootWindow().window()) {
+            fbLog_warn << "Attempted to set the property of an untracked window (" << window << ")" << std::endl;
+        }
     }
 }
 

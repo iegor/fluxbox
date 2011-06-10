@@ -24,8 +24,9 @@
 #ifndef FBCOMPOSITOR_EXCEPTIONS_HH
 #define FBCOMPOSITOR_EXCEPTIONS_HH
 
+#include "FbTk/FbString.hh"
+
 #include <exception>
-#include <string>
 
 
 namespace FbCompositor {
@@ -38,7 +39,7 @@ namespace FbCompositor {
     class CompositorException : public std::exception {
     public:
         /** The constructor. */
-        CompositorException(std::string errorMessage) throw() :
+        CompositorException(FbTk::FbString errorMessage) throw() :
             m_errorMessage(errorMessage) {}
 
         /** Destructor.  */
@@ -49,7 +50,7 @@ namespace FbCompositor {
 
     private:
         /** The exception's main message. */
-        std::string m_errorMessage;
+        FbTk::FbString m_errorMessage;
     };
 
 
@@ -62,7 +63,7 @@ namespace FbCompositor {
     class ConfigException : public CompositorException {
     public:
         /** Public constructor. */
-        ConfigException(std::string errorMessage) throw() :
+        ConfigException(FbTk::FbString errorMessage) throw() :
             CompositorException(errorMessage) {}
 
         /** Destructor. */
@@ -77,7 +78,7 @@ namespace FbCompositor {
     class InitException : public CompositorException {
     public:
         /** Public constructor. */
-        InitException(std::string errorMessage) throw() :
+        InitException(FbTk::FbString errorMessage) throw() :
             CompositorException(errorMessage) {}
 
         /** Destructor. */
@@ -92,7 +93,7 @@ namespace FbCompositor {
     class RuntimeException : public CompositorException {
     public:
         /** Public constructor. */
-        RuntimeException(std::string errorMessage) throw() :
+        RuntimeException(FbTk::FbString errorMessage) throw() :
             CompositorException(errorMessage) {}
 
         /** Destructor. */

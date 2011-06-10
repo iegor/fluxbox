@@ -24,6 +24,8 @@
 #include "OpenGLScreen.hh"
 #include "OpenGLWindow.hh"
 
+#include "FbTk/FbString.hh"
+
 #include <X11/extensions/shape.h>
 #include <X11/extensions/Xcomposite.h>
 #include <X11/extensions/Xfixes.h>
@@ -31,7 +33,6 @@
 #include <list>
 #include <iostream>
 #include <sstream>
-#include <string>
 
 #include <cstring>
 
@@ -285,7 +286,7 @@ void OpenGLScreen::createBackgroundTexture() throw(InitException) {
 
 // Creates a shader.
 GLuint OpenGLScreen::createShader(GLenum shaderType, GLint sourceLength, const GLchar *source) throw(InitException) {
-    std::string shaderName;
+    FbTk::FbString shaderName;
     if (shaderType == GL_VERTEX_SHADER) {
         shaderName = "vertex";
     } else if (shaderType == GL_GEOMETRY_SHADER) {
