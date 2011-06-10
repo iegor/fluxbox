@@ -25,7 +25,6 @@
 
 #include <X11/extensions/shape.h>
 #include <X11/extensions/Xcomposite.h>
-#include <X11/Xatom.h>
 
 #include <algorithm>
 #include <ostream>
@@ -64,53 +63,6 @@ BaseCompWindow::~BaseCompWindow() throw() {
     if (m_clipShapeRects) {
         XFree(m_clipShapeRects);
     }
-}
-
-
-//--- PROPERTY ACCESS ----------------------------------------------------------
-
-// Returns the specified cardinal property.
-// This function was overriden, because it would return only one value of the
-// property, regardless of how many values there are in it.
-std::vector<long> BaseCompWindow::cardinalProperty(Atom propertyAtom) {
-    unsigned long nItems;
-    long *data;
-
-    if (rawPropertyData(propertyAtom, XA_CARDINAL, &nItems, reinterpret_cast<unsigned char**>(&data))) {
-        std::vector<long> actualData(data, data + nItems);
-        XFree(data);
-        return actualData;
-    }
-
-    return std::vector<long>();
-}
-
-// Returns the specified pixmap property.
-std::vector<Pixmap> BaseCompWindow::pixmapProperty(Atom propertyAtom) {
-    unsigned long nItems;
-    Pixmap *data;
-
-    if (rawPropertyData(propertyAtom, XA_PIXMAP, &nItems, reinterpret_cast<unsigned char**>(&data))) {
-        std::vector<Pixmap> actualData(data, data + nItems);
-        XFree(data);
-        return actualData;
-    }
-
-    return std::vector<Pixmap>();
-}
-
-// Returns the specified window property.
-std::vector<Window> BaseCompWindow::windowProperty(Atom propertyAtom) {
-    unsigned long nItems;
-    Window *data;
-
-    if (rawPropertyData(propertyAtom, XA_WINDOW, &nItems, reinterpret_cast<unsigned char**>(&data))) {
-        std::vector<Window> actualData(data, data + nItems);
-        XFree(data);
-        return actualData;
-    }
-
-    return std::vector<Window>();
 }
 
 

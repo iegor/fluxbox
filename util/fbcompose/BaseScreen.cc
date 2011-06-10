@@ -22,6 +22,7 @@
 
 
 #include "BaseScreen.hh"
+#include "Logging.hh"
 
 #include "FbTk/App.hh"
 
@@ -52,9 +53,9 @@ BaseScreen::BaseScreen(int screenNumber) :
         // TODO: Do something.
     }
 
-    m_activeWindowXID = m_rootWindow.windowProperty(m_activeWindowAtom)[0];
-    m_currentWorkspace = m_rootWindow.cardinalProperty(m_workspaceAtom)[0];
-    m_workspaceCount = m_rootWindow.cardinalProperty(m_workspaceCountAtom)[0];
+    m_activeWindowXID = m_rootWindow.singlePropertyValue<Window>(m_activeWindowAtom, 0);
+    m_currentWorkspace = m_rootWindow.singlePropertyValue<long>(m_workspaceAtom, 0);
+    m_workspaceCount = m_rootWindow.singlePropertyValue<long>(m_workspaceCountAtom, 1);
 
     long eventMask = ExposureMask | PropertyChangeMask | StructureNotifyMask | SubstructureNotifyMask;
     m_rootWindow.setEventMask(eventMask);
@@ -87,14 +88,6 @@ void BaseScreen::initWindows() {
 
 
 //--- WINDOW MANIPULATION ------------------------------------------------------
-
-// Adds a window to ignore list, stops tracking it if it is being tracked.
-void BaseScreen::addWindowToIgnoreList(Window window) {
-    if (find(m_ignoreList.begin(), m_ignoreList.end(), window) == m_ignoreList.end()) {
-        destroyWindow(window);
-        m_ignoreList.push_back(window);
-    }
-}
 
 // Creates a new window and inserts it into the list of windows.
 void BaseScreen::createWindow(Window window) {
@@ -130,12 +123,6 @@ void BaseScreen::destroyWindow(Window window) {
     } else {
         // TODO: Throw something.
     }
-}
-
-// Checks whether a given window is managed by the current screen.
-bool BaseScreen::isWindowManaged(Window window) {
-    std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
-    return (it != m_windows.end());
 }
 
 // Maps a window on this screen.
@@ -200,11 +187,11 @@ void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
 
     if ((window == m_rootWindow.window()) && (state == PropertyNewValue)) {
         if (property == m_activeWindowAtom) {
-            m_activeWindowXID = m_rootWindow.windowProperty(m_activeWindowAtom)[0];
+            m_activeWindowXID = m_rootWindow.singlePropertyValue<Window>(m_activeWindowAtom, 0);
         } else if (property == m_workspaceAtom) {
-            m_currentWorkspace = m_rootWindow.cardinalProperty(m_workspaceAtom)[0];
+            m_currentWorkspace = m_rootWindow.singlePropertyValue<long>(m_workspaceAtom, 0);
         } else if (property == m_workspaceCountAtom) {
-            m_workspaceCount = m_rootWindow.cardinalProperty(m_workspaceCountAtom)[0];
+            m_workspaceCount = m_rootWindow.singlePropertyValue<long>(m_workspaceCountAtom, 1);
         }
     }
 
@@ -216,6 +203,20 @@ void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
     }
 }
 
+
+// Checks whether a given window is managed by the current screen.
+bool BaseScreen::isWindowManaged(Window window) {
+    std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
+    return (it != m_windows.end());
+}
+
+// Adds a window to ignore list, stops tracking it if it is being tracked.
+void BaseScreen::addWindowToIgnoreList(Window window) {
+    if (find(m_ignoreList.begin(), m_ignoreList.end(), window) == m_ignoreList.end()) {
+        destroyWindow(window);
+        m_ignoreList.push_back(window);
+    }
+}
 
 //--- INTERNAL FUNCTIONS -------------------------------------------------------
 

@@ -259,7 +259,7 @@ void OpenGLScreen::createDefaultBuffers() {
 // Creates the background texture.
 void OpenGLScreen::createBackgroundTexture() throw(InitException) {
     Atom bgPixmapAtom = XInternAtom(display(), "_XROOTPMAP_ID", False);
-    Pixmap bgPixmap = rootWindow().pixmapProperty(bgPixmapAtom)[0];
+    Pixmap bgPixmap = rootWindow().singlePropertyValue<Pixmap>(bgPixmapAtom, 0);
 
     glGenTextures(1, &m_backgroundTexture);
     glBindTexture(GL_TEXTURE_2D, m_backgroundTexture);
@@ -269,13 +269,15 @@ void OpenGLScreen::createBackgroundTexture() throw(InitException) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    XImage *image = XGetImage(display(), bgPixmap, 0, 0, rootWindow().width(), rootWindow().height(), AllPlanes, ZPixmap);
-    if (!image) {
-        throw InitException("Cannot create background texture.");
+    if (bgPixmap) {
+        XImage *image = XGetImage(display(), bgPixmap, 0, 0, rootWindow().width(), rootWindow().height(), AllPlanes, ZPixmap);
+        if (!image) {
+            throw InitException("Cannot create background texture.");
+        }
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, rootWindow().width(), rootWindow().height(),
+                     0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)(&(image->data[0])));
+        XDestroyImage(image);
     }
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, rootWindow().width(), rootWindow().height(),
-                 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)(&(image->data[0])));
-    XDestroyImage(image);
 }
 
 

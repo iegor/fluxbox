@@ -24,9 +24,12 @@
 #ifndef FBCOMPOSITOR_WINDOW_HH
 #define FBCOMPOSITOR_WINDOW_HH
 
+#include "Logging.hh"
+
 #include "FbTk/FbWindow.hh"
 
 #include <X11/Xlib.h>
+#include <X11/Xatom.h>
 #include <X11/extensions/Xdamage.h>
 
 #include <iosfwd>
@@ -83,14 +86,13 @@ namespace FbCompositor {
 
         //--- PROPERTY ACCESS --------------------------------------------------
 
-        /** \returns the specified cardinal property. */
-        std::vector<long> cardinalProperty(Atom propertyAtom);
+        /** \returns the value of the specified property. */
+        template<class T>
+        std::vector<T> propertyValue(Atom propertyAtom);
 
-        /** \returns the specified pixmap property. */
-        std::vector<Pixmap> pixmapProperty(Atom propertyAtom);
-
-        /** \returns the specified window property. */
-        std::vector<Window> windowProperty(Atom propertyAtom);
+        /** Convenience function for accessing properties with a single value. */
+        template<class T>
+        T singlePropertyValue(Atom propertyAtom, T defaultValue, const char *propertyName = 0);
 
 
         //--- WINDOW MANIPULATION ----------------------------------------------
@@ -258,6 +260,40 @@ namespace FbCompositor {
         return m_class;
     }
 
+
+    //--- PROPERTY ACCESS ----------------------------------------------------------
+
+    // Returns the value of the specified property.
+    template<class T>
+    std::vector<T> BaseCompWindow::propertyValue(Atom propertyAtom) {
+        unsigned long nItems;
+        T *data;
+
+        if (rawPropertyData(propertyAtom, AnyPropertyType, &nItems, reinterpret_cast<unsigned char**>(&data))) {
+            std::vector<T> actualData(data, data + nItems);
+            XFree(data);
+            return actualData;
+        }
+
+        return std::vector<T>();
+    }
+
+    // Convenience function for accessing properties with a single value.
+    template<class T>
+    T BaseCompWindow::singlePropertyValue(Atom propertyAtom, T defaultValue, const char *propertyName) {
+        std::vector<T> values = propertyValue<T>(propertyAtom);
+
+        if (values.size() == 0) {
+            if (!propertyName) {
+                propertyName = XGetAtomName(display(), propertyAtom);
+            }
+            fbLog_warn << "Property " << propertyName << " is undefined on window " << window()
+                       << ", using default value." << std::endl;
+            return defaultValue;
+        } else {
+            return values[0];
+        }
+    }
 }
 
 #endif  // FBCOMPOSITOR_WINDOW_HH

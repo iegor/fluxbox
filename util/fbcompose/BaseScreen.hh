@@ -90,9 +90,6 @@ namespace FbCompositor {
 
         //--- WINDOW MANIPULATION ----------------------------------------------
 
-        /** Adds a window to ignore list, stops tracking it if it is being tracked. */
-        void addWindowToIgnoreList(Window window);
-
         /** Creates a new window on this screen. */
         void createWindow(Window window);
 
@@ -101,9 +98,6 @@ namespace FbCompositor {
 
         /** Destroys a window on this screen. */
         void destroyWindow(Window window);
-
-        /** Checks whether a given window is managed by the current screen. */
-        bool isWindowManaged(Window window);
 
         /** Maps a window on this screen. */
         void mapWindow(Window window);
@@ -119,6 +113,13 @@ namespace FbCompositor {
 
         /** Updates the value of some window's property. */
         void updateWindowProperty(Window window, Atom property, int state);
+
+
+        /** Adds a window to ignore list, stops tracking it if it is being tracked. */
+        void addWindowToIgnoreList(Window window);
+
+        /** Checks whether a given window is managed by the current screen. */
+        bool isWindowManaged(Window window);
 
 
         //--- SCREEN RENDERING -------------------------------------------------
@@ -143,7 +144,7 @@ namespace FbCompositor {
     private:
         //--- INTERNAL FUNCTIONS -----------------------------------------------
 
-        /** Returns an iterator of m_windows that points to the given window. */
+        /** \returns an iterator of m_windows that points to the given window. */
         std::list<BaseCompWindow*>::iterator getWindowIterator(Window windowXID);
 
 
