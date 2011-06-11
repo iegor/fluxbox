@@ -100,9 +100,6 @@ namespace FbCompositor {
         /** Add damage to a window. */
         virtual void addDamage(XRectangle area) throw();
 
-        /** Reconfigure a window. */
-        virtual void reconfigure(const XConfigureEvent &event) throw();
-
         /** Set the clip shape as changed. */
         void setClipShapeChanged() throw();
 
@@ -114,6 +111,9 @@ namespace FbCompositor {
 
         /** Update the window's contents. */
         virtual void updateContents();
+
+        /** Update window's geometry. */
+        virtual void updateGeometry(const XConfigureEvent &event) throw();
 
         /** Update window's property. */
         virtual void updateProperty(Atom property, int state);

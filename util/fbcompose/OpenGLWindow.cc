@@ -85,12 +85,6 @@ OpenGLWindow::~OpenGLWindow() throw() {
 
 //--- WINDOW UPDATE FUNCTIONS ------------------------------------------
 
-// Reconfigures the window.
-void OpenGLWindow::reconfigure(const XConfigureEvent &event) throw() {
-    BaseCompWindow::reconfigure(event);
-    updateWindowPosArray();
-}
-
 // Updates the window's contents.
 void OpenGLWindow::updateContents() throw(RuntimeException) {
     updateContentPixmap();
@@ -147,6 +141,12 @@ void OpenGLWindow::updateContents() throw(RuntimeException) {
     }
 
     clearDamage();
+}
+
+// Updates window's geometry.
+void OpenGLWindow::updateGeometry(const XConfigureEvent &event) throw() {
+    BaseCompWindow::updateGeometry(event);
+    updateWindowPosArray();
 }
 
 

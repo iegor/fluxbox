@@ -64,11 +64,11 @@ namespace FbCompositor {
 
         //--- WINDOW UPDATE FUNCTIONS ------------------------------------------
 
-        /** Reconfigures a window. */
-        void reconfigure(const XConfigureEvent &event) throw();
-
         /** Updates the window's contents. */
         void updateContents() throw(RuntimeException);
+
+        /** Updates window's geometry. */
+        void updateGeometry(const XConfigureEvent &event) throw();
 
 
     private :

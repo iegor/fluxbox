@@ -137,13 +137,13 @@ void BaseScreen::mapWindow(Window window) {
 // Updates window's configuration.
 void BaseScreen::reconfigureWindow(const XConfigureEvent &event) {
     if (event.window == m_rootWindow.window()) {
-        m_rootWindow.reconfigure(event);
+        m_rootWindow.updateGeometry(event);
         return;
     }
 
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(event.window);
     if (it != m_windows.end()) {
-        (*it)->reconfigure(event);
+        (*it)->updateGeometry(event);
 
         BaseCompWindow *currentWindow = *it;
         m_windows.erase(it);

@@ -75,19 +75,6 @@ void BaseCompWindow::addDamage(XRectangle area) throw() {
     m_damagedArea.push_back(area);
 }
 
-// Reconfigure a window.
-void BaseCompWindow::reconfigure(const XConfigureEvent &event) throw() {
-    unsigned int oldBorderWidth = borderWidth();
-    unsigned int oldHeight = height();
-    unsigned int oldWidth = width();
-    updateGeometry();
-
-    if ((borderWidth() != oldBorderWidth) || (height() != oldHeight) || (width() != oldWidth)) {
-        setClipShapeChanged();
-        m_isResized = true;
-    }
-}
-
 // Set the clip shape as changed.
 void BaseCompWindow::setClipShapeChanged() throw() {
     m_clipShapeChanged = true;
@@ -113,6 +100,19 @@ void BaseCompWindow::updateContents() {
     clearDamage();
 }
 
+// Update window's geometry.
+void BaseCompWindow::updateGeometry(const XConfigureEvent &/*event*/) throw() {
+    unsigned int oldBorderWidth = borderWidth();
+    unsigned int oldHeight = height();
+    unsigned int oldWidth = width();
+    FbTk::FbWindow::updateGeometry();
+
+    if ((borderWidth() != oldBorderWidth) || (height() != oldHeight) || (width() != oldWidth)) {
+        setClipShapeChanged();
+        m_isResized = true;
+    }
+}
+
 // Update the window's clip shape.
 void BaseCompWindow::updateShape() throw() {
     if (m_clipShapeRects) {
@@ -127,7 +127,7 @@ void BaseCompWindow::updateShape() throw() {
 }
 
 // Update window's property.
-void BaseCompWindow::updateProperty(Atom property, int state) { }
+void BaseCompWindow::updateProperty(Atom /*property*/, int /*state*/) { }
 
 
 //--- PROTECTED WINDOW MANIPULATION --------------------------------------------
