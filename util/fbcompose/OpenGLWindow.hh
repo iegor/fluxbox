@@ -102,15 +102,6 @@ namespace FbCompositor {
         /** The GLX pixmap of window's contents. */
         GLXPixmap m_glxContents;
 #endif  // GLXEW_EXT_texture_from_pixmap
-
-
-        //--- OTHER VARIABLES --------------------------------------------------
-
-        /** Width of the root window of the window's screen. */
-        int m_rootWidth;
-
-        /** Height of the root window of the window's screen. */
-        int m_rootHeight;
     };
 
 

@@ -21,6 +21,7 @@
 // THE SOFTWARE.
 
 
+#include "Logging.hh"
 #include "OpenGLScreen.hh"
 #include "OpenGLWindow.hh"
 
@@ -75,6 +76,8 @@ const GLfloat OpenGLScreen::DEFAULT_TEX_POS_ARRAY[] = {
 OpenGLScreen::OpenGLScreen(int screenNumber) :
     BaseScreen(screenNumber) {
 
+    m_backgroundChanged = true;
+
     earlyInitGLXPointers();
     initRenderingContext();
     initRenderingSurface();
@@ -102,6 +105,15 @@ OpenGLScreen::~OpenGLScreen() {
     glXDestroyWindow(display(), m_glxRenderingWindow);
     glXDestroyContext(display(), m_glxContext);
     XDestroyWindow(display(), m_renderingWindow);
+}
+
+
+//--- SCREEN MANIPULATION ----------------------------------------------
+
+// Notifies the screen of the background change.
+void OpenGLScreen::setBackgroundChanged() {
+    BaseScreen::setBackgroundChanged();
+    m_backgroundChanged = true;
 }
 
 
@@ -259,9 +271,6 @@ void OpenGLScreen::createDefaultBuffers() {
 
 // Creates the background texture.
 void OpenGLScreen::createBackgroundTexture() throw(InitException) {
-    Atom bgPixmapAtom = XInternAtom(display(), "_XROOTPMAP_ID", False);
-    Pixmap bgPixmap = rootWindow().singlePropertyValue<Pixmap>(bgPixmapAtom, 0);
-
     glGenTextures(1, &m_backgroundTexture);
     glBindTexture(GL_TEXTURE_2D, m_backgroundTexture);
 
@@ -269,15 +278,28 @@ void OpenGLScreen::createBackgroundTexture() throw(InitException) {
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+}
+
+
+//--- OTHER FUNCTIONS --------------------------------------------------
+
+// Renews the background texture.
+void OpenGLScreen::updateBackgroundTexture() {
+    Atom bgPixmapAtom = XInternAtom(display(), "_XROOTPMAP_ID", False);
+    Pixmap bgPixmap = rootWindow().singlePropertyValue<Pixmap>(bgPixmapAtom, 0);
+
+    glBindTexture(GL_TEXTURE_2D, m_backgroundTexture);
 
     if (bgPixmap) {
         XImage *image = XGetImage(display(), bgPixmap, 0, 0, rootWindow().width(), rootWindow().height(), AllPlanes, ZPixmap);
         if (!image) {
-            throw InitException("Cannot create background texture.");
+            fbLog_warn << "Cannot create background texture." << std::endl;
+            return;
         }
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, rootWindow().width(), rootWindow().height(),
                      0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)(&(image->data[0])));
         XDestroyImage(image);
+        m_backgroundChanged = false;
     }
 }
 
@@ -395,6 +417,9 @@ void OpenGLScreen::renderScreen() {
 
 // A function to render the desktop background.
 void OpenGLScreen::renderBackground() {
+    if (m_backgroundChanged) {
+        updateBackgroundTexture();
+    }
     renderTexture(m_defaultPrimPosBuffer, m_defaultTexPosBuffer, m_defaultElementBuffer, m_backgroundTexture);
 }
 
@@ -403,7 +428,6 @@ void OpenGLScreen::renderWindow(OpenGLWindow &window) {
     if (window.isDamaged()) {
         window.updateContents();
     }
-
     renderTexture(window.windowPosBuffer(), m_defaultTexPosBuffer, m_defaultElementBuffer, window.contentTexture());
 }
 

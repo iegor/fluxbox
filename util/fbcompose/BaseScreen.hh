@@ -122,6 +122,12 @@ namespace FbCompositor {
         bool isWindowManaged(Window window);
 
 
+        //--- SCREEN MANIPULATION ----------------------------------------------
+
+        /** Notifies the screen of the background change. */
+        virtual void setBackgroundChanged();
+
+
         //--- SCREEN RENDERING -------------------------------------------------
 
         /** Renders the screen's contents. */
@@ -153,6 +159,9 @@ namespace FbCompositor {
         /** Property that denotes the currently active window. */
         Atom m_activeWindowAtom;
 
+        /** Property that denotes the pixmap of the root window. */
+        Atom m_rootPixmapAtom;
+
         /** Property that denotes the index of active workspace. */
         Atom m_workspaceAtom;
 
@@ -165,6 +174,9 @@ namespace FbCompositor {
         /** Current connection to the X server. */
         Display *m_display;
 
+        /** Windows that should be ignored. */
+        std::vector<Window> m_ignoreList;
+
         /** Screen's number. */
         int m_screenNumber;
 
@@ -173,9 +185,6 @@ namespace FbCompositor {
 
         /** Screen's windows. */
         std::list<BaseCompWindow*> m_windows;
-
-        /** Windows that should be ignored. */
-        std::vector<Window> m_ignoreList;
 
 
         /** XID of the active window. */

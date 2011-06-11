@@ -30,7 +30,8 @@ fbcompose_CPPFLAGS = \
 fbcompose_CXXFLAGS = \
 	$(AM_CXXFLAGS) \
 	-Wall \
-	-Werror
+	-Werror \
+	-Wextra
 
 fbcompose_SOURCES = \
 	util/fbcompose/main.cc \

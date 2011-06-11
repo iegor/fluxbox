@@ -56,6 +56,12 @@ namespace FbCompositor {
         ~OpenGLScreen();
 
 
+        //--- SCREEN MANIPULATION ----------------------------------------------
+
+        /** Notifies the screen of the background change. */
+        void setBackgroundChanged();
+
+
         //--- SCREEN RENDERING -------------------------------------------------
 
         /** Renders the screen's contents. */
@@ -113,6 +119,12 @@ namespace FbCompositor {
         void initShaders() throw(InitException);
 
 
+        //--- OTHER FUNCTIONS --------------------------------------------------
+
+        /** Renews the background texture. */
+        void updateBackgroundTexture();
+
+
         //--- CONVENIENCE OPENGL WRAPPERS --------------------------------------
 
         /** Creates a shader. */
@@ -149,6 +161,13 @@ namespace FbCompositor {
         Window m_renderingWindow;
 
 
+        /** The background texture. */
+        GLuint m_backgroundTexture;
+
+        /** Whether the background changed since the last update. */
+        bool m_backgroundChanged;
+
+
         /** Default element buffer. */
         GLuint m_defaultElementBuffer;
 
@@ -157,9 +176,6 @@ namespace FbCompositor {
 
         /** Default texture position buffer. */
         GLuint m_defaultTexPosBuffer;
-
-        /** The background texture. */
-        GLuint m_backgroundTexture;
 
 
         //--- SHADER-RELATED ---------------------------------------------------

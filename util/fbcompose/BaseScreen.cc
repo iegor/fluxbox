@@ -45,6 +45,7 @@ BaseScreen::BaseScreen(int screenNumber) :
 
     // Set up atoms and properties.
     m_activeWindowAtom = XInternAtom(m_display, "_NET_ACTIVE_WINDOW", False);
+    m_rootPixmapAtom = XInternAtom(m_display, "_XROOTPMAP_ID", False);
     m_workspaceAtom = XInternAtom(m_display, "_WIN_WORKSPACE", False);
     m_workspaceCountAtom = XInternAtom(m_display, "_WIN_WORKSPACE_COUNT", False);
 
@@ -53,7 +54,7 @@ BaseScreen::BaseScreen(int screenNumber) :
     m_workspaceCount = m_rootWindow.singlePropertyValue<long>(m_workspaceCountAtom, 1);
 
     // Set up root window.
-    long eventMask = ExposureMask | PropertyChangeMask | StructureNotifyMask | SubstructureNotifyMask;
+    long eventMask = PropertyChangeMask | StructureNotifyMask | SubstructureNotifyMask;
     m_rootWindow.setEventMask(eventMask);
 
     XCompositeRedirectSubwindows(m_display, m_rootWindow.window(), CompositeRedirectManual);
@@ -106,7 +107,9 @@ void BaseScreen::damageWindow(Window window, XRectangle area) {
     if (it != m_windows.end()) {
         (*it)->addDamage(area);
     } else {
-        fbLog_warn << "Attempted to damage an untracked window (" << window << ")" << std::endl;
+        if (window != m_rootWindow.window()) {
+            fbLog_warn << "Attempted to damage an untracked window (" << window << ")" << std::endl;
+        }
     }
 }
 
@@ -133,6 +136,11 @@ void BaseScreen::mapWindow(Window window) {
 
 // Updates window's configuration.
 void BaseScreen::reconfigureWindow(const XConfigureEvent &event) {
+    if (event.window == m_rootWindow.window()) {
+        m_rootWindow.reconfigure(event);
+        return;
+    }
+
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(event.window);
     if (it != m_windows.end()) {
         (*it)->reconfigure(event);
@@ -152,7 +160,7 @@ void BaseScreen::reconfigureWindow(const XConfigureEvent &event) {
             }
         }
     } else {
-        fbLog_warn << "Attempted to reparent an untracked window (" << event.window << ")" << std::endl;
+        fbLog_warn << "Attempted to reconfigure an untracked window (" << event.window << ")" << std::endl;
     }
 }
 
@@ -181,6 +189,8 @@ void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
     if ((window == m_rootWindow.window()) && (state == PropertyNewValue)) {
         if (property == m_activeWindowAtom) {
             m_activeWindowXID = m_rootWindow.singlePropertyValue<Window>(m_activeWindowAtom, 0);
+        } else if (property == m_rootPixmapAtom) {
+            setBackgroundChanged();
         } else if (property == m_workspaceAtom) {
             m_currentWorkspace = m_rootWindow.singlePropertyValue<long>(m_workspaceAtom, 0);
         } else if (property == m_workspaceCountAtom) {
@@ -212,6 +222,13 @@ void BaseScreen::addWindowToIgnoreList(Window window) {
         m_ignoreList.push_back(window);
     }
 }
+
+
+//--- SCREEN MANIPULATION ----------------------------------------------
+
+// Notifies the screen of the background change.
+void BaseScreen::setBackgroundChanged() { }
+
 
 //--- INTERNAL FUNCTIONS -------------------------------------------------------
 

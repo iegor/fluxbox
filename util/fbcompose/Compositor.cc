@@ -154,7 +154,6 @@ void Compositor::initExtension(const char *extensionName, QueryExtensionFunction
 // The event loop.
 void Compositor::eventLoop() {
     XEvent event;
-    XRectangle exposedArea;
     bool changesOccured = false;
 
     while (!done()) {
@@ -186,14 +185,6 @@ void Compositor::eventLoop() {
             case DestroyNotify :
                 m_screens[eventScreen]->destroyWindow(event.xdestroywindow.window);
                 fbLog_info << "DestroyNotify on " << event.xdestroywindow.window << std::endl;
-                break;
-            case Expose :
-                exposedArea.x = event.xexpose.x;
-                exposedArea.y = event.xexpose.y;
-                exposedArea.width = event.xexpose.width;
-                exposedArea.height = event.xexpose.height;
-                m_screens[eventScreen]->damageWindow(event.xexpose.window, exposedArea);
-                fbLog_info << "Expose on " << event.xexpose.window << std::endl;
                 break;
             case MapNotify :
                 m_screens[eventScreen]->mapWindow(event.xmap.window);
