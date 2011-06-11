@@ -124,8 +124,11 @@ namespace FbCompositor {
 
         //--- SCREEN MANIPULATION ----------------------------------------------
 
-        /** Notifies the screen of the background change. */
+        /** Notifies the screen of a background change. */
         virtual void setBackgroundChanged();
+
+        /** Notifies the screen of a root window change. */
+        virtual void setRootWindowChanged();
 
 
         //--- SCREEN RENDERING -------------------------------------------------

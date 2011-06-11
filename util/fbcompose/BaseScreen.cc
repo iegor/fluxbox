@@ -138,6 +138,7 @@ void BaseScreen::mapWindow(Window window) {
 void BaseScreen::reconfigureWindow(const XConfigureEvent &event) {
     if (event.window == m_rootWindow.window()) {
         m_rootWindow.updateGeometry(event);
+        setRootWindowChanged();
         return;
     }
 
@@ -228,6 +229,9 @@ void BaseScreen::addWindowToIgnoreList(Window window) {
 
 // Notifies the screen of the background change.
 void BaseScreen::setBackgroundChanged() { }
+
+// Notifies the screen of a root window change.
+void BaseScreen::setRootWindowChanged() { }
 
 
 //--- INTERNAL FUNCTIONS -------------------------------------------------------

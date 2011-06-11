@@ -116,6 +116,11 @@ void OpenGLScreen::setBackgroundChanged() {
     m_backgroundChanged = true;
 }
 
+// Notifies the screen of a root window change.
+void OpenGLScreen::setRootWindowChanged() {
+    // TODO: Handle resolution changes.
+}
+
 
 //--- INITIALIZATION FUNCTIONS -------------------------------------------------
 

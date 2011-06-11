@@ -61,6 +61,9 @@ namespace FbCompositor {
         /** Notifies the screen of the background change. */
         void setBackgroundChanged();
 
+        /** Notifies the screen of a root window change. */
+        void setRootWindowChanged();
+
 
         //--- SCREEN RENDERING -------------------------------------------------
 
