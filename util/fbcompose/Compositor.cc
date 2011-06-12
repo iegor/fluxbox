@@ -25,6 +25,8 @@
 #include "Logging.hh"
 #include "OpenGLScreen.hh"
 
+#include "FbTk/RefCount.hh"
+
 #include <GL/glx.h>
 #include <X11/extensions/shape.h>
 #include <X11/extensions/Xcomposite.h>
@@ -42,7 +44,8 @@ using namespace FbCompositor;
 
 // The constructor.
 Compositor::Compositor(const CompositorConfig &config) throw(InitException) :
-    App(config.displayName().c_str()) {
+    App(config.displayName().c_str()),
+    m_redrawTimer() {
 
     m_renderingMode = config.renderingMode();
 
@@ -50,7 +53,6 @@ Compositor::Compositor(const CompositorConfig &config) throw(InitException) :
     XSetErrorHandler(&handleXError);
 
     initAllExtensions();
-
 
     // Set up screens.
     int screenCount = XScreenCount(display());
@@ -81,6 +83,11 @@ Compositor::Compositor(const CompositorConfig &config) throw(InitException) :
     }
 
     XFlush(display());
+
+    FbTk::RefCount<FbTk::Command<void> > command(new RenderScreensCommand(this));
+    m_redrawTimer.setCommand(command);
+    m_redrawTimer.setTimeout(0, 1000000 / 60);
+    m_redrawTimer.start();
 }
 
 // Destructor.
@@ -154,7 +161,6 @@ void Compositor::initExtension(const char *extensionName, QueryExtensionFunction
 // The event loop.
 void Compositor::eventLoop() {
     XEvent event;
-    bool changesOccured = false;
 
     while (!done()) {
         if (m_renderingMode == RM_ServerAuto) {
@@ -162,10 +168,8 @@ void Compositor::eventLoop() {
         }
 
         XFlush(display());
-
         while (XPending(display())) {
             XNextEvent(display(), &event);
-            changesOccured = true;
 
             int eventScreen = screenOfEvent(event);
             if (eventScreen < 0) {
@@ -220,30 +224,30 @@ void Compositor::eventLoop() {
                 } else {
                     fbLog_info << "Event " << event.xany.type << " on screen " << eventScreen
                                << " and window " << event.xany.window << std::endl;
-                    changesOccured = false;
                 }
                 break;
             }
         }
 
-        if (changesOccured) {
-            for (size_t i = 0; i < m_screens.size(); i++) {
-                m_screens[i]->renderScreen();
-            }
+        FbTk::Timer::updateTimers(XConnectionNumber(display()));
 
-            fbLog_debug << m_screens.size() << " screen(s) available." << std::endl;
-            for (size_t i = 0; i < m_screens.size(); i++) {
-                fbLog_debug << *m_screens[i];
-            }
-            fbLog_debug << "======================================" << std::endl;
-
-            changesOccured = false;
+        fbLog_debug << m_screens.size() << " screen(s) available." << std::endl;
+        for (size_t i = 0; i < m_screens.size(); i++) {
+            fbLog_debug << *m_screens[i];
         }
+        fbLog_debug << "======================================" << std::endl;
     }
 }
 
 
 //--- INTERNAL FUNCTIONS -----------------------------------------------
+
+// Render the screens.
+void Compositor::renderScreens() {
+    for (size_t i = 0; i < m_screens.size(); i++) {
+        m_screens[i]->renderScreen();
+    }
+}
 
 // Locates the screen an event affects. Returns -1 on failure.
 int Compositor::screenOfEvent(const XEvent &event) {

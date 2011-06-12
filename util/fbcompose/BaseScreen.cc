@@ -262,7 +262,9 @@ std::ostream &FbCompositor::operator<<(std::ostream& out, const BaseScreen& s) {
 
     std::list<BaseCompWindow*>::const_iterator it = s.m_windows.begin();
     while (it != s.m_windows.end()) {
-        out << "    " << **it << std::endl;
+        if ((*it)->isMapped()) {
+            out << "    " << **it << std::endl;
+        }
         it++;
     }
 
