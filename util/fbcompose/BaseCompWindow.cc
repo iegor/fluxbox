@@ -75,11 +75,6 @@ void BaseCompWindow::addDamage(XRectangle area) throw() {
     m_damagedArea.push_back(area);
 }
 
-// Set the clip shape as changed.
-void BaseCompWindow::setClipShapeChanged() throw() {
-    m_clipShapeChanged = true;
-}
-
 // Mark the window as mapped.
 void BaseCompWindow::setMapped() throw() {
     m_isMapped = true;
@@ -114,7 +109,7 @@ void BaseCompWindow::updateGeometry(const XConfigureEvent &/*event*/) throw() {
 }
 
 // Update the window's clip shape.
-void BaseCompWindow::updateShape() throw() {
+void BaseCompWindow::updateShape() {
     if (m_clipShapeRects) {
         XFree(m_clipShapeRects);
     }
@@ -128,6 +123,12 @@ void BaseCompWindow::updateShape() throw() {
 
 // Update window's property.
 void BaseCompWindow::updateProperty(Atom /*property*/, int /*state*/) { }
+
+
+// Set the clip shape as changed.
+void BaseCompWindow::setClipShapeChanged() throw() {
+    m_clipShapeChanged = true;
+}
 
 
 //--- PROTECTED WINDOW MANIPULATION --------------------------------------------

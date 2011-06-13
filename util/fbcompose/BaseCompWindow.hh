@@ -100,9 +100,6 @@ namespace FbCompositor {
         /** Add damage to a window. */
         virtual void addDamage(XRectangle area) throw();
 
-        /** Set the clip shape as changed. */
-        void setClipShapeChanged() throw();
-
         /** Mark the window as mapped. */
         virtual void setMapped() throw();
 
@@ -117,6 +114,10 @@ namespace FbCompositor {
 
         /** Update window's property. */
         virtual void updateProperty(Atom property, int state);
+
+
+        /** Set the clip shape as changed. */
+        void setClipShapeChanged() throw();
 
 
     protected:
@@ -151,7 +152,7 @@ namespace FbCompositor {
         void updateContentPixmap() throw();
 
         /** Update the window's clip shape. */
-        virtual void updateShape() throw();
+        virtual void updateShape();
 
 
     private:

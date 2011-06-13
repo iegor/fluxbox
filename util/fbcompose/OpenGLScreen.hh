@@ -178,6 +178,8 @@ namespace FbCompositor {
         bool m_backgroundChanged;
 
 
+        //--- DEFAULT ARRAYS ---------------------------------------------------
+
         /** Default element buffer. */
         GLuint m_defaultElementBuffer;
 
@@ -198,6 +200,12 @@ namespace FbCompositor {
         
         /** The shader program. */
         GLuint m_shaderProgram;
+
+
+        //--- ATOMS OF INTEREST ------------------------------------------------
+
+        /** Atom that corresponds to the pixmap of desktop's contents. */
+        Atom m_bgPixmapAtom;
     };
 }
 

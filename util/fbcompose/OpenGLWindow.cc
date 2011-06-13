@@ -55,6 +55,7 @@ OpenGLWindow::OpenGLWindow(Window windowXID, GLXFBConfig fbConfig) throw() :
     BaseCompWindow(windowXID) {
 
     m_fbConfig = fbConfig;
+    m_shapePixmap = None;
     m_rootWidth = dynamic_cast<Compositor*>(FbTk::App::instance())->getScreen(screenNumber()).rootWindow().width();
     m_rootHeight = dynamic_cast<Compositor*>(FbTk::App::instance())->getScreen(screenNumber()).rootWindow().height();
 
@@ -102,21 +103,13 @@ void OpenGLWindow::updateContents() throw(RuntimeException) {
     }
 
     if (contentPixmap()) {
-        // Create a new pixmap that contains the correct alpha values for the clip shape.
-        Pixmap clippedPixmap = XCreatePixmap(display(), window(), realWidth(), realHeight(), depth());
-
-        GC gc = XCreateGC(display(), clippedPixmap, 0, 0);
+        GC gc = XCreateGC(display(), m_shapePixmap, 0, 0);
         XSetGraphicsExposures(display(), gc, False);
 
-        XSetForeground(display(), gc, 0x00000000);
-        XFillRectangle(display(), clippedPixmap, gc, 0, 0, realWidth(), realHeight());
-
-        XSetForeground(display(), gc, 0xff000000);
-        XSetClipRectangles(display(), gc, 0, 0, clipShapeRects(), clipShapeRectCount(), Unsorted);  // TODO: Fix rect order errors.
-        XFillRectangle(display(), clippedPixmap, gc, 0, 0, realWidth(), realHeight());
-
         XSetPlaneMask(display(), gc, 0x00ffffff);
-        XCopyArea(display(), contentPixmap(), clippedPixmap, gc, 0, 0, realWidth(), realHeight(), 0, 0);
+        XCopyArea(display(), contentPixmap(), m_shapePixmap, gc, 0, 0, realWidth(), realHeight(), 0, 0);
+
+        XFreeGC(display(), gc);
 
 #ifdef GLXEW_EXT_texture_from_pixmap
         // Bind the pixmap to a GLX texture.
@@ -124,16 +117,17 @@ void OpenGLWindow::updateContents() throw(RuntimeException) {
             glXDestroyPixmap(display(), m_glxContents);
             m_glxContents = 0;
         }
-        m_glxContents = glXCreatePixmap(display(), m_fbConfig, clippedPixmap, TEX_PIXMAP_ATTRIBUTES);
+        m_glxContents = glXCreatePixmap(display(), m_fbConfig, m_shapePixmap, TEX_PIXMAP_ATTRIBUTES);
 
         glBindTexture(GL_TEXTURE_2D, contentTexture());
         glXBindTexImageEXT(display(), m_glxContents, GLX_FRONT_LEFT_EXT, NULL);
 
 #else
         // Convert the content pixmap to an XImage to access its raw contents.
-        XImage *image = XGetImage(display(), clippedPixmap, 0, 0, realWidth(), realHeight(), AllPlanes, ZPixmap);
+        XImage *image = XGetImage(display(), m_shapePixmap, 0, 0, realWidth(), realHeight(), AllPlanes, ZPixmap);
         if (!image) {
-            fbLog_warn << "Cannot create XImage for window " << window() << ". It's probably nothing - skipping." << std::endl;
+            fbLog_warn << "Cannot create XImage for window " << std::hex << window()
+                       << ". It's probably nothing - skipping." << std::endl;
             return;
         }
 
@@ -144,12 +138,34 @@ void OpenGLWindow::updateContents() throw(RuntimeException) {
         XDestroyImage(image);
 
 #endif  // GLXEW_EXT_texture_from_pixmap
-
-        XFreePixmap(display(), clippedPixmap);
-        XFreeGC(display(), gc);
     }
 
     clearDamage();
+}
+
+// Updates the window's shape.
+void OpenGLWindow::updateShape() {
+    BaseCompWindow::updateShape();
+
+    if (m_shapePixmap) {
+        XFreePixmap(display(), m_shapePixmap);
+        m_shapePixmap = None;
+    }
+    m_shapePixmap = XCreatePixmap(display(), window(), realWidth(), realHeight(), depth());
+
+    GC gc = XCreateGC(display(), m_shapePixmap, 0, 0);
+    XSetGraphicsExposures(display(), gc, False);
+    XSetPlaneMask(display(), gc, 0xffffffff);
+
+    XSetForeground(display(), gc, 0x00000000);
+    XFillRectangle(display(), m_shapePixmap, gc, 0, 0, realWidth(), realHeight());
+
+    XSetForeground(display(), gc, 0xff000000);
+    // TODO: Fix rectangle ordering mismatch.
+    XSetClipRectangles(display(), gc, 0, 0, clipShapeRects(), clipShapeRectCount(), Unsorted);
+    XFillRectangle(display(), m_shapePixmap, gc, 0, 0, realWidth(), realHeight());
+
+    XFreeGC(display(), gc);
 }
 
 // Updates window's geometry.

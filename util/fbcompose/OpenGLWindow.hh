@@ -70,6 +70,9 @@ namespace FbCompositor {
         /** Updates the window's contents. */
         void updateContents() throw(RuntimeException);
 
+        /** Updates the window's shape. */
+        void updateShape();
+
         /** Updates window's geometry. */
         void updateGeometry(const XConfigureEvent &event) throw();
 
@@ -94,6 +97,16 @@ namespace FbCompositor {
 
         /** Window position buffer. */
         GLuint m_windowPosBuffer;
+
+
+        /**
+         * A pixmap that contains the window's shape as a mask. This pixmap can
+         * be used in any way necessary, as long as planes 0xff000000 are not
+         * modified. That is, it is perfectly acceptable to draw things onto
+         * the pixmap for performance reasons, as long as the alpha values are
+         * unchanged.
+         */
+        Pixmap m_shapePixmap;
 
 
         /** Width of the window's root. */

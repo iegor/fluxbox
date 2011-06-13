@@ -77,6 +77,7 @@ OpenGLScreen::OpenGLScreen(int screenNumber) :
     BaseScreen(screenNumber) {
 
     m_backgroundChanged = true;
+    m_bgPixmapAtom = XInternAtom(display(), "_XROOTPMAP_ID", False);
     m_rootWindowChanged = false;
 
     earlyInitGLXPointers();
@@ -214,7 +215,7 @@ void OpenGLScreen::initGlew() throw(InitException) {
     if(glewErr != GLEW_OK) {
         std::stringstream ss;
         ss << "GLEW Error: " << (const char*)(glewGetErrorString(glewErr));
-        throw InitException(ss.str().c_str());
+        throw InitException(ss.str());
     }
 
     // Check for an appropriate OpenGL version.
@@ -292,21 +293,23 @@ void OpenGLScreen::createBackgroundTexture() throw(InitException) {
 
 // Renews the background texture.
 void OpenGLScreen::updateBackgroundTexture() {
-    Atom bgPixmapAtom = XInternAtom(display(), "_XROOTPMAP_ID", False);
-    Pixmap bgPixmap = rootWindow().singlePropertyValue<Pixmap>(bgPixmapAtom, 0);
-
-    glBindTexture(GL_TEXTURE_2D, m_backgroundTexture);
+    Pixmap bgPixmap = rootWindow().singlePropertyValue<Pixmap>(m_bgPixmapAtom, 0);
 
     if (bgPixmap) {
         XImage *image = XGetImage(display(), bgPixmap, 0, 0, rootWindow().width(), rootWindow().height(), AllPlanes, ZPixmap);
         if (!image) {
-            fbLog_warn << "Cannot create background texture." << std::endl;
+            fbLog_warn << "Cannot create background texture (cannot create XImage)." << std::endl;
             return;
         }
+
+        glBindTexture(GL_TEXTURE_2D, m_backgroundTexture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, rootWindow().width(), rootWindow().height(),
                      0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)(&(image->data[0])));
+
         XDestroyImage(image);
         m_backgroundChanged = false;
+    } else {
+        fbLog_warn << "Cannot create background texture (cannot find background pixmap)." << std::endl;
     }
 }
 

@@ -103,6 +103,10 @@ void BaseScreen::createWindow(Window window) {
 
 // Damages a window on this screen.
 void BaseScreen::damageWindow(Window window, XRectangle area) {
+    if (find(m_ignoreList.begin(), m_ignoreList.end(), window) != m_ignoreList.end()) {
+        return;
+    }
+
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
     if (it != m_windows.end()) {
         (*it)->addDamage(area);
@@ -115,6 +119,10 @@ void BaseScreen::damageWindow(Window window, XRectangle area) {
 
 // Destroys a window on this screen.
 void BaseScreen::destroyWindow(Window window) {
+    if (find(m_ignoreList.begin(), m_ignoreList.end(), window) != m_ignoreList.end()) {
+        return;
+    }
+
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
     if (it != m_windows.end()) {
         delete *it;
@@ -126,6 +134,10 @@ void BaseScreen::destroyWindow(Window window) {
 
 // Maps a window on this screen.
 void BaseScreen::mapWindow(Window window) {
+    if (find(m_ignoreList.begin(), m_ignoreList.end(), window) != m_ignoreList.end()) {
+        return;
+    }
+
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
     if (it != m_windows.end()) {
         (*it)->setMapped();
@@ -136,6 +148,10 @@ void BaseScreen::mapWindow(Window window) {
 
 // Updates window's configuration.
 void BaseScreen::reconfigureWindow(const XConfigureEvent &event) {
+    if (find(m_ignoreList.begin(), m_ignoreList.end(), event.window) != m_ignoreList.end()) {
+        return;
+    }
+
     if (event.window == m_rootWindow.window()) {
         m_rootWindow.updateGeometry(event);
         setRootWindowChanged();
@@ -167,6 +183,10 @@ void BaseScreen::reconfigureWindow(const XConfigureEvent &event) {
 
 // Updates window's shape.
 void BaseScreen::updateShape(Window window) {
+    if (find(m_ignoreList.begin(), m_ignoreList.end(), window) != m_ignoreList.end()) {
+        return;
+    }
+
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
     if (it != m_windows.end()) {
         (*it)->setClipShapeChanged();
@@ -177,6 +197,10 @@ void BaseScreen::updateShape(Window window) {
 
 // Unmaps a window on this screen.
 void BaseScreen::unmapWindow(Window window) {
+    if (find(m_ignoreList.begin(), m_ignoreList.end(), window) != m_ignoreList.end()) {
+        return;
+    }
+
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
     if (it != m_windows.end()) {
         (*it)->setUnmapped();
@@ -187,6 +211,10 @@ void BaseScreen::unmapWindow(Window window) {
 
 // Updates the value of some window's property.
 void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
+    if (find(m_ignoreList.begin(), m_ignoreList.end(), window) != m_ignoreList.end()) {
+        return;
+    }
+    
     if ((window == m_rootWindow.window()) && (state == PropertyNewValue)) {
         if (property == m_activeWindowAtom) {
             m_activeWindowXID = m_rootWindow.singlePropertyValue<Window>(m_activeWindowAtom, 0);
@@ -210,18 +238,18 @@ void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
 }
 
 
-// Checks whether a given window is managed by the current screen.
-bool BaseScreen::isWindowManaged(Window window) {
-    std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
-    return (it != m_windows.end());
-}
-
 // Adds a window to ignore list, stops tracking it if it is being tracked.
 void BaseScreen::addWindowToIgnoreList(Window window) {
     if (find(m_ignoreList.begin(), m_ignoreList.end(), window) == m_ignoreList.end()) {
         destroyWindow(window);
         m_ignoreList.push_back(window);
     }
+}
+
+// Checks whether a given window is managed by the current screen.
+bool BaseScreen::isWindowManaged(Window window) {
+    std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
+    return (it != m_windows.end());
 }
 
 
