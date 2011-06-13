@@ -170,7 +170,19 @@ void BaseScreen::reconfigureWindow(const XConfigureEvent &event) {
         } else {
             it = getWindowIterator(event.above);
             if (it == m_windows.end()) {
-                m_windows.push_back(currentWindow);     // TODO: Proper parent matching.
+                // TODO: Optimize.
+                Window parent = getParentWindow(currentWindow->window());
+                while (!isWindowManaged(parent) && (parent != None) && (parent != rootWindow().window())) {
+                    parent = getParentWindow(parent);
+                }
+
+                it = getWindowIterator(parent);
+                if (it != m_windows.end()) {
+                    ++it;
+                    m_windows.insert(it, currentWindow);
+                } else {
+                    m_windows.push_back(currentWindow);
+                }
             } else {
                 ++it;
                 m_windows.insert(it, currentWindow);
@@ -178,6 +190,15 @@ void BaseScreen::reconfigureWindow(const XConfigureEvent &event) {
         }
     } else {
         fbLog_warn << "Attempted to reconfigure an untracked window (" << std::hex << event.window << ")" << std::endl;
+    }
+}
+
+// Reparents a window.
+void BaseScreen::reparentWindow(Window window, Window parent) {
+    if (parent == rootWindow().window()) {
+        createWindow(window);
+    } else {
+        destroyWindow(window);
     }
 }
 
@@ -215,9 +236,14 @@ void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
         return;
     }
     
-    if ((window == m_rootWindow.window()) && (state == PropertyNewValue)) {
+    if ((window == m_rootWindow.window()) && (property != None) && (state == PropertyNewValue)) {
         if (property == m_activeWindowAtom) {
             m_activeWindowXID = m_rootWindow.singlePropertyValue<Window>(m_activeWindowAtom, 0);
+
+            while (!isWindowManaged(m_activeWindowXID) && (m_activeWindowXID != None)
+                    && (m_activeWindowXID != rootWindow().window())) {
+                m_activeWindowXID = getParentWindow(m_activeWindowXID);
+            }
         } else if (property == m_rootPixmapAtom) {
             setBackgroundChanged();
         } else if (property == m_workspaceAtom) {
@@ -263,6 +289,21 @@ void BaseScreen::setRootWindowChanged() { }
 
 
 //--- INTERNAL FUNCTIONS -------------------------------------------------------
+
+// Returns the parent of a given window.
+Window BaseScreen::getParentWindow(Window window) {
+    Window root;
+    Window parent;
+    Window *children = 0;
+    unsigned int childCount;
+
+    XQueryTree(display(), window, &root, &parent, &children, &childCount);
+    if (children) {
+        XFree(children);
+    }
+
+    return parent;
+}
 
 // Returns an iterator of m_windows that points to the given window.
 std::list<BaseCompWindow*>::iterator BaseScreen::getWindowIterator(Window window) {

@@ -200,11 +200,7 @@ void Compositor::eventLoop() {
                            << XGetAtomName(display(), event.xproperty.atom) << ")" << std::endl;
                 break;
             case ReparentNotify :
-                if (event.xreparent.parent == m_screens[eventScreen]->rootWindow().window()) {
-                    m_screens[eventScreen]->createWindow(event.xreparent.window);
-                } else {
-                    m_screens[eventScreen]->destroyWindow(event.xreparent.window);
-                }
+                m_screens[eventScreen]->reparentWindow(event.xreparent.window, event.xreparent.parent);
                 fbLog_info << "ReparentNotify on " << std::hex << event.xreparent.window << " (parent "
                            << event.xreparent.parent << ")" << std::endl;
                 break;
@@ -214,20 +210,21 @@ void Compositor::eventLoop() {
                 break;
             default :
                 if (event.type == (m_damageEventBase + XDamageNotify)) {
-                    XDamageNotifyEvent damageEvent = *((XDamageNotifyEvent*) &event);   // TODO: Better cast.
+                    XDamageNotifyEvent damageEvent = *((XDamageNotifyEvent*) &event);
                     m_screens[eventScreen]->damageWindow(damageEvent.drawable, damageEvent.area);
                     fbLog_info << "DamageNotify on " << std::hex << damageEvent.drawable << std::endl;
                 } else if (event.type == (m_shapeEventBase + ShapeNotify)) {
-                    XShapeEvent shapeEvent = *((XShapeEvent*) &event);      // TODO: Better cast.
+                    XShapeEvent shapeEvent = *((XShapeEvent*) &event);
                     m_screens[eventScreen]->updateShape(shapeEvent.window);
                     fbLog_info << "ShapeNotify on " << std::hex << shapeEvent.window << std::endl;
                 } else {
-                    fbLog_info << "Event " << event.xany.type << " on screen " << eventScreen
-                               << " and window " << event.xany.window << std::endl;
+                    fbLog_info << "Event " << std::dec << event.xany.type << " on screen " << eventScreen
+                               << " and window " << std::hex << event.xany.window << std::endl;
                 }
                 break;
             }
         }
+        XFlush(display());
 
         FbTk::Timer::updateTimers(XConnectionNumber(display()));
 

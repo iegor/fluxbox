@@ -172,6 +172,7 @@ bool BaseCompWindow::rawPropertyData(Atom propertyAtom, Atom propertyType,
     return false;
 }
 
+
 //--- OPERATORS ----------------------------------------------------------------
 
 // << output stream operator for the window class.

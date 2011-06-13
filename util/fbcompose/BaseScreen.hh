@@ -105,6 +105,9 @@ namespace FbCompositor {
         /** Updates window's configuration. */
         void reconfigureWindow(const XConfigureEvent &event);
 
+        /** Reparents a window. */
+        void reparentWindow(Window window, Window parent);
+
         /** Updates window's shape. */
         void updateShape(Window window);
 
@@ -152,6 +155,9 @@ namespace FbCompositor {
 
     private:
         //--- INTERNAL FUNCTIONS -----------------------------------------------
+
+        /** \returns the parent of a given window. */
+        Window getParentWindow(Window window);
 
         /** \returns an iterator of m_windows that points to the given window. */
         std::list<BaseCompWindow*>::iterator getWindowIterator(Window windowXID);
