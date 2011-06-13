@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
         CompositorConfig config(argc, argv);
         Compositor app(config);
         app.eventLoop();
-    } catch(CompositorException e) {
+    } catch(const CompositorException &e) {
         fbLog_error << e.what() << std::endl;
         return EXIT_FAILURE;
     }

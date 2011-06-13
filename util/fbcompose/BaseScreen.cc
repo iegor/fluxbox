@@ -97,7 +97,7 @@ void BaseScreen::createWindow(Window window) {
         BaseCompWindow *newWindow = createWindowObject(window);
         m_windows.push_back(newWindow);
     } else {
-        fbLog_warn << "Attempted to create a window twice (" << window << ")" << std::endl;
+        fbLog_warn << "Attempted to create a window twice (" << std::hex << window << ")" << std::endl;
     }
 }
 
@@ -108,7 +108,7 @@ void BaseScreen::damageWindow(Window window, XRectangle area) {
         (*it)->addDamage(area);
     } else {
         if (window != m_rootWindow.window()) {
-            fbLog_warn << "Attempted to damage an untracked window (" << window << ")" << std::endl;
+            fbLog_warn << "Attempted to damage an untracked window (" << std::hex << window << ")" << std::endl;
         }
     }
 }
@@ -120,7 +120,7 @@ void BaseScreen::destroyWindow(Window window) {
         delete *it;
         m_windows.erase(it);
     } else {
-        fbLog_warn << "Attempted to destroy an untracked window (" << window << ")" << std::endl;
+        fbLog_warn << "Attempted to destroy an untracked window (" << std::hex << window << ")" << std::endl;
     }
 }
 
@@ -130,7 +130,7 @@ void BaseScreen::mapWindow(Window window) {
     if (it != m_windows.end()) {
         (*it)->setMapped();
     } else {
-        fbLog_warn << "Attempted to map an untracked window (" << window << ")" << std::endl;
+        fbLog_warn << "Attempted to map an untracked window (" << std::hex << window << ")" << std::endl;
     }
 }
 
@@ -156,12 +156,12 @@ void BaseScreen::reconfigureWindow(const XConfigureEvent &event) {
             if (it == m_windows.end()) {
                 m_windows.push_back(currentWindow);     // TODO: Proper parent matching.
             } else {
-                it++;
+                ++it;
                 m_windows.insert(it, currentWindow);
             }
         }
     } else {
-        fbLog_warn << "Attempted to reconfigure an untracked window (" << event.window << ")" << std::endl;
+        fbLog_warn << "Attempted to reconfigure an untracked window (" << std::hex << event.window << ")" << std::endl;
     }
 }
 
@@ -171,7 +171,7 @@ void BaseScreen::updateShape(Window window) {
     if (it != m_windows.end()) {
         (*it)->setClipShapeChanged();
     } else {
-        fbLog_warn << "Attempted to update the shape of an untracked window (" << window << ")" << std::endl;
+        fbLog_warn << "Attempted to update the shape of an untracked window (" << std::hex << window << ")" << std::endl;
     }
 }
 
@@ -181,7 +181,7 @@ void BaseScreen::unmapWindow(Window window) {
     if (it != m_windows.end()) {
         (*it)->setUnmapped();
     } else {
-        fbLog_warn << "Attempted to unmap an untracked window (" << window << ")" << std::endl;
+        fbLog_warn << "Attempted to unmap an untracked window (" << std::hex << window << ")" << std::endl;
     }
 }
 
@@ -204,7 +204,7 @@ void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
         (*it)->updateProperty(property, state);
     } else {
         if (window != rootWindow().window()) {
-            fbLog_warn << "Attempted to set the property of an untracked window (" << window << ")" << std::endl;
+            fbLog_warn << "Attempted to set the property of an untracked window (" << std::hex << window << ")" << std::endl;
         }
     }
 }
@@ -243,7 +243,7 @@ std::list<BaseCompWindow*>::iterator BaseScreen::getWindowIterator(Window window
         if (window == (*it)->window()) {
             break;
         }
-        it++;
+        ++it;
     }
     return it;
 }
@@ -253,11 +253,11 @@ std::list<BaseCompWindow*>::iterator BaseScreen::getWindowIterator(Window window
 
 // << output stream operator for the BaseScreen class.
 std::ostream &FbCompositor::operator<<(std::ostream& out, const BaseScreen& s) {
-    out << "SCREEN NUMBER " << s.m_screenNumber << ":" << std::endl
+    out << "SCREEN NUMBER " << std::dec << s.m_screenNumber << ":" << std::endl
         << "  Properties" << std::endl
-        << "    Active window XID: " << s.m_activeWindowXID << std::endl
-        << "    Number of workspaces: " << s.m_workspaceCount << std::endl
-        << "    Current workspace: " << s.m_currentWorkspace << std::endl
+        << "    Active window XID: " << std::hex << s.m_activeWindowXID << std::endl
+        << "    Number of workspaces: " << std::dec << s.m_workspaceCount << std::endl
+        << "    Current workspace: " << std::dec << s.m_currentWorkspace << std::endl
         << "  Windows" << std::endl;
 
     std::list<BaseCompWindow*>::const_iterator it = s.m_windows.begin();
@@ -265,14 +265,14 @@ std::ostream &FbCompositor::operator<<(std::ostream& out, const BaseScreen& s) {
         if ((*it)->isMapped()) {
             out << "    " << **it << std::endl;
         }
-        it++;
+        ++it;
     }
 
     out << "  Ignore list" << std::endl << "    ";
     std::vector<Window>::const_iterator it2 = s.m_ignoreList.begin();
     while (it2 != s.m_ignoreList.end()) {
-        out << *it2 << " ";
-        it2++;
+        out << std::hex << *it2 << " ";
+        ++it2;
     }
     out << std::endl;
 

@@ -127,6 +127,9 @@ namespace FbCompositor {
         /** Renews the background texture. */
         void updateBackgroundTexture();
 
+        /** React to the geometry change of the root window. */
+        void updateOnRootWindowResize();
+
 
         //--- CONVENIENCE OPENGL WRAPPERS --------------------------------------
 
@@ -157,11 +160,15 @@ namespace FbCompositor {
         /** The GLX context. */
         GLXContext m_glxContext;
 
+
         /** GLX handle to the rendering window. */
         GLXWindow m_glxRenderingWindow;
 
         /** Rendering window. */
         Window m_renderingWindow;
+
+        /** Whether the root window has changed since the last update. */
+        bool m_rootWindowChanged;
 
 
         /** The background texture. */

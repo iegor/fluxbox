@@ -64,6 +64,9 @@ namespace FbCompositor {
 
         //--- WINDOW UPDATE FUNCTIONS ------------------------------------------
 
+        /** Sets a new root window size. */
+        void setRootWindowSize(unsigned int width, unsigned int height) throw();
+
         /** Updates the window's contents. */
         void updateContents() throw(RuntimeException);
 
@@ -91,6 +94,13 @@ namespace FbCompositor {
 
         /** Window position buffer. */
         GLuint m_windowPosBuffer;
+
+
+        /** Width of the window's root. */
+        unsigned int m_rootWidth;
+
+        /** Height of the window's root. */
+        unsigned int m_rootHeight;
 
 
         //--- texture_from_pixmap EXTENSION SPECIFIC ---------------------------

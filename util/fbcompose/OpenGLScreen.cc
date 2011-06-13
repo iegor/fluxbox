@@ -77,6 +77,7 @@ OpenGLScreen::OpenGLScreen(int screenNumber) :
     BaseScreen(screenNumber) {
 
     m_backgroundChanged = true;
+    m_rootWindowChanged = false;
 
     earlyInitGLXPointers();
     initRenderingContext();
@@ -118,7 +119,8 @@ void OpenGLScreen::setBackgroundChanged() {
 
 // Notifies the screen of a root window change.
 void OpenGLScreen::setRootWindowChanged() {
-    // TODO: Handle resolution changes.
+    BaseScreen::setRootWindowChanged();
+    m_rootWindowChanged = true;
 }
 
 
@@ -308,6 +310,19 @@ void OpenGLScreen::updateBackgroundTexture() {
     }
 }
 
+// React to the geometry change of the root window.
+void OpenGLScreen::updateOnRootWindowResize() {
+    XResizeWindow(display(), m_renderingWindow, rootWindow().width(), rootWindow().height());
+
+    std::list<BaseCompWindow*>::const_iterator it = allWindows().begin();
+    while (it != allWindows().end()) {
+        (dynamic_cast<OpenGLWindow*>(*it))->setRootWindowSize(rootWindow().width(), rootWindow().height());
+        ++it;
+    }
+
+    m_rootWindowChanged = false;
+}
+
 
 //--- CONVENIENCE OPENGL WRAPPERS ----------------------------------------------
 
@@ -398,6 +413,10 @@ BaseCompWindow *OpenGLScreen::createWindowObject(Window window) {
 
 // Renders the screen's contents.
 void OpenGLScreen::renderScreen() {
+    if (m_rootWindowChanged) {
+        updateOnRootWindowResize();
+    }
+
     glXMakeCurrent(display(), m_glxRenderingWindow, m_glxContext);
     glUseProgram(m_shaderProgram);
 
@@ -414,7 +433,7 @@ void OpenGLScreen::renderScreen() {
         if ((*it)->isMapped()) {
             renderWindow(*(dynamic_cast<OpenGLWindow*>(*it)));
         }
-        it++;
+        ++it;
     }
 
     glXSwapBuffers(display(), m_glxRenderingWindow);
@@ -463,6 +482,7 @@ void OpenGLScreen::renderTexture(GLuint primPosBuffer, GLuint texturePosBuffer, 
     glUniform1i(texturePos, 0);
 
     // Rendering.
+    glViewport(0, 0, rootWindow().width(), rootWindow().height());
     glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, (void*)0);
 
     // Cleanup.

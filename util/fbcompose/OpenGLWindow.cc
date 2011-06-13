@@ -55,6 +55,8 @@ OpenGLWindow::OpenGLWindow(Window windowXID, GLXFBConfig fbConfig) throw() :
     BaseCompWindow(windowXID) {
 
     m_fbConfig = fbConfig;
+    m_rootWidth = dynamic_cast<Compositor*>(FbTk::App::instance())->getScreen(screenNumber()).rootWindow().width();
+    m_rootHeight = dynamic_cast<Compositor*>(FbTk::App::instance())->getScreen(screenNumber()).rootWindow().height();
 
     // Create OpenGL elements.
     glGenTextures(1, &m_contentTexture);
@@ -84,6 +86,13 @@ OpenGLWindow::~OpenGLWindow() throw() {
 
 
 //--- WINDOW UPDATE FUNCTIONS ------------------------------------------
+
+// Sets a new root window size.
+void OpenGLWindow::setRootWindowSize(unsigned int width, unsigned int height) throw() {
+    m_rootWidth = width;
+    m_rootHeight = height;
+    updateWindowPosArray();
+}
 
 // Updates the window's contents.
 void OpenGLWindow::updateContents() throw(RuntimeException) {
@@ -154,13 +163,10 @@ void OpenGLWindow::updateGeometry(const XConfigureEvent &event) throw() {
 
 // Updates the window position vertex array.
 void OpenGLWindow::updateWindowPosArray() throw() {
-    unsigned int rootWidth = dynamic_cast<Compositor*>(FbTk::App::instance())->getScreen(screenNumber()).rootWindow().width();
-    unsigned int rootHeight = dynamic_cast<Compositor*>(FbTk::App::instance())->getScreen(screenNumber()).rootWindow().height();
-
-    m_windowPosArray[0] = m_windowPosArray[4] = ((x() * 2.0) / rootWidth) - 1.0;
-    m_windowPosArray[2] = m_windowPosArray[6] = (((x() + realWidth()) * 2.0) / rootWidth) - 1.0;
-    m_windowPosArray[1] = m_windowPosArray[3] = 1.0 - ((y() * 2.0) / rootHeight);
-    m_windowPosArray[5] = m_windowPosArray[7] = 1.0 - (((y() + realHeight()) * 2.0) / rootHeight);
+    m_windowPosArray[0] = m_windowPosArray[4] = ((x() * 2.0) / m_rootWidth) - 1.0;
+    m_windowPosArray[2] = m_windowPosArray[6] = (((x() + realWidth()) * 2.0) / m_rootWidth) - 1.0;
+    m_windowPosArray[1] = m_windowPosArray[3] = 1.0 - ((y() * 2.0) / m_rootHeight);
+    m_windowPosArray[5] = m_windowPosArray[7] = 1.0 - (((y() + realHeight()) * 2.0) / m_rootHeight);
 
     glBindBuffer(GL_ARRAY_BUFFER, m_windowPosBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(m_windowPosArray), (const GLvoid*)(m_windowPosArray), GL_STATIC_DRAW);
