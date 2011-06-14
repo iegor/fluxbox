@@ -85,6 +85,11 @@ void BaseCompWindow::setUnmapped() throw() {
 
 // Update the window's contents.
 void BaseCompWindow::updateContents() {
+    XWindowAttributes xwa;
+    if (!XGetWindowAttributes(display(), window(), &xwa)) {
+        return;     // In case the window was unmapped/destroyed.
+    }
+
     updateContentPixmap();
     if (m_clipShapeChanged) {
         updateShape();
@@ -110,9 +115,10 @@ void BaseCompWindow::updateGeometry(const XConfigureEvent &/*event*/) throw() {
 void BaseCompWindow::updateShape() {
     if (m_clipShapeRects) {
         XFree(m_clipShapeRects);
+        m_clipShapeRects = NULL;
     }
-
     m_clipShapeRects = XShapeGetRectangles(display(), window(), ShapeClip, &m_clipShapeRectCount, &m_clipShapeRectOrder);
+
     for (int i = 0; i < m_clipShapeRectCount; i++) {
         m_clipShapeRects[i].height = std::min(m_clipShapeRects[i].height + 2 * borderWidth(), realHeight());
         m_clipShapeRects[i].width = std::min(m_clipShapeRects[i].width + 2 * borderWidth(), realWidth());

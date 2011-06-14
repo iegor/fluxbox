@@ -95,6 +95,9 @@ void BaseScreen::createWindow(Window window) {
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
     if (it == m_windows.end()) {
         BaseCompWindow *newWindow = createWindowObject(window);
+        if (newWindow->depth() == 0) {
+            return;     // In case the window is already destroyed.
+        }
         m_windows.push_back(newWindow);
     } else {
         fbLog_warn << "Attempted to create a window twice (" << std::hex << window << ")" << std::endl;

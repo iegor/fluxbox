@@ -97,17 +97,24 @@ void OpenGLWindow::setRootWindowSize(unsigned int width, unsigned int height) th
 
 // Updates the window's contents.
 void OpenGLWindow::updateContents() throw(RuntimeException) {
+    static XWindowAttributes xwa;
+    if (!XGetWindowAttributes(display(), window(), &xwa)) {
+        return;     // In case the window was unmapped/destroyed.
+    }
+
     updateContentPixmap();
     if (clipShapeChanged()) {
         updateShape();
     }
 
-    if (contentPixmap()) {
+    if (contentPixmap() && m_shapePixmap) {
         GC gc = XCreateGC(display(), m_shapePixmap, 0, 0);
         XSetGraphicsExposures(display(), gc, False);
 
         XSetPlaneMask(display(), gc, 0x00ffffff);
-        XCopyArea(display(), contentPixmap(), m_shapePixmap, gc, 0, 0, realWidth(), realHeight(), 0, 0);
+        if (!XCopyArea(display(), contentPixmap(), m_shapePixmap, gc, 0, 0, realWidth(), realHeight(), 0, 0)) {
+            return;
+        }
 
         XFreeGC(display(), gc);
 
@@ -152,6 +159,9 @@ void OpenGLWindow::updateShape() {
         m_shapePixmap = None;
     }
     m_shapePixmap = XCreatePixmap(display(), window(), realWidth(), realHeight(), depth());
+    if (!m_shapePixmap) {
+        return;     // In case the window was unmapped/destroyed.
+    }
 
     GC gc = XCreateGC(display(), m_shapePixmap, 0, 0);
     XSetGraphicsExposures(display(), gc, False);

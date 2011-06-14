@@ -75,19 +75,20 @@ Compositor::Compositor(const CompositorConfig &config) throw(InitException) :
         getCMSelectionOwnership(i);
     }
 
-    // Set up windows.
     if (m_renderingMode != RM_ServerAuto) {
+        // Set up windows.
         for (size_t i = 0; i < m_screens.size(); i++) {
             m_screens[i]->initWindows();
         }
+
+        // Set up FPS limiter.
+        FbTk::RefCount<FbTk::Command<void> > command(new RenderScreensCommand(this));
+        m_redrawTimer.setCommand(command);
+        m_redrawTimer.setTimeout(0, 1000000 / 60);
+        m_redrawTimer.start();
     }
 
     XFlush(display());
-
-    FbTk::RefCount<FbTk::Command<void> > command(new RenderScreensCommand(this));
-    m_redrawTimer.setCommand(command);
-    m_redrawTimer.setTimeout(0, 1000000 / 60);
-    m_redrawTimer.start();
 }
 
 // Destructor.
@@ -167,7 +168,6 @@ void Compositor::eventLoop() {
             continue;
         }
 
-        XFlush(display());
         while (XPending(display())) {
             XNextEvent(display(), &event);
 
@@ -226,7 +226,8 @@ void Compositor::eventLoop() {
                 break;
             }
         }
-        XFlush(display());
+
+        XSync(display(), False);
 
         FbTk::Timer::updateTimers(XConnectionNumber(display()));
 
@@ -235,9 +236,9 @@ void Compositor::eventLoop() {
             fbLog_debug << *m_screens[i];
         }
         fbLog_debug << "======================================" << std::endl;
-    }
 
-    std::cout << "SS" << std::endl;
+        XSync(display(), False);
+    }
 }
 
 
@@ -277,7 +278,7 @@ int FbCompositor::handleXError(Display *display, XErrorEvent *error) {
     char errorText[ERROR_TEXT_LENGTH];
     XGetErrorText(display, error->error_code, errorText, ERROR_TEXT_LENGTH);
 
-    fbLog_warn << "X Error: " << errorText << " (errorCode=" << int(error->error_code)
+    fbLog_warn << "X Error: " << errorText << " (errorCode=" << std::dec << int(error->error_code)
                << ", majorOpCode=" << int(error->request_code) << ", minorOpCode="
                << int(error->minor_code) << ", resourceId=" << std::hex << error->resourceid
                << std::dec << ")" << std::endl;
