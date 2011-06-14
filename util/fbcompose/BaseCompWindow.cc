@@ -51,7 +51,7 @@ BaseCompWindow::BaseCompWindow(Window windowXID) throw() :
     m_clipShapeRectOrder = Unsorted;
 
     if (m_class == InputOutput) {
-        m_damage = XDamageCreate(display(), window(), XDamageReportDeltaRectangles);
+        m_damage = XDamageCreate(display(), window(), XDamageReportNonEmpty);
     } else {
         m_damage = 0;
     }
@@ -69,10 +69,8 @@ BaseCompWindow::~BaseCompWindow() throw() {
 //--- WINDOW MANIPULATION ------------------------------------------------------
 
 // Add damage to a window.
-void BaseCompWindow::addDamage(XRectangle area) throw() {
-    area.height = std::min(area.height + 1, (int)realHeight());
-    area.width = std::min(area.width + 1, (int)realWidth());
-    m_damagedArea.push_back(area);
+void BaseCompWindow::addDamage() throw() {
+    m_isDamaged = true;
 }
 
 // Mark the window as mapped.
@@ -136,7 +134,7 @@ void BaseCompWindow::setClipShapeChanged() throw() {
 // Removes all damage from the window.
 void BaseCompWindow::clearDamage() throw() {
     m_clipShapeChanged = false;
-    m_damagedArea.clear();
+    m_isDamaged = false;
     m_isResized = false;
 }
 

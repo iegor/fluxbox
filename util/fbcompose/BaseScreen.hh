@@ -94,7 +94,7 @@ namespace FbCompositor {
         void createWindow(Window window);
 
         /** Damages a window on this screen. */
-        void damageWindow(Window window, XRectangle area);
+        void damageWindow(Window window);
 
         /** Destroys a window on this screen. */
         void destroyWindow(Window window);

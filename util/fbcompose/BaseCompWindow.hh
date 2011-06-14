@@ -98,7 +98,7 @@ namespace FbCompositor {
         //--- WINDOW MANIPULATION ----------------------------------------------
 
         /** Add damage to a window. */
-        virtual void addDamage(XRectangle area) throw();
+        virtual void addDamage() throw();
 
         /** Mark the window as mapped. */
         virtual void setMapped() throw();
@@ -135,9 +135,6 @@ namespace FbCompositor {
         /** \returns the rectangles that make up the clip shape. */
         XRectangle *clipShapeRects() const throw();
 
-
-        /** \returns the vector, containing the damaged window's areas. */
-        const std::vector<XRectangle> &damagedArea() const throw();
 
         /** \returns whether the window has been resized since the last update. */
         bool isResized() const throw();
@@ -178,8 +175,8 @@ namespace FbCompositor {
         /** Window's damage object. */
         Damage m_damage;
 
-        /** A list of damaged rectangles. */
-        std::vector<XRectangle> m_damagedArea;
+        /** Shows whether the window is damaged. */
+        bool m_isDamaged;
 
         /** Shows whether the window has been resized since the last update. */
         bool m_isResized;
@@ -227,13 +224,9 @@ namespace FbCompositor {
     }
 
     // Returns the vector, containing the damaged window's areas.
-    inline const std::vector<XRectangle> &BaseCompWindow::damagedArea() const throw() {
-        return m_damagedArea;
-    }
-
     // Returns whether the window is damaged or not.
     inline bool BaseCompWindow::isDamaged() const throw() {
-        return (!m_damagedArea.empty());
+        return m_isDamaged;
     }
 
     // Returns whether the window is mapped or not.

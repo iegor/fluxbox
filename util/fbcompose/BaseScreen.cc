@@ -102,14 +102,14 @@ void BaseScreen::createWindow(Window window) {
 }
 
 // Damages a window on this screen.
-void BaseScreen::damageWindow(Window window, XRectangle area) {
+void BaseScreen::damageWindow(Window window) {
     if (find(m_ignoreList.begin(), m_ignoreList.end(), window) != m_ignoreList.end()) {
         return;
     }
 
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
     if (it != m_windows.end()) {
-        (*it)->addDamage(area);
+        (*it)->addDamage();
     } else {
         if (window != m_rootWindow.window()) {
             fbLog_warn << "Attempted to damage an untracked window (" << std::hex << window << ")" << std::endl;

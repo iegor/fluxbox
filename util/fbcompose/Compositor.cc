@@ -173,7 +173,9 @@ void Compositor::eventLoop() {
 
             int eventScreen = screenOfEvent(event);
             if (eventScreen < 0) {
-                fbLog_info << "Event " << event.xany.serial << " does not affect any managed windows, skipping." << std::endl;
+                fbLog_info << "Event " << std::dec << event.xany.serial << "(window " << std::hex << event.xany.window
+                           << ", type " << std::dec << event.xany.type << ") does not affect any managed windows, skipping."
+                           << std::endl;
                 continue;
             }
 
@@ -211,7 +213,7 @@ void Compositor::eventLoop() {
             default :
                 if (event.type == (m_damageEventBase + XDamageNotify)) {
                     XDamageNotifyEvent damageEvent = *((XDamageNotifyEvent*) &event);
-                    m_screens[eventScreen]->damageWindow(damageEvent.drawable, damageEvent.area);
+                    m_screens[eventScreen]->damageWindow(damageEvent.drawable);
                     fbLog_info << "DamageNotify on " << std::hex << damageEvent.drawable << std::endl;
                 } else if (event.type == (m_shapeEventBase + ShapeNotify)) {
                     XShapeEvent shapeEvent = *((XShapeEvent*) &event);
@@ -234,6 +236,8 @@ void Compositor::eventLoop() {
         }
         fbLog_debug << "======================================" << std::endl;
     }
+
+    std::cout << "SS" << std::endl;
 }
 
 

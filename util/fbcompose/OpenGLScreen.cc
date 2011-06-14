@@ -439,6 +439,7 @@ void OpenGLScreen::renderScreen() {
         ++it;
     }
 
+    glFlush();
     glXSwapBuffers(display(), m_glxRenderingWindow);
 }
 
