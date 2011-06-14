@@ -419,7 +419,6 @@ void FbWindow::setNew(Window win) {
     m_window = win;
 
     if (m_window != 0) {
-        updateGeometry();
         XWindowAttributes attr;
         attr.screen = 0;
         //get screen number
