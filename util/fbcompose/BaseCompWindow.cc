@@ -32,11 +32,20 @@
 using namespace FbCompositor;
 
 
+//--- STATIC VARIABLES -------------------------------------------------
+
+// Opacity atom.
+Atom BaseCompWindow::m_opacityAtom = 0;
+
+
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
 BaseCompWindow::BaseCompWindow(Window windowXID) throw() :
     FbTk::FbWindow(windowXID) {
+
+    initAtoms();
+    m_alpha = singlePropertyValue<long>(m_opacityAtom, 0xff) & 0xff;
 
     XWindowAttributes xwa;
     XGetWindowAttributes(display(), window(), &xwa);
@@ -62,6 +71,19 @@ BaseCompWindow::BaseCompWindow(Window windowXID) throw() :
 BaseCompWindow::~BaseCompWindow() throw() {
     if (m_clipShapeRects) {
         XFree(m_clipShapeRects);
+    }
+}
+
+
+//--- INITIALIZATION FUNCTIONS -----------------------------------------
+
+// Initializes atoms.
+void BaseCompWindow::initAtoms() {
+    static bool atomsInitialized = false;
+
+    if (!atomsInitialized) {
+        m_opacityAtom = XInternAtom(display(), "_NET_WM_WINDOW_OPACITY", False);
+        atomsInitialized = true;
     }
 }
 
@@ -126,7 +148,11 @@ void BaseCompWindow::updateShape() {
 }
 
 // Update window's property.
-void BaseCompWindow::updateProperty(Atom /*property*/, int /*state*/) { }
+void BaseCompWindow::updateProperty(Atom property, int /*state*/) {
+    if (property == m_opacityAtom) {
+        m_alpha = singlePropertyValue<long>(m_opacityAtom, 0xff) & 0xff;
+    }
+}
 
 
 // Set the clip shape as changed.

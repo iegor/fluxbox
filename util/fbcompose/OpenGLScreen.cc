@@ -245,12 +245,13 @@ void OpenGLScreen::initShaders() throw(InitException) {
     GLchar fShaderSource[] =
         "#version 120\n"
         "\n"
+        "uniform float fb_Alpha;\n"
         "uniform sampler2D fb_Texture;\n"
         "\n"
         "varying vec2 fb_TexCoord;\n"
         "\n"
         "void main() {\n"
-        "    gl_FragColor = texture2D(fb_Texture, fb_TexCoord);\n"
+        "    gl_FragColor = mix(vec4(0.0), texture2D(fb_Texture, fb_TexCoord), fb_Alpha);\n"
         "}";
     GLint fShaderSourceLength = (GLint)strlen(fShaderSource);
 
@@ -361,7 +362,8 @@ GLuint OpenGLScreen::createShader(GLenum shaderType, GLint sourceLength, const G
         glGetShaderInfoLog(shader, INFO_LOG_BUFFER_SIZE, &infoLogSize, infoLog);
 
         std::stringstream ss;
-        ss << "Error in compilation of the " << shaderName << " shader: " << (const char*)(infoLog);
+        ss << "Error in compilation of the " << shaderName << " shader: "
+           << std::endl << (const char*)(infoLog);
         throw InitException(ss.str());
     }
 
@@ -395,7 +397,7 @@ GLuint OpenGLScreen::createShaderProgram(GLuint vertexShader, GLuint geometrySha
         glGetProgramInfoLog(program, INFO_LOG_BUFFER_SIZE, &infoLogSize, infoLog);
 
         std::stringstream ss;
-        ss << "Error in linking of the shader program: " << (const char*)(infoLog);
+        ss << "Error in linking of the shader program: " << std::endl << (const char*)(infoLog);
         throw InitException(ss.str());
     }
 
@@ -448,7 +450,7 @@ void OpenGLScreen::renderBackground() {
     if (m_backgroundChanged) {
         updateBackgroundTexture();
     }
-    renderTexture(m_defaultPrimPosBuffer, m_defaultTexPosBuffer, m_defaultElementBuffer, m_backgroundTexture);
+    renderTexture(m_defaultPrimPosBuffer, m_defaultTexPosBuffer, m_defaultElementBuffer, m_backgroundTexture, 1.0);
 }
 
 // A function to render a particular window onto the screen.
@@ -456,11 +458,11 @@ void OpenGLScreen::renderWindow(OpenGLWindow &window) {
     if (window.isDamaged()) {
         window.updateContents();
     }
-    renderTexture(window.windowPosBuffer(), m_defaultTexPosBuffer, m_defaultElementBuffer, window.contentTexture());
+    renderTexture(window.windowPosBuffer(), m_defaultTexPosBuffer, m_defaultElementBuffer, window.contentTexture(), window.alpha() / 255.0);
 }
 
 // A function to render some texture onto the screen.
-void OpenGLScreen::renderTexture(GLuint primPosBuffer, GLuint texturePosBuffer, GLuint elementBuffer, GLuint texture) {
+void OpenGLScreen::renderTexture(GLuint primPosBuffer, GLuint texturePosBuffer, GLuint elementBuffer, GLuint texture, GLfloat alpha) {
     // Load primitive position vertex array.
     glBindBuffer(GL_ARRAY_BUFFER, primPosBuffer);
 
@@ -484,6 +486,10 @@ void OpenGLScreen::renderTexture(GLuint primPosBuffer, GLuint texturePosBuffer, 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
     glUniform1i(texturePos, 0);
+
+    // Set up other uniforms.
+    GLuint alphaPos = glGetUniformLocation(m_shaderProgram, "fb_Alpha");
+    glUniform1f(alphaPos, alpha);
 
     // Rendering.
     glViewport(0, 0, rootWindow().width(), rootWindow().height());

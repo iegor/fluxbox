@@ -149,7 +149,7 @@ namespace FbCompositor {
         void renderWindow(OpenGLWindow &window);
 
         /** Render some texture onto the screen. */
-        void renderTexture(GLuint primPosBuffer, GLuint texturePosBuffer, GLuint elementBuffer, GLuint texture);
+        void renderTexture(GLuint primPosBuffer, GLuint texturePosBuffer, GLuint elementBuffer, GLuint texture, GLfloat alpha);
 
 
         //--- MAIN RENDERING-RELATED VARIABLES ---------------------------------

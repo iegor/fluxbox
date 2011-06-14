@@ -64,6 +64,9 @@ namespace FbCompositor {
 
         //--- ACCESSORS --------------------------------------------------------
 
+        /** \returns the window's opacity. */
+        int alpha() const throw();
+
         /** \returns the window's contents as a pixmap. */
         Pixmap contentPixmap() const throw();
 
@@ -153,6 +156,12 @@ namespace FbCompositor {
 
 
     private:
+        //--- INITIALIZATION FUNCTIONS -----------------------------------------
+
+        /** Initializes atoms. */
+        static void initAtoms();
+
+
         //--- INTERNAL FUNCTIONS -----------------------------------------------
 
         /** Returns the raw contents of a property. */
@@ -161,6 +170,9 @@ namespace FbCompositor {
 
 
         //--- WINDOW ATTRIBUTES ------------------------------------------------
+
+        /** Window opacity. */
+        int m_alpha;
 
         /** Window's class. */
         int m_class;
@@ -193,10 +205,21 @@ namespace FbCompositor {
 
         /** Shows whether the clip shape changed since the last update. */
         bool m_clipShapeChanged;
+
+
+        //--- ATOMS OF INTEREST ------------------------------------------------
+
+        /** Opacity atom. */
+        static Atom m_opacityAtom;
     };
 
 
     //--- INLINE FUNCTIONS -----------------------------------------------------
+
+    // Returns the window's opacity.
+    inline int BaseCompWindow::alpha() const throw() {
+        return m_alpha;
+    }
 
     // Returns whether the chip shape changed since the last update.
     inline int BaseCompWindow::clipShapeChanged() const throw() {
@@ -223,7 +246,6 @@ namespace FbCompositor {
         return m_contentPixmap;
     }
 
-    // Returns the vector, containing the damaged window's areas.
     // Returns whether the window is damaged or not.
     inline bool BaseCompWindow::isDamaged() const throw() {
         return m_isDamaged;
