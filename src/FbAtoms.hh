@@ -42,6 +42,7 @@ public:
     // these atoms are for normal app->WM interaction beyond the scope of the
     // ICCCM...
     Atom getFluxboxAttributesAtom() const { return blackbox_attributes; }
+    Atom getFluxboxResizeRectAtom() const { return resize_rect; }
 
 private:
     FbAtoms();
@@ -49,6 +50,7 @@ private:
     Atom blackbox_attributes;
     Atom motif_wm_info;
     Atom motif_wm_hints;
+    Atom resize_rect;
     Atom xa_wm_protocols;
     Atom xa_wm_state;
     Atom xa_wm_delete_window;
