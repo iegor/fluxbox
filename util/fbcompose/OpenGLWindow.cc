@@ -24,8 +24,7 @@
 #include "Compositor.hh"
 #include "Logging.hh"
 #include "OpenGLWindow.hh"
-
-#include "FbTk/App.hh"
+#include "Utility.hh"
 
 #include <X11/Xutil.h>
 
@@ -33,6 +32,7 @@
 #include <iostream>
 
 using namespace FbCompositor;
+
 
 //--- CONSTANTS ----------------------------------------------------------------
 
@@ -56,8 +56,8 @@ OpenGLWindow::OpenGLWindow(Window windowXID, GLXFBConfig fbConfig) throw() :
 
     m_fbConfig = fbConfig;
     m_shapePixmap = None;
-    m_rootWidth = dynamic_cast<Compositor*>(FbTk::App::instance())->getScreen(screenNumber()).rootWindow().width();
-    m_rootHeight = dynamic_cast<Compositor*>(FbTk::App::instance())->getScreen(screenNumber()).rootWindow().height();
+    m_rootWidth = compositorInstance()->getScreen(screenNumber()).rootWindow().width();
+    m_rootHeight = compositorInstance()->getScreen(screenNumber()).rootWindow().height();
 
     // Create OpenGL elements.
     glGenTextures(1, &m_contentTexture);
@@ -189,10 +189,14 @@ void OpenGLWindow::updateGeometry(const XConfigureEvent &event) throw() {
 
 // Updates the window position vertex array.
 void OpenGLWindow::updateWindowPosArray() throw() {
-    m_windowPosArray[0] = m_windowPosArray[4] = ((x() * 2.0) / m_rootWidth) - 1.0;
-    m_windowPosArray[2] = m_windowPosArray[6] = (((x() + realWidth()) * 2.0) / m_rootWidth) - 1.0;
-    m_windowPosArray[1] = m_windowPosArray[3] = 1.0 - ((y() * 2.0) / m_rootHeight);
-    m_windowPosArray[5] = m_windowPosArray[7] = 1.0 - (((y() + realHeight()) * 2.0) / m_rootHeight);
+    GLfloat xLow, xHigh, yLow, yHigh;
+    toOpenGLCoordinates(m_rootWidth, m_rootHeight, x(), y(), realWidth(),
+                        realHeight(), &xLow, &xHigh, &yLow, &yHigh);
+
+    m_windowPosArray[0] = m_windowPosArray[4] = xLow;
+    m_windowPosArray[2] = m_windowPosArray[6] = xHigh;
+    m_windowPosArray[1] = m_windowPosArray[3] = yLow;
+    m_windowPosArray[5] = m_windowPosArray[7] = yHigh;
 
     glBindBuffer(GL_ARRAY_BUFFER, m_windowPosBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(m_windowPosArray), (const GLvoid*)(m_windowPosArray), GL_STATIC_DRAW);

@@ -269,7 +269,7 @@ int Compositor::screenOfEvent(const XEvent &event) {
 }
 
 
-//--- MISC HANDLERS ------------------------------------------------------------
+//--- VARIOUS HANDLERS ---------------------------------------------------------
 
 // Custom signal handler.
 void FbCompositor::handleSignal(int sig) {

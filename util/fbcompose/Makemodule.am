@@ -37,15 +37,14 @@ fbcompose_SOURCES = \
 	util/fbcompose/main.cc \
 	util/fbcompose/BaseCompWindow.hh util/fbcompose/BaseCompWindow.cc \
 	util/fbcompose/BaseScreen.hh util/fbcompose/BaseScreen.cc \
-	util/fbcompose/Compositor.hh \
-	util/fbcompose/Compositor.cc \
-	util/fbcompose/CompositorConfig.hh \
-	util/fbcompose/CompositorConfig.cc \
+	util/fbcompose/Compositor.hh util/fbcompose/Compositor.cc \
+	util/fbcompose/CompositorConfig.hh util/fbcompose/CompositorConfig.cc \
 	util/fbcompose/Constants.hh \
 	util/fbcompose/Exceptions.hh \
 	util/fbcompose/Logging.hh util/fbcompose/Logging.cc \
 	util/fbcompose/OpenGLScreen.hh util/fbcompose/OpenGLScreen.cc \
-	util/fbcompose/OpenGLWindow.hh util/fbcompose/OpenGLWindow.cc
+	util/fbcompose/OpenGLWindow.hh util/fbcompose/OpenGLWindow.cc \
+	util/fbcompose/Utility.hh util/fbcompose/Utility.cc
 
 #  FLUXBOX_SRC_DIR=	../../src/
 # INCLUDES= 		-I$(top_srcdir)/src -I$(top_srcdir)/src/FbTk

@@ -24,6 +24,7 @@
 #include "Logging.hh"
 #include "OpenGLScreen.hh"
 #include "OpenGLWindow.hh"
+#include "Utility.hh"
 
 #include "FbTk/FbString.hh"
 
@@ -516,10 +517,10 @@ void OpenGLScreen::renderBackground() {
 
 // Render the resize rectangle.
 void OpenGLScreen::renderResizeRect() {
-    GLfloat xLow  = ((resizeRectangle().x * 2.0) / rootWindow().width()) - 1.0;
-    GLfloat xHigh = (((resizeRectangle().x + resizeRectangle().width) * 2.0) / rootWindow().width()) - 1.0;
-    GLfloat yLow  = 1.0 - ((resizeRectangle().y * 2.0) / rootWindow().height());
-    GLfloat yHigh = 1.0 - (((resizeRectangle().y + resizeRectangle().height) * 2.0) / rootWindow().height());
+    GLfloat xLow, xHigh, yLow, yHigh;
+    toOpenGLCoordinates(rootWindow().width(), rootWindow().height(),
+            resizeRectangle().x, resizeRectangle().y, resizeRectangle().width, resizeRectangle().height,
+            &xLow, &xHigh, &yLow, &yHigh);
     GLfloat linePosArray[] = { xLow, yLow, xHigh, yLow, xHigh, yHigh, xLow, yHigh };
 
     glBindBuffer(GL_ARRAY_BUFFER, m_resizeRectLinePosBuffer);

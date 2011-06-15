@@ -172,11 +172,26 @@ namespace FbCompositor {
     };
 
 
+    //--- VARIOUS HANDLERS -----------------------------------------------------
+
+    /** Custom signal handler. */
+    void handleSignal(int signal);
+
+    /** Custom X error handler. */
+    int handleXError(Display *display, XErrorEvent *error);
+
+
+    //--- OTHER FUNCTIONS ------------------------------------------------------
+
+    /** \returns a properly type cast pointer to the app object. */
+    Compositor *compositorInstance() throw();
+
+
     //--- INLINE FUNCTIONS -----------------------------------------------------
 
-    // Returns the number of screens.
-    inline int Compositor::screenCount() const throw() {
-        return m_screens.size();
+    // Returns a properly type cast pointer to the app object.
+    inline Compositor *compositorInstance() throw() {
+        return dynamic_cast<Compositor*>(FbTk::App::instance());
     }
 
     // Returns a particular screen.
@@ -192,14 +207,10 @@ namespace FbCompositor {
         return m_renderingMode;
     }
 
-
-    //--- MISC HANDLERS --------------------------------------------------------
-
-    /** Custom signal handler. */
-    void handleSignal(int signal);
-
-    /** Custom X error handler. */
-    int handleXError(Display *display, XErrorEvent *error);
+    // Returns the number of screens.
+    inline int Compositor::screenCount() const throw() {
+        return m_screens.size();
+    }
 }
 
 
