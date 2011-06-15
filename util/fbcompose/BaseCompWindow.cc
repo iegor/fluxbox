@@ -44,9 +44,15 @@ Atom BaseCompWindow::m_opacityAtom = 0;
 BaseCompWindow::BaseCompWindow(Window windowXID) throw() :
     FbTk::FbWindow(windowXID) {
 
-    initAtoms();
+    // Set up atoms and properties.
+    static bool atomsInitialized = false;
+    if (!atomsInitialized) {
+        m_opacityAtom = XInternAtom(display(), "_NET_WM_WINDOW_OPACITY", False);
+        atomsInitialized = true;
+    }
     m_alpha = singlePropertyValue<long>(m_opacityAtom, 0xff) & 0xff;
 
+    // Set up other window attributes.
     XWindowAttributes xwa;
     XGetWindowAttributes(display(), window(), &xwa);
 
@@ -71,19 +77,6 @@ BaseCompWindow::BaseCompWindow(Window windowXID) throw() :
 BaseCompWindow::~BaseCompWindow() throw() {
     if (m_clipShapeRects) {
         XFree(m_clipShapeRects);
-    }
-}
-
-
-//--- INITIALIZATION FUNCTIONS -----------------------------------------
-
-// Initializes atoms.
-void BaseCompWindow::initAtoms() {
-    static bool atomsInitialized = false;
-
-    if (!atomsInitialized) {
-        m_opacityAtom = XInternAtom(display(), "_NET_WM_WINDOW_OPACITY", False);
-        atomsInitialized = true;
     }
 }
 

@@ -157,16 +157,14 @@ namespace FbCompositor {
 
 
     private:
-        //--- INITIALIZATION FUNCTIONS -----------------------------------------
-
-        /** Initializes the atoms. */
-        void initAtoms();
-
-
         //--- INTERNAL FUNCTIONS -----------------------------------------------
 
         /** \returns the parent of a given window. */
         Window getParentWindow(Window window);
+
+
+        /** \returns the first managed ancestor of a window. */
+        std::list<BaseCompWindow*>::iterator getFirstManagedAncestorIterator(Window window);
 
         /** \returns an iterator of m_windows that points to the given window. */
         std::list<BaseCompWindow*>::iterator getWindowIterator(Window windowXID);

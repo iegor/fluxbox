@@ -36,6 +36,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <csignal>
 
 using namespace FbCompositor;
 
@@ -89,6 +90,9 @@ Compositor::Compositor(const CompositorConfig &config) throw(InitException) :
     }
 
     XFlush(display());
+
+    signal(SIGINT, handleSignal);
+    signal(SIGTERM, handleSignal);
 }
 
 // Destructor.
@@ -265,7 +269,14 @@ int Compositor::screenOfEvent(const XEvent &event) {
 }
 
 
-//--- ERROR HANDLERS -----------------------------------------------------------
+//--- MISC HANDLERS ------------------------------------------------------------
+
+// Custom signal handler.
+void FbCompositor::handleSignal(int sig) {
+    if ((sig == SIGINT) || (sig == SIGTERM)) {
+        FbTk::App::instance()->end();
+    }
+}
 
 // Custom X error handler.
 int FbCompositor::handleXError(Display *display, XErrorEvent *error) {

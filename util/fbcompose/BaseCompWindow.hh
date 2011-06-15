@@ -156,12 +156,6 @@ namespace FbCompositor {
 
 
     private:
-        //--- INITIALIZATION FUNCTIONS -----------------------------------------
-
-        /** Initializes atoms. */
-        static void initAtoms();
-
-
         //--- INTERNAL FUNCTIONS -----------------------------------------------
 
         /** Returns the raw contents of a property. */

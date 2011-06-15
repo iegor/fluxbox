@@ -62,7 +62,16 @@ BaseScreen::BaseScreen(int screenNumber) :
     m_rootWindow(XRootWindow(m_display, m_screenNumber)) {
 
     // Set up atoms and properties.
-    initAtoms();
+    static bool atomsInitialized = false;
+    if (!atomsInitialized) {
+        m_activeWindowAtom = XInternAtom(m_display, "_NET_ACTIVE_WINDOW", False);
+        m_resizeRectAtom = XInternAtom(m_display, "_FLUXBOX_RECONFIGURE_RECT", False);
+        m_rootPixmapAtom = XInternAtom(m_display, "_XROOTPMAP_ID", False);
+        m_workspaceAtom = XInternAtom(m_display, "_WIN_WORKSPACE", False);
+        m_workspaceCountAtom = XInternAtom(m_display, "_WIN_WORKSPACE_COUNT", False);
+        atomsInitialized = true;
+    }
+
     m_activeWindowXID = m_rootWindow.singlePropertyValue<Window>(m_activeWindowAtom, 0);
     m_currentWorkspace = m_rootWindow.singlePropertyValue<long>(m_workspaceAtom, 0);
     m_resizeRect.x = m_resizeRect.y = m_resizeRect.width = m_resizeRect.height = 0;
@@ -80,20 +89,6 @@ BaseScreen::~BaseScreen() { }
 
 
 //--- OTHER INITIALIZATION -----------------------------------------------------
-
-// Initializes the atoms.
-void BaseScreen::initAtoms() {
-    static bool atomsInitialized = false;
-
-    if (!atomsInitialized) {
-        m_activeWindowAtom = XInternAtom(m_display, "_NET_ACTIVE_WINDOW", False);
-        m_resizeRectAtom = XInternAtom(m_display, "_FLUXBOX_RECONFIGURE_RECT", False);
-        m_rootPixmapAtom = XInternAtom(m_display, "_XROOTPMAP_ID", False);
-        m_workspaceAtom = XInternAtom(m_display, "_WIN_WORKSPACE", False);
-        m_workspaceCountAtom = XInternAtom(m_display, "_WIN_WORKSPACE_COUNT", False);
-        atomsInitialized = true;
-    }
-}
 
 // Initializes all of the windows on the screen.
 void BaseScreen::initWindows() {
@@ -203,14 +198,10 @@ void BaseScreen::reconfigureWindow(const XConfigureEvent &event) {
             m_windows.push_front(currentWindow);
         } else {
             it = getWindowIterator(event.above);
-            if (it == m_windows.end()) {
-                // TODO: Optimize.
-                Window parent = getParentWindow(currentWindow->window());
-                while (!isWindowManaged(parent) && (parent != None) && (parent != rootWindow().window())) {
-                    parent = getParentWindow(parent);
-                }
 
-                it = getWindowIterator(parent);
+            if (it == m_windows.end()) {
+                it = getFirstManagedAncestorIterator(getParentWindow(currentWindow->window()));
+
                 if (it != m_windows.end()) {
                     ++it;
                     m_windows.insert(it, currentWindow);
@@ -272,11 +263,13 @@ void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
     
     if ((window == m_rootWindow.window()) && (property != None) && (state == PropertyNewValue)) {
         if (property == m_activeWindowAtom) {
-            m_activeWindowXID = m_rootWindow.singlePropertyValue<Window>(m_activeWindowAtom, 0);
+            Window activeWindow = m_rootWindow.singlePropertyValue<Window>(m_activeWindowAtom, None);
+            std::list<BaseCompWindow*>::iterator it = getFirstManagedAncestorIterator(activeWindow);
 
-            while (!isWindowManaged(m_activeWindowXID) && (m_activeWindowXID != None)
-                    && (m_activeWindowXID != rootWindow().window())) {
-                m_activeWindowXID = getParentWindow(m_activeWindowXID);
+            if (it != m_windows.end()) {
+                m_activeWindowXID = (*it)->window();
+            } else {
+                m_activeWindowXID = None;
             }
         } else if (property == m_resizeRectAtom) {
             std::vector<long> data = m_rootWindow.propertyValue<long>(m_resizeRectAtom);
@@ -333,6 +326,25 @@ void BaseScreen::setRootWindowChanged() { }
 
 
 //--- INTERNAL FUNCTIONS -------------------------------------------------------
+
+// Returns the first managed ancestor of a window.
+std::list<BaseCompWindow*>::iterator BaseScreen::getFirstManagedAncestorIterator(Window window) {
+    if (window == None) {
+        return m_windows.end();
+    }
+
+    Window currentWindow = window;
+    std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
+
+    while (it == m_windows.end()) {
+        currentWindow = getParentWindow(currentWindow);
+        if ((currentWindow == None) || (currentWindow == rootWindow().window())) {
+            return m_windows.end();
+        }
+        it = getWindowIterator(currentWindow);
+    }
+    return it;
+}
 
 // Returns the parent of a given window.
 Window BaseScreen::getParentWindow(Window window) {
