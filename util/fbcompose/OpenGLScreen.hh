@@ -98,6 +98,13 @@ namespace FbCompositor {
         static const GLfloat DEFAULT_TEX_POS_ARRAY[];
 
 
+        /** The color of the resize rectangle. */
+        static const unsigned long RESIZE_RECT_COLOR;
+
+        /** Element array for drawing the resize rectangle. */
+        static const GLushort RESIZE_RECT_ELEMENT_ARRAY[];
+
+
         //--- INITIALIZATION FUNCTIONS -----------------------------------------
 
         /** Creates the background texture. */
@@ -105,6 +112,9 @@ namespace FbCompositor {
 
         /** Creates default texture rendering buffers. */
         void createDefaultBuffers();
+
+        /** Creates all elements, needed to draw the resize rectangle. */
+        void createResizeRectElements();
 
         /** Early initialization of GLX function pointers. */
         void earlyInitGLXPointers() throw(InitException);
@@ -145,11 +155,16 @@ namespace FbCompositor {
         /** Render the desktop background. */
         void renderBackground();
 
+        /** Render the resize rectangle. */
+        void renderResizeRect();
+
         /** Render a particular window onto the screen. */
         void renderWindow(OpenGLWindow &window);
 
-        /** Render some texture onto the screen. */
-        void renderTexture(GLuint primPosBuffer, GLuint texturePosBuffer, GLuint elementBuffer, GLuint texture, GLfloat alpha);
+
+        /** Render something onto the screen. */
+        void render(GLenum renderingMode, GLuint primPosBuffer, GLuint texturePosBuffer,
+                    GLuint elementBuffer, GLuint elementCount, GLuint texture, GLfloat alpha);
 
 
         //--- MAIN RENDERING-RELATED VARIABLES ---------------------------------
@@ -171,11 +186,25 @@ namespace FbCompositor {
         bool m_rootWindowChanged;
 
 
+        //--- DESKTOP BACKGROUND RELATED ---------------------------------------
+
         /** The background texture. */
         GLuint m_backgroundTexture;
 
         /** Whether the background changed since the last update. */
         bool m_backgroundChanged;
+
+
+        //--- RESIZE FRAME RELATED ---------------------------------------------
+
+        /** The resize rectangle element buffer. */
+        GLuint m_resizeRectElementBuffer;
+
+        /** The resize rectangle primitive position array buffer. */
+        GLuint m_resizeRectLinePosBuffer;
+
+        /** The resize rectangle texture. */
+        GLuint m_resizeRectTexture;
 
 
         //--- DEFAULT ARRAYS ---------------------------------------------------
@@ -205,7 +234,7 @@ namespace FbCompositor {
         //--- ATOMS OF INTEREST ------------------------------------------------
 
         /** Atom that corresponds to the pixmap of desktop's contents. */
-        Atom m_bgPixmapAtom;
+        static Atom m_bgPixmapAtom;
     };
 }
 

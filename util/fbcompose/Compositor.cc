@@ -227,8 +227,6 @@ void Compositor::eventLoop() {
             }
         }
 
-        XSync(display(), False);
-
         FbTk::Timer::updateTimers(XConnectionNumber(display()));
 
         fbLog_debug << m_screens.size() << " screen(s) available." << std::endl;
@@ -236,8 +234,6 @@ void Compositor::eventLoop() {
             fbLog_debug << *m_screens[i];
         }
         fbLog_debug << "======================================" << std::endl;
-
-        XSync(display(), False);
     }
 }
 

@@ -35,6 +35,24 @@
 using namespace FbCompositor;
 
 
+//--- STATIC VARIABLES ---------------------------------------------------------
+
+// Property that denotes the currently active window.
+Atom BaseScreen::m_activeWindowAtom = 0;
+
+// Property that denotes the resize rectangle of fluxbox.
+Atom BaseScreen::m_resizeRectAtom = 0;
+
+// Property that denotes the pixmap of the root window.
+Atom BaseScreen::m_rootPixmapAtom = 0;
+
+// Property that denotes the index of active workspace.
+Atom BaseScreen::m_workspaceAtom = 0;
+
+// Property that denotes the number of workspaces.
+Atom BaseScreen::m_workspaceCountAtom = 0;
+
+
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
@@ -44,13 +62,10 @@ BaseScreen::BaseScreen(int screenNumber) :
     m_rootWindow(XRootWindow(m_display, m_screenNumber)) {
 
     // Set up atoms and properties.
-    m_activeWindowAtom = XInternAtom(m_display, "_NET_ACTIVE_WINDOW", False);
-    m_rootPixmapAtom = XInternAtom(m_display, "_XROOTPMAP_ID", False);
-    m_workspaceAtom = XInternAtom(m_display, "_WIN_WORKSPACE", False);
-    m_workspaceCountAtom = XInternAtom(m_display, "_WIN_WORKSPACE_COUNT", False);
-
+    initAtoms();
     m_activeWindowXID = m_rootWindow.singlePropertyValue<Window>(m_activeWindowAtom, 0);
     m_currentWorkspace = m_rootWindow.singlePropertyValue<long>(m_workspaceAtom, 0);
+    m_resizeRect.x = m_resizeRect.y = m_resizeRect.width = m_resizeRect.height = 0;
     m_workspaceCount = m_rootWindow.singlePropertyValue<long>(m_workspaceCountAtom, 1);
 
     // Set up root window.
@@ -65,6 +80,20 @@ BaseScreen::~BaseScreen() { }
 
 
 //--- OTHER INITIALIZATION -----------------------------------------------------
+
+// Initializes the atoms.
+void BaseScreen::initAtoms() {
+    static bool atomsInitialized = false;
+
+    if (!atomsInitialized) {
+        m_activeWindowAtom = XInternAtom(m_display, "_NET_ACTIVE_WINDOW", False);
+        m_resizeRectAtom = XInternAtom(m_display, "_FLUXBOX_RECONFIGURE_RECT", False);
+        m_rootPixmapAtom = XInternAtom(m_display, "_XROOTPMAP_ID", False);
+        m_workspaceAtom = XInternAtom(m_display, "_WIN_WORKSPACE", False);
+        m_workspaceCountAtom = XInternAtom(m_display, "_WIN_WORKSPACE_COUNT", False);
+        atomsInitialized = true;
+    }
+}
 
 // Initializes all of the windows on the screen.
 void BaseScreen::initWindows() {
@@ -248,6 +277,16 @@ void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
             while (!isWindowManaged(m_activeWindowXID) && (m_activeWindowXID != None)
                     && (m_activeWindowXID != rootWindow().window())) {
                 m_activeWindowXID = getParentWindow(m_activeWindowXID);
+            }
+        } else if (property == m_resizeRectAtom) {
+            std::vector<long> data = m_rootWindow.propertyValue<long>(m_resizeRectAtom);
+            if (data.size() != 4) {
+                m_resizeRect.x = m_resizeRect.y = m_resizeRect.width = m_resizeRect.height = 0;
+            } else {
+                m_resizeRect.x = data[0];
+                m_resizeRect.y = data[1];
+                m_resizeRect.width = data[2];
+                m_resizeRect.height = data[3];
             }
         } else if (property == m_rootPixmapAtom) {
             setBackgroundChanged();

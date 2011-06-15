@@ -54,6 +54,7 @@ const int OpenGLScreen::PREFERRED_FBCONFIG_ATTRIBUTES[] = {
     None
 };
 
+
 // Default element array for texture rendering.
 const GLushort OpenGLScreen::DEFAULT_ELEMENT_ARRAY[] = {
     0, 1, 2, 3
@@ -70,14 +71,34 @@ const GLfloat OpenGLScreen::DEFAULT_TEX_POS_ARRAY[] = {
 };
 
 
+// The color of the resize rectangle.
+const unsigned long OpenGLScreen::RESIZE_RECT_COLOR = 0xffffffff;
+
+// Element array for drawing the resize rectangle.
+const GLushort OpenGLScreen::RESIZE_RECT_ELEMENT_ARRAY[] = {
+    0, 1, 2, 3, 0
+};
+
+
+//--- STATIC VARIABLES ---------------------------------------------------------
+
+// Atom that corresponds to the pixmap of desktop's contents.
+Atom OpenGLScreen::m_bgPixmapAtom = 0;
+
+
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
 OpenGLScreen::OpenGLScreen(int screenNumber) :
     BaseScreen(screenNumber) {
 
+    static bool atomsInitialized = false;
+    if (!atomsInitialized) {
+        m_bgPixmapAtom = XInternAtom(display(), "_XROOTPMAP_ID", False);
+        atomsInitialized = true;
+    }
+
     m_backgroundChanged = true;
-    m_bgPixmapAtom = XInternAtom(display(), "_XROOTPMAP_ID", False);
     m_rootWindowChanged = false;
 
     earlyInitGLXPointers();
@@ -85,8 +106,10 @@ OpenGLScreen::OpenGLScreen(int screenNumber) :
     initRenderingSurface();
     initGlew();
     initShaders();
+
     createDefaultBuffers();
     createBackgroundTexture();
+    createResizeRectElements();
 }
 
 // Destructor.
@@ -103,6 +126,10 @@ OpenGLScreen::~OpenGLScreen() {
     glDeleteBuffers(1, &m_defaultElementBuffer);
     glDeleteBuffers(1, &m_defaultPrimPosBuffer);
     glDeleteBuffers(1, &m_defaultTexPosBuffer);
+
+    glDeleteTextures(1, &m_resizeRectTexture);
+    glDeleteBuffers(1, &m_resizeRectElementBuffer);
+    glDeleteBuffers(1, &m_resizeRectLinePosBuffer);
 
     glXDestroyWindow(display(), m_glxRenderingWindow);
     glXDestroyContext(display(), m_glxContext);
@@ -260,6 +287,7 @@ void OpenGLScreen::initShaders() throw(InitException) {
     m_shaderProgram = createShaderProgram(m_vertexShader, 0, m_fragmentShader);
 }
 
+
 // Creates default texture rendering buffers.
 void OpenGLScreen::createDefaultBuffers() {
     glGenBuffers(1, &m_defaultElementBuffer);
@@ -287,6 +315,29 @@ void OpenGLScreen::createBackgroundTexture() throw(InitException) {
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+}
+
+// Creates all elements, needed to draw the resize rectangle.
+void OpenGLScreen::createResizeRectElements() {
+    // Buffers.
+    glGenBuffers(1, &m_resizeRectLinePosBuffer);
+
+    glGenBuffers(1, &m_resizeRectElementBuffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_resizeRectElementBuffer);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(RESIZE_RECT_ELEMENT_ARRAY),
+                 (const GLvoid*)(RESIZE_RECT_ELEMENT_ARRAY), GL_STATIC_DRAW);
+
+    // Texture.
+    glGenTextures(1, &m_resizeRectTexture);
+    glBindTexture(GL_TEXTURE_2D, m_resizeRectTexture);
+
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    int textureData[1][1] = {{ RESIZE_RECT_COLOR }};
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)(textureData));
 }
 
 
@@ -441,16 +492,38 @@ void OpenGLScreen::renderScreen() {
         ++it;
     }
 
+    if ((resizeRectangle().width != 0) && (resizeRectangle().height != 0)) {
+        renderResizeRect();
+    }
+
     glFlush();
     glXSwapBuffers(display(), m_glxRenderingWindow);
 }
+
 
 // A function to render the desktop background.
 void OpenGLScreen::renderBackground() {
     if (m_backgroundChanged) {
         updateBackgroundTexture();
     }
-    renderTexture(m_defaultPrimPosBuffer, m_defaultTexPosBuffer, m_defaultElementBuffer, m_backgroundTexture, 1.0);
+
+    render(GL_TRIANGLE_STRIP, m_defaultPrimPosBuffer, m_defaultTexPosBuffer, m_defaultElementBuffer,
+           4, m_backgroundTexture, 1.0);
+}
+
+// Render the resize rectangle.
+void OpenGLScreen::renderResizeRect() {
+    GLfloat xLow  = ((resizeRectangle().x * 2.0) / rootWindow().width()) - 1.0;
+    GLfloat xHigh = (((resizeRectangle().x + resizeRectangle().width) * 2.0) / rootWindow().width()) - 1.0;
+    GLfloat yLow  = 1.0 - ((resizeRectangle().y * 2.0) / rootWindow().height());
+    GLfloat yHigh = 1.0 - (((resizeRectangle().y + resizeRectangle().height) * 2.0) / rootWindow().height());
+    GLfloat linePosArray[] = { xLow, yLow, xHigh, yLow, xHigh, yHigh, xLow, yHigh };
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_resizeRectLinePosBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(linePosArray), (const GLvoid*)(linePosArray), GL_STATIC_DRAW);
+
+    render(GL_LINE_STRIP, m_resizeRectLinePosBuffer, m_defaultTexPosBuffer, m_resizeRectElementBuffer,
+           5, m_resizeRectTexture, 1.0);
 }
 
 // A function to render a particular window onto the screen.
@@ -458,42 +531,45 @@ void OpenGLScreen::renderWindow(OpenGLWindow &window) {
     if (window.isDamaged()) {
         window.updateContents();
     }
-    renderTexture(window.windowPosBuffer(), m_defaultTexPosBuffer, m_defaultElementBuffer, window.contentTexture(), window.alpha() / 255.0);
+
+    render(GL_TRIANGLE_STRIP, window.windowPosBuffer(), m_defaultTexPosBuffer, m_defaultElementBuffer,
+           4, window.contentTexture(), window.alpha() / 255.0);
 }
 
-// A function to render some texture onto the screen.
-void OpenGLScreen::renderTexture(GLuint primPosBuffer, GLuint texturePosBuffer, GLuint elementBuffer, GLuint texture, GLfloat alpha) {
+
+// A function to render something onto the screen.
+void OpenGLScreen::render(GLenum renderingMode, GLuint primPosBuffer, GLuint texturePosBuffer,
+                          GLuint elementBuffer, GLuint elementCount, GLuint texture, GLfloat alpha) {
+    // Attribute locations.
+    static GLuint texPosAttrib = glGetAttribLocation(m_shaderProgram, "fb_InitTexCoord");
+    static GLuint windowPosAttrib = glGetAttribLocation(m_shaderProgram, "fb_InitPointPos");
+    // Uniform locations.
+    static GLuint alphaPos = glGetUniformLocation(m_shaderProgram, "fb_Alpha");
+    static GLuint texturePos = glGetUniformLocation(m_shaderProgram, "fb_Texture");
+
     // Load primitive position vertex array.
     glBindBuffer(GL_ARRAY_BUFFER, primPosBuffer);
-
-    GLuint windowPosAttrib = glGetAttribLocation(m_shaderProgram, "fb_InitPointPos");
     glVertexAttribPointer(windowPosAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
     glEnableVertexAttribArray(windowPosAttrib);
 
     // Load texture position vertex array.
     glBindBuffer(GL_ARRAY_BUFFER, texturePosBuffer);
-
-    GLuint texPosAttrib = glGetAttribLocation(m_shaderProgram, "fb_InitTexCoord");
     glVertexAttribPointer(texPosAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
     glEnableVertexAttribArray(texPosAttrib);
 
     // Load element array.
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
 
-    // Set up the texture uniforms.
-    GLuint texturePos = glGetUniformLocation(m_shaderProgram, "fb_Texture");
+    // Set up uniforms.
+    glUniform1f(alphaPos, alpha);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
     glUniform1i(texturePos, 0);
 
-    // Set up other uniforms.
-    GLuint alphaPos = glGetUniformLocation(m_shaderProgram, "fb_Alpha");
-    glUniform1f(alphaPos, alpha);
-
-    // Rendering.
+    // Render stuff.
     glViewport(0, 0, rootWindow().width(), rootWindow().height());
-    glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, (void*)0);
+    glDrawElements(renderingMode, elementCount, GL_UNSIGNED_SHORT, (void*)0);
 
     // Cleanup.
     glDisableVertexAttribArray(windowPosAttrib);

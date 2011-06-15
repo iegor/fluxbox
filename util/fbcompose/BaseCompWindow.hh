@@ -306,8 +306,6 @@ namespace FbCompositor {
             if (!propertyName) {
                 propertyName = XGetAtomName(display(), propertyAtom);
             }
-            fbLog_warn << "Property " << propertyName << " is undefined on window " << window()
-                       << ", using default value." << std::endl;
             return defaultValue;
         } else {
             return values[0];

@@ -145,6 +145,9 @@ namespace FbCompositor {
 
         /** \returns the list of windows on the screen. */
         const std::list<BaseCompWindow*> &allWindows() const throw();
+        
+        /** \returns the resize rectangle. */
+        XRectangle resizeRectangle() const throw();
 
 
         //--- SPECIALIZED WINDOW MANIPULATION FUNCTIONS ------------------------
@@ -154,6 +157,12 @@ namespace FbCompositor {
 
 
     private:
+        //--- INITIALIZATION FUNCTIONS -----------------------------------------
+
+        /** Initializes the atoms. */
+        void initAtoms();
+
+
         //--- INTERNAL FUNCTIONS -----------------------------------------------
 
         /** \returns the parent of a given window. */
@@ -161,21 +170,6 @@ namespace FbCompositor {
 
         /** \returns an iterator of m_windows that points to the given window. */
         std::list<BaseCompWindow*>::iterator getWindowIterator(Window windowXID);
-
-
-        //--- PROPERTIES OF INTEREST -------------------------------------------
-
-        /** Property that denotes the currently active window. */
-        Atom m_activeWindowAtom;
-
-        /** Property that denotes the pixmap of the root window. */
-        Atom m_rootPixmapAtom;
-
-        /** Property that denotes the index of active workspace. */
-        Atom m_workspaceAtom;
-
-        /** Property that denotes the number of workspaces. */
-        Atom m_workspaceCountAtom;
 
 
         //--- PRIVATE VARIABLES ------------------------------------------------
@@ -202,8 +196,29 @@ namespace FbCompositor {
         /** The index of the current workspace. */
         int m_currentWorkspace;
 
+        /** The current resize rectangle. */
+        XRectangle m_resizeRect;
+
         /** The total number of workspaces. */
         int m_workspaceCount;
+
+
+        //--- PROPERTIES OF INTEREST -------------------------------------------
+
+        /** Property that denotes the currently active window. */
+        static Atom m_activeWindowAtom;
+
+        /** Property that denotes the resize rectangle of fluxbox. */
+        static Atom m_resizeRectAtom;
+
+        /** Property that denotes the pixmap of the root window. */
+        static Atom m_rootPixmapAtom;
+
+        /** Property that denotes the index of active workspace. */
+        static Atom m_workspaceAtom;
+
+        /** Property that denotes the number of workspaces. */
+        static Atom m_workspaceCountAtom;
     };
 
 
@@ -227,6 +242,11 @@ namespace FbCompositor {
     // Returns the current connection to the X server.
     inline Display *BaseScreen::display() throw() {
         return m_display;
+    }
+
+    // Returns the resize rectangle.
+    inline XRectangle BaseScreen::resizeRectangle() const throw() {
+        return m_resizeRect;
     }
 
     // Returns screen's root window.
