@@ -71,9 +71,6 @@ const GLfloat OpenGLScreen::DEFAULT_TEX_POS_ARRAY[] = {
 };
 
 
-// The color of the resize rectangle.
-const unsigned long OpenGLScreen::RESIZE_RECT_COLOR = 0xffffffff;
-
 // Element array for drawing the resize rectangle.
 const GLushort OpenGLScreen::RESIZE_RECT_ELEMENT_ARRAY[] = {
     0, 1, 2, 3, 0
@@ -107,7 +104,7 @@ OpenGLScreen::OpenGLScreen(int screenNumber) :
     initGlew();
     initShaders();
 
-    createDefaultBuffers();
+    createDefaultElements();
     createBackgroundTexture();
     createResizeRectElements();
 }
@@ -122,12 +119,13 @@ OpenGLScreen::~OpenGLScreen() {
     glDeleteShader(m_vertexShader);
     glDeleteShader(m_fragmentShader);
 
-    glDeleteTextures(1, &m_backgroundTexture);
+    glDeleteTextures(1, &m_blankTexture);
     glDeleteBuffers(1, &m_defaultElementBuffer);
     glDeleteBuffers(1, &m_defaultPrimPosBuffer);
     glDeleteBuffers(1, &m_defaultTexPosBuffer);
 
-    glDeleteTextures(1, &m_resizeRectTexture);
+    glDeleteTextures(1, &m_backgroundTexture);
+
     glDeleteBuffers(1, &m_resizeRectElementBuffer);
     glDeleteBuffers(1, &m_resizeRectLinePosBuffer);
 
@@ -289,17 +287,32 @@ void OpenGLScreen::initShaders() throw(InitException) {
 
 
 // Creates default texture rendering buffers.
-void OpenGLScreen::createDefaultBuffers() {
+void OpenGLScreen::createDefaultElements() {
+    // Blank white texture.
+    glGenTextures(1, &m_blankTexture);
+    glBindTexture(GL_TEXTURE_2D, m_blankTexture);
+
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    int textureData[1][1] = {{ 0xffffffff }};
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, (void*)(textureData));
+
+    // Default element buffer.
     glGenBuffers(1, &m_defaultElementBuffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_defaultElementBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(DEFAULT_ELEMENT_ARRAY),
                  (const GLvoid*)(DEFAULT_ELEMENT_ARRAY), GL_STATIC_DRAW);
 
+    // Default primitive position buffer.
     glGenBuffers(1, &m_defaultPrimPosBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, m_defaultPrimPosBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(DEFAULT_PRIM_POS_ARRAY),
                  (const GLvoid*)(DEFAULT_PRIM_POS_ARRAY), GL_STATIC_DRAW);
 
+    // Default texture position buffer.
     glGenBuffers(1, &m_defaultTexPosBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, m_defaultTexPosBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(DEFAULT_TEX_POS_ARRAY),
@@ -326,18 +339,6 @@ void OpenGLScreen::createResizeRectElements() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_resizeRectElementBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(RESIZE_RECT_ELEMENT_ARRAY),
                  (const GLvoid*)(RESIZE_RECT_ELEMENT_ARRAY), GL_STATIC_DRAW);
-
-    // Texture.
-    glGenTextures(1, &m_resizeRectTexture);
-    glBindTexture(GL_TEXTURE_2D, m_resizeRectTexture);
-
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    int textureData[1][1] = {{ RESIZE_RECT_COLOR }};
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)(textureData));
 }
 
 
@@ -496,7 +497,9 @@ void OpenGLScreen::renderScreen() {
         renderResizeRect();
     }
 
+    glDisable(GL_BLEND);
     glFlush();
+
     glXSwapBuffers(display(), m_glxRenderingWindow);
 }
 
@@ -522,8 +525,13 @@ void OpenGLScreen::renderResizeRect() {
     glBindBuffer(GL_ARRAY_BUFFER, m_resizeRectLinePosBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(linePosArray), (const GLvoid*)(linePosArray), GL_STATIC_DRAW);
 
+    glEnable(GL_COLOR_LOGIC_OP);
+    glLogicOp(GL_XOR);
+
     render(GL_LINE_STRIP, m_resizeRectLinePosBuffer, m_defaultTexPosBuffer, m_resizeRectElementBuffer,
-           5, m_resizeRectTexture, 1.0);
+           5, m_blankTexture, 1.0);
+
+    glDisable(GL_COLOR_LOGIC_OP);
 }
 
 // A function to render a particular window onto the screen.

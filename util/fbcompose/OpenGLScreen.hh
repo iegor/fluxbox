@@ -98,9 +98,6 @@ namespace FbCompositor {
         static const GLfloat DEFAULT_TEX_POS_ARRAY[];
 
 
-        /** The color of the resize rectangle. */
-        static const unsigned long RESIZE_RECT_COLOR;
-
         /** Element array for drawing the resize rectangle. */
         static const GLushort RESIZE_RECT_ELEMENT_ARRAY[];
 
@@ -111,7 +108,7 @@ namespace FbCompositor {
         void createBackgroundTexture() throw(InitException);
 
         /** Creates default texture rendering buffers. */
-        void createDefaultBuffers();
+        void createDefaultElements();
 
         /** Creates all elements, needed to draw the resize rectangle. */
         void createResizeRectElements();
@@ -203,11 +200,11 @@ namespace FbCompositor {
         /** The resize rectangle primitive position array buffer. */
         GLuint m_resizeRectLinePosBuffer;
 
-        /** The resize rectangle texture. */
-        GLuint m_resizeRectTexture;
 
+        //--- DEFAULT OPENGL ELEMENTS ------------------------------------------
 
-        //--- DEFAULT ARRAYS ---------------------------------------------------
+        /** Blank texture. */
+        GLuint m_blankTexture;
 
         /** Default element buffer. */
         GLuint m_defaultElementBuffer;
