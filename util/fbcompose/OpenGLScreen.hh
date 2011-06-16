@@ -79,29 +79,6 @@ namespace FbCompositor {
 
 
     private:
-        //--- CONSTANTS --------------------------------------------------------
-        
-        /** Size of the info log buffer. */
-        static const int INFO_LOG_BUFFER_SIZE = 256;
-
-        /** Preferred framebuffer configuration. */
-        static const int PREFERRED_FBCONFIG_ATTRIBUTES[];
-
-
-        /** Default element array for texture rendering. */
-        static const GLushort DEFAULT_ELEMENT_ARRAY[];
-
-        /** Default primitive position array for texture rendering. */
-        static const GLfloat DEFAULT_PRIM_POS_ARRAY[];
-
-        /** Default texture position array for texture rendering. */
-        static const GLfloat DEFAULT_TEX_POS_ARRAY[];
-
-
-        /** Element array for drawing the resize rectangle. */
-        static const GLushort RESIZE_RECT_ELEMENT_ARRAY[];
-
-
         //--- INITIALIZATION FUNCTIONS -----------------------------------------
 
         /** Creates the background texture. */
@@ -115,6 +92,9 @@ namespace FbCompositor {
 
         /** Early initialization of GLX function pointers. */
         void earlyInitGLXPointers() throw(InitException);
+
+        /** Finishes the initialization of the rendering context and surface. */
+        void finishRenderingInit() throw(InitException);
 
         /** Initializes GLEW. */
         void initGlew() throw(InitException);

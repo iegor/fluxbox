@@ -43,39 +43,47 @@ using namespace FbCompositor;
 
 //--- CONSTANTS ----------------------------------------------------------------
 
-// The preferred framebuffer configuration.
-const int OpenGLScreen::PREFERRED_FBCONFIG_ATTRIBUTES[] = {
-    GLX_RENDER_TYPE, GLX_RGBA_BIT,
-    GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT,
-    GLX_DOUBLEBUFFER, GL_TRUE,
-    GLX_RED_SIZE, 8,
-    GLX_GREEN_SIZE, 8,
-    GLX_BLUE_SIZE, 8,
-    GLX_ALPHA_SIZE, 8,
-    None
-};
+namespace {
+
+    /** Size of the info log buffer. */
+    static const int INFO_LOG_BUFFER_SIZE = 256;
 
 
-// Default element array for texture rendering.
-const GLushort OpenGLScreen::DEFAULT_ELEMENT_ARRAY[] = {
-    0, 1, 2, 3
-};
-
-// Default primitive position array for texture rendering.
-const GLfloat OpenGLScreen::DEFAULT_PRIM_POS_ARRAY[] = {
-    -1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0
-};
-
-// Default texture position array for texture rendering.
-const GLfloat OpenGLScreen::DEFAULT_TEX_POS_ARRAY[] = {
-    0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0
-};
+    /** The preferred framebuffer configuration. */
+    static const int PREFERRED_FBCONFIG_ATTRIBUTES[] = {
+        GLX_RENDER_TYPE, GLX_RGBA_BIT,
+        GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT | GLX_PIXMAP_BIT,
+        GLX_DOUBLEBUFFER, GL_TRUE,
+        GLX_RED_SIZE, 8,
+        GLX_GREEN_SIZE, 8,
+        GLX_BLUE_SIZE, 8,
+        GLX_ALPHA_SIZE, 8,
+        None
+    };
 
 
-// Element array for drawing the resize rectangle.
-const GLushort OpenGLScreen::RESIZE_RECT_ELEMENT_ARRAY[] = {
-    0, 1, 2, 3, 0
-};
+    // Default element array for texture rendering.
+    static const GLushort DEFAULT_ELEMENT_ARRAY[] = {
+        0, 1, 2, 3
+    };
+
+    // Default primitive position array for texture rendering.
+    static const GLfloat DEFAULT_PRIM_POS_ARRAY[] = {
+        -1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0
+    };
+
+    // Default texture position array for texture rendering.
+    static const GLfloat DEFAULT_TEX_POS_ARRAY[] = {
+        0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0
+    };
+
+
+    // Element array for drawing the resize rectangle.
+    static const GLushort RESIZE_RECT_ELEMENT_ARRAY[] = {
+        0, 1, 2, 3, 0
+    };
+
+}
 
 
 //--- STATIC VARIABLES ---------------------------------------------------------
@@ -103,8 +111,9 @@ OpenGLScreen::OpenGLScreen(int screenNumber) :
     initRenderingContext();
     initRenderingSurface();
     initGlew();
-    initShaders();
+    finishRenderingInit();
 
+    initShaders();
     createDefaultElements();
     createBackgroundTexture();
     createResizeRectElements();
@@ -248,6 +257,14 @@ void OpenGLScreen::initGlew() throw(InitException) {
     if (!GLEW_VERSION_2_1) {
         throw InitException("OpenGL 2.1 not available.");
     }
+}
+
+// Finishes the initialization of the rendering context and surface.
+void OpenGLScreen::finishRenderingInit() throw(InitException) {
+    glXMakeCurrent(display(), m_glxRenderingWindow, m_glxContext);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 // Initializes shaders.
@@ -478,12 +495,6 @@ void OpenGLScreen::renderScreen() {
     glXMakeCurrent(display(), m_glxRenderingWindow, m_glxContext);
     glUseProgram(m_shaderProgram);
 
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glClearColor(1.0, 1.0, 1.0, 1.0);
-    glClear(GL_COLOR_BUFFER_BIT);
-
     renderBackground();
 
     std::list<BaseCompWindow*>::const_iterator it = allWindows().begin();
@@ -498,9 +509,7 @@ void OpenGLScreen::renderScreen() {
         renderResizeRect();
     }
 
-    glDisable(GL_BLEND);
     glFlush();
-
     glXSwapBuffers(display(), m_glxRenderingWindow);
 }
 
@@ -577,7 +586,9 @@ void OpenGLScreen::render(GLenum renderingMode, GLuint primPosBuffer, GLuint tex
     glUniform1i(texturePos, 0);
 
     // Render stuff.
+    glDrawBuffer(GL_BACK);
     glViewport(0, 0, rootWindow().width(), rootWindow().height());
+
     glDrawElements(renderingMode, elementCount, GL_UNSIGNED_SHORT, (void*)0);
 
     // Cleanup.

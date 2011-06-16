@@ -83,6 +83,12 @@ OpenGLWindow::OpenGLWindow(Window windowXID, GLXFBConfig fbConfig) throw() :
 OpenGLWindow::~OpenGLWindow() throw() {
     glDeleteTextures(1, &m_contentTexture);
     glDeleteBuffers(1, &m_windowPosBuffer);
+
+#ifdef GLXEW_EXT_texture_from_pixmap
+    if (m_glxContents) {
+        glXDestroyPixmap(display(), m_glxContents);
+    }
+#endif
 }
 
 
@@ -119,6 +125,9 @@ void OpenGLWindow::updateContents() throw(RuntimeException) {
         XFreeGC(display(), gc);
 
 #ifdef GLXEW_EXT_texture_from_pixmap
+        glBindTexture(GL_TEXTURE_2D, contentTexture());
+        glXReleaseTexImageEXT(display(), m_glxContents, GLX_BACK_LEFT_EXT);
+
         // Bind the pixmap to a GLX texture.
         if (m_glxContents) {
             glXDestroyPixmap(display(), m_glxContents);
@@ -126,8 +135,7 @@ void OpenGLWindow::updateContents() throw(RuntimeException) {
         }
         m_glxContents = glXCreatePixmap(display(), m_fbConfig, m_shapePixmap, TEX_PIXMAP_ATTRIBUTES);
 
-        glBindTexture(GL_TEXTURE_2D, contentTexture());
-        glXBindTexImageEXT(display(), m_glxContents, GLX_FRONT_LEFT_EXT, NULL);
+        glXBindTexImageEXT(display(), m_glxContents, GLX_BACK_LEFT_EXT, NULL);
 
 #else
         // Convert the content pixmap to an XImage to access its raw contents.
