@@ -36,7 +36,6 @@
 
 #include <iostream>
 #include <sstream>
-#include <csignal>
 
 using namespace FbCompositor;
 
@@ -69,7 +68,7 @@ Compositor::Compositor(const CompositorConfig &config) throw(InitException) :
             XCompositeRedirectSubwindows(display(), XRootWindow(display(), i), CompositeRedirectAutomatic);
             break;
         default:
-            // TODO: Throw something.
+            throw InitException("Unknown rendering mode selected.");
             break;
         }
 
@@ -85,18 +84,21 @@ Compositor::Compositor(const CompositorConfig &config) throw(InitException) :
         // Set up FPS limiter.
         FbTk::RefCount<FbTk::Command<void> > command(new RenderScreensCommand(this));
         m_redrawTimer.setCommand(command);
-        m_redrawTimer.setTimeout(0, 1000000 / 60);
+        m_redrawTimer.setTimeout(0, 1000000 / 60);  // TODO: FPS configurable.
         m_redrawTimer.start();
     }
 
     XFlush(display());
-
-    signal(SIGINT, handleSignal);
-    signal(SIGTERM, handleSignal);
 }
 
 // Destructor.
-Compositor::~Compositor() { }
+Compositor::~Compositor() {
+    std::vector<BaseScreen*>::iterator it = m_screens.begin();
+    while (it != m_screens.end()) {
+        delete *it;
+        ++it;
+    }
+}
 
 
 //--- INITIALIZATION FUNCTIONS -----------------------------------------
@@ -143,7 +145,7 @@ void Compositor::initExtension(const char *extensionName, QueryExtensionFunction
 
     if (!(*extensionFunc)(display(), eventBase, errorBase)) {
         std::stringstream ss;
-        ss << extensionName << " extension is not present.";
+        ss << extensionName << " extension not found.";
         throw InitException(ss.str());
     }
 
@@ -177,7 +179,7 @@ void Compositor::eventLoop() {
 
             int eventScreen = screenOfEvent(event);
             if (eventScreen < 0) {
-                fbLog_info << "Event " << std::dec << event.xany.serial << "(window " << std::hex << event.xany.window
+                fbLog_info << "Event " << std::dec << event.xany.serial << " (window " << std::hex << event.xany.window
                            << ", type " << std::dec << event.xany.type << ") does not affect any managed windows, skipping."
                            << std::endl;
                 continue;
@@ -231,6 +233,7 @@ void Compositor::eventLoop() {
             }
         }
 
+        // This calls the m_redrawTimer, which actually draws the screens.
         FbTk::Timer::updateTimers(XConnectionNumber(display()));
 
         fbLog_debug << m_screens.size() << " screen(s) available." << std::endl;
@@ -270,13 +273,6 @@ int Compositor::screenOfEvent(const XEvent &event) {
 
 
 //--- VARIOUS HANDLERS ---------------------------------------------------------
-
-// Custom signal handler.
-void FbCompositor::handleSignal(int sig) {
-    if ((sig == SIGINT) || (sig == SIGTERM)) {
-        FbTk::App::instance()->end();
-    }
-}
 
 // Custom X error handler.
 int FbCompositor::handleXError(Display *display, XErrorEvent *error) {

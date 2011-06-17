@@ -200,6 +200,7 @@ void OpenGLScreen::initRenderingContext() throw(InitException) {
         throw InitException("Screen does not support the required GLXFBConfig.");
     }
     m_fbConfig = fbConfigs[0];
+    XFree(fbConfigs);
 
     // Creating the GLX rendering context.
     m_glxContext = glXCreateNewContext(display(), m_fbConfig, GLX_RGBA_TYPE, NULL, True);
@@ -239,6 +240,8 @@ void OpenGLScreen::initRenderingSurface() throw(InitException) {
     if (!m_glxRenderingWindow) {
         throw InitException("Cannot create the rendering surface.");
     }
+
+    XFree(visualInfo);
 }
 
 // Initializes GLEW.

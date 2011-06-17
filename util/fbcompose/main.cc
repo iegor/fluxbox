@@ -37,7 +37,7 @@ using namespace FbCompositor;
  * The entry point.
  *
  * \param argc The number of command line arguments.
- * \param argv An array of strings, containing the arguments themselves.
+ * \param argv An array of strings, containing the arguments.
  * \returns Application's exit status.
  */
 int main(int argc, char **argv) {

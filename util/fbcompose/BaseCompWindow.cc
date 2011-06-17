@@ -78,6 +78,10 @@ BaseCompWindow::~BaseCompWindow() throw() {
     if (m_clipShapeRects) {
         XFree(m_clipShapeRects);
     }
+    if (m_contentPixmap) {
+        XFreePixmap(display(), m_contentPixmap);
+    }
+    // m_damage is apparently destroyed server-side.
 }
 
 
@@ -100,9 +104,8 @@ void BaseCompWindow::setUnmapped() throw() {
 
 // Update the window's contents.
 void BaseCompWindow::updateContents() {
-    XWindowAttributes xwa;
-    if (!XGetWindowAttributes(display(), window(), &xwa)) {
-        return;     // In case the window was unmapped/destroyed.
+    if (isWindowBad()) {
+        return;
     }
 
     updateContentPixmap();
@@ -173,6 +176,15 @@ void BaseCompWindow::updateContentPixmap() throw() {
         m_contentPixmap = None;
     }
     m_contentPixmap = XCompositeNameWindowPixmap(display(), window());
+}
+
+
+//--- OTHER FUNCTIONS --------------------------------------------------
+
+// Checks whether the current window is bad.
+bool BaseCompWindow::isWindowBad() {
+    static XWindowAttributes xwa;
+    return (!XGetWindowAttributes(display(), window(), &xwa));
 }
 
 

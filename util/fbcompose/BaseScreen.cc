@@ -85,7 +85,13 @@ BaseScreen::BaseScreen(int screenNumber) :
 }
 
 // Destructor
-BaseScreen::~BaseScreen() { }
+BaseScreen::~BaseScreen() {
+    std::list<BaseCompWindow*>::iterator it = m_windows.begin();
+    while (it != m_windows.end()) {
+        delete *it;
+        ++it;
+    }
+}
 
 
 //--- OTHER INITIALIZATION -----------------------------------------------------
@@ -94,7 +100,7 @@ BaseScreen::~BaseScreen() { }
 void BaseScreen::initWindows() {
     Window root;
     Window parent;
-    Window *children;
+    Window *children = 0;
     unsigned int childCount;
 
     XQueryTree(display(), rootWindow().window(), &root, &parent, &children, &childCount);
@@ -120,6 +126,7 @@ void BaseScreen::createWindow(Window window) {
     if (it == m_windows.end()) {
         BaseCompWindow *newWindow = createWindowObject(window);
         if (newWindow->depth() == 0) {
+            delete newWindow;
             return;     // If the window is already destroyed.
         }
 
@@ -304,15 +311,19 @@ void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
 // Adds a window to ignore list, stops tracking it if it is being tracked.
 void BaseScreen::addWindowToIgnoreList(Window window) {
     if (find(m_ignoreList.begin(), m_ignoreList.end(), window) == m_ignoreList.end()) {
-        destroyWindow(window);
         m_ignoreList.push_back(window);
+
+        std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
+        if (it != m_windows.end()) {
+            delete *it;
+            m_windows.erase(it);
+        }
     }
 }
 
 // Checks whether a given window is managed by the current screen.
 bool BaseScreen::isWindowManaged(Window window) {
-    std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
-    return (it != m_windows.end());
+    return (getWindowIterator(window) != m_windows.end());
 }
 
 

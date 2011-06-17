@@ -95,7 +95,7 @@ namespace FbCompositor {
 
         /** Convenience function for accessing properties with a single value. */
         template<class T>
-        T singlePropertyValue(Atom propertyAtom, T defaultValue, const char *propertyName = 0);
+        T singlePropertyValue(Atom propertyAtom, T defaultValue);
 
 
         //--- WINDOW MANIPULATION ----------------------------------------------
@@ -153,6 +153,12 @@ namespace FbCompositor {
 
         /** Update the window's clip shape. */
         virtual void updateShape();
+
+
+        //--- OTHER FUNCTIONS --------------------------------------------------
+
+        /** Checks whether the current window is bad. */
+        bool isWindowBad();
 
 
     private:
@@ -290,16 +296,13 @@ namespace FbCompositor {
 
     // Convenience function for accessing properties with a single value.
     template<class T>
-    T BaseCompWindow::singlePropertyValue(Atom propertyAtom, T defaultValue, const char *propertyName) {
+    T BaseCompWindow::singlePropertyValue(Atom propertyAtom, T defaultValue) {
         if (!propertyAtom) {
             return defaultValue;
         }
 
         std::vector<T> values = propertyValue<T>(propertyAtom);
         if (values.size() == 0) {
-            if (!propertyName) {
-                propertyName = XGetAtomName(display(), propertyAtom);
-            }
             return defaultValue;
         } else {
             return values[0];

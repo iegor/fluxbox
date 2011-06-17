@@ -81,14 +81,17 @@ OpenGLWindow::OpenGLWindow(Window windowXID, GLXFBConfig fbConfig) throw() :
 
 // Destructor.
 OpenGLWindow::~OpenGLWindow() throw() {
-    glDeleteTextures(1, &m_contentTexture);
-    glDeleteBuffers(1, &m_windowPosBuffer);
-
+    if (m_shapePixmap) {
+        XFreePixmap(display(), m_shapePixmap);
+    }
 #ifdef GLXEW_EXT_texture_from_pixmap
     if (m_glxContents) {
         glXDestroyPixmap(display(), m_glxContents);
     }
 #endif
+
+    glDeleteTextures(1, &m_contentTexture);
+    glDeleteBuffers(1, &m_windowPosBuffer);
 }
 
 
@@ -103,9 +106,8 @@ void OpenGLWindow::setRootWindowSize(unsigned int width, unsigned int height) th
 
 // Updates the window's contents.
 void OpenGLWindow::updateContents() throw(RuntimeException) {
-    static XWindowAttributes xwa;
-    if (!XGetWindowAttributes(display(), window(), &xwa)) {
-        return;     // In case the window was unmapped/destroyed.
+    if (isWindowBad()) {
+        return;
     }
 
     updateContentPixmap();
