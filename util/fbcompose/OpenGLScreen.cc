@@ -23,6 +23,7 @@
 
 #include "Logging.hh"
 #include "OpenGLScreen.hh"
+#include "OpenGLShaders.hh"
 #include "OpenGLWindow.hh"
 #include "Utility.hh"
 
@@ -272,37 +273,13 @@ void OpenGLScreen::finishRenderingInit() throw(InitException) {
 
 // Initializes shaders.
 void OpenGLScreen::initShaders() throw(InitException) {
-    // Vertex shader source code (TODO: move somewhere else when everything is working).
-    GLchar vShaderSource[] =
-        "#version 120\n"
-        "\n"
-        "attribute vec2 fb_InitPointPos;\n"
-        "attribute vec2 fb_InitTexCoord;\n"
-        "\n"
-        "varying vec2 fb_TexCoord;\n"
-        "\n"
-        "void main() {\n"
-        "    gl_Position = vec4(fb_InitPointPos, 0.0, 1.0);\n"
-        "    fb_TexCoord = fb_InitTexCoord;\n"
-        "}";
-    GLint vShaderSourceLength = (GLint)strlen(vShaderSource);
+    m_vertexShader = createShader(GL_VERTEX_SHADER,
+                                  OpenGLShaders::vertexShaderSourceLength(),
+                                  OpenGLShaders::vertexShaderSource());
+    m_fragmentShader = createShader(GL_FRAGMENT_SHADER,
+                                    OpenGLShaders::fragmentShaderSourceLength(),
+                                    OpenGLShaders::fragmentShaderSource());
 
-    // Fragment shader source code (TODO: move somewhere else when everything is working).
-    GLchar fShaderSource[] =
-        "#version 120\n"
-        "\n"
-        "uniform float fb_Alpha;\n"
-        "uniform sampler2D fb_Texture;\n"
-        "\n"
-        "varying vec2 fb_TexCoord;\n"
-        "\n"
-        "void main() {\n"
-        "    gl_FragColor = mix(vec4(0.0), texture2D(fb_Texture, fb_TexCoord), fb_Alpha);\n"
-        "}";
-    GLint fShaderSourceLength = (GLint)strlen(fShaderSource);
-
-    m_vertexShader = createShader(GL_VERTEX_SHADER, vShaderSourceLength, vShaderSource);
-    m_fragmentShader = createShader(GL_FRAGMENT_SHADER, fShaderSourceLength, fShaderSource);
     m_shaderProgram = createShaderProgram(m_vertexShader, 0, m_fragmentShader);
 }
 
