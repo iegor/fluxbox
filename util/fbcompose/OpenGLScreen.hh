@@ -206,12 +206,6 @@ namespace FbCompositor {
         
         /** The shader program. */
         GLuint m_shaderProgram;
-
-
-        //--- ATOMS OF INTEREST ------------------------------------------------
-
-        /** Atom that corresponds to the pixmap of desktop's contents. */
-        static Atom m_bgPixmapAtom;
     };
 }
 

@@ -149,6 +149,9 @@ namespace FbCompositor {
         /** \returns the resize rectangle. */
         XRectangle resizeRectangle() const throw();
 
+        /** \returns the root window pixmap. */
+        Pixmap rootWindowPixmap() throw();
+
 
         //--- SPECIALIZED WINDOW MANIPULATION FUNCTIONS ------------------------
 
@@ -255,6 +258,11 @@ namespace FbCompositor {
     // Returns screen's root window (const version).
     inline const BaseCompWindow &BaseScreen::rootWindow() const throw() {
         return m_rootWindow;
+    }
+
+    // Returns the root window pixmap.
+    inline Pixmap BaseScreen::rootWindowPixmap() throw() {
+        return rootWindow().singlePropertyValue<Pixmap>(m_rootPixmapAtom, None);
     }
 
     // Returns the screen's number.

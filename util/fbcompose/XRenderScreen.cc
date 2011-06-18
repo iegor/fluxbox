@@ -30,24 +30,11 @@
 using namespace FbCompositor;
 
 
-//--- STATIC VARIABLES ---------------------------------------------------------
-
-// Property that denotes the pixmap of the root window.
-Atom XRenderScreen::m_bgPixmapAtom = 0;
-
-
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
 XRenderScreen::XRenderScreen(int screenNumber) :
     BaseScreen(screenNumber) {
-
-    // Set up atoms and properties.
-    static bool atomsInitialized = false;
-    if (!atomsInitialized) {
-        m_bgPixmapAtom = XInternAtom(display(), "_XROOTPMAP_ID", False);
-        atomsInitialized = true;
-    }
 
     initRenderingSurface();
     initBackgroundPicture();
@@ -127,7 +114,7 @@ void XRenderScreen::setRootWindowChanged() {
 
 // Update the background picture.
 void XRenderScreen::updateBackgroundPicture() {
-    Pixmap bgPixmap = rootWindow().singlePropertyValue<Pixmap>(m_bgPixmapAtom, 0);
+    Pixmap bgPixmap = rootWindowPixmap();
 
     if (bgPixmap) {
         if (m_rootPicture) {

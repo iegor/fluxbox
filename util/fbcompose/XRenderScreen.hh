@@ -115,12 +115,6 @@ namespace FbCompositor {
 
         /** Whether the root window has changed since the last update. */
         bool m_rootChanged;
-
-
-        //--- ATOMS OF INTEREST ------------------------------------------------
-
-        /** Property that denotes the pixmap of the root window. */
-        static Atom m_bgPixmapAtom;
     };
 
 }

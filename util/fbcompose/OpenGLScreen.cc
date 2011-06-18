@@ -87,23 +87,11 @@ namespace {
 }
 
 
-//--- STATIC VARIABLES ---------------------------------------------------------
-
-// Atom that corresponds to the pixmap of desktop's contents.
-Atom OpenGLScreen::m_bgPixmapAtom = 0;
-
-
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
 OpenGLScreen::OpenGLScreen(int screenNumber) :
     BaseScreen(screenNumber) {
-
-    static bool atomsInitialized = false;
-    if (!atomsInitialized) {
-        m_bgPixmapAtom = XInternAtom(display(), "_XROOTPMAP_ID", False);
-        atomsInitialized = true;
-    }
 
     m_backgroundChanged = true;
     m_rootWindowChanged = false;
@@ -344,7 +332,7 @@ void OpenGLScreen::createResizeRectElements() {
 
 // Renews the background texture.
 void OpenGLScreen::updateBackgroundTexture() {
-    Pixmap bgPixmap = rootWindow().singlePropertyValue<Pixmap>(m_bgPixmapAtom, 0);
+    Pixmap bgPixmap = rootWindowPixmap();
 
     if (bgPixmap) {
         XImage *image = XGetImage(display(), bgPixmap, 0, 0, rootWindow().width(), rootWindow().height(), AllPlanes, ZPixmap);
