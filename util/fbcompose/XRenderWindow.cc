@@ -56,18 +56,16 @@ void XRenderWindow::updateContents() {
         updateShape();
     }
 
-    if (!m_picture || isResized()) {
-        if (m_picture) {
-            XRenderFreePicture(display(), m_picture);
-            m_picture = None;
-        }
-
-        XRenderPictureAttributes pa;
-        pa.subwindow_mode = IncludeInferiors;
-        long paMask = CPSubwindowMode;
-
-        m_picture = XRenderCreatePicture(display(), contentPixmap(), m_pictFormat, paMask, &pa);
+    if (m_picture) {
+        XRenderFreePicture(display(), m_picture);
+        m_picture = None;
     }
+
+    XRenderPictureAttributes pa;
+    pa.subwindow_mode = IncludeInferiors;
+    long paMask = CPSubwindowMode;
+
+    m_picture = XRenderCreatePicture(display(), contentPixmap(), m_pictFormat, paMask, &pa);
 
     clearDamage();
 }

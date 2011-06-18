@@ -96,8 +96,24 @@ namespace FbCompositor {
         /** Render a particular window onto the screen. */
         void renderWindow(XRenderWindow &window);
 
+        /** Swap back and front buffers. */
+        void swapBuffers();
+
 
         //--- MAIN RENDERING-RELATED VARIABLES ---------------------------------
+
+        /** The picture format of the back buffer. */
+        XRenderPictFormat *m_backBufferPictFormat;
+
+        /** The picture of the back buffer. */
+        Picture m_backBufferPicture;
+
+        /** Back buffer pixmap. */
+        Pixmap m_backBufferPixmap;
+
+
+        /** The picture format of the rendering window. */
+        XRenderPictFormat *m_renderingPictFormat;
 
         /** The picture of the rendering window. */
         Picture m_renderingPicture;

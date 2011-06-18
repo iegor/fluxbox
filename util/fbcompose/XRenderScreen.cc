@@ -41,7 +41,23 @@ XRenderScreen::XRenderScreen(int screenNumber) :
 }
 
 // Destructor.
-XRenderScreen::~XRenderScreen() { }
+XRenderScreen::~XRenderScreen() {
+    if (m_backBufferPicture) {
+        XRenderFreePicture(display(), m_backBufferPicture);
+    }
+    if (m_backBufferPixmap) {
+        XFreePixmap(display(), m_backBufferPixmap);
+    }
+    if (m_renderingPicture) {
+        XRenderFreePicture(display(), m_renderingPicture);
+    }
+    if (m_rootPicture) {
+        XRenderFreePicture(display(), m_rootPicture);
+    }
+
+    XUnmapWindow(display(), m_renderingWindow);
+    XDestroyWindow(display(), m_renderingWindow);
+}
 
 
 //--- INITIALIZATION FUNCTIONS -------------------------------------------------
@@ -77,16 +93,20 @@ void XRenderScreen::initRenderingSurface() throw(InitException) {
     addWindowToIgnoreList(m_renderingWindow);
 
     // Create an XRender picture for the rendering window.
-    XRenderPictFormat *pictFormat = XRenderFindVisualFormat(display(), visualInfo.visual);  // Do not XFree.
-    if (!pictFormat) {
-        throw InitException("Cannot find the required picture format.");
-    }
-
     XRenderPictureAttributes pa;
     pa.subwindow_mode = IncludeInferiors;
     long paMask = CPSubwindowMode;
 
-    m_renderingPicture = XRenderCreatePicture(display(), m_renderingWindow, pictFormat, paMask, &pa);
+    m_renderingPictFormat = XRenderFindVisualFormat(display(), visualInfo.visual);  // Do not XFree.
+    if (!m_renderingPictFormat) {
+        throw InitException("Cannot find the required picture format.");
+    }
+    m_renderingPicture = XRenderCreatePicture(display(), m_renderingWindow, m_renderingPictFormat, paMask, &pa);
+
+    // Create the back buffer.
+    m_backBufferPictFormat = XRenderFindStandardFormat(display(), PictStandardARGB32);     // Do not XFree.
+    m_backBufferPixmap = XCreatePixmap(display(), rootWindow().window(), rootWindow().width(), rootWindow().height(), 32);
+    m_backBufferPicture = XRenderCreatePicture(display(), m_backBufferPixmap, m_backBufferPictFormat, paMask, &pa);
 }
 
 // Initializes background picture.
@@ -109,6 +129,22 @@ void XRenderScreen::setBackgroundChanged() {
 // Notifies the screen of a root window change.
 void XRenderScreen::setRootWindowChanged() {
     m_rootChanged = true;
+
+    if (m_backBufferPicture) {
+        XRenderFreePicture(display(), m_backBufferPicture);
+        m_backBufferPicture = None;
+    }
+    if (m_backBufferPixmap) {
+        XFreePixmap(display(), m_backBufferPixmap);
+        m_backBufferPixmap = None;
+    }
+
+    XRenderPictureAttributes pa;
+    pa.subwindow_mode = IncludeInferiors;
+    long paMask = CPSubwindowMode;
+
+    m_backBufferPixmap = XCreatePixmap(display(), rootWindow().window(), rootWindow().width(), rootWindow().height(), 32);
+    m_backBufferPicture = XRenderCreatePicture(display(), m_backBufferPixmap, m_backBufferPictFormat, paMask, &pa);
 }
 
 
@@ -147,17 +183,18 @@ void XRenderScreen::renderScreen() {
         }
         ++it;
     }
+
+    swapBuffers();
 }
 
 // Render the desktop wallpaper.
 void XRenderScreen::renderBackground() {
     // TODO: Simply make the window transparent.
-
     if (m_rootChanged) {
         updateBackgroundPicture();
     }
 
-    XRenderComposite(display(), PictOpSrc, m_rootPicture, None, m_renderingPicture,
+    XRenderComposite(display(), PictOpSrc, m_rootPicture, None, m_backBufferPicture,
                      0, 0, 0, 0, 0, 0, rootWindow().width(), rootWindow().height());
 }
 
@@ -167,8 +204,14 @@ void XRenderScreen::renderWindow(XRenderWindow &window) {
         window.updateContents();
     }
 
-    XRenderComposite(display(), PictOpSrc, window.contentPicture(), None, m_renderingPicture,
+    XRenderComposite(display(), PictOpSrc, window.contentPicture(), None, m_backBufferPicture,
                      0, 0, 0, 0, window.x(), window.y(), window.realWidth(), window.realHeight());
+}
+
+// Swap back and front buffers.
+void XRenderScreen::swapBuffers() {
+    XRenderComposite(display(), PictOpSrc, m_backBufferPicture, None, m_renderingPicture,
+                     0, 0, 0, 0, 0, 0, rootWindow().width(), rootWindow().height());
 }
 
 
