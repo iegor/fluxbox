@@ -23,6 +23,11 @@
 #include "XRenderScreen.hh"
 #include "XRenderWindow.hh"
 
+#include <X11/extensions/shape.h>
+#include <X11/extensions/Xcomposite.h>
+#include <X11/extensions/Xfixes.h>
+#include <X11/Xutil.h>
+
 using namespace FbCompositor;
 
 
@@ -31,10 +36,53 @@ using namespace FbCompositor;
 // Constructor.
 XRenderScreen::XRenderScreen(int screenNumber) :
     BaseScreen(screenNumber) {
+
+    initRenderingSurface();
 }
 
 // Destructor.
 XRenderScreen::~XRenderScreen() { }
+
+
+//--- INITIALIZATION FUNCTIONS -------------------------------------------------
+
+// Initializes the rendering surface.
+void XRenderScreen::initRenderingSurface() throw(InitException) {
+    // Get all the elements, needed for the creation of the rendering surface.
+    Window compOverlay = XCompositeGetOverlayWindow(display(), rootWindow().window());
+
+    XVisualInfo visualInfo;
+    if (!XMatchVisualInfo(display(), screenNumber(), 32, TrueColor, &visualInfo)) {
+        throw InitException("Cannot find the required visual.");
+    }
+
+    XSetWindowAttributes wa;
+    wa.border_pixel = XBlackPixel(display(), screenNumber());   // Without this XCreateWindow gives BadMatch error.
+    wa.colormap = XCreateColormap(display(), rootWindow().window(), visualInfo.visual, AllocNone);
+    long waMask = CWBorderPixel | CWColormap;
+
+    // Create the rendering surface.
+    m_renderingWindow = XCreateWindow(display(), compOverlay, 0, 0, rootWindow().width(), rootWindow().height(), 0,
+                                      visualInfo.depth, InputOutput, visualInfo.visual, waMask, &wa);
+    XmbSetWMProperties(display(), m_renderingWindow, "fbcompose", "fbcompose", NULL, 0, NULL, NULL, NULL);
+    XMapWindow(display(), m_renderingWindow);
+
+    // Make sure the overlays do not consume any input events.
+    XserverRegion emptyRegion = XFixesCreateRegion(display(), NULL, 0);
+    XFixesSetWindowShapeRegion(display(), compOverlay, ShapeInput, 0, 0, emptyRegion);
+    XFixesSetWindowShapeRegion(display(), m_renderingWindow, ShapeInput, 0, 0, emptyRegion);
+    XFixesDestroyRegion(display(), emptyRegion);
+
+    addWindowToIgnoreList(compOverlay);
+    addWindowToIgnoreList(m_renderingWindow);
+
+    // Create an XRender picture for the rendering window.
+    XRenderPictFormat *pictFormat = XRenderFindVisualFormat(display(), visualInfo.visual);
+    if (!pictFormat) {
+        throw InitException("Cannot find the required picture format.");
+    }
+    m_renderingPicture = XRenderCreatePicture(display(), m_renderingWindow, pictFormat, 0, NULL);
+}
 
 
 //--- SCREEN MANIPULATION ------------------------------------------------------

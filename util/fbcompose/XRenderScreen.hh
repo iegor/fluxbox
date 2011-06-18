@@ -25,6 +25,9 @@
 
 #include "BaseScreen.hh"
 
+#include <X11/extensions/Xrender.h>
+#include <X11/Xlib.h>
+
 
 namespace FbCompositor {
 
@@ -60,11 +63,28 @@ namespace FbCompositor {
         /** Renders the screen's contents. */
         void renderScreen();
 
+
     protected:
         //--- SPECIALIZED WINDOW MANIPULATION FUNCTIONS ------------------------
 
         /** Creates a window object from its XID. */
         BaseCompWindow *createWindowObject(Window window);
+
+
+    private:
+        //--- INITIALIZATION FUNCTIONS -----------------------------------------
+
+        /** Initializes the rendering surface. */
+        void initRenderingSurface() throw(InitException);
+
+
+        //--- MAIN RENDERING-RELATED VARIABLES ---------------------------------
+
+        /** The picture of the rendering window. */
+        Picture m_renderingPicture;
+
+        /** The rendering window. */
+        Window m_renderingWindow;
     };
 
 }
