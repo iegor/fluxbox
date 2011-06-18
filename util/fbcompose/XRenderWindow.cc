@@ -47,10 +47,29 @@ XRenderWindow::~XRenderWindow() throw() {
 
 // Update the window's contents.
 void XRenderWindow::updateContents() {
-    BaseCompWindow::updateContents();
-    if (!m_picture) {
-        m_picture = XRenderCreatePicture(display(), contentPixmap(), m_pictFormat, 0, NULL);
+    if (isWindowBad()) {
+        return;
     }
+
+    updateContentPixmap();
+    if (clipShapeChanged()) {
+        updateShape();
+    }
+
+    if (!m_picture || isResized()) {
+        if (m_picture) {
+            XRenderFreePicture(display(), m_picture);
+            m_picture = None;
+        }
+
+        XRenderPictureAttributes pa;
+        pa.subwindow_mode = IncludeInferiors;
+        long paMask = CPSubwindowMode;
+
+        m_picture = XRenderCreatePicture(display(), contentPixmap(), m_pictFormat, paMask, &pa);
+    }
+
+    clearDamage();
 }
 
 

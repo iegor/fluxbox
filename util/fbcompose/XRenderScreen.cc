@@ -30,13 +30,27 @@
 using namespace FbCompositor;
 
 
+//--- STATIC VARIABLES ---------------------------------------------------------
+
+// Property that denotes the pixmap of the root window.
+Atom XRenderScreen::m_bgPixmapAtom = 0;
+
+
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
 XRenderScreen::XRenderScreen(int screenNumber) :
     BaseScreen(screenNumber) {
 
+    // Set up atoms and properties.
+    static bool atomsInitialized = false;
+    if (!atomsInitialized) {
+        m_bgPixmapAtom = XInternAtom(display(), "_XROOTPMAP_ID", False);
+        atomsInitialized = true;
+    }
+
     initRenderingSurface();
+    initBackgroundPicture();
 }
 
 // Destructor.
@@ -80,23 +94,65 @@ void XRenderScreen::initRenderingSurface() throw(InitException) {
     if (!pictFormat) {
         throw InitException("Cannot find the required picture format.");
     }
-    m_renderingPicture = XRenderCreatePicture(display(), m_renderingWindow, pictFormat, 0, NULL);
+
+    XRenderPictureAttributes pa;
+    pa.subwindow_mode = IncludeInferiors;
+    long paMask = CPSubwindowMode;
+
+    m_renderingPicture = XRenderCreatePicture(display(), m_renderingWindow, pictFormat, paMask, &pa);
+}
+
+// Initializes background picture.
+void XRenderScreen::initBackgroundPicture() {
+    m_rootChanged = false;
+    m_rootPictFormat = XRenderFindVisualFormat(display(), rootWindow().visual());
+    m_rootPicture = None;
+
+    updateBackgroundPicture();
 }
 
 
 //--- SCREEN MANIPULATION ------------------------------------------------------
 
 // Notifies the screen of a background change.
-void XRenderScreen::setBackgroundChanged() { }
+void XRenderScreen::setBackgroundChanged() {
+    m_rootChanged = true;
+}
 
 // Notifies the screen of a root window change.
-void XRenderScreen::setRootWindowChanged() { }
+void XRenderScreen::setRootWindowChanged() {
+    m_rootChanged = true;
+}
+
+
+// Update the background picture.
+void XRenderScreen::updateBackgroundPicture() {
+    Pixmap bgPixmap = rootWindow().singlePropertyValue<Pixmap>(m_bgPixmapAtom, 0);
+
+    if (bgPixmap) {
+        if (m_rootPicture) {
+            XRenderFreePicture(display(), m_rootPicture);
+            m_rootPicture = None;
+        }
+
+        XRenderPictureAttributes pa;
+        pa.subwindow_mode = IncludeInferiors;
+        long paMask = CPSubwindowMode;
+
+        m_rootPicture = XRenderCreatePicture(display(), bgPixmap, m_rootPictFormat, paMask, &pa);
+        m_rootChanged = false;
+    } else {
+        fbLog_warn << "Cannot create background texture (cannot find background pixmap)." << std::endl;
+    }
+}
 
 
 //--- SCREEN RENDERING ---------------------------------------------------------
 
 // Renders the screen's contents.
 void XRenderScreen::renderScreen() {
+    renderBackground();
+
     std::list<BaseCompWindow*>::const_iterator it = allWindows().begin();
     while (it != allWindows().end()) {
         if ((*it)->isMapped()) {
@@ -104,6 +160,18 @@ void XRenderScreen::renderScreen() {
         }
         ++it;
     }
+}
+
+// Render the desktop wallpaper.
+void XRenderScreen::renderBackground() {
+    // TODO: Simply make the window transparent.
+
+    if (m_rootChanged) {
+        updateBackgroundPicture();
+    }
+
+    XRenderComposite(display(), PictOpSrc, m_rootPicture, None, m_renderingPicture,
+                     0, 0, 0, 0, 0, 0, rootWindow().width(), rootWindow().height());
 }
 
 // Render a particular window onto the screen.

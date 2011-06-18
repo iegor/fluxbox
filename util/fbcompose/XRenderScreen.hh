@@ -78,8 +78,20 @@ namespace FbCompositor {
         /** Initializes the rendering surface. */
         void initRenderingSurface() throw(InitException);
 
+        /** Initializes background picture. */
+        void initBackgroundPicture();
+
+
+        //--- SCREEN MANIPULATION ----------------------------------------------
+
+        /** Update the background picture. */
+        void updateBackgroundPicture();
+
 
         //--- RENDERING FUNCTIONS ----------------------------------------------
+
+        /** Render the desktop wallpaper. */
+        void renderBackground();
 
         /** Render a particular window onto the screen. */
         void renderWindow(XRenderWindow &window);
@@ -92,6 +104,23 @@ namespace FbCompositor {
 
         /** The rendering window. */
         Window m_renderingWindow;
+
+
+        /** The format of the root window picture. */
+        XRenderPictFormat *m_rootPictFormat;
+
+        /** The picture of the root window. */
+        Picture m_rootPicture;
+
+
+        /** Whether the root window has changed since the last update. */
+        bool m_rootChanged;
+
+
+        //--- ATOMS OF INTEREST ------------------------------------------------
+
+        /** Property that denotes the pixmap of the root window. */
+        static Atom m_bgPixmapAtom;
     };
 
 }
