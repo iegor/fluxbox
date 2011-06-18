@@ -21,7 +21,6 @@
 // THE SOFTWARE.
 
 #include "XRenderScreen.hh"
-#include "XRenderWindow.hh"
 
 #include <X11/extensions/shape.h>
 #include <X11/extensions/Xcomposite.h>
@@ -77,7 +76,7 @@ void XRenderScreen::initRenderingSurface() throw(InitException) {
     addWindowToIgnoreList(m_renderingWindow);
 
     // Create an XRender picture for the rendering window.
-    XRenderPictFormat *pictFormat = XRenderFindVisualFormat(display(), visualInfo.visual);
+    XRenderPictFormat *pictFormat = XRenderFindVisualFormat(display(), visualInfo.visual);  // Do not XFree.
     if (!pictFormat) {
         throw InitException("Cannot find the required picture format.");
     }
@@ -97,7 +96,25 @@ void XRenderScreen::setRootWindowChanged() { }
 //--- SCREEN RENDERING ---------------------------------------------------------
 
 // Renders the screen's contents.
-void XRenderScreen::renderScreen() { }
+void XRenderScreen::renderScreen() {
+    std::list<BaseCompWindow*>::const_iterator it = allWindows().begin();
+    while (it != allWindows().end()) {
+        if ((*it)->isMapped()) {
+            renderWindow(*(dynamic_cast<XRenderWindow*>(*it)));
+        }
+        ++it;
+    }
+}
+
+// Render a particular window onto the screen.
+void XRenderScreen::renderWindow(XRenderWindow &window) {
+    if (window.isDamaged()) {
+        window.updateContents();
+    }
+
+    XRenderComposite(display(), PictOpSrc, window.contentPicture(), None, m_renderingPicture,
+                     0, 0, 0, 0, window.x(), window.y(), window.realWidth(), window.realHeight());
+}
 
 
 //--- SPECIALIZED WINDOW MANIPULATION FUNCTIONS --------------------------------

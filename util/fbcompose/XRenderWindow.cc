@@ -30,19 +30,33 @@ using namespace FbCompositor;
 // Constructor.
 XRenderWindow::XRenderWindow(Window windowXID) throw(InitException) :
     BaseCompWindow(windowXID) {
+
+    m_pictFormat = XRenderFindVisualFormat(display(), visual());
+    m_picture = None;
 }
 
 // Destructor.
-XRenderWindow::~XRenderWindow() throw() { }
+XRenderWindow::~XRenderWindow() throw() {
+    if (m_picture) {
+        XRenderFreePicture(display(), m_picture);
+    }
+}
 
 
 //--- WINDOW MANIPULATION ------------------------------------------------------
 
 // Update the window's contents.
-void XRenderWindow::updateContents() { }
+void XRenderWindow::updateContents() {
+    BaseCompWindow::updateContents();
+    if (!m_picture) {
+        m_picture = XRenderCreatePicture(display(), contentPixmap(), m_pictFormat, 0, NULL);
+    }
+}
 
 
 //--- PROTECTED WINDOW MANIPULATION --------------------------------------------
 
 // Update the window's clip shape.
-void XRenderWindow::updateShape() { }
+void XRenderWindow::updateShape() {
+    BaseCompWindow::updateShape();
+}

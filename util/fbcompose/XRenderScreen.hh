@@ -24,6 +24,7 @@
 #define FBCOMPOSITOR_XRENDERSCREEN_HH
 
 #include "BaseScreen.hh"
+#include "XRenderWindow.hh"
 
 #include <X11/extensions/Xrender.h>
 #include <X11/Xlib.h>
@@ -76,6 +77,12 @@ namespace FbCompositor {
 
         /** Initializes the rendering surface. */
         void initRenderingSurface() throw(InitException);
+
+
+        //--- RENDERING FUNCTIONS ----------------------------------------------
+
+        /** Render a particular window onto the screen. */
+        void renderWindow(XRenderWindow &window);
 
 
         //--- MAIN RENDERING-RELATED VARIABLES ---------------------------------

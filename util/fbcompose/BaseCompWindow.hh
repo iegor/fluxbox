@@ -77,6 +77,9 @@ namespace FbCompositor {
 
         /** \returns whether the screen is mapped or not. */
         bool isMapped() const throw();
+        
+        /** \returns the window's visual. */
+        Visual *visual() throw();
 
         /** \returns the window's class. */
         int windowClass() const throw();
@@ -182,6 +185,9 @@ namespace FbCompositor {
         /** Window's map state. */
         bool m_isMapped;
 
+        /** Window's visual. */
+        Visual *m_visual;
+
 
         /** Window's content pixmap. */
         Pixmap m_contentPixmap;
@@ -271,6 +277,11 @@ namespace FbCompositor {
     // Returns the window's width with borders factored in.
     inline unsigned int BaseCompWindow::realWidth() const throw() {
         return width() + 2 * borderWidth();
+    }
+
+    // Returns the window's visual.
+    inline Visual *BaseCompWindow::visual() throw() {
+        return m_visual;
     }
 
     // Returns the window's class.

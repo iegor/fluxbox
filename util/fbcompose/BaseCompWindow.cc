@@ -59,6 +59,7 @@ BaseCompWindow::BaseCompWindow(Window windowXID) throw(InitException) :
     m_class = xwa.c_class;
     m_isMapped = (xwa.map_state != IsUnmapped);
     m_isResized = true;
+    m_visual = xwa.visual;
 
     m_clipShapeChanged = true;
     m_clipShapeRects = 0;

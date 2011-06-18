@@ -26,11 +26,14 @@
 #include "BaseCompWindow.hh"
 #include "Exceptions.hh"
 
+#include <X11/extensions/Xrender.h>
+
 
 namespace FbCompositor {
 
     class BaseCompWindow;
     class InitException;
+    class XRenderWindow;
 
 
     /**
@@ -47,6 +50,12 @@ namespace FbCompositor {
         ~XRenderWindow() throw();
 
 
+        //--- ACCESSORS --------------------------------------------------------
+
+        /** \returns the window's contents as an XRender picture. */
+        Picture contentPicture() const throw();
+
+
         //--- WINDOW MANIPULATION ----------------------------------------------
 
         /** Update the window's contents. */
@@ -58,7 +67,25 @@ namespace FbCompositor {
 
         /** Update the window's clip shape. */
         void updateShape();
+
+
+    private:
+        //--- RENDERING RELATED ------------------------------------------------
+
+        /** The window's picture format. */
+        XRenderPictFormat *m_pictFormat;
+
+        /** The window's picture. */
+        Picture m_picture;
     };
+
+
+    //--- INLINE FUNCTIONS -----------------------------------------------------
+
+    // Returns the window's contents as an XRender picture.
+    inline Picture XRenderWindow::contentPicture() const throw() {
+        return m_picture;
+    }
 }
 
 #endif  // FBCOMPOSITOR_XRENDERWINDOW_HH
