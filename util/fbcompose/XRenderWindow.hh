@@ -1,4 +1,4 @@
-/** CompositorConfig.cc file for the fluxbox compositor. */
+/** XRenderWindow.hh file for the fluxbox compositor. */
 
 // Copyright (c) 2011 Gediminas Liktaras (gliktaras at gmail dot com)
 //
@@ -20,19 +20,45 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#ifndef FBCOMPOSITOR_XRENDERWINDOW_HH
+#define FBCOMPOSITOR_XRENDERWINDOW_HH
 
-#include "CompositorConfig.hh"
+#include "BaseCompWindow.hh"
+#include "Exceptions.hh"
 
-using namespace FbCompositor;
+
+namespace FbCompositor {
+
+    class BaseCompWindow;
+    class InitException;
 
 
-//--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
+    /**
+     * Manages windows in XRender rendering mode.
+     */
+    class XRenderWindow : public BaseCompWindow {
+    public:
+        //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
-// Constructor.
-CompositorConfig::CompositorConfig(int /*argc*/, char ** /*argv*/) throw(ConfigException) :
-    m_displayName(""),
-    m_renderingMode(RM_XRender) {
+        /** Constructor. */
+        XRenderWindow(Window windowXID) throw(InitException);
+
+        /** Destructor. */
+        ~XRenderWindow() throw();
+
+
+        //--- WINDOW MANIPULATION ----------------------------------------------
+
+        /** Update the window's contents. */
+        void updateContents();
+
+
+    protected:
+        //--- PROTECTED WINDOW MANIPULATION ------------------------------------
+
+        /** Update the window's clip shape. */
+        void updateShape();
+    };
 }
 
-// Destructor.
-CompositorConfig::~CompositorConfig() throw() {}
+#endif  // FBCOMPOSITOR_XRENDERWINDOW_HH

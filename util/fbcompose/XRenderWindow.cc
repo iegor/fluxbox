@@ -1,4 +1,4 @@
-/** CompositorConfig.cc file for the fluxbox compositor. */
+/** XRenderWindow.cc file for the fluxbox compositor. */
 
 // Copyright (c) 2011 Gediminas Liktaras (gliktaras at gmail dot com)
 //
@@ -20,8 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-
-#include "CompositorConfig.hh"
+#include "XRenderWindow.hh"
 
 using namespace FbCompositor;
 
@@ -29,10 +28,21 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-CompositorConfig::CompositorConfig(int /*argc*/, char ** /*argv*/) throw(ConfigException) :
-    m_displayName(""),
-    m_renderingMode(RM_XRender) {
+XRenderWindow::XRenderWindow(Window windowXID) throw(InitException) :
+    BaseCompWindow(windowXID) {
 }
 
 // Destructor.
-CompositorConfig::~CompositorConfig() throw() {}
+XRenderWindow::~XRenderWindow() throw() { }
+
+
+//--- WINDOW MANIPULATION ------------------------------------------------------
+
+// Update the window's contents.
+void XRenderWindow::updateContents() { }
+
+
+//--- PROTECTED WINDOW MANIPULATION --------------------------------------------
+
+// Update the window's clip shape.
+void XRenderWindow::updateShape() { }

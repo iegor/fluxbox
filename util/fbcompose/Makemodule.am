@@ -45,7 +45,9 @@ fbcompose_SOURCES = \
 	util/fbcompose/OpenGLScreen.hh util/fbcompose/OpenGLScreen.cc \
 	util/fbcompose/OpenGLShaders.hh util/fbcompose/OpenGLShaders.cc \
 	util/fbcompose/OpenGLWindow.hh util/fbcompose/OpenGLWindow.cc \
-	util/fbcompose/Utility.hh util/fbcompose/Utility.cc
+	util/fbcompose/Utility.hh util/fbcompose/Utility.cc \
+	util/fbcompose/XRenderScreen.hh util/fbcompose/XRenderScreen.cc \
+	util/fbcompose/XRenderWindow.hh util/fbcompose/XRenderWindow.cc
 
 #  FLUXBOX_SRC_DIR=	../../src/
 # INCLUDES= 		-I$(top_srcdir)/src -I$(top_srcdir)/src/FbTk

@@ -41,7 +41,7 @@ Atom BaseCompWindow::m_opacityAtom = 0;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-BaseCompWindow::BaseCompWindow(Window windowXID) throw() :
+BaseCompWindow::BaseCompWindow(Window windowXID) throw(InitException) :
     FbTk::FbWindow(windowXID) {
 
     // Set up atoms and properties.

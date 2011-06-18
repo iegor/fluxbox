@@ -24,6 +24,7 @@
 #include "Compositor.hh"
 #include "Logging.hh"
 #include "OpenGLScreen.hh"
+#include "XRenderScreen.hh"
 
 #include "FbTk/RefCount.hh"
 
@@ -32,6 +33,7 @@
 #include <X11/extensions/Xcomposite.h>
 #include <X11/extensions/Xdamage.h>
 #include <X11/extensions/Xfixes.h>
+#include <X11/extensions/Xrender.h>
 #include <X11/Xutil.h>
 
 #include <iostream>
@@ -63,6 +65,7 @@ Compositor::Compositor(const CompositorConfig &config) throw(InitException) :
             m_screens.push_back(new OpenGLScreen(i));
             break;
         case RM_XRender :
+            m_screens.push_back(new XRenderScreen(i));
             break;
         case RM_ServerAuto :
             XCompositeRedirectSubwindows(display(), XRootWindow(display(), i), CompositeRedirectAutomatic);
@@ -130,6 +133,12 @@ void Compositor::initAllExtensions() throw(InitException) {
         initExtension("XComposite", &XCompositeQueryExtension, &XCompositeQueryVersion, 0, 4, &m_compositeEventBase, &m_compositeErrorBase);
         initExtension("XDamage", &XDamageQueryExtension, &XDamageQueryVersion, 1, 0, &m_damageEventBase, &m_damageErrorBase);
         initExtension("XFixes", &XFixesQueryExtension, &XFixesQueryVersion, 2, 0, &m_fixesEventBase, &m_fixesErrorBase);
+        initExtension("XShape", &XShapeQueryExtension, &XShapeQueryVersion, 1, 1, &m_shapeEventBase, &m_shapeErrorBase);
+    } else if (m_renderingMode == RM_XRender) {
+        initExtension("XComposite", &XCompositeQueryExtension, &XCompositeQueryVersion, 0, 4, &m_compositeEventBase, &m_compositeErrorBase);
+        initExtension("XDamage", &XDamageQueryExtension, &XDamageQueryVersion, 1, 0, &m_damageEventBase, &m_damageErrorBase);
+        initExtension("XFixes", &XFixesQueryExtension, &XFixesQueryVersion, 2, 0, &m_fixesEventBase, &m_fixesErrorBase);
+        initExtension("XRender", &XRenderQueryExtension, &XRenderQueryVersion, 0, 1, &m_renderEventBase, &m_renderErrorBase);
         initExtension("XShape", &XShapeQueryExtension, &XShapeQueryVersion, 1, 1, &m_shapeEventBase, &m_shapeErrorBase);
     } else if (m_renderingMode == RM_ServerAuto) {
         initExtension("XComposite", &XCompositeQueryExtension, &XCompositeQueryVersion, 0, 1, &m_compositeEventBase, &m_compositeErrorBase);

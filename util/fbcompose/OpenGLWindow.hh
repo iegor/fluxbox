@@ -47,7 +47,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        OpenGLWindow(Window windowXID, GLXFBConfig fbConfig) throw();
+        OpenGLWindow(Window windowXID, GLXFBConfig fbConfig) throw(InitException);
 
         /** Destructor. */
         virtual ~OpenGLWindow() throw();

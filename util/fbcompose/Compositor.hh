@@ -164,6 +164,12 @@ namespace FbCompositor {
         /** Error base of the X Fixes extension. */
         int m_fixesErrorBase;
 
+        /** Event base of the X Render extension. */
+        int m_renderEventBase;
+
+        /** Error base of the X Render extension. */
+        int m_renderErrorBase;
+
         /** Event base of the X Shape extension. */
         int m_shapeEventBase;
 

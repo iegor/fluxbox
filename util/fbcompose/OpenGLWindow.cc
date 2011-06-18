@@ -51,7 +51,7 @@ const int OpenGLWindow::TEX_PIXMAP_ATTRIBUTES[] = {
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-OpenGLWindow::OpenGLWindow(Window windowXID, GLXFBConfig fbConfig) throw() :
+OpenGLWindow::OpenGLWindow(Window windowXID, GLXFBConfig fbConfig) throw(InitException) :
     BaseCompWindow(windowXID) {
 
     m_fbConfig = fbConfig;

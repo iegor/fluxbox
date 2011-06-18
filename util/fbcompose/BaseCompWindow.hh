@@ -24,6 +24,7 @@
 #ifndef FBCOMPOSITOR_WINDOW_HH
 #define FBCOMPOSITOR_WINDOW_HH
 
+#include "Exceptions.hh"
 #include "Logging.hh"
 
 #include "FbTk/FbWindow.hh"
@@ -39,6 +40,7 @@
 namespace FbCompositor {
 
     class BaseCompWindow;
+    class InitException;
 
     /** << output stream operator for the BaseCompWindow class. */
     std::ostream &operator<<(std::ostream& out, const BaseCompWindow& window);
@@ -56,7 +58,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        BaseCompWindow(Window windowXID) throw();
+        BaseCompWindow(Window windowXID) throw(InitException);
 
         /** Destructor. */
         virtual ~BaseCompWindow() throw();

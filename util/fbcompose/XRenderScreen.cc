@@ -1,4 +1,4 @@
-/** CompositorConfig.cc file for the fluxbox compositor. */
+/** XRenderScreen.cc file for the fluxbox compositor. */
 
 // Copyright (c) 2011 Gediminas Liktaras (gliktaras at gmail dot com)
 //
@@ -20,8 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-
-#include "CompositorConfig.hh"
+#include "XRenderScreen.hh"
+#include "XRenderWindow.hh"
 
 using namespace FbCompositor;
 
@@ -29,10 +29,33 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-CompositorConfig::CompositorConfig(int /*argc*/, char ** /*argv*/) throw(ConfigException) :
-    m_displayName(""),
-    m_renderingMode(RM_XRender) {
+XRenderScreen::XRenderScreen(int screenNumber) :
+    BaseScreen(screenNumber) {
 }
 
 // Destructor.
-CompositorConfig::~CompositorConfig() throw() {}
+XRenderScreen::~XRenderScreen() { }
+
+
+//--- SCREEN MANIPULATION ------------------------------------------------------
+
+// Notifies the screen of a background change.
+void XRenderScreen::setBackgroundChanged() { }
+
+// Notifies the screen of a root window change.
+void XRenderScreen::setRootWindowChanged() { }
+
+
+//--- SCREEN RENDERING ---------------------------------------------------------
+
+// Renders the screen's contents.
+void XRenderScreen::renderScreen() { }
+
+
+//--- SPECIALIZED WINDOW MANIPULATION FUNCTIONS --------------------------------
+
+// Creates a window object from its XID.
+BaseCompWindow *XRenderScreen::createWindowObject(Window window) {
+    XRenderWindow *newWindow = new XRenderWindow(window);
+    return newWindow;
+}
