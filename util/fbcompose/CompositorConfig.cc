@@ -22,6 +22,12 @@
 
 
 #include "CompositorConfig.hh"
+#include "Logging.hh"
+
+#include <algorithm>
+#include <iostream>
+#include <sstream>
+#include <cstdlib>
 
 using namespace FbCompositor;
 
@@ -29,10 +35,82 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-CompositorConfig::CompositorConfig(int /*argc*/, char ** /*argv*/) throw(ConfigException) :
+CompositorConfig::CompositorConfig(std::vector<FbTk::FbString> args) throw(ConfigException) :
     m_displayName(""),
     m_renderingMode(RM_XRender) {
+    // TODO: Proper command line argument parsing (getopt or something else).
+
+    std::vector<FbTk::FbString>::iterator it;
+    std::stringstream ss;
+
+    it = args.begin();
+    while (it != args.end()) {
+        if ((*it == "-h") || (*it == "--help")) {
+            printFullHelp(std::cout);
+            exit(EXIT_SUCCESS);
+        } else if ((*it == "-V") || (*it == "--version")) {
+            printVersion(std::cout);
+            exit(EXIT_SUCCESS);
+        }
+        ++it;
+    }
+
+    it = args.begin();
+    while (it != args.end()) {
+        if ((*it == "-m") || (*it == "--mode")) {
+            ++it;
+            if (it == args.end()) {
+                throw ConfigException("No rendering mode specified.");
+            }
+
+            if (*it == "opengl") {
+                m_renderingMode = RM_OpenGL;
+            } else if (*it == "xrender") {
+                m_renderingMode = RM_XRender;
+            } else if (*it == "serverauto") {
+                m_renderingMode = RM_ServerAuto;
+            } else {
+                ss.str("");
+                ss << "Unknown rendering mode \"" << *it << "\".";
+                throw ConfigException(ss.str());
+            }
+        } else if ((*it == "-v") || (*it == "--verbose")) {
+            Logger::setLoggingLevel(LOG_LEVEL_INFO);
+        } else {
+            ss.str("");
+            ss << "Unknown option \"" << *it << "\".";
+            throw ConfigException(ss.str());
+        }
+        ++it;
+    }
 }
 
 // Destructor.
 CompositorConfig::~CompositorConfig() throw() {}
+
+
+//--- CONVENIENCE FUNCTIONS ----------------------------------------------------
+
+// Output full help message.
+void CompositorConfig::printFullHelp(std::ostream &os) throw() {
+    os << "Usage: fbcompose [OPTION]..." << std::endl
+       << std::endl
+       << "Options and arguments:" << std::endl
+       << "  -h, --help           : Print this text and exit." << std::endl
+       << "  -m MODE, --mode MODE : Select the rendering mode." << std::endl
+       << "                         MODE can be \"opengl\", \"xrender\" or \"serverauto\"." << std::endl
+       << "  -v, --verbose        : Print more information." << std::endl
+       << "  -V, --version        : Print version and exit." << std::endl;
+}
+
+// Output short help message.
+void CompositorConfig::printShortHelp(std::ostream &os) throw() {
+    os << "Usage: fbcompose [OPTION]..." << std::endl
+       << "Try `fbcompose --help` for more information." << std::endl;
+}
+
+// Output version information.
+void CompositorConfig::printVersion(std::ostream &os) throw() {
+    os << "Fluxbox compositor %VERSION%" << std::endl
+       << "Copyright (c) 2011 Gediminas Liktaras" << std::endl;
+}

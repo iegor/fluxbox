@@ -27,7 +27,12 @@
 #include "Constants.hh"
 #include "Exceptions.hh"
 
+#include "FbTk/FbString.hh"
+
 #include <X11/Xlib.h>
+
+#include <vector>
+#include <iosfwd>
 
 
 namespace FbCompositor {
@@ -47,7 +52,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** The constructor. */
-        CompositorConfig(int argc, char **argv) throw(ConfigException);
+        CompositorConfig(std::vector<FbTk::FbString> args) throw(ConfigException);
 
         /** Destructor. */
         ~CompositorConfig() throw();
@@ -61,6 +66,17 @@ namespace FbCompositor {
         /** \returns the selected rendering mode. */
         RenderingMode renderingMode() const throw();
 
+
+        //--- CONVENIENCE FUNCTIONS --------------------------------------------
+
+        /** Output full help message. */
+        static void printFullHelp(std::ostream &os) throw();
+
+        /** Output short help message. */
+        static void printShortHelp(std::ostream &os) throw();
+
+        /** Output version information. */
+        static void printVersion(std::ostream &os) throw();
 
     private:
         //--- PRIVATE VARIABLES ------------------------------------------------

@@ -25,9 +25,11 @@
 #include "Exceptions.hh"
 #include "Logging.hh"
 
+#include "FbTk/FbString.hh"
+
 #include <X11/Xlib.h>
 
-#include <iostream>
+#include <vector>
 #include <cstdlib>
 
 using namespace FbCompositor;
@@ -42,12 +44,18 @@ using namespace FbCompositor;
  */
 int main(int argc, char **argv) {
     try {
-        Logger::setLoggingLevel(LOG_LEVEL_INFO);
+        Logger::setLoggingLevel(LOG_LEVEL_WARN);
 
-        CompositorConfig config(argc, argv);
+        std::vector<FbTk::FbString> args(argv + 1, argv + argc);
+        CompositorConfig config(args);
+
         Compositor app(config);
         app.eventLoop();
-    } catch(const CompositorException &e) {
+    } catch (const ConfigException &e) {
+        std::cerr << e.what() << std::endl;
+        CompositorConfig::printShortHelp(std::cerr);
+        return EXIT_FAILURE;
+    } catch (const CompositorException &e) {
         fbLog_error << e.what() << std::endl;
         return EXIT_FAILURE;
     }
