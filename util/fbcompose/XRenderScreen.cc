@@ -138,10 +138,17 @@ void XRenderScreen::setRootWindowChanged() {
         XFreePixmap(display(), m_backBufferPixmap);
         m_backBufferPixmap = None;
     }
+    if (m_renderingPicture) {
+        XRenderFreePicture(display(), m_renderingPicture);
+        m_renderingPicture = None;
+    }
 
     XRenderPictureAttributes pa;
     pa.subwindow_mode = IncludeInferiors;
     long paMask = CPSubwindowMode;
+
+    XResizeWindow(display(), m_renderingWindow, rootWindow().width(), rootWindow().height());
+    m_renderingPicture = XRenderCreatePicture(display(), m_renderingWindow, m_renderingPictFormat, paMask, &pa);
 
     m_backBufferPixmap = XCreatePixmap(display(), rootWindow().window(), rootWindow().width(), rootWindow().height(), 32);
     m_backBufferPicture = XRenderCreatePicture(display(), m_backBufferPixmap, m_backBufferPictFormat, paMask, &pa);
