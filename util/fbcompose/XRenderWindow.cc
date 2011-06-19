@@ -31,12 +31,20 @@ using namespace FbCompositor;
 XRenderWindow::XRenderWindow(Window windowXID) throw(InitException) :
     BaseCompWindow(windowXID) {
 
+    m_maskPicture = None;
+    m_maskPixmap = None;
     m_pictFormat = XRenderFindVisualFormat(display(), visual());
     m_picture = None;
 }
 
 // Destructor.
 XRenderWindow::~XRenderWindow() throw() {
+    if (m_maskPicture) {
+        XRenderFreePicture(display(), m_maskPicture);
+    }
+    if (m_maskPixmap) {
+        XFreePixmap(display(), m_maskPixmap);
+    }
     if (m_picture) {
         XRenderFreePicture(display(), m_picture);
     }
@@ -52,7 +60,7 @@ void XRenderWindow::updateContents() {
     }
 
     updateContentPixmap();
-    if (clipShapeChanged()) {
+    if (!m_maskPicture || clipShapeChanged()) {
         updateShape();
     }
 
@@ -70,10 +78,46 @@ void XRenderWindow::updateContents() {
     clearDamage();
 }
 
+// Update window's property.
+void XRenderWindow::updateProperty(Atom property, int state) {
+    BaseCompWindow::updateProperty(property, state);
+
+    if (property == m_opacityAtom) {
+        updateMaskPicture();
+    }
+}
+
 
 //--- PROTECTED WINDOW MANIPULATION --------------------------------------------
 
 // Update the window's clip shape.
 void XRenderWindow::updateShape() {
     BaseCompWindow::updateShape();
+    updateMaskPicture();
+}
+
+
+//--- INTERNAL FUNCTIONS -------------------------------------------------------
+
+// Update the window's mask picture.
+void XRenderWindow::updateMaskPicture() throw() {
+    if (!m_maskPicture || isResized()) {
+        if (m_maskPixmap) {
+            XFreePixmap(display(), m_maskPixmap);
+            m_maskPixmap = None;
+        }
+        if (m_maskPicture) {
+            XRenderFreePicture(display(), m_maskPicture);
+            m_maskPicture = None;
+        }
+
+        m_maskPixmap = XCreatePixmap(display(), window(), realWidth(), realHeight(), 32);
+        m_maskPicture = XRenderCreatePicture(display(), m_maskPixmap, XRenderFindStandardFormat(display(), PictStandardARGB32), 0, NULL);
+    }
+
+    XRenderColor color = { 0, 0, 0, 0 };
+    XRenderFillRectangle(display(), PictOpSrc, m_maskPicture, &color, 0, 0, realWidth(), realHeight());
+
+    color.alpha = (unsigned int)((alpha() * 0xffff) / 255.0);
+    XRenderFillRectangles(display(), PictOpSrc, m_maskPicture, &color, clipShapeRects(), clipShapeRectCount());
 }

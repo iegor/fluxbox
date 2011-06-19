@@ -54,12 +54,18 @@ namespace FbCompositor {
 
         /** \returns the window's contents as an XRender picture. */
         Picture contentPicture() const throw();
+        
+        /** \returns the window's mask picture. */
+        Picture maskPicture() const throw();
 
 
         //--- WINDOW MANIPULATION ----------------------------------------------
 
         /** Update the window's contents. */
         void updateContents();
+
+        /** Update window's property. */
+        void updateProperty(Atom property, int state);
 
 
     protected:
@@ -70,7 +76,20 @@ namespace FbCompositor {
 
 
     private:
+        //--- INTERNAL FUNCTIONS -----------------------------------------------
+
+        /** Update the window's mask picture. */
+        void updateMaskPicture() throw();
+
+
         //--- RENDERING RELATED ------------------------------------------------
+
+        /** The window's mask pixmap. */
+        Pixmap m_maskPixmap;
+
+        /** The window's mask picture. */
+        Picture m_maskPicture;
+
 
         /** The window's picture format. */
         XRenderPictFormat *m_pictFormat;
@@ -85,6 +104,11 @@ namespace FbCompositor {
     // Returns the window's contents as an XRender picture.
     inline Picture XRenderWindow::contentPicture() const throw() {
         return m_picture;
+    }
+
+    // Returns the window's mask picture.
+    inline Picture XRenderWindow::maskPicture() const throw() {
+        return m_maskPicture;
     }
 }
 

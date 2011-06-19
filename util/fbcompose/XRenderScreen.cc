@@ -211,7 +211,7 @@ void XRenderScreen::renderWindow(XRenderWindow &window) {
         window.updateContents();
     }
 
-    XRenderComposite(display(), PictOpSrc, window.contentPicture(), None, m_backBufferPicture,
+    XRenderComposite(display(), PictOpOver, window.contentPicture(), window.maskPicture(), m_backBufferPicture,
                      0, 0, 0, 0, window.x(), window.y(), window.realWidth(), window.realHeight());
 }
 

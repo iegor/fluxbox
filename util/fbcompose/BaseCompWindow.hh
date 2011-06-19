@@ -166,6 +166,12 @@ namespace FbCompositor {
         bool isWindowBad();
 
 
+        //--- ATOMS OF INTEREST ------------------------------------------------
+
+        /** Opacity atom. */
+        static Atom m_opacityAtom;
+
+
     private:
         //--- INTERNAL FUNCTIONS -----------------------------------------------
 
@@ -213,12 +219,6 @@ namespace FbCompositor {
 
         /** Shows whether the clip shape changed since the last update. */
         bool m_clipShapeChanged;
-
-
-        //--- ATOMS OF INTEREST ------------------------------------------------
-
-        /** Opacity atom. */
-        static Atom m_opacityAtom;
     };
 
 
