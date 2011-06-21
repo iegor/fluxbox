@@ -55,9 +55,8 @@ namespace {
         varying vec2 fb_TexCoord;                                            \n\
                                                                              \n\
         void main() {                                                        \n\
-            gl_FragColor = mix(vec4(0.0),                                    \n\
-                               texture2D(fb_Texture, fb_TexCoord),           \n\
-                               fb_Alpha);                                    \n\
+            gl_FragColor = texture2D(fb_Texture, fb_TexCoord)                \n\
+                    * vec4(1.0, 1.0, 1.0, fb_Alpha);                         \n\
         }                                                                    \n\
     ";
 }
