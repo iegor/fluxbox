@@ -63,6 +63,9 @@ namespace FbCompositor {
         /** \returns the display name. */
         const FbTk::FbString &displayName() const throw();
 
+        /** \returns the refresh rate. */
+        int framesPerSecond() const throw();
+
         /** \returns the selected rendering mode. */
         RenderingMode renderingMode() const throw();
 
@@ -79,10 +82,30 @@ namespace FbCompositor {
         static void printVersion(std::ostream &os) throw();
 
     private:
+        //--- INTERNAL FUNCTIONS -----------------------------------------------
+
+        /** Make the first scan of the arguments for special options. */
+        void preScanArguments();
+
+        /** Properly scan the command line arguments. */
+        void processArguments() throw(ConfigException);
+
+
+        /** Fetch the value of the next command line argument, advance iterator. */
+        FbTk::FbString getNextOption(std::vector<FbTk::FbString>::iterator &it, const char *errorMessage);
+
+
         //--- PRIVATE VARIABLES ------------------------------------------------
+
+        /** The passed command line arguments. */
+        std::vector<FbTk::FbString> m_args;
+
 
         /** The name of the display we want to use. */
         FbTk::FbString m_displayName;
+
+        /** The refresh rate. */
+        int m_framesPerSecond;
 
         /** Selected rendering mode. */
         RenderingMode m_renderingMode;
@@ -94,6 +117,11 @@ namespace FbCompositor {
     // Returns the display name.
     inline const FbTk::FbString &CompositorConfig::displayName() const throw() {
         return m_displayName;
+    }
+
+    // Returns the refresh rate.
+    inline int CompositorConfig::framesPerSecond() const throw() {
+        return m_framesPerSecond;
     }
 
     // Returns the rendering mode.

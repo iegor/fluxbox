@@ -87,7 +87,7 @@ Compositor::Compositor(const CompositorConfig &config) throw(InitException) :
         // Set up FPS limiter.
         FbTk::RefCount<FbTk::Command<void> > command(new RenderScreensCommand(this));
         m_redrawTimer.setCommand(command);
-        m_redrawTimer.setTimeout(0, 1000000 / 60);  // TODO: FPS configurable.
+        m_redrawTimer.setTimeout(0, 1000000.0 / config.framesPerSecond());
         m_redrawTimer.start();
     }
 

@@ -36,15 +36,26 @@ using namespace FbCompositor;
 
 // Constructor.
 CompositorConfig::CompositorConfig(std::vector<FbTk::FbString> args) throw(ConfigException) :
+    m_args(args),
     m_displayName(""),
+    m_framesPerSecond(60),
     m_renderingMode(RM_XRender) {
-    // TODO: Proper command line argument parsing (getopt or something else).
 
-    std::vector<FbTk::FbString>::iterator it;
-    std::stringstream ss;
+    preScanArguments();
+    processArguments();
+}
 
-    it = args.begin();
-    while (it != args.end()) {
+// Destructor.
+CompositorConfig::~CompositorConfig() throw() {}
+
+
+//--- INTERNAL FUNCTIONS -------------------------------------------------------
+
+// Make the first scan of the arguments for special options.
+void CompositorConfig::preScanArguments() {
+    std::vector<FbTk::FbString>::iterator it = m_args.begin();
+
+    while (it != m_args.end()) {
         if ((*it == "-h") || (*it == "--help")) {
             printFullHelp(std::cout);
             exit(EXIT_SUCCESS);
@@ -54,24 +65,39 @@ CompositorConfig::CompositorConfig(std::vector<FbTk::FbString> args) throw(Confi
         }
         ++it;
     }
+}
 
-    it = args.begin();
-    while (it != args.end()) {
-        if ((*it == "-m") || (*it == "--mode")) {
-            ++it;
-            if (it == args.end()) {
-                throw ConfigException("No rendering mode specified.");
-            }
+// Properly scan the command line arguments.
+void CompositorConfig::processArguments() throw(ConfigException) {
+    std::vector<FbTk::FbString>::iterator it = m_args.begin();
+    std::stringstream ss;
 
-            if (*it == "opengl") {
+    while (it != m_args.end()) {
+        if ((*it == "-d") || (*it == "--display")) {
+            m_displayName = getNextOption(it, "No display string specified.");
+        } else if ((*it == "-m") || (*it == "--mode")) {
+            FbTk::FbString mode = getNextOption(it, "No rendering mode specified.");
+
+            if (mode == "opengl") {
                 m_renderingMode = RM_OpenGL;
-            } else if (*it == "xrender") {
+            } else if (mode == "xrender") {
                 m_renderingMode = RM_XRender;
-            } else if (*it == "serverauto") {
+            } else if (mode == "serverauto") {
                 m_renderingMode = RM_ServerAuto;
             } else {
                 ss.str("");
-                ss << "Unknown rendering mode \"" << *it << "\".";
+                ss << "Unknown rendering mode \"" << mode << "\".";
+                throw ConfigException(ss.str());
+            }
+        } else if ((*it == "-q") || (*it == "--quiet")) {
+            Logger::setLoggingLevel(LOG_LEVEL_NONE);
+        } else if ((*it == "-r") || (*it == "--refresh-rate")) {
+            ss.str(getNextOption(it, "No refresh rate specified."));
+            ss >> m_framesPerSecond;
+
+            if (m_framesPerSecond <= 0) {
+                ss.str("");
+                ss << "Invalid refresh rate given.";
                 throw ConfigException(ss.str());
             }
         } else if ((*it == "-v") || (*it == "--verbose")) {
@@ -85,8 +111,15 @@ CompositorConfig::CompositorConfig(std::vector<FbTk::FbString> args) throw(Confi
     }
 }
 
-// Destructor.
-CompositorConfig::~CompositorConfig() throw() {}
+
+// Fetch the value of the next command line argument, advance iterator.
+FbTk::FbString CompositorConfig::getNextOption(std::vector<FbTk::FbString>::iterator &it, const char *errorMessage) {
+    ++it;
+    if (it == m_args.end()) {
+        throw ConfigException(errorMessage);
+    }
+    return *it;
+}
 
 
 //--- CONVENIENCE FUNCTIONS ----------------------------------------------------
@@ -94,13 +127,18 @@ CompositorConfig::~CompositorConfig() throw() {}
 // Output full help message.
 void CompositorConfig::printFullHelp(std::ostream &os) throw() {
     os << "Usage: fbcompose [OPTION]..." << std::endl
-       << std::endl
        << "Options and arguments:" << std::endl
-       << "  -h, --help           : Print this text and exit." << std::endl
-       << "  -m MODE, --mode MODE : Select the rendering mode." << std::endl
+       << "  -d DISPLAY, --display DISPLAY" << std::endl
+       << "                         Use the specified display connection." << std::endl
+       << "  -h, --help             Print this text and exit." << std::endl
+       << "  -m MODE, --mode MODE   Select the rendering mode." << std::endl
        << "                         MODE can be \"opengl\", \"xrender\" or \"serverauto\"." << std::endl
-       << "  -v, --verbose        : Print more information." << std::endl
-       << "  -V, --version        : Print version and exit." << std::endl;
+       << "  -q, --quiet            Do not print anything." << std::endl
+       << "  -r RATE, --refresh-rate RATE" << std::endl
+       << "                         Specify the compositor's refresh rate in Hz" << std::endl
+       << "                         (aka frames per second)." << std::endl
+       << "  -v, --verbose          Print more information." << std::endl
+       << "  -V, --version          Print version and exit." << std::endl;
 }
 
 // Output short help message.
