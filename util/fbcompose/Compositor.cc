@@ -56,7 +56,6 @@ Compositor::Compositor(const CompositorConfig &config) throw(InitException) :
     XSetErrorHandler(&handleXError);
     initAllExtensions();
 
-    // Set up screens.
     int screenCount = XScreenCount(display());
     m_screens.reserve(screenCount);
     for (int i = 0; i < screenCount; i++) {
@@ -79,12 +78,10 @@ Compositor::Compositor(const CompositorConfig &config) throw(InitException) :
     }
 
     if (m_renderingMode != RM_ServerAuto) {
-        // Set up windows.
         for (size_t i = 0; i < m_screens.size(); i++) {
             m_screens[i]->initWindows();
         }
 
-        // Set up FPS limiter.
         FbTk::RefCount<FbTk::Command<void> > command(new RenderScreensCommand(this));
         m_redrawTimer.setCommand(command);
         m_redrawTimer.setTimeout(0, 1000000.0 / config.framesPerSecond());
@@ -108,9 +105,7 @@ Compositor::~Compositor() {
 
 // Acquires the ownership of compositing manager selections.
 void Compositor::getCMSelectionOwnership(int screenNumber) throw(InitException) {
-    std::stringstream ss;
-    ss << "_NET_WM_CM_S" << screenNumber;
-    Atom cmAtom = XInternAtom(display(), ss.str().c_str(), False);
+    Atom cmAtom = Atoms::compositingSelectionAtom(screenNumber);
 
     Window curOwner = XGetSelectionOwner(display(), cmAtom);
     if (curOwner != None) {
@@ -173,6 +168,7 @@ void Compositor::initExtension(const char *extensionName, QueryExtensionFunction
         throw InitException(ss.str());
     }
 }
+
 
 //--- EVENT LOOP ---------------------------------------------------------------
 

@@ -37,6 +37,9 @@ namespace FbCompositor {
         /** \returns the _NET_ACTIVE_WINDOW atom. */
         static Atom activeWindowAtom() throw();
 
+        /** \returns the _NET_WM_CM_Sxx atoms. */
+        static Atom compositingSelectionAtom(int screenNumber) throw();
+
         /** \returns the _NET_WM_WINDOW_OPACITY atom. */
         static Atom opacityAtom() throw();
 

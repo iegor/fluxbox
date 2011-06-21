@@ -24,6 +24,8 @@
 
 #include "FbTk/App.hh"
 
+#include <sstream>
+
 using namespace FbCompositor;
 
 
@@ -31,6 +33,13 @@ using namespace FbCompositor;
 Atom Atoms::activeWindowAtom() throw() {
     static Atom atom = XInternAtom(FbTk::App::instance()->display(), "_NET_ACTIVE_WINDOW", False);
     return atom;
+}
+
+// Returns the _NET_WM_CM_Sxx atoms.
+Atom Atoms::compositingSelectionAtom(int screenNumber) throw() {
+    std::stringstream ss;
+    ss << "_NET_WM_CM_S" << screenNumber;
+    return XInternAtom(FbTk::App::instance()->display(), ss.str().c_str(), False);
 }
 
 // Returns the _NET_WM_WINDOW_OPACITY atom.
