@@ -53,10 +53,10 @@ namespace FbCompositor {
         //--- SCREEN MANIPULATION ----------------------------------------------
 
         /** Notifies the screen of a background change. */
-        void setBackgroundChanged();
+        void setRootPixmapChanged();
 
         /** Notifies the screen of a root window change. */
-        void setRootWindowChanged();
+        void setRootWindowSizeChanged();
 
 
         //--- SCREEN RENDERING -------------------------------------------------

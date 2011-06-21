@@ -202,7 +202,7 @@ namespace FbCompositor {
         if ((screenNumber < 0) || (screenNumber >= screenCount())) {
             throw RuntimeException("getScreen(int) was given an out of bounds index.");
         }
-        return *m_screens[screenNumber];
+        return *(m_screens[screenNumber]);
     }
 
     // Returns the rendering mode.

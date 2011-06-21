@@ -35,24 +35,6 @@
 using namespace FbCompositor;
 
 
-//--- STATIC VARIABLES ---------------------------------------------------------
-
-// Property that denotes the currently active window.
-Atom BaseScreen::m_activeWindowAtom = 0;
-
-// Property that denotes the resize rectangle of fluxbox.
-Atom BaseScreen::m_resizeRectAtom = 0;
-
-// Property that denotes the pixmap of the root window.
-Atom BaseScreen::m_rootPixmapAtom = 0;
-
-// Property that denotes the index of active workspace.
-Atom BaseScreen::m_workspaceAtom = 0;
-
-// Property that denotes the number of workspaces.
-Atom BaseScreen::m_workspaceCountAtom = 0;
-
-
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
@@ -61,21 +43,10 @@ BaseScreen::BaseScreen(int screenNumber) :
     m_screenNumber(screenNumber),
     m_rootWindow(XRootWindow(m_display, m_screenNumber)) {
 
-    // Set up atoms and properties.
-    static bool atomsInitialized = false;
-    if (!atomsInitialized) {
-        m_activeWindowAtom = XInternAtom(m_display, "_NET_ACTIVE_WINDOW", False);
-        m_resizeRectAtom = XInternAtom(m_display, "_FLUXBOX_RECONFIGURE_RECT", False);
-        m_rootPixmapAtom = XInternAtom(m_display, "_XROOTPMAP_ID", False);
-        m_workspaceAtom = XInternAtom(m_display, "_WIN_WORKSPACE", False);
-        m_workspaceCountAtom = XInternAtom(m_display, "_WIN_WORKSPACE_COUNT", False);
-        atomsInitialized = true;
-    }
-
-    m_activeWindowXID = m_rootWindow.singlePropertyValue<Window>(m_activeWindowAtom, 0);
-    m_currentWorkspace = m_rootWindow.singlePropertyValue<long>(m_workspaceAtom, 0);
-    m_resizeRect.x = m_resizeRect.y = m_resizeRect.width = m_resizeRect.height = 0;
-    m_workspaceCount = m_rootWindow.singlePropertyValue<long>(m_workspaceCountAtom, 1);
+    m_activeWindowXID = m_rootWindow.singlePropertyValue<Window>(Atoms::activeWindowAtom(), 0);
+    m_currentWorkspace = m_rootWindow.singlePropertyValue<long>(Atoms::workspaceAtom(), 0);
+    m_reconfigureRect.x = m_reconfigureRect.y = m_reconfigureRect.width = m_reconfigureRect.height = 0;
+    m_workspaceCount = m_rootWindow.singlePropertyValue<long>(Atoms::workspaceCountAtom(), 1);
 
     // Set up root window.
     long eventMask = PropertyChangeMask | StructureNotifyMask | SubstructureNotifyMask;
@@ -190,7 +161,7 @@ void BaseScreen::reconfigureWindow(const XConfigureEvent &event) {
 
     if (event.window == m_rootWindow.window()) {
         m_rootWindow.updateGeometry(event);
-        setRootWindowChanged();
+        setRootWindowSizeChanged();
         return;
     }
 
@@ -205,19 +176,15 @@ void BaseScreen::reconfigureWindow(const XConfigureEvent &event) {
             m_windows.push_front(currentWindow);
         } else {
             it = getWindowIterator(event.above);
-
             if (it == m_windows.end()) {
                 it = getFirstManagedAncestorIterator(getParentWindow(currentWindow->window()));
+            }
 
-                if (it != m_windows.end()) {
-                    ++it;
-                    m_windows.insert(it, currentWindow);
-                } else {
-                    m_windows.push_back(currentWindow);
-                }
-            } else {
+            if (it != m_windows.end()) {
                 ++it;
                 m_windows.insert(it, currentWindow);
+            } else {
+                m_windows.push_back(currentWindow);
             }
         }
     } else {
@@ -269,8 +236,8 @@ void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
     }
     
     if ((window == m_rootWindow.window()) && (property != None) && (state == PropertyNewValue)) {
-        if (property == m_activeWindowAtom) {
-            Window activeWindow = m_rootWindow.singlePropertyValue<Window>(m_activeWindowAtom, None);
+        if (property == Atoms::activeWindowAtom()) {
+            Window activeWindow = m_rootWindow.singlePropertyValue<Window>(Atoms::activeWindowAtom(), None);
             std::list<BaseCompWindow*>::iterator it = getFirstManagedAncestorIterator(activeWindow);
 
             if (it != m_windows.end()) {
@@ -278,22 +245,22 @@ void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
             } else {
                 m_activeWindowXID = None;
             }
-        } else if (property == m_resizeRectAtom) {
-            std::vector<long> data = m_rootWindow.propertyValue<long>(m_resizeRectAtom);
+        } else if (property == Atoms::reconfigureRectAtom()) {
+            std::vector<long> data = m_rootWindow.propertyValue<long>(Atoms::reconfigureRectAtom());
             if (data.size() != 4) {
-                m_resizeRect.x = m_resizeRect.y = m_resizeRect.width = m_resizeRect.height = 0;
+                m_reconfigureRect.x = m_reconfigureRect.y = m_reconfigureRect.width = m_reconfigureRect.height = 0;
             } else {
-                m_resizeRect.x = data[0];
-                m_resizeRect.y = data[1];
-                m_resizeRect.width = data[2];
-                m_resizeRect.height = data[3];
+                m_reconfigureRect.x = data[0];
+                m_reconfigureRect.y = data[1];
+                m_reconfigureRect.width = data[2];
+                m_reconfigureRect.height = data[3];
             }
-        } else if (property == m_rootPixmapAtom) {
-            setBackgroundChanged();
-        } else if (property == m_workspaceAtom) {
-            m_currentWorkspace = m_rootWindow.singlePropertyValue<long>(m_workspaceAtom, 0);
-        } else if (property == m_workspaceCountAtom) {
-            m_workspaceCount = m_rootWindow.singlePropertyValue<long>(m_workspaceCountAtom, 1);
+        } else if (property == Atoms::rootPixmapAtom()) {
+            setRootPixmapChanged();
+        } else if (property == Atoms::workspaceAtom()) {
+            m_currentWorkspace = m_rootWindow.singlePropertyValue<long>(Atoms::workspaceAtom(), 0);
+        } else if (property == Atoms::workspaceCountAtom()) {
+            m_workspaceCount = m_rootWindow.singlePropertyValue<long>(Atoms::workspaceCountAtom(), 1);
         }
     }
 
@@ -330,10 +297,10 @@ bool BaseScreen::isWindowManaged(Window window) {
 //--- SCREEN MANIPULATION ----------------------------------------------
 
 // Notifies the screen of the background change.
-void BaseScreen::setBackgroundChanged() { }
+void BaseScreen::setRootPixmapChanged() { }
 
 // Notifies the screen of a root window change.
-void BaseScreen::setRootWindowChanged() { }
+void BaseScreen::setRootWindowSizeChanged() { }
 
 
 //--- INTERNAL FUNCTIONS -------------------------------------------------------

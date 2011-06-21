@@ -122,12 +122,12 @@ void XRenderScreen::initBackgroundPicture() {
 //--- SCREEN MANIPULATION ------------------------------------------------------
 
 // Notifies the screen of a background change.
-void XRenderScreen::setBackgroundChanged() {
+void XRenderScreen::setRootPixmapChanged() {
     m_rootChanged = true;
 }
 
 // Notifies the screen of a root window change.
-void XRenderScreen::setRootWindowChanged() {
+void XRenderScreen::setRootWindowSizeChanged() {
     m_rootChanged = true;
 
     if (m_backBufferPicture) {

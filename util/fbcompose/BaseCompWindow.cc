@@ -21,6 +21,7 @@
 // THE SOFTWARE.
 
 
+#include "Atoms.hh"
 #include "BaseCompWindow.hh"
 
 #include <X11/extensions/shape.h>
@@ -32,25 +33,13 @@
 using namespace FbCompositor;
 
 
-//--- STATIC VARIABLES -------------------------------------------------
-
-// Opacity atom.
-Atom BaseCompWindow::m_opacityAtom = 0;
-
-
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
 BaseCompWindow::BaseCompWindow(Window windowXID) throw(InitException) :
     FbTk::FbWindow(windowXID) {
 
-    // Set up atoms and properties.
-    static bool atomsInitialized = false;
-    if (!atomsInitialized) {
-        m_opacityAtom = XInternAtom(display(), "_NET_WM_WINDOW_OPACITY", False);
-        atomsInitialized = true;
-    }
-    m_alpha = singlePropertyValue<long>(m_opacityAtom, 0xff) & 0xff;
+    m_alpha = singlePropertyValue<long>(Atoms::opacityAtom(), 0xff) & 0xff;
 
     // Set up other window attributes.
     XWindowAttributes xwa;
@@ -146,8 +135,8 @@ void BaseCompWindow::updateShape() {
 
 // Update window's property.
 void BaseCompWindow::updateProperty(Atom property, int /*state*/) {
-    if (property == m_opacityAtom) {
-        m_alpha = singlePropertyValue<long>(m_opacityAtom, 0xff) & 0xff;
+    if (property == Atoms::opacityAtom()) {
+        m_alpha = singlePropertyValue<long>(Atoms::opacityAtom(), 0xff) & 0xff;
     }
 }
 

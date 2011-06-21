@@ -24,6 +24,7 @@
 #ifndef FBCOMPOSITOR_SCREEN_HH
 #define FBCOMPOSITOR_SCREEN_HH
 
+#include "Atoms.hh"
 #include "BaseCompWindow.hh"
 
 #include <X11/Xlib.h>
@@ -128,10 +129,10 @@ namespace FbCompositor {
         //--- SCREEN MANIPULATION ----------------------------------------------
 
         /** Notifies the screen of a background change. */
-        virtual void setBackgroundChanged();
+        virtual void setRootPixmapChanged();
 
         /** Notifies the screen of a root window change. */
-        virtual void setRootWindowChanged();
+        virtual void setRootWindowSizeChanged();
 
 
         //--- SCREEN RENDERING -------------------------------------------------
@@ -146,8 +147,8 @@ namespace FbCompositor {
         /** \returns the list of windows on the screen. */
         const std::list<BaseCompWindow*> &allWindows() const throw();
         
-        /** \returns the resize rectangle. */
-        XRectangle resizeRectangle() const throw();
+        /** \returns the reconfigure rectangle. */
+        XRectangle reconfigureRectangle() const throw();
 
         /** \returns the root window pixmap. */
         Pixmap rootWindowPixmap() throw();
@@ -197,29 +198,11 @@ namespace FbCompositor {
         /** The index of the current workspace. */
         int m_currentWorkspace;
 
-        /** The current resize rectangle. */
-        XRectangle m_resizeRect;
+        /** The current reconfigure rectangle. */
+        XRectangle m_reconfigureRect;
 
         /** The total number of workspaces. */
         int m_workspaceCount;
-
-
-        //--- PROPERTIES OF INTEREST -------------------------------------------
-
-        /** Property that denotes the currently active window. */
-        static Atom m_activeWindowAtom;
-
-        /** Property that denotes the resize rectangle of fluxbox. */
-        static Atom m_resizeRectAtom;
-
-        /** Property that denotes the pixmap of the root window. */
-        static Atom m_rootPixmapAtom;
-
-        /** Property that denotes the index of active workspace. */
-        static Atom m_workspaceAtom;
-
-        /** Property that denotes the number of workspaces. */
-        static Atom m_workspaceCountAtom;
     };
 
 
@@ -245,9 +228,9 @@ namespace FbCompositor {
         return m_display;
     }
 
-    // Returns the resize rectangle.
-    inline XRectangle BaseScreen::resizeRectangle() const throw() {
-        return m_resizeRect;
+    // Returns the reconfigure rectangle.
+    inline XRectangle BaseScreen::reconfigureRectangle() const throw() {
+        return m_reconfigureRect;
     }
 
     // Returns screen's root window.
@@ -262,7 +245,7 @@ namespace FbCompositor {
 
     // Returns the root window pixmap.
     inline Pixmap BaseScreen::rootWindowPixmap() throw() {
-        return rootWindow().singlePropertyValue<Pixmap>(m_rootPixmapAtom, None);
+        return rootWindow().singlePropertyValue<Pixmap>(Atoms::rootPixmapAtom(), None);
     }
 
     // Returns the screen's number.

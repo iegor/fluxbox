@@ -59,10 +59,10 @@ namespace FbCompositor {
         //--- SCREEN MANIPULATION ----------------------------------------------
 
         /** Notifies the screen of the background change. */
-        void setBackgroundChanged();
+        void setRootPixmapChanged();
 
         /** Notifies the screen of a root window change. */
-        void setRootWindowChanged();
+        void setRootWindowSizeChanged();
 
 
         //--- SCREEN RENDERING -------------------------------------------------
@@ -87,8 +87,8 @@ namespace FbCompositor {
         /** Creates default texture rendering buffers. */
         void createDefaultElements();
 
-        /** Creates all elements, needed to draw the resize rectangle. */
-        void createResizeRectElements();
+        /** Creates all elements, needed to draw the reconfigure rectangle. */
+        void createReconfigureRectElements();
 
         /** Early initialization of GLX function pointers. */
         void earlyInitGLXPointers() throw(InitException);
@@ -132,8 +132,8 @@ namespace FbCompositor {
         /** Render the desktop background. */
         void renderBackground();
 
-        /** Render the resize rectangle. */
-        void renderResizeRect();
+        /** Render the reconfigure rectangle. */
+        void renderReconfigureRect();
 
         /** Render a particular window onto the screen. */
         void renderWindow(OpenGLWindow &window);
@@ -174,11 +174,11 @@ namespace FbCompositor {
 
         //--- RESIZE FRAME RELATED ---------------------------------------------
 
-        /** The resize rectangle element buffer. */
-        GLuint m_resizeRectElementBuffer;
+        /** The reconfigure rectangle element buffer. */
+        GLuint m_reconfigureRectElementBuffer;
 
-        /** The resize rectangle primitive position array buffer. */
-        GLuint m_resizeRectLinePosBuffer;
+        /** The reconfigure rectangle primitive position array buffer. */
+        GLuint m_reconfigureRectLinePosBuffer;
 
 
         //--- DEFAULT OPENGL ELEMENTS ------------------------------------------

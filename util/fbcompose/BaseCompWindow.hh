@@ -166,12 +166,6 @@ namespace FbCompositor {
         bool isWindowBad();
 
 
-        //--- ATOMS OF INTEREST ------------------------------------------------
-
-        /** Opacity atom. */
-        static Atom m_opacityAtom;
-
-
     private:
         //--- INTERNAL FUNCTIONS -----------------------------------------------
 

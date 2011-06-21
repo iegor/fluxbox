@@ -49,11 +49,11 @@ Compositor::Compositor(const CompositorConfig &config) throw(InitException) :
     App(config.displayName().c_str()),
     m_redrawTimer() {
 
+    XSynchronize(display(), True);
+
     m_renderingMode = config.renderingMode();
 
-    XSynchronize(display(), True);
     XSetErrorHandler(&handleXError);
-
     initAllExtensions();
 
     // Set up screens.
@@ -70,7 +70,7 @@ Compositor::Compositor(const CompositorConfig &config) throw(InitException) :
         case RM_ServerAuto :
             XCompositeRedirectSubwindows(display(), XRootWindow(display(), i), CompositeRedirectAutomatic);
             break;
-        default:
+        default :
             throw InitException("Unknown rendering mode selected.");
             break;
         }

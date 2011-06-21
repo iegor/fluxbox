@@ -35,6 +35,7 @@ fbcompose_CXXFLAGS = \
 
 fbcompose_SOURCES = \
 	util/fbcompose/main.cc \
+	util/fbcompose/Atoms.hh util/fbcompose/Atoms.cc \
 	util/fbcompose/BaseCompWindow.hh util/fbcompose/BaseCompWindow.cc \
 	util/fbcompose/BaseScreen.hh util/fbcompose/BaseScreen.cc \
 	util/fbcompose/Compositor.hh util/fbcompose/Compositor.cc \

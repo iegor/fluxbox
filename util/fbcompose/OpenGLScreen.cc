@@ -79,8 +79,8 @@ namespace {
     };
 
 
-    // Element array for drawing the resize rectangle.
-    static const GLushort RESIZE_RECT_ELEMENT_ARRAY[] = {
+    // Element array for drawing the reconfigure rectangle.
+    static const GLushort RECONFIGURE_RECT_ELEMENT_ARRAY[] = {
         0, 1, 2, 3, 0
     };
 
@@ -105,7 +105,7 @@ OpenGLScreen::OpenGLScreen(int screenNumber) :
     initShaders();
     createDefaultElements();
     createBackgroundTexture();
-    createResizeRectElements();
+    createReconfigureRectElements();
 }
 
 // Destructor.
@@ -125,8 +125,8 @@ OpenGLScreen::~OpenGLScreen() {
 
     glDeleteTextures(1, &m_backgroundTexture);
 
-    glDeleteBuffers(1, &m_resizeRectElementBuffer);
-    glDeleteBuffers(1, &m_resizeRectLinePosBuffer);
+    glDeleteBuffers(1, &m_reconfigureRectElementBuffer);
+    glDeleteBuffers(1, &m_reconfigureRectLinePosBuffer);
 
     glXDestroyWindow(display(), m_glxRenderingWindow);
     glXDestroyContext(display(), m_glxContext);
@@ -137,14 +137,14 @@ OpenGLScreen::~OpenGLScreen() {
 //--- SCREEN MANIPULATION ----------------------------------------------
 
 // Notifies the screen of the background change.
-void OpenGLScreen::setBackgroundChanged() {
-    BaseScreen::setBackgroundChanged();
+void OpenGLScreen::setRootPixmapChanged() {
+    BaseScreen::setRootPixmapChanged();
     m_backgroundChanged = true;
 }
 
 // Notifies the screen of a root window change.
-void OpenGLScreen::setRootWindowChanged() {
-    BaseScreen::setRootWindowChanged();
+void OpenGLScreen::setRootWindowSizeChanged() {
+    BaseScreen::setRootWindowSizeChanged();
     m_rootWindowChanged = true;
 }
 
@@ -316,15 +316,15 @@ void OpenGLScreen::createBackgroundTexture() throw(InitException) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
-// Creates all elements, needed to draw the resize rectangle.
-void OpenGLScreen::createResizeRectElements() {
+// Creates all elements, needed to draw the reconfigure rectangle.
+void OpenGLScreen::createReconfigureRectElements() {
     // Buffers.
-    glGenBuffers(1, &m_resizeRectLinePosBuffer);
+    glGenBuffers(1, &m_reconfigureRectLinePosBuffer);
 
-    glGenBuffers(1, &m_resizeRectElementBuffer);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_resizeRectElementBuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(RESIZE_RECT_ELEMENT_ARRAY),
-                 (const GLvoid*)(RESIZE_RECT_ELEMENT_ARRAY), GL_STATIC_DRAW);
+    glGenBuffers(1, &m_reconfigureRectElementBuffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_reconfigureRectElementBuffer);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(RECONFIGURE_RECT_ELEMENT_ARRAY),
+                 (const GLvoid*)(RECONFIGURE_RECT_ELEMENT_ARRAY), GL_STATIC_DRAW);
 }
 
 
@@ -473,8 +473,8 @@ void OpenGLScreen::renderScreen() {
         ++it;
     }
 
-    if ((resizeRectangle().width != 0) && (resizeRectangle().height != 0)) {
-        renderResizeRect();
+    if ((reconfigureRectangle().width != 0) && (reconfigureRectangle().height != 0)) {
+        renderReconfigureRect();
     }
 
     glFlush();
@@ -492,21 +492,21 @@ void OpenGLScreen::renderBackground() {
            4, m_backgroundTexture, 1.0);
 }
 
-// Render the resize rectangle.
-void OpenGLScreen::renderResizeRect() {
+// Render the reconfigure rectangle.
+void OpenGLScreen::renderReconfigureRect() {
     GLfloat xLow, xHigh, yLow, yHigh;
     toOpenGLCoordinates(rootWindow().width(), rootWindow().height(),
-            resizeRectangle().x, resizeRectangle().y, resizeRectangle().width, resizeRectangle().height,
+            reconfigureRectangle().x, reconfigureRectangle().y, reconfigureRectangle().width, reconfigureRectangle().height,
             &xLow, &xHigh, &yLow, &yHigh);
     GLfloat linePosArray[] = { xLow, yLow, xHigh, yLow, xHigh, yHigh, xLow, yHigh };
 
-    glBindBuffer(GL_ARRAY_BUFFER, m_resizeRectLinePosBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, m_reconfigureRectLinePosBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(linePosArray), (const GLvoid*)(linePosArray), GL_STATIC_DRAW);
 
     glEnable(GL_COLOR_LOGIC_OP);
     glLogicOp(GL_XOR);
 
-    render(GL_LINE_STRIP, m_resizeRectLinePosBuffer, m_defaultTexPosBuffer, m_resizeRectElementBuffer,
+    render(GL_LINE_STRIP, m_reconfigureRectLinePosBuffer, m_defaultTexPosBuffer, m_reconfigureRectElementBuffer,
            5, m_blankTexture, 1.0);
 
     glDisable(GL_COLOR_LOGIC_OP);

@@ -20,6 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#include "Atoms.hh"
 #include "XRenderWindow.hh"
 
 using namespace FbCompositor;
@@ -82,7 +83,7 @@ void XRenderWindow::updateContents() {
 void XRenderWindow::updateProperty(Atom property, int state) {
     BaseCompWindow::updateProperty(property, state);
 
-    if (property == m_opacityAtom) {
+    if (property == Atoms::opacityAtom()) {
         updateMaskPicture();
     }
 }
