@@ -42,6 +42,9 @@ XRenderScreen::XRenderScreen(int screenNumber) :
 
 // Destructor.
 XRenderScreen::~XRenderScreen() {
+    if (m_backBufferGC) {
+        XFreeGC(display(), m_backBufferGC);
+    }
     if (m_backBufferPicture) {
         XRenderFreePicture(display(), m_backBufferPicture);
     }
@@ -107,6 +110,7 @@ void XRenderScreen::initRenderingSurface() throw(InitException) {
     m_backBufferPictFormat = XRenderFindStandardFormat(display(), PictStandardARGB32);     // Do not XFree.
     m_backBufferPixmap = XCreatePixmap(display(), rootWindow().window(), rootWindow().width(), rootWindow().height(), 32);
     m_backBufferPicture = XRenderCreatePicture(display(), m_backBufferPixmap, m_backBufferPictFormat, paMask, &pa);
+    m_backBufferGC = XCreateGC(display(), m_backBufferPixmap, 0, NULL);
 }
 
 // Initializes background picture.
@@ -130,6 +134,10 @@ void XRenderScreen::setRootPixmapChanged() {
 void XRenderScreen::setRootWindowSizeChanged() {
     m_rootChanged = true;
 
+    if (m_backBufferGC) {
+        XFreeGC(display(), m_backBufferGC);
+        m_backBufferGC = None;
+    }
     if (m_backBufferPicture) {
         XRenderFreePicture(display(), m_backBufferPicture);
         m_backBufferPicture = None;
@@ -152,6 +160,7 @@ void XRenderScreen::setRootWindowSizeChanged() {
 
     m_backBufferPixmap = XCreatePixmap(display(), rootWindow().window(), rootWindow().width(), rootWindow().height(), 32);
     m_backBufferPicture = XRenderCreatePicture(display(), m_backBufferPixmap, m_backBufferPictFormat, paMask, &pa);
+    m_backBufferGC = XCreateGC(display(), m_backBufferPixmap, 0, NULL);
 }
 
 
@@ -191,6 +200,10 @@ void XRenderScreen::renderScreen() {
         ++it;
     }
 
+    if ((reconfigureRectangle().width != 0) && (reconfigureRectangle().height != 0)) {
+        renderReconfigureRect();
+    }
+
     swapBuffers();
 }
 
@@ -203,6 +216,16 @@ void XRenderScreen::renderBackground() {
 
     XRenderComposite(display(), PictOpSrc, m_rootPicture, None, m_backBufferPicture,
                      0, 0, 0, 0, 0, 0, rootWindow().width(), rootWindow().height());
+}
+
+// Render the reconfigure rectangle.
+void XRenderScreen::renderReconfigureRect() {
+    XSetForeground(display(), m_backBufferGC, XWhitePixel(display(), screenNumber()));
+    XSetFunction(display(), m_backBufferGC, GXxor);
+    XSetLineAttributes(display(), m_backBufferGC, 1, LineSolid, CapNotLast, JoinMiter);
+
+    XRectangle rect = reconfigureRectangle();
+    XDrawRectangles(display(), m_backBufferPixmap, m_backBufferGC, &rect, 1);
 }
 
 // Render a particular window onto the screen.

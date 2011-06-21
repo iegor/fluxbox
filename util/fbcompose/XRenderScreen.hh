@@ -93,6 +93,9 @@ namespace FbCompositor {
         /** Render the desktop wallpaper. */
         void renderBackground();
 
+        /** Render the reconfigure rectangle. */
+        void renderReconfigureRect();
+
         /** Render a particular window onto the screen. */
         void renderWindow(XRenderWindow &window);
 
@@ -101,6 +104,9 @@ namespace FbCompositor {
 
 
         //--- MAIN RENDERING-RELATED VARIABLES ---------------------------------
+
+        /** The back buffer graphical context. */
+        GC m_backBufferGC;
 
         /** The picture format of the back buffer. */
         XRenderPictFormat *m_backBufferPictFormat;
