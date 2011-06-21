@@ -62,24 +62,36 @@ namespace {
         None
     };
 
+    /** The fallback framebuffer configuration. */
+    static const int FALLBACK_FBCONFIG_ATTRIBUTES[] = {
+        GLX_RENDER_TYPE, GLX_RGBA_BIT,
+        GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT | GLX_PIXMAP_BIT,
+        GLX_DOUBLEBUFFER, GL_FALSE,
+        GLX_RED_SIZE, 8,
+        GLX_GREEN_SIZE, 8,
+        GLX_BLUE_SIZE, 8,
+        GLX_ALPHA_SIZE, 8,
+        None
+    };
 
-    // Default element array for texture rendering.
+
+    /** Default element array for texture rendering. */
     static const GLushort DEFAULT_ELEMENT_ARRAY[] = {
         0, 1, 2, 3
     };
 
-    // Default primitive position array for texture rendering.
+    /** Default primitive position array for texture rendering. */
     static const GLfloat DEFAULT_PRIM_POS_ARRAY[] = {
         -1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0
     };
 
-    // Default texture position array for texture rendering.
+    /** Default texture position array for texture rendering. */
     static const GLfloat DEFAULT_TEX_POS_ARRAY[] = {
         0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0
     };
 
 
-    // Element array for drawing the reconfigure rectangle.
+    /** Element array for drawing the reconfigure rectangle. */
     static const GLushort RECONFIGURE_RECT_ELEMENT_ARRAY[] = {
         0, 1, 2, 3, 0
     };
@@ -183,11 +195,21 @@ void OpenGLScreen::earlyInitGLXPointers() throw(InitException) {
 // Initializes the rendering context.
 void OpenGLScreen::initRenderingContext() throw(InitException) {
     int nConfigs;
+
     GLXFBConfig *fbConfigs = glXChooseFBConfig(display(), screenNumber(), PREFERRED_FBCONFIG_ATTRIBUTES, &nConfigs);
+    m_haveDoubleBuffering = true;
+
     if (!fbConfigs) {
-        // TODO: Better failure handling (i.e. fallback configurations).
-        throw InitException("Screen does not support the required GLXFBConfig.");
+        fbConfigs = glXChooseFBConfig(display(), screenNumber(), FALLBACK_FBCONFIG_ATTRIBUTES, &nConfigs);
+        m_haveDoubleBuffering = false;
+
+        fbLog_warn << "Could not get a double-buffered FB config, trying single buffer." << std::endl;
+
+        if (!fbConfigs) {
+            throw InitException("Screen does not support the required GLXFBConfigs.");
+        }
     }
+
     m_fbConfig = fbConfigs[0];
     XFree(fbConfigs);
 
@@ -478,7 +500,9 @@ void OpenGLScreen::renderScreen() {
     }
 
     glFlush();
-    glXSwapBuffers(display(), m_glxRenderingWindow);
+    if (m_haveDoubleBuffering) {
+        glXSwapBuffers(display(), m_glxRenderingWindow);
+    }
 }
 
 
@@ -554,7 +578,9 @@ void OpenGLScreen::render(GLenum renderingMode, GLuint primPosBuffer, GLuint tex
     glUniform1i(texturePos, 0);
 
     // Render stuff.
-    glDrawBuffer(GL_BACK);
+    if (m_haveDoubleBuffering) {
+        glDrawBuffer(GL_BACK);
+    }
     glViewport(0, 0, rootWindow().width(), rootWindow().height());
 
     glDrawElements(renderingMode, elementCount, GL_UNSIGNED_SHORT, (void*)0);

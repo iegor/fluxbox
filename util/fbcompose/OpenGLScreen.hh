@@ -206,6 +206,12 @@ namespace FbCompositor {
         
         /** The shader program. */
         GLuint m_shaderProgram;
+
+
+        //--- OTHER VARIABLES --------------------------------------------------
+
+        /** Whether we have a double-buffered window. */
+        bool m_haveDoubleBuffering;
     };
 }
 
