@@ -31,6 +31,9 @@ namespace FbCompositor {
 
     //--- ENUMERATIONS ---------------------------------------------------------
 
+    /** Monitor heads mode enumeration. */
+    enum HeadMode { Heads_One, Heads_Xinerama };
+
     /** Rendering mode enumeration. */
     enum RenderingMode { RM_OpenGL, RM_XRender, RM_ServerAuto };
 

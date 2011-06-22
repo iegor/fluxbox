@@ -26,6 +26,7 @@
 
 #include "Atoms.hh"
 #include "BaseCompWindow.hh"
+#include "Constants.hh"
 
 #include <X11/Xlib.h>
 
@@ -63,7 +64,7 @@ namespace FbCompositor {
         //--- OTHER INITIALIZATION ---------------------------------------------
 
         /** Initializes heads on the current screen. */
-        void initHeads(bool haveXinerama) throw();
+        void initHeads(HeadMode headMode) throw();
 
         /** Initializes all of the windows on the screen. */
         void initWindows() throw();

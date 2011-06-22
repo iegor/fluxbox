@@ -176,17 +176,16 @@ void Compositor::initExtension(const char *extensionName, QueryExtensionFunction
 
 // Initializes Xinerama.
 void Compositor::initXinerama() throw() {
+    HeadMode headMode = Heads_One;
     try {
         initExtension("Xinerama", &XineramaQueryExtension, &XCompositeQueryVersion, 0, 0, &m_xineramaEventBase, &m_xineramaErrorBase);
-    } catch (const InitException &e) {
-        for (size_t i = 0; i < m_screens.size(); i++) {
-            m_screens[i]->initHeads(false);
+        if (XineramaIsActive(display())) {
+            headMode = Heads_Xinerama;
         }
-    }
+    } catch (const InitException &e) { }
 
-    bool haveXinerama = XineramaIsActive(display());
     for (size_t i = 0; i < m_screens.size(); i++) {
-        m_screens[i]->initHeads(haveXinerama);
+        m_screens[i]->initHeads(headMode);
     }
 }
 

@@ -69,12 +69,12 @@ BaseScreen::~BaseScreen() {
 //--- OTHER INITIALIZATION -----------------------------------------------------
 
 // Initializes heads on the current screen.
-void BaseScreen::initHeads(bool haveXinerama) throw() {
+void BaseScreen::initHeads(HeadMode headMode) throw() {
     m_heads.clear();
 
-    if (haveXinerama) {
+    if (headMode == Heads_Xinerama) {
         int nHeads;
-        XineramaScreenInfo *xHeads = XineramaQueryScreens(display(), &nHeads);
+        XineramaScreenInfo *xHeads = XineramaQueryScreens(display(), &nHeads);  // Are the screens in order?
 
         m_heads.reserve(nHeads);
         for (int i = 0; i < nHeads; i++) {
@@ -85,7 +85,7 @@ void BaseScreen::initHeads(bool haveXinerama) throw() {
         if (xHeads) {
             XFree(xHeads);
         }
-    } else {
+    } else {    // headMode == Heads_One
         XRectangle h = { 0, 0, rootWindow().width(), rootWindow().height() };
         m_heads.push_back(h);
     }
