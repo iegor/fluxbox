@@ -48,6 +48,10 @@ namespace FbCompositor {
 
     /**
      * Main class for the compositor.
+     *
+     * Note that if the serverauto rendering mode is selected, ServerAutoApp is
+     * used instead. This was done to take out the ad-hoc code out of this
+     * class, since this class is too complex for serverauto rendering.
      */
     class Compositor : public FbTk::App {
     public:

@@ -52,6 +52,9 @@ Compositor::Compositor(const CompositorConfig &config) throw(InitException) :
 
     XSynchronize(display(), True);
 
+    if (config.renderingMode() == RM_ServerAuto) {
+        throw InitException("Compositor class does not provide the serverauto renderer.");
+    }
     m_renderingMode = config.renderingMode();
 
     XSetErrorHandler(&handleXError);
@@ -67,9 +70,6 @@ Compositor::Compositor(const CompositorConfig &config) throw(InitException) :
         case RM_XRender :
             m_screens.push_back(new XRenderScreen(i));
             break;
-        case RM_ServerAuto :
-            XCompositeRedirectSubwindows(display(), XRootWindow(display(), i), CompositeRedirectAutomatic);
-            break;
         default :
             throw InitException("Unknown rendering mode selected.");
             break;
@@ -78,17 +78,15 @@ Compositor::Compositor(const CompositorConfig &config) throw(InitException) :
         getCMSelectionOwnership(i);
     }
 
-    if (m_renderingMode != RM_ServerAuto) {
-        initXinerama();
-        for (size_t i = 0; i < m_screens.size(); i++) {
-            m_screens[i]->initWindows();
-        }
-
-        FbTk::RefCount<FbTk::Command<void> > command(new RenderScreensCommand(this));
-        m_redrawTimer.setCommand(command);
-        m_redrawTimer.setTimeout(0, 1000000.0 / config.framesPerSecond());
-        m_redrawTimer.start();
+    initXinerama();
+    for (size_t i = 0; i < m_screens.size(); i++) {
+        m_screens[i]->initWindows();
     }
+
+    FbTk::RefCount<FbTk::Command<void> > command(new RenderScreensCommand(this));
+    m_redrawTimer.setCommand(command);
+    m_redrawTimer.setTimeout(0, 1000000.0 / config.framesPerSecond());
+    m_redrawTimer.start();
 
     XFlush(display());
 }
@@ -120,9 +118,7 @@ void Compositor::getCMSelectionOwnership(int screenNumber) throw(InitException) 
     XmbSetWMProperties(display(), curOwner, "fbcompose", "fbcompose", NULL, 0, NULL, NULL, NULL);
     XSetSelectionOwner(display(), cmAtom, curOwner, CurrentTime);
 
-    if (m_renderingMode != RM_ServerAuto) {
-        m_screens[screenNumber]->addWindowToIgnoreList(curOwner);
-    }
+    m_screens[screenNumber]->addWindowToIgnoreList(curOwner);
 }
 
 // Initializes X's extensions.
@@ -139,8 +135,6 @@ void Compositor::initAllExtensions() throw(InitException) {
         initExtension("XFixes", &XFixesQueryExtension, &XFixesQueryVersion, 2, 0, &m_fixesEventBase, &m_fixesErrorBase);
         initExtension("XRender", &XRenderQueryExtension, &XRenderQueryVersion, 0, 1, &m_renderEventBase, &m_renderErrorBase);
         initExtension("XShape", &XShapeQueryExtension, &XShapeQueryVersion, 1, 1, &m_shapeEventBase, &m_shapeErrorBase);
-    } else if (m_renderingMode == RM_ServerAuto) {
-        initExtension("XComposite", &XCompositeQueryExtension, &XCompositeQueryVersion, 0, 1, &m_compositeEventBase, &m_compositeErrorBase);
     }
 }
 
@@ -204,10 +198,6 @@ void Compositor::eventLoop() {
     XEvent event;
 
     while (!done()) {
-        if (m_renderingMode == RM_ServerAuto) {
-            continue;
-        }
-
         while (XPending(display())) {
             XNextEvent(display(), &event);
 

@@ -22,8 +22,10 @@
 
 
 #include "Compositor.hh"
+#include "Constants.hh"
 #include "Exceptions.hh"
 #include "Logging.hh"
+#include "ServerAutoApp.hh"
 
 #include "FbTk/FbString.hh"
 
@@ -49,8 +51,13 @@ int main(int argc, char **argv) {
         std::vector<FbTk::FbString> args(argv + 1, argv + argc);
         CompositorConfig config(args);
 
-        Compositor app(config);
-        app.eventLoop();
+        if (config.renderingMode() == RM_ServerAuto) {
+            ServerAutoApp app(config);
+            app.eventLoop();
+        } else {
+            Compositor app(config);
+            app.eventLoop();
+        }
     } catch (const ConfigException &e) {
         std::cerr << e.what() << std::endl;
         CompositorConfig::printShortHelp(std::cerr);
