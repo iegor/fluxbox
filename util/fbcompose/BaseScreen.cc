@@ -28,6 +28,7 @@
 
 #include <X11/extensions/shape.h>
 #include <X11/extensions/Xcomposite.h>
+#include <X11/extensions/Xinerama.h>
 
 #include <algorithm>
 #include <ostream>
@@ -67,8 +68,31 @@ BaseScreen::~BaseScreen() {
 
 //--- OTHER INITIALIZATION -----------------------------------------------------
 
+// Initializes heads on the current screen.
+void BaseScreen::initHeads(bool haveXinerama) throw() {
+    m_heads.clear();
+
+    if (haveXinerama) {
+        int nHeads;
+        XineramaScreenInfo *xHeads = XineramaQueryScreens(display(), &nHeads);
+
+        m_heads.reserve(nHeads);
+        for (int i = 0; i < nHeads; i++) {
+            XRectangle h = { xHeads[i].x_org, xHeads[i].y_org, xHeads[i].width, xHeads[i].height };
+            m_heads.push_back(h);
+        }
+
+        if (xHeads) {
+            XFree(xHeads);
+        }
+    } else {
+        XRectangle h = { 0, 0, rootWindow().width(), rootWindow().height() };
+        m_heads.push_back(h);
+    }
+}
+
 // Initializes all of the windows on the screen.
-void BaseScreen::initWindows() {
+void BaseScreen::initWindows() throw() {
     Window root;
     Window parent;
     Window *children = 0;

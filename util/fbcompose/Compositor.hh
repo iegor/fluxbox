@@ -116,6 +116,9 @@ namespace FbCompositor {
                            QueryVersionFunction versionFunc, const int minMajorVer, const int minMinorVer,
                            int *eventBase, int *errorBase) throw(InitException);
 
+        /** Initializes Xinerama. */
+        void initXinerama() throw();
+
 
         //--- INTERNAL FUNCTIONS -----------------------------------------------
 
@@ -175,6 +178,12 @@ namespace FbCompositor {
 
         /** Error base of the X Shape extension. */
         int m_shapeErrorBase;
+
+        /** Event base of the Xinerama extension. */
+        int m_xineramaEventBase;
+
+        /** Error base of the Xinerama extension. */
+        int m_xineramaErrorBase;
     };
 
 

@@ -33,6 +33,7 @@
 #include <X11/extensions/Xcomposite.h>
 #include <X11/extensions/Xdamage.h>
 #include <X11/extensions/Xfixes.h>
+#include <X11/extensions/Xinerama.h>
 #include <X11/extensions/Xrender.h>
 #include <X11/Xutil.h>
 
@@ -78,6 +79,7 @@ Compositor::Compositor(const CompositorConfig &config) throw(InitException) :
     }
 
     if (m_renderingMode != RM_ServerAuto) {
+        initXinerama();
         for (size_t i = 0; i < m_screens.size(); i++) {
             m_screens[i]->initWindows();
         }
@@ -150,22 +152,47 @@ void Compositor::initExtension(const char *extensionName, QueryExtensionFunction
     int minorVer;
 
     if (!(*extensionFunc)(display(), eventBase, errorBase)) {
+        *eventBase = -1;
+        *errorBase = -1;
+
         std::stringstream ss;
         ss << extensionName << " extension not found.";
         throw InitException(ss.str());
     }
 
     if (!(*versionFunc)(display(), &majorVer, &minorVer)) {
+        *eventBase = -1;
+        *errorBase = -1;
+
         std::stringstream ss;
         ss << "Could not query the version of " << extensionName << " extension.";
         throw InitException(ss.str());
     }
 
     if ((majorVer < minMajorVer) || ((majorVer == minMajorVer) && (minorVer < minMinorVer))) {
+        *eventBase = -1;
+        *errorBase = -1;
+
         std::stringstream ss;
         ss << "Unsupported " << extensionName << " extension version (required >=" << minMajorVer
            << "." << minMinorVer << ", got " << majorVer << "." << minorVer << ").";
         throw InitException(ss.str());
+    }
+}
+
+// Initializes Xinerama.
+void Compositor::initXinerama() throw() {
+    try {
+        initExtension("Xinerama", &XineramaQueryExtension, &XCompositeQueryVersion, 0, 0, &m_xineramaEventBase, &m_xineramaErrorBase);
+    } catch (const InitException &e) {
+        for (size_t i = 0; i < m_screens.size(); i++) {
+            m_screens[i]->initHeads(false);
+        }
+    }
+
+    bool haveXinerama = XineramaIsActive(display());
+    for (size_t i = 0; i < m_screens.size(); i++) {
+        m_screens[i]->initHeads(haveXinerama);
     }
 }
 

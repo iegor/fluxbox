@@ -31,6 +31,7 @@
 
 #include <iosfwd>
 #include <list>
+#include <vector>
 
 
 namespace FbCompositor {
@@ -61,8 +62,11 @@ namespace FbCompositor {
 
         //--- OTHER INITIALIZATION ---------------------------------------------
 
+        /** Initializes heads on the current screen. */
+        void initHeads(bool haveXinerama) throw();
+
         /** Initializes all of the windows on the screen. */
-        void initWindows();
+        void initWindows() throw();
 
 
         //--- ACCESSORS --------------------------------------------------------
@@ -75,6 +79,9 @@ namespace FbCompositor {
 
         /** \returns the current connection to the X server. */
         Display *display() throw();
+
+        /** \returns the vector with the output heads on this screen. */
+        const std::vector<XRectangle> &heads() const throw();
 
         /** \returns screen's root window. */
         BaseCompWindow &rootWindow() throw();
@@ -179,6 +186,9 @@ namespace FbCompositor {
         /** Current connection to the X server. */
         Display *m_display;
 
+        /** Heads of the current display. */
+        std::vector<XRectangle> m_heads;
+
         /** Windows that should be ignored. */
         std::vector<Window> m_ignoreList;
 
@@ -226,6 +236,11 @@ namespace FbCompositor {
     // Returns the current connection to the X server.
     inline Display *BaseScreen::display() throw() {
         return m_display;
+    }
+
+    // Returns the vector with the output heads on this screen.
+    inline const std::vector<XRectangle> &BaseScreen::heads() const throw() {
+        return m_heads;
     }
 
     // Returns the reconfigure rectangle.
