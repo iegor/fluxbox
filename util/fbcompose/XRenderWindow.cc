@@ -29,8 +29,9 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-XRenderWindow::XRenderWindow(Window windowXID) throw(InitException) :
-    BaseCompWindow(windowXID) {
+XRenderWindow::XRenderWindow(Window windowXID, const char *pictFilter) throw(InitException) :
+    BaseCompWindow(windowXID),
+    m_pictFilter(pictFilter) {
 
     m_maskPicture = None;
     m_maskPixmap = None;
@@ -75,6 +76,7 @@ void XRenderWindow::updateContents() {
     long paMask = CPSubwindowMode;
 
     m_picture = XRenderCreatePicture(display(), contentPixmap(), m_pictFormat, paMask, &pa);
+    XRenderSetPictureFilter(display(), m_picture, m_pictFilter, NULL, 0);
 
     clearDamage();
 }
@@ -114,6 +116,7 @@ void XRenderWindow::updateMaskPicture() throw() {
 
         m_maskPixmap = XCreatePixmap(display(), window(), realWidth(), realHeight(), 32);
         m_maskPicture = XRenderCreatePicture(display(), m_maskPixmap, XRenderFindStandardFormat(display(), PictStandardARGB32), 0, NULL);
+        XRenderSetPictureFilter(display(), m_maskPicture, m_pictFilter, NULL, 0);
     }
 
     XRenderColor color = { 0, 0, 0, 0 };

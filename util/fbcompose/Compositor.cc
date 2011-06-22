@@ -68,7 +68,7 @@ Compositor::Compositor(const CompositorConfig &config) throw(InitException) :
             m_screens.push_back(new OpenGLScreen(i));
             break;
         case RM_XRender :
-            m_screens.push_back(new XRenderScreen(i));
+            m_screens.push_back(new XRenderScreen(i, config.xRenderPictFilter()));
             break;
         default :
             throw InitException("Unknown rendering mode selected.");

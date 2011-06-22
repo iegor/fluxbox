@@ -44,7 +44,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        XRenderWindow(Window windowXID) throw(InitException);
+        XRenderWindow(Window windowXID, const char *pictFilter) throw(InitException);
 
         /** Destructor. */
         ~XRenderWindow() throw();
@@ -96,6 +96,10 @@ namespace FbCompositor {
 
         /** The window's picture. */
         Picture m_picture;
+
+
+        /** The picture filter. */
+        const char *m_pictFilter;
     };
 
 

@@ -69,6 +69,9 @@ namespace FbCompositor {
         /** \returns the selected rendering mode. */
         RenderingMode renderingMode() const throw();
 
+        /** \returns the XRender picture filter. */
+        const char *xRenderPictFilter() const throw();
+
 
         //--- CONVENIENCE FUNCTIONS --------------------------------------------
 
@@ -109,6 +112,10 @@ namespace FbCompositor {
 
         /** Selected rendering mode. */
         RenderingMode m_renderingMode;
+
+
+        /** XRender picture filter. */
+        const char *m_xRenderPictFilter;
     };
 
 
@@ -129,6 +136,10 @@ namespace FbCompositor {
         return m_renderingMode;
     }
 
+    // Returns the XRender picture filter.
+    inline const char *CompositorConfig::xRenderPictFilter() const throw() {
+        return m_xRenderPictFilter;
+    }
 }
 
 #endif  // FBCOMPOSITOR_COMPOSITORCONFIG_HH

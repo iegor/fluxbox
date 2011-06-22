@@ -24,6 +24,8 @@
 #include "CompositorConfig.hh"
 #include "Logging.hh"
 
+#include <X11/extensions/Xrender.h>
+
 #include <algorithm>
 #include <iostream>
 #include <sstream>
@@ -39,7 +41,8 @@ CompositorConfig::CompositorConfig(std::vector<FbTk::FbString> args) throw(Confi
     m_args(args),
     m_displayName(""),
     m_framesPerSecond(60),
-    m_renderingMode(RM_XRender) {
+    m_renderingMode(RM_OpenGL),
+    m_xRenderPictFilter(FilterFast) {
 
     preScanArguments();
     processArguments();

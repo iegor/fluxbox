@@ -44,7 +44,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        XRenderScreen(int screenNumber);
+        XRenderScreen(int screenNumber, const char *pictFilter);
 
         /** Destructor. */
         ~XRenderScreen();
@@ -134,9 +134,12 @@ namespace FbCompositor {
         /** The picture of the root window. */
         Picture m_rootPicture;
 
-
         /** Whether the root window has changed since the last update. */
         bool m_rootChanged;
+
+
+        /** The picture filter to use. */
+        const char *m_pictFilter;
     };
 
 }

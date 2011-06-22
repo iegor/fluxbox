@@ -33,8 +33,9 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-XRenderScreen::XRenderScreen(int screenNumber) :
-    BaseScreen(screenNumber) {
+XRenderScreen::XRenderScreen(int screenNumber, const char *pictFilter) :
+    BaseScreen(screenNumber),
+    m_pictFilter(pictFilter) {
 
     initRenderingSurface();
     initBackgroundPicture();
@@ -111,6 +112,10 @@ void XRenderScreen::initRenderingSurface() throw(InitException) {
     m_backBufferPixmap = XCreatePixmap(display(), rootWindow().window(), rootWindow().width(), rootWindow().height(), 32);
     m_backBufferPicture = XRenderCreatePicture(display(), m_backBufferPixmap, m_backBufferPictFormat, paMask, &pa);
     m_backBufferGC = XCreateGC(display(), m_backBufferPixmap, 0, NULL);
+
+    // Set picture filters.
+    XRenderSetPictureFilter(display(), m_renderingPicture, m_pictFilter, NULL, 0);
+    XRenderSetPictureFilter(display(), m_backBufferPicture, m_pictFilter, NULL, 0);
 }
 
 // Initializes background picture.
@@ -161,6 +166,9 @@ void XRenderScreen::setRootWindowSizeChanged() {
     m_backBufferPixmap = XCreatePixmap(display(), rootWindow().window(), rootWindow().width(), rootWindow().height(), 32);
     m_backBufferPicture = XRenderCreatePicture(display(), m_backBufferPixmap, m_backBufferPictFormat, paMask, &pa);
     m_backBufferGC = XCreateGC(display(), m_backBufferPixmap, 0, NULL);
+
+    XRenderSetPictureFilter(display(), m_renderingPicture, m_pictFilter, NULL, 0);
+    XRenderSetPictureFilter(display(), m_backBufferPicture, m_pictFilter, NULL, 0);
 }
 
 
@@ -249,6 +257,6 @@ void XRenderScreen::swapBuffers() {
 
 // Creates a window object from its XID.
 BaseCompWindow *XRenderScreen::createWindowObject(Window window) {
-    XRenderWindow *newWindow = new XRenderWindow(window);
+    XRenderWindow *newWindow = new XRenderWindow(window, m_pictFilter);
     return newWindow;
 }
