@@ -186,11 +186,48 @@ AC_COMPILE_IFELSE([
 ])
 
 dnl Dependencies for fbcompose
-dnl TODO: Replace with something more permanent and optional
-AC_CHECK_LIB([GLEW],[glewInit])
-AC_CHECK_LIB([GL],[glXQueryExtension])
-AC_CHECK_LIB([Xcomposite],[XCompositeQueryExtension])
-AC_CHECK_LIB([Xdamage],[XDamageQueryExtnsion])
+AC_CHECK_LIB([Xcomposite],[XCompositeRedirectSubwindows])
+
+enableval="yes"
+AC_MSG_CHECKING([whether to have XRender compositing support])
+AC_ARG_ENABLE(xrender-compositing,
+              AC_HELP_STRING([--enable-xrender-compositing],
+                             [XRender compositing support [default=yes]]), ,
+              [enableval=yes])
+if test "x$enableval" = "xyes"; then
+    AC_MSG_RESULT([yes])
+    libsfound="x"
+    AC_CHECK_LIB([Xdamage],[XDamageCreate],libsfound="x$libsfound")
+    AC_CHECK_LIB([Xrender],[XRenderCreatePicture],libsfound="x$libsfound")
+    AC_CHECK_LIB([Xext],[XShapeCombineShape],libsfound="x$libsfound")
+    if test "$libsfound" = "xxxx"; then
+        AC_DEFINE(USE_XRENDER_COMPOSITING,[1],[Define to 1 if you want XRender compositing.])
+        LIBS="$LIBS -lXext -lXdamage -lXrender"
+    fi
+else
+    AC_MSG_RESULT([no])
+fi
+
+enableval="yes"
+AC_MSG_CHECKING([whether to have OpenGL compositing support])
+AC_ARG_ENABLE(opengl-compositing,
+              AC_HELP_STRING([--enable-opengl-compositing],
+                             [OpenGL compositing support [default=yes]]), ,
+              [enableval=yes])
+if test "x$enableval" = "xyes"; then
+    AC_MSG_RESULT([yes])
+    libsfound="x"
+    AC_CHECK_LIB([GLEW],[glewInit],libsfound="x$libsfound")
+    AC_CHECK_LIB([GL],[glXMakeCurrent],libsfound="x$libsfound")
+    AC_CHECK_LIB([Xdamage],[XDamageCreate],libsfound="x$libsfound")
+    AC_CHECK_LIB([Xext],[XShapeCombineShape],libsfound="x$libsfound")
+    if test "$libsfound" = "xxxx"; then
+        AC_DEFINE(USE_OPENGL_COMPOSITE,[1],[Define to 1 if you want OpenGL compositing.])
+        LIBS="$LIBS -lXext -lXdamage -lGL -lGLEW"
+    fi
+else
+    AC_MSG_RESULT([no])
+fi
 
 AM_ICONV
 AS_IF([test x$am_cv_proto_iconv_arg1 = "xconst"], [
