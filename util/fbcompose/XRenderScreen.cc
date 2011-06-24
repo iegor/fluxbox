@@ -22,6 +22,9 @@
 
 #include "XRenderScreen.hh"
 
+#ifdef USE_XRENDER_COMPOSITING
+
+
 #include <X11/extensions/shape.h>
 #include <X11/extensions/Xcomposite.h>
 #include <X11/extensions/Xfixes.h>
@@ -260,3 +263,5 @@ BaseCompWindow *XRenderScreen::createWindowObject(Window window) {
     XRenderWindow *newWindow = new XRenderWindow(window, m_pictFilter);
     return newWindow;
 }
+
+#endif // USE_XRENDER_COMPOSITING

@@ -20,10 +20,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#include "OpenGLWindow.hh"
+
+#ifdef USE_OPENGL_COMPOSITING
+
 
 #include "Compositor.hh"
 #include "Logging.hh"
-#include "OpenGLWindow.hh"
 #include "Utility.hh"
 
 #include <X11/Xutil.h>
@@ -211,3 +214,5 @@ void OpenGLWindow::updateWindowPosArray() throw() {
     glBindBuffer(GL_ARRAY_BUFFER, m_windowPosBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(m_windowPosArray), (const GLvoid*)(m_windowPosArray), GL_STATIC_DRAW);
 }
+
+#endif  // USE_OPENGL_COMPOSITING

@@ -23,6 +23,11 @@
 #ifndef FBCOMPOSITOR_XRENDERWINDOW_HH
 #define FBCOMPOSITOR_XRENDERWINDOW_HH
 
+#include "config.h"
+
+#ifdef USE_XRENDER_COMPOSITING
+
+
 #include "BaseCompWindow.hh"
 #include "Exceptions.hh"
 
@@ -115,5 +120,7 @@ namespace FbCompositor {
         return m_maskPicture;
     }
 }
+
+#endif  // USE_XRENDER_COMPOSITING
 
 #endif  // FBCOMPOSITOR_XRENDERWINDOW_HH

@@ -24,6 +24,8 @@
 #ifndef FBCOMPOSITOR_COMPOSITOR_HH
 #define FBCOMPOSITOR_COMPOSITOR_HH
 
+#include "config.h"
+
 #include "BaseScreen.hh"
 #include "CompositorConfig.hh"
 #include "Constants.hh"
@@ -120,8 +122,8 @@ namespace FbCompositor {
                            QueryVersionFunction versionFunc, const int minMajorVer, const int minMinorVer,
                            int *eventBase, int *errorBase) throw(InitException);
 
-        /** Initializes Xinerama. */
-        void initXinerama() throw();
+        /** Initializes monitor heads on every screen. */
+        void initHeads() throw();
 
 
         //--- INTERNAL FUNCTIONS -----------------------------------------------

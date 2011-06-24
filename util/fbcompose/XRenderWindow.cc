@@ -20,8 +20,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include "Atoms.hh"
 #include "XRenderWindow.hh"
+
+#ifdef USE_XRENDER_COMPOSITING
+
+
+#include "Atoms.hh"
 
 using namespace FbCompositor;
 
@@ -125,3 +129,5 @@ void XRenderWindow::updateMaskPicture() throw() {
     color.alpha = (unsigned int)((alpha() * 0xffff) / 255.0);
     XRenderFillRectangles(display(), PictOpSrc, m_maskPicture, &color, clipShapeRects(), clipShapeRectCount());
 }
+
+#endif  // USE_XRENDER_COMPOSITING

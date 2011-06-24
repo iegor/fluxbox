@@ -20,9 +20,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#include "OpenGLScreen.hh"
+
+#ifdef USE_OPENGL_COMPOSITING
+
 
 #include "Logging.hh"
-#include "OpenGLScreen.hh"
 #include "OpenGLShaders.hh"
 #include "OpenGLWindow.hh"
 #include "Utility.hh"
@@ -589,3 +592,5 @@ void OpenGLScreen::render(GLenum renderingMode, GLuint primPosBuffer, GLuint tex
     glDisableVertexAttribArray(windowPosAttrib);
     glDisableVertexAttribArray(texPosAttrib);
 }
+
+#endif  // USE_OPENGL_COMPOSITING

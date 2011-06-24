@@ -22,6 +22,9 @@
 
 #include "OpenGLShaders.hh"
 
+#ifdef USE_OPENGL_COMPOSITING
+
+
 #include <cstring>
 
 using namespace FbCompositor;
@@ -86,3 +89,5 @@ int OpenGLShaders::vertexShaderSourceLength() throw() {
     static GLint sourceLength = (GLint)strlen(VERTEX_SHADER_SOURCE);
     return sourceLength;
 }
+
+#endif  // USE_OPENGL_COMPOSITING

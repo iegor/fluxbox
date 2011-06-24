@@ -24,9 +24,12 @@
 #ifndef FBCOMPOSITOR_SCREEN_HH
 #define FBCOMPOSITOR_SCREEN_HH
 
+#include "config.h"
+
 #include "Atoms.hh"
 #include "BaseCompWindow.hh"
 #include "Constants.hh"
+#include "Exceptions.hh"
 
 #include <X11/Xlib.h>
 
@@ -39,6 +42,8 @@ namespace FbCompositor {
 
     class BaseCompWindow;
     class BaseScreen;
+    class InitException;
+
 
     /** << output stream operator for the BaseScreen class. */
     std::ostream &operator<<(std::ostream& out, const BaseScreen& s);
@@ -64,7 +69,7 @@ namespace FbCompositor {
         //--- OTHER INITIALIZATION ---------------------------------------------
 
         /** Initializes heads on the current screen. */
-        void initHeads(HeadMode headMode) throw();
+        void initHeads(HeadMode headMode) throw(InitException);
 
         /** Initializes all of the windows on the screen. */
         void initWindows() throw();

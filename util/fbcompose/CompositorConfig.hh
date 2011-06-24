@@ -24,6 +24,8 @@
 #ifndef FBCOMPOSITOR_COMPOSITORCONFIG_HH
 #define FBCOMPOSITOR_COMPOSITORCONFIG_HH
 
+#include "config.h"
+
 #include "Constants.hh"
 #include "Exceptions.hh"
 
@@ -69,8 +71,10 @@ namespace FbCompositor {
         /** \returns the selected rendering mode. */
         RenderingMode renderingMode() const throw();
 
+#ifdef USE_XRENDER_COMPOSITING
         /** \returns the XRender picture filter. */
         const char *xRenderPictFilter() const throw();
+#endif  // USE_XRENDER_COMPOSITING
 
 
         //--- CONVENIENCE FUNCTIONS --------------------------------------------
@@ -104,18 +108,21 @@ namespace FbCompositor {
         std::vector<FbTk::FbString> m_args;
 
 
+        /** Selected rendering mode. */
+        RenderingMode m_renderingMode;
+
+#ifdef USE_XRENDER_COMPOSITING
+        /** XRender picture filter. */
+        const char *m_xRenderPictFilter;
+#endif  // USE_XRENDER_COMPOSITING
+
+
         /** The name of the display we want to use. */
         FbTk::FbString m_displayName;
 
         /** The refresh rate. */
         int m_framesPerSecond;
 
-        /** Selected rendering mode. */
-        RenderingMode m_renderingMode;
-
-
-        /** XRender picture filter. */
-        const char *m_xRenderPictFilter;
     };
 
 
@@ -136,10 +143,13 @@ namespace FbCompositor {
         return m_renderingMode;
     }
 
+
+#ifdef USE_XRENDER_COMPOSITING
     // Returns the XRender picture filter.
     inline const char *CompositorConfig::xRenderPictFilter() const throw() {
         return m_xRenderPictFilter;
     }
+#endif  // USE_XRENDER_COMPOSITING
 }
 
 #endif  // FBCOMPOSITOR_COMPOSITORCONFIG_HH

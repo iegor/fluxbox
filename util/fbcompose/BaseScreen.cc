@@ -22,13 +22,17 @@
 
 
 #include "BaseScreen.hh"
+
 #include "Logging.hh"
 
 #include "FbTk/App.hh"
 
 #include <X11/extensions/shape.h>
 #include <X11/extensions/Xcomposite.h>
+
+#ifdef XINERAMA
 #include <X11/extensions/Xinerama.h>
+#endif  // XINERAMA
 
 #include <algorithm>
 #include <ostream>
@@ -69,9 +73,10 @@ BaseScreen::~BaseScreen() {
 //--- OTHER INITIALIZATION -----------------------------------------------------
 
 // Initializes heads on the current screen.
-void BaseScreen::initHeads(HeadMode headMode) throw() {
+void BaseScreen::initHeads(HeadMode headMode) throw(InitException) {
     m_heads.clear();
 
+#ifdef XINERAMA
     if (headMode == Heads_Xinerama) {
         int nHeads;
         XineramaScreenInfo *xHeads = XineramaQueryScreens(display(), &nHeads);  // Are the screens in order?
@@ -85,9 +90,14 @@ void BaseScreen::initHeads(HeadMode headMode) throw() {
         if (xHeads) {
             XFree(xHeads);
         }
-    } else {    // headMode == Heads_One
+    } else
+#endif  // XINERAMA
+
+    if (headMode == Heads_One) {
         XRectangle h = { 0, 0, rootWindow().width(), rootWindow().height() };
         m_heads.push_back(h);
+    } else {
+        throw InitException("Unknown screen head mode given.");
     }
 }
 

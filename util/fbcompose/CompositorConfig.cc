@@ -24,7 +24,9 @@
 #include "CompositorConfig.hh"
 #include "Logging.hh"
 
+#ifdef USE_XRENDER_COMPOSITING
 #include <X11/extensions/Xrender.h>
+#endif  // USE_XRENDER_COMPOSITING
 
 #include <algorithm>
 #include <iostream>
@@ -39,10 +41,23 @@ using namespace FbCompositor;
 // Constructor.
 CompositorConfig::CompositorConfig(std::vector<FbTk::FbString> args) throw(ConfigException) :
     m_args(args),
-    m_displayName(""),
-    m_framesPerSecond(60),
+
+#ifdef USE_OPENGL_COMPOSITING
     m_renderingMode(RM_OpenGL),
-    m_xRenderPictFilter(FilterFast) {
+#else
+#ifdef USE_XRENDER_COMPOSITING
+    m_renderingMode(RM_XRender),
+#else
+    m_renderingMode(RM_ServerAuto),
+#endif
+#endif
+
+#ifdef USE_XRENDER_COMPOSITING
+    m_xRenderPictFilter(FilterFast),
+#endif
+
+    m_displayName(""),
+    m_framesPerSecond(60) {
 
     preScanArguments();
     processArguments();
@@ -81,11 +96,19 @@ void CompositorConfig::processArguments() throw(ConfigException) {
         } else if ((*it == "-m") || (*it == "--mode")) {
             FbTk::FbString mode = getNextOption(it, "No rendering mode specified.");
 
+#ifdef USE_OPENGL_COMPOSITING
             if (mode == "opengl") {
                 m_renderingMode = RM_OpenGL;
-            } else if (mode == "xrender") {
+            } else
+#endif  // USE_OPENGL_COMPOSITING
+                
+#ifdef USE_XRENDER_COMPOSITING
+            if (mode == "xrender") {
                 m_renderingMode = RM_XRender;
-            } else if (mode == "serverauto") {
+            } else
+#endif  // USE_XRENDER_COMPOSITING
+
+            if (mode == "serverauto") {
                 m_renderingMode = RM_ServerAuto;
             } else {
                 ss.str("");
@@ -129,13 +152,22 @@ FbTk::FbString CompositorConfig::getNextOption(std::vector<FbTk::FbString>::iter
 
 // Output full help message.
 void CompositorConfig::printFullHelp(std::ostream &os) throw() {
+    static const char modes[] = 
+#ifdef USE_OPENGL_COMPOSITING
+        "opengl, "
+#endif  // USE_OPENGL_COMPOSITING
+#ifdef USE_XRENDER_COMPOSITING
+        "xrender, "
+#endif  // USE_XRENDER_COMPOSITING
+        "serverauto";
+
     os << "Usage: fbcompose [OPTION]..." << std::endl
        << "Options and arguments:" << std::endl
        << "  -d DISPLAY, --display DISPLAY" << std::endl
        << "                         Use the specified display connection." << std::endl
        << "  -h, --help             Print this text and exit." << std::endl
        << "  -m MODE, --mode MODE   Select the rendering mode." << std::endl
-       << "                         MODE can be \"opengl\", \"xrender\" or \"serverauto\"." << std::endl
+       << "                         MODE can be " << modes << "." << std::endl
        << "  -q, --quiet            Do not print anything." << std::endl
        << "  -r RATE, --refresh-rate RATE" << std::endl
        << "                         Specify the compositor's refresh rate in Hz" << std::endl

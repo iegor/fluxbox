@@ -24,6 +24,11 @@
 #ifndef FBCOMPOSITOR_XRENDERAUTOWINDOW_HH
 #define FBCOMPOSITOR_XRENDERAUTOWINDOW_HH
 
+#include "config.h"
+
+#ifdef USE_OPENGL_COMPOSITING
+
+
 #include "BaseCompWindow.hh"
 #include "Exceptions.hh"
 
@@ -140,5 +145,7 @@ namespace FbCompositor {
         return m_windowPosBuffer;
     }
 }
+
+#endif  // USE_OPENGL_COMPOSITING
 
 #endif  // FBCOMPOSITOR_XRENDERAUTOWINDOW_HH

@@ -23,6 +23,11 @@
 #ifndef FBCOMPOSITOR_OPENGLSHADERS_HH
 #define FBCOMPOSITOR_OPENGLSHADERS_HH
 
+#include "config.h"
+
+#ifdef USE_OPENGL_COMPOSITING
+
+
 #include <GL/gl.h>
 
 
@@ -50,5 +55,6 @@ namespace FbCompositor {
 
 }
 
+#endif  // USE_OPENGL_COMPOSITING
 
 #endif  // FBCOMPOSITOR_OPENGLSHADERS_HH

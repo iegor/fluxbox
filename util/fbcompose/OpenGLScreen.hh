@@ -24,6 +24,11 @@
 #ifndef FBCOMPOSITOR_XRENDERAUTOSCREEN_HH
 #define FBCOMPOSITOR_XRENDERAUTOSCREEN_HH
 
+#include "config.h"
+
+#ifdef USE_OPENGL_COMPOSITING
+
+
 #include "BaseScreen.hh"
 #include "BaseCompWindow.hh"
 #include "Exceptions.hh"
@@ -215,5 +220,6 @@ namespace FbCompositor {
     };
 }
 
+#endif  // USE_OPENGL_COMPOSITING
 
 #endif  // FBCOMPOSITOR_XRENDERAUTOSCREEN_HH

@@ -28,14 +28,23 @@
 
 #include "FbTk/RefCount.hh"
 
-#include <GL/glx.h>
 #include <X11/extensions/shape.h>
 #include <X11/extensions/Xcomposite.h>
 #include <X11/extensions/Xdamage.h>
 #include <X11/extensions/Xfixes.h>
-#include <X11/extensions/Xinerama.h>
-#include <X11/extensions/Xrender.h>
 #include <X11/Xutil.h>
+
+#ifdef USE_OPENGL_COMPOSITING
+#include <GL/glx.h>
+#endif  // USE_OPENGL_COMPOSITING
+
+#ifdef USE_XRENDER_COMPOSITING
+#include <X11/extensions/Xrender.h>
+#endif  // USE_XRENDER_COMPOSITING
+
+#ifdef XINERAMA
+#include <X11/extensions/Xinerama.h>
+#endif  // XINERAMA
 
 #include <iostream>
 #include <sstream>
@@ -64,12 +73,19 @@ Compositor::Compositor(const CompositorConfig &config) throw(InitException) :
     m_screens.reserve(screenCount);
     for (int i = 0; i < screenCount; i++) {
         switch (m_renderingMode) {
+
+#ifdef USE_OPENGL_COMPOSITING
         case RM_OpenGL :
             m_screens.push_back(new OpenGLScreen(i));
             break;
+#endif  // USE_OPENGL_COMPOSITING
+
+#ifdef USE_XRENDER_COMPOSITING
         case RM_XRender :
             m_screens.push_back(new XRenderScreen(i, config.xRenderPictFilter()));
             break;
+#endif  // USE_XRENDER_COMPOSITING
+
         default :
             throw InitException("Unknown rendering mode selected.");
             break;
@@ -78,7 +94,7 @@ Compositor::Compositor(const CompositorConfig &config) throw(InitException) :
         getCMSelectionOwnership(i);
     }
 
-    initXinerama();
+    initHeads();
     for (size_t i = 0; i < m_screens.size(); i++) {
         m_screens[i]->initWindows();
     }
@@ -123,19 +139,27 @@ void Compositor::getCMSelectionOwnership(int screenNumber) throw(InitException) 
 
 // Initializes X's extensions.
 void Compositor::initAllExtensions() throw(InitException) {
+#ifdef USE_OPENGL_COMPOSITING
     if (m_renderingMode == RM_OpenGL) {
         initExtension("GLX", &glXQueryExtension, &glXQueryVersion, 1, 4, &m_glxEventBase, &m_glxErrorBase);
         initExtension("XComposite", &XCompositeQueryExtension, &XCompositeQueryVersion, 0, 4, &m_compositeEventBase, &m_compositeErrorBase);
         initExtension("XDamage", &XDamageQueryExtension, &XDamageQueryVersion, 1, 0, &m_damageEventBase, &m_damageErrorBase);
         initExtension("XFixes", &XFixesQueryExtension, &XFixesQueryVersion, 2, 0, &m_fixesEventBase, &m_fixesErrorBase);
         initExtension("XShape", &XShapeQueryExtension, &XShapeQueryVersion, 1, 1, &m_shapeEventBase, &m_shapeErrorBase);
-    } else if (m_renderingMode == RM_XRender) {
+    } else
+#endif  // USE_OPENGL_COMPOSITING
+
+#ifdef USE_XRENDER_COMPOSITING
+    if (m_renderingMode == RM_XRender) {
         initExtension("XComposite", &XCompositeQueryExtension, &XCompositeQueryVersion, 0, 4, &m_compositeEventBase, &m_compositeErrorBase);
         initExtension("XDamage", &XDamageQueryExtension, &XDamageQueryVersion, 1, 0, &m_damageEventBase, &m_damageErrorBase);
         initExtension("XFixes", &XFixesQueryExtension, &XFixesQueryVersion, 2, 0, &m_fixesEventBase, &m_fixesErrorBase);
         initExtension("XRender", &XRenderQueryExtension, &XRenderQueryVersion, 0, 1, &m_renderEventBase, &m_renderErrorBase);
         initExtension("XShape", &XShapeQueryExtension, &XShapeQueryVersion, 1, 1, &m_shapeEventBase, &m_shapeErrorBase);
-    }
+    } else
+#endif  // USE_XRENDER_COMPOSITING
+
+    { }
 }
 
 // Initializes a particular X server extension.
@@ -174,15 +198,22 @@ void Compositor::initExtension(const char *extensionName, QueryExtensionFunction
     }
 }
 
-// Initializes Xinerama.
-void Compositor::initXinerama() throw() {
+// Initializes monitor heads on every screen.
+void Compositor::initHeads() throw() {
     HeadMode headMode = Heads_One;
+
+#ifdef XINERAMA
     try {
         initExtension("Xinerama", &XineramaQueryExtension, &XCompositeQueryVersion, 0, 0, &m_xineramaEventBase, &m_xineramaErrorBase);
         if (XineramaIsActive(display())) {
             headMode = Heads_Xinerama;
         }
     } catch (const InitException &e) { }
+
+    if (headMode != Heads_Xinerama) {
+        fbLog_warn << "Could not initialize Xinerama." << std::endl;
+    }
+#endif  // XINERAMA
 
     for (size_t i = 0; i < m_screens.size(); i++) {
         m_screens[i]->initHeads(headMode);

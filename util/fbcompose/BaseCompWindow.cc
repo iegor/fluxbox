@@ -55,11 +55,14 @@ BaseCompWindow::BaseCompWindow(Window windowXID) throw(InitException) :
     m_clipShapeRectCount = 0;
     m_clipShapeRectOrder = Unsorted;
 
+#ifdef HAVE_XDAMAGE
     if (m_class == InputOutput) {
         m_damage = XDamageCreate(display(), window(), XDamageReportNonEmpty);
     } else {
         m_damage = 0;
     }
+#endif  // HAVE_XDAMAGE
+
     m_contentPixmap = None;
 }
 
@@ -158,8 +161,10 @@ void BaseCompWindow::clearDamage() throw() {
 
 // Updates the window's content pixmap.
 void BaseCompWindow::updateContentPixmap() throw() {
+#ifdef HAVE_XDAMAGE
     // We must reset the damage here, otherwise we may miss damage events.
     XDamageSubtract(display(), m_damage, None, None);
+#endif  // HAVE_XDAMAGE
 
     if (m_contentPixmap) {
         XFreePixmap(display(), m_contentPixmap);

@@ -196,13 +196,18 @@ AC_ARG_ENABLE(xrender-compositing,
               [enableval=yes])
 if test "x$enableval" = "xyes"; then
     AC_MSG_RESULT([yes])
-    libsfound="x"
-    AC_CHECK_LIB([Xdamage],[XDamageCreate],libsfound="x$libsfound")
-    AC_CHECK_LIB([Xrender],[XRenderCreatePicture],libsfound="x$libsfound")
-    AC_CHECK_LIB([Xext],[XShapeCombineShape],libsfound="x$libsfound")
-    if test "$libsfound" = "xxxx"; then
+    libfound="yes"
+    AC_CHECK_LIB([Xdamage],[XDamageCreate],
+                 AC_DEFINE(HAVE_XDAMAGE,[1],[Define to 1 if you have XDamage.]),libfound="no")
+    AC_CHECK_LIB([Xrender],[XRenderCreatePicture],
+                 AC_DEFINE(HAVE_XRENDER,[1],[Define to 1 if you have XRender.]),libfound="no")
+    AC_CHECK_LIB([Xext],[XShapeCombineShape],
+                 AC_DEFINE(SHAPE,[1],[Define to 1 if you have SHAPE.]),libfound="no")
+    if test "$libfound" = "yes"; then
         AC_DEFINE(USE_XRENDER_COMPOSITING,[1],[Define to 1 if you want XRender compositing.])
         LIBS="$LIBS -lXext -lXdamage -lXrender"
+    else
+        AC_MSG_ERROR([Could not find the required software packages.])
     fi
 else
     AC_MSG_RESULT([no])
@@ -216,14 +221,20 @@ AC_ARG_ENABLE(opengl-compositing,
               [enableval=yes])
 if test "x$enableval" = "xyes"; then
     AC_MSG_RESULT([yes])
-    libsfound="x"
-    AC_CHECK_LIB([GLEW],[glewInit],libsfound="x$libsfound")
-    AC_CHECK_LIB([GL],[glXMakeCurrent],libsfound="x$libsfound")
-    AC_CHECK_LIB([Xdamage],[XDamageCreate],libsfound="x$libsfound")
-    AC_CHECK_LIB([Xext],[XShapeCombineShape],libsfound="x$libsfound")
-    if test "$libsfound" = "xxxx"; then
+    libfound="yes"
+    AC_CHECK_LIB([GL],[glXMakeCurrent],
+                 AC_DEFINE(HAVE_GL,[1],[Define to 1 if you have GL.]),libfound="no")
+    AC_CHECK_LIB([GLEW],[glewInit],
+                 AC_DEFINE(HAVE_GLEW,[1],[Define to 1 if you have GLEW.]),libfound="no")
+    AC_CHECK_LIB([Xdamage],[XDamageCreate],
+                 AC_DEFINE(HAVE_XDAMAGE,[1],[Define to 1 if you have XDamage.]),libfound="no")
+    AC_CHECK_LIB([Xrender],[XRenderCreatePicture],
+                 AC_DEFINE(HAVE_XRENDER,[1],[Define to 1 if you have XRender.]),libfound="no")
+    if test "$libfound" = "yes"; then
         AC_DEFINE(USE_OPENGL_COMPOSITE,[1],[Define to 1 if you want OpenGL compositing.])
         LIBS="$LIBS -lXext -lXdamage -lGL -lGLEW"
+    else
+        AC_MSG_ERROR([Could not find the required software packages.])
     fi
 else
     AC_MSG_RESULT([no])
