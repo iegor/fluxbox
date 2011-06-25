@@ -25,9 +25,13 @@
 
 #include "config.h"
 
+#include "BasePlugin.hh"
 #include "Constants.hh"
 #include "Exceptions.hh"
 
+#include "FbTk/FbString.hh"
+
+#include <map>
 #include <vector>
 
 
@@ -35,11 +39,20 @@ namespace FbCompositor {
 
     class InitException;
 
+
+    //--- TYPEDEFS -------------------------------------------------------------
+
+    /** A pointer to a function that creates a plugin class instance. */
+    typedef BasePlugin* (*CreatePluginFunction)(const std::vector<FbTk::FbString>&);
+
+
     /**
      * Responsible for plugin loading, unloading and availibility.
      */
     class PluginManager {
-    public:
+        struct PluginData;
+
+    public :
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
@@ -47,8 +60,47 @@ namespace FbCompositor {
 
         /** Destructor. */
         ~PluginManager();
-    }
+
+
+        //--- PLUGIN MANIPULATION ----------------------------------------------
+
+        /** Load a plugin. */
+        void loadPlugin(FbTk::FbString name, std::vector<FbTk::FbString> args = std::vector<FbTk::FbString>());
+
+        /** Set arguments for a particular plugin. */
+        void setPluginArguments(FbTk::FbString name, std::vector<FbTk::FbString> args);
+        
+        /** Unload a plugin. */
+        void unloadPlugin(FbTk::FbString name);
+
+
+        /** Return a vector with appropriately instantiated plugin objects. */
+        std::vector<BasePlugin*> instantiatePlugins(std::vector<FbTk::FbString> plugins = std::vector<FbTk::FbString>());
+
+
+    private :
+        //--- INTERNAL PLUGIN MANIPULATION -------------------------------------
+
+        /** Unload a plugin. */
+        void unloadPluginProper(std::map<FbTk::FbString, PluginData>::iterator it);
+
+
+        //--- PLUGINS AND METADATA ---------------------------------------------
+
+        /** Specific plugin-related data. */
+        struct PluginData {
+            FbTk::FbString name;                    ///< Name of the plugin.
+            void *handle;                           ///< Handle to the loaded library.
+            CreatePluginFunction factoryFunction;   ///< Plugin creation function.
+            std::vector<FbTk::FbString> args;       ///< Plugin arguments.
+        };
+
+        /** A map, containing all loaded plugins. */
+        std::map<FbTk::FbString, PluginData> m_plugins;
+    };
+
 }
 
+#undef EMTPY_VECTOR
 
 #endif  // FBCOMPOSITOR_PLUGINMANAGER_HH

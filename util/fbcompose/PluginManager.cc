@@ -22,6 +22,10 @@
 
 #include "PluginManager.hh"
 
+#include <dlfcn.h>
+
+using namespace FbCompositor;
+
 
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
@@ -29,4 +33,40 @@
 PluginManager::PluginManager() throw(InitException) { }
 
 // Destructor.
-PluginManager::~PluginManager() { }
+PluginManager::~PluginManager() {
+    std::map<FbTk::FbString, PluginData>::iterator it = m_plugins.begin();
+    while (it != m_plugins.end()) {
+        unloadPluginProper(it);
+        ++it;
+    }
+}
+
+
+//--- PLUGIN MANIPULATION ------------------------------------------------------
+
+// Load a plugin.
+void PluginManager::loadPlugin(FbTk::FbString /*name*/, std::vector<FbTk::FbString> /*args*/) {
+}
+
+/** Set arguments for a particular plugin. */
+void PluginManager::setPluginArguments(FbTk::FbString name, std::vector<FbTk::FbString> args) {
+    m_plugins[name].args = args;
+}
+
+/** Unload a plugin. */
+void PluginManager::unloadPlugin(FbTk::FbString name) {
+    unloadPluginProper(m_plugins.find(name));
+}
+
+
+/** Return a vector with appropriately instantiated plugin objects. */
+std::vector<BasePlugin*> PluginManager::instantiatePlugins(std::vector<FbTk::FbString> /*plugins*/) {
+    return std::vector<BasePlugin*>();
+}
+
+
+//--- INTERNAL PLUGIN MANIPULATION ---------------------------------------------
+
+// Unload a plugin.
+void PluginManager::unloadPluginProper(std::map<FbTk::FbString, PluginData>::iterator /*it*/) {
+}

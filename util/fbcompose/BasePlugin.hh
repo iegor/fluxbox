@@ -29,14 +29,16 @@
 #include "Constants.hh"
 #include "Exceptions.hh"
 
-#include "FbTk/FbString.h"
+#include "FbTk/FbString.hh"
 
 #include <vector>
 
 
 namespace FbCompositor {
 
+    class BasePlugin;
     class InitException;
+
 
     /**
      * Base class for compositor plugins.
@@ -46,7 +48,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        BasePlugin(const std::vector<FbTk::String> &args) throw(InitException);
+        BasePlugin(const std::vector<FbTk::FbString> &args) throw(InitException);
 
         /** Destructor. */
         virtual ~BasePlugin();
@@ -55,11 +57,11 @@ namespace FbCompositor {
         //--- ACCESSORS --------------------------------------------------------
 
         /** \returns the name of the plugin. */
-        const char *pluginName() const throw() = 0;
+        virtual const char *pluginName() const throw() = 0;
 
         /** \returns which rendering mode the plugin is written for. */
-        RenderingMode pluginType() const throw() = 0;
-    }
+        virtual RenderingMode pluginType() const throw() = 0;
+    };
 }
 
 

@@ -22,11 +22,13 @@
 
 #include "BasePlugin.hh"
 
+using namespace FbCompositor;
+
 
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Costructor.
-BasePlugin::BasePlugin(const std::vector<FbTk::String> &args) throw(InitException) { }
+BasePlugin::BasePlugin(const std::vector<FbTk::FbString> &/*args*/) throw(InitException) { }
 
 // Destructor.
 BasePlugin::~BasePlugin() { }
