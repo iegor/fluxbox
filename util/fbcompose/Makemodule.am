@@ -37,6 +37,7 @@ fbcompose_SOURCES = \
 	util/fbcompose/main.cc \
 	util/fbcompose/Atoms.hh util/fbcompose/Atoms.cc \
 	util/fbcompose/BaseCompWindow.hh util/fbcompose/BaseCompWindow.cc \
+    util/fbcompose/BasePlugin.hh util/fbcompose/BasePlugin.cc \
 	util/fbcompose/BaseScreen.hh util/fbcompose/BaseScreen.cc \
 	util/fbcompose/Compositor.hh util/fbcompose/Compositor.cc \
 	util/fbcompose/CompositorConfig.hh util/fbcompose/CompositorConfig.cc \
@@ -46,6 +47,7 @@ fbcompose_SOURCES = \
 	util/fbcompose/OpenGLScreen.hh util/fbcompose/OpenGLScreen.cc \
 	util/fbcompose/OpenGLShaders.hh util/fbcompose/OpenGLShaders.cc \
 	util/fbcompose/OpenGLWindow.hh util/fbcompose/OpenGLWindow.cc \
+    util/fbcompose/PluginManager.hh util/fbcompose/PluginManager.cc \
 	util/fbcompose/ServerAutoApp.hh util/fbcompose/ServerAutoApp.cc \
 	util/fbcompose/Utility.hh util/fbcompose/Utility.cc \
 	util/fbcompose/XRenderScreen.hh util/fbcompose/XRenderScreen.cc \
