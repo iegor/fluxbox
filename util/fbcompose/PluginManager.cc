@@ -20,6 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#include "Logging.hh"
 #include "PluginManager.hh"
 
 #include <algorithm>
@@ -37,7 +38,8 @@ PluginManager::PluginManager() throw(InitException) { }
 // Destructor.
 PluginManager::~PluginManager() {
     for (size_t i = 0; i < m_pluginObjects.size(); i++) {
-        delete m_pluginObjects[i];
+        // TODO: Resolve plugin name better.
+        (*(m_pluginLibs[ m_pluginObjects[i]->pluginName() ].destroyFunction))(m_pluginObjects[i]);
     }
 
     std::map<FbTk::FbString, PluginLibData>::iterator it = m_pluginLibs.begin();
@@ -56,8 +58,8 @@ void PluginManager::createPluginObject(FbTk::FbString name, std::vector<FbTk::Fb
         loadPlugin(name);
     }
 
-    CreatePluginFunction factoryFunction = m_pluginLibs.find(name)->second;
-    BasePlugin *newPluginObject = (*factoryFunction)(args);
+    CreatePluginFunction createFunction = m_pluginLibs.find(name)->second.createFunction;
+    BasePlugin *newPluginObject = (*createFunction)(args);
     m_pluginObjects.push_back(newPluginObject);
 }
 
@@ -67,6 +69,7 @@ void PluginManager::createPluginObject(FbTk::FbString name, std::vector<FbTk::Fb
 // Load a plugin.
 void PluginManager::loadPlugin(FbTk::FbString name) throw(RuntimeException) {
     std::vector<FbTk::FbString> paths = buildPluginPaths(name);
+    const char *error = NULL;
 
     // Get the handle to the plugin so object.
     void *handle = NULL;
@@ -82,16 +85,33 @@ void PluginManager::loadPlugin(FbTk::FbString name) throw(RuntimeException) {
         throw RuntimeException(ss.str());
     }
 
-    // Get the factory function pointer.
-    void *rawFactoryFunc = dlsym(handle, "createPlugin");
-    if (!rawFactoryFunc) {
+    // Get the creation function pointer.
+    dlerror();
+    void *rawCreateFunc = dlsym(handle, "createPlugin");
+    error = dlerror();
+
+    if (error) {
+        dlclose(handle);
         std::stringstream ss;
-        ss << "Could not find the factory function for the plugin " << name << ".";
+        ss << "Error in loading creation function for " << name << " plugin: " << error;
+        throw RuntimeException(ss.str());
+    }
+
+    // Get the destruction function pointer.
+    dlerror();
+    void *rawDestroyFunc = dlsym(handle, "destroyPlugin");
+    error = dlerror();
+
+    if (error) {
+        dlclose(handle);
+        std::stringstream ss;
+        ss << "Error in loading destruction function for " << name << " plugin: " << error;
         throw RuntimeException(ss.str());
     }
 
     // Track the plugin.
-    PluginLibData pluginData = { handle, reinterpret_cast<CreatePluginFunction>(rawFactoryFunc) };  // TODO: Better cast, error checking.
+    PluginLibData pluginData = { handle, reinterpret_cast<CreatePluginFunction>(rawCreateFunc),
+                                 reinterpret_cast<DestroyPluginFunction>(rawDestroyFunc) };  // TODO: Better cast, error checking.
     m_pluginLibs.insert(make_pair(name, pluginData));
 }
 
@@ -111,6 +131,10 @@ void PluginManager::unloadPlugin(FbTk::FbString name) throw(RuntimeException) {
 // Unload a plugin (actual worker function).
 void PluginManager::unloadPlugin(std::map<FbTk::FbString, PluginLibData>::iterator it) {
     dlclose(it->second.handle);
+
+    it->second.handle = NULL;
+    it->second.createFunction = NULL;
+    it->second.destroyFunction = NULL;
 }
 
 

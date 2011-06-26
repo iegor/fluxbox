@@ -185,8 +185,9 @@ AC_COMPILE_IFELSE([
 	AC_MSG_RESULT([no])
 ])
 
-dnl Dependencies for fbcompose
+dnl Check for compositor features
 AC_CHECK_LIB([Xcomposite],[XCompositeRedirectSubwindows])
+LDFLAGS="$LDFLAGS -Wl,-export-dynamic"
 
 enableval="yes"
 AC_MSG_CHECKING([whether to have XRender compositing support])

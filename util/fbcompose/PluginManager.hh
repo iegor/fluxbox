@@ -48,6 +48,9 @@ namespace FbCompositor {
     /** A pointer to a function that creates a plugin class instance. */
     typedef BasePlugin* (*CreatePluginFunction)(const std::vector<FbTk::FbString>&);
 
+    /** A pointer to a function that destroys a plugin class instance. */
+    typedef void (*DestroyPluginFunction)(BasePlugin*);
+
 
     /**
      * Responsible for plugin loading, unloading and availibility.
@@ -98,7 +101,8 @@ namespace FbCompositor {
         /** Specific plugin-related data. */
         struct PluginLibData {
             void *handle;                           ///< Handle to the loaded library.
-            CreatePluginFunction factoryFunction;   ///< Plugin creation function.
+            CreatePluginFunction createFunction;    ///< Plugin creation function.
+            DestroyPluginFunction destroyFunction;  ///< Plugin destruction function.
         };
 
         /** A map, containing all loaded plugins. */

@@ -34,6 +34,8 @@
 #include <vector>
 #include <cstdlib>
 
+#include "PluginManager.hh"
+
 using namespace FbCompositor;
 
 
@@ -45,6 +47,10 @@ using namespace FbCompositor;
  * \returns Application's exit status.
  */
 int main(int argc, char **argv) {
+    PluginManager pluginManager;
+    pluginManager.createPluginObject("Test plugin/libtestplugin.so.1");
+    std::cout << pluginManager.plugins()[0]->pluginName() << std::endl;
+
     try {
         Logger::setLoggingLevel(LOG_LEVEL_WARN);
 
