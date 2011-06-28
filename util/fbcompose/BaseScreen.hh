@@ -28,6 +28,7 @@
 
 #include "Atoms.hh"
 #include "BaseCompWindow.hh"
+#include "CompositorConfig.hh"
 #include "Constants.hh"
 #include "Exceptions.hh"
 #include "PluginManager.hh"
@@ -43,6 +44,7 @@ namespace FbCompositor {
 
     class BaseCompWindow;
     class BaseScreen;
+    class CompositorConfig;
     class InitException;
     class PluginManager;
 
@@ -62,7 +64,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        BaseScreen(int screenNumber, PluginType pluginType);
+        BaseScreen(int screenNumber, PluginType pluginType, const CompositorConfig &config);
 
         /** Destructor. */
         virtual ~BaseScreen();
@@ -72,9 +74,6 @@ namespace FbCompositor {
 
         /** Initializes heads on the current screen. */
         void initHeads(HeadMode headMode) throw(InitException);
-
-        /** Initializes plugins. */
-        void initPlugins(std::vector< std::pair< FbTk::FbString, std::vector<FbTk::FbString> > > plugins);
 
         /** Initializes all of the windows on the screen. */
         void initWindows() throw();

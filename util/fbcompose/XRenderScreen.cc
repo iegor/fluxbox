@@ -36,9 +36,9 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-XRenderScreen::XRenderScreen(int screenNumber, const char *pictFilter) :
-    BaseScreen(screenNumber, Plugin_XRender),
-    m_pictFilter(pictFilter) {
+XRenderScreen::XRenderScreen(int screenNumber, const CompositorConfig &config) :
+    BaseScreen(screenNumber, Plugin_XRender, config),
+    m_pictFilter(config.xRenderPictFilter()) {
 
     initRenderingSurface();
     initBackgroundPicture();

@@ -31,6 +31,7 @@
 
 #include "BaseScreen.hh"
 #include "BaseCompWindow.hh"
+#include "CompositorConfig.hh"
 #include "Exceptions.hh"
 #include "OpenGLPlugin.hh"
 #include "OpenGLWindow.hh"
@@ -43,6 +44,7 @@
 namespace FbCompositor {
 
     class BaseCompWindow;
+    class CompositorConfig;
     class InitException;
     class OpenGLPlugin;
     class OpenGLScreen;
@@ -57,7 +59,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        OpenGLScreen(int screenNumber);
+        OpenGLScreen(int screenNumber, const CompositorConfig &config);
 
         /** Destructor. */
         ~OpenGLScreen();

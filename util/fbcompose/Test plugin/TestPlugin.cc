@@ -22,7 +22,28 @@
 
 #include "TestPlugin.hh"
 
+#include <GL/gl.h>
+
 using namespace FbCompositor;
+
+
+namespace {
+    //--- SHADER SOURCES -------------------------------------------------------
+
+    /** Plugin's fragment shader source. */
+    static const GLchar FRAGMENT_SHADER[] = "\
+        void Test() {                                                        \n\
+            gl_FragColor *= vec4(1.0, 0.5, 0.5, 1.0);                        \n\
+        }                                                                    \n\
+    ";
+
+    /** Plugin's vertex shader source. */
+    static const GLchar VERTEX_SHADER[] = "\
+        void Test() {                                                        \n\
+            gl_Position *= vec4(0.5, 0.5, 1.0, 1.0);                         \n\
+        }                                                                    \n\
+    ";
+}
 
 
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
@@ -34,6 +55,19 @@ TestPlugin::TestPlugin(const std::vector<FbTk::FbString> &args) throw(InitExcept
 
 // Destructor.
 TestPlugin::~TestPlugin() { }
+
+
+//--- ACCESSORS ----------------------------------------------------------------
+
+// Returns the additional source code for the fragment shader.
+const char *TestPlugin::fragmentShader() const throw() {
+    return FRAGMENT_SHADER;
+}
+
+// Returns the additional source code for the vertex shader.
+const char *TestPlugin::vertexShader() const throw() {
+    return VERTEX_SHADER;
+}
 
 
 //--- PLUGIN MANAGER FUNCTIONS -------------------------------------------------

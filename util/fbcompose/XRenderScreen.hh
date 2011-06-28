@@ -29,6 +29,7 @@
 
 
 #include "BaseScreen.hh"
+#include "CompositorConfig.hh"
 #include "XRenderWindow.hh"
 
 #include <X11/extensions/Xrender.h>
@@ -38,6 +39,7 @@
 namespace FbCompositor {
 
     class BaseScreen;
+    class CompositorConfig;
     class XRenderScreen;
 
 
@@ -49,7 +51,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        XRenderScreen(int screenNumber, const char *pictFilter);
+        XRenderScreen(int screenNumber, const CompositorConfig &config);
 
         /** Destructor. */
         ~XRenderScreen();

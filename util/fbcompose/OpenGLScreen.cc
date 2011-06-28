@@ -45,6 +45,17 @@
 using namespace FbCompositor;
 
 
+//--- MACROS -------------------------------------------------------------------
+
+// Macro that eases plugin iteration.
+#define forEachPlugin(i, plugin)                                                       \
+    for(size_t (i) = 0;                                                                \
+        (((i) < pluginManager().plugins().size())                                      \
+            ? ((plugin) = dynamic_cast<OpenGLPlugin*>(pluginManager().plugins()[(i)])) \
+            : false);                                                                  \
+        (i)++)
+
+
 //--- CONSTANTS ----------------------------------------------------------------
 
 namespace {
@@ -105,8 +116,8 @@ namespace {
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-OpenGLScreen::OpenGLScreen(int screenNumber) :
-    BaseScreen(screenNumber, Plugin_OpenGL) {
+OpenGLScreen::OpenGLScreen(int screenNumber, const CompositorConfig &config) :
+    BaseScreen(screenNumber, Plugin_OpenGL, config) {
 
     m_backgroundChanged = true;
     m_rootWindowChanged = false;
@@ -286,13 +297,37 @@ void OpenGLScreen::finishRenderingInit() throw(InitException) {
 
 // Initializes shaders.
 void OpenGLScreen::initShaders() throw(InitException) {
-    m_vertexShader = createShader(GL_VERTEX_SHADER,
-                                  OpenGLShaders::vertexShaderSourceLength(),
-                                  OpenGLShaders::vertexShaderSource());
-    m_fragmentShader = createShader(GL_FRAGMENT_SHADER,
-                                    OpenGLShaders::fragmentShaderSourceLength(),
-                                    OpenGLShaders::fragmentShaderSource());
+    std::stringstream ss;
+    OpenGLPlugin *plugin;
 
+    // Assemble vertex shader.
+    ss.str("");
+    ss << OpenGLShaders::vertexShaderHead();
+    forEachPlugin(i, plugin) {
+        ss << plugin->vertexShader() << "\n";
+    }
+    ss << OpenGLShaders::vertexShaderMiddle();
+    forEachPlugin(i, plugin) {
+        ss << plugin->pluginName() << "();\n";
+    }
+    ss << OpenGLShaders::vertexShaderTail();
+    std::cout << ss.str();
+    m_vertexShader = createShader(GL_VERTEX_SHADER, ss.str().length(), ss.str().c_str());
+
+    // Assemble fragment shader.
+    ss.str("");
+    ss << OpenGLShaders::fragmentShaderHead();
+    forEachPlugin(i, plugin) {
+        ss << plugin->fragmentShader() << "\n";
+    }
+    ss << OpenGLShaders::fragmentShaderMiddle();
+    forEachPlugin(i, plugin) {
+        ss << plugin->pluginName() << "();\n";
+    }
+    ss << OpenGLShaders::fragmentShaderTail();
+    m_fragmentShader = createShader(GL_FRAGMENT_SHADER, ss.str().length(), ss.str().c_str());
+
+    // Create shader program.
     m_shaderProgram = createShaderProgram(m_vertexShader, 0, m_fragmentShader);
 }
 

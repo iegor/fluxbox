@@ -57,6 +57,13 @@ namespace FbCompositor {
 
         /** \returns the name of the plugin. */
         const char *pluginName() const throw();
+
+        
+        /** \returns the additional source code for the fragment shader. */
+        const char *fragmentShader() const throw();
+
+        /** \returns the additional source code for the vertex shader. */
+        const char *vertexShader() const throw();
     };
 
 

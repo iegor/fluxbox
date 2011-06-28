@@ -33,33 +33,48 @@ using namespace FbCompositor;
 namespace {
     //--- SHADER SOURCES -------------------------------------------------------
 
-    /** Vertex shader source code. */
-    static const GLchar VERTEX_SHADER_SOURCE[] = "\
+    /** Head of the vertex shader source code. */
+    static const GLchar VERTEX_SHADER_HEAD[] = "\
         #version 120                                                         \n\
                                                                              \n\
         attribute vec2 fb_InitPointPos;                                      \n\
         attribute vec2 fb_InitTexCoord;                                      \n\
                                                                              \n\
         varying vec2 fb_TexCoord;                                            \n\
-                                                                             \n\
+    ";
+
+    /** Middle of the vertex shader source code. */
+    static const GLchar VERTEX_SHADER_MIDDLE[] = "\
         void main() {                                                        \n\
             gl_Position = vec4(fb_InitPointPos, 0.0, 1.0);                   \n\
             fb_TexCoord = fb_InitTexCoord;                                   \n\
+    ";
+
+    /** Tail of the vertex shader source code. */
+    static const GLchar VERTEX_SHADER_TAIL[] = "\
         }                                                                    \n\
     ";
 
-    /** Fragment shader source code. */
-    static const GLchar FRAGMENT_SHADER_SOURCE[] = "\
+
+    /** Head of the fragment shader source code. */
+    static const GLchar FRAGMENT_SHADER_HEAD[] = "\
         #version 120                                                         \n\
                                                                              \n\
         uniform float fb_Alpha;                                              \n\
         uniform sampler2D fb_Texture;                                        \n\
                                                                              \n\
         varying vec2 fb_TexCoord;                                            \n\
-                                                                             \n\
+    ";
+
+    /** Middle of the fragment shader source code. */
+    static const GLchar FRAGMENT_SHADER_MIDDLE[] = "\
         void main() {                                                        \n\
             gl_FragColor = texture2D(fb_Texture, fb_TexCoord)                \n\
                     * vec4(1.0, 1.0, 1.0, fb_Alpha);                         \n\
+    ";
+
+    /** Tail of the fragment shader source code. */
+    static const GLchar FRAGMENT_SHADER_TAIL[] = "\
         }                                                                    \n\
     ";
 }
@@ -67,27 +82,35 @@ namespace {
 
 //--- ACCESSORS ----------------------------------------------------------------
 
-// Returns the the fragment shader source code.
-const GLchar *OpenGLShaders::fragmentShaderSource() throw() {
-    return FRAGMENT_SHADER_SOURCE;
+// Returns the head of the fragment shader source code.
+const GLchar *OpenGLShaders::fragmentShaderHead() throw() {
+    return FRAGMENT_SHADER_HEAD;
 }
 
-// Returns the length of the fragment shader source code.
-int OpenGLShaders::fragmentShaderSourceLength() throw() {
-    static GLint sourceLength = (GLint)strlen(FRAGMENT_SHADER_SOURCE);
-    return sourceLength;
+// Returns the middle of the fragment shader source code.
+const GLchar *OpenGLShaders::fragmentShaderMiddle() throw() {
+    return FRAGMENT_SHADER_MIDDLE;
 }
 
-
-// Returns the the vertex shader source code.
-const GLchar *OpenGLShaders::vertexShaderSource() throw() {
-    return VERTEX_SHADER_SOURCE;
+// Returns the tail of the fragment shader source code.
+const GLchar *OpenGLShaders::fragmentShaderTail() throw() {
+    return FRAGMENT_SHADER_TAIL;
 }
 
-// Returns the length of the vertex shader source code.
-int OpenGLShaders::vertexShaderSourceLength() throw() {
-    static GLint sourceLength = (GLint)strlen(VERTEX_SHADER_SOURCE);
-    return sourceLength;
+// Returns the head of the vertex shader source code.
+const GLchar *OpenGLShaders::vertexShaderHead() throw() {
+    return VERTEX_SHADER_HEAD;
 }
+
+// Returns the middle of the vertex shader source code.
+const GLchar *OpenGLShaders::vertexShaderMiddle() throw() {
+    return VERTEX_SHADER_MIDDLE;
+}
+
+// Returns the tail of the vertex shader source code.
+const GLchar *OpenGLShaders::vertexShaderTail() throw() {
+    return VERTEX_SHADER_TAIL;
+}
+
 
 #endif  // USE_OPENGL_COMPOSITING

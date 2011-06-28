@@ -76,13 +76,13 @@ Compositor::Compositor(const CompositorConfig &config) throw(InitException) :
 
 #ifdef USE_OPENGL_COMPOSITING
         case RM_OpenGL :
-            m_screens.push_back(new OpenGLScreen(i));
+            m_screens.push_back(new OpenGLScreen(i, config));
             break;
 #endif  // USE_OPENGL_COMPOSITING
 
 #ifdef USE_XRENDER_COMPOSITING
         case RM_XRender :
-            m_screens.push_back(new XRenderScreen(i, config.xRenderPictFilter()));
+            m_screens.push_back(new XRenderScreen(i, config));
             break;
 #endif  // USE_XRENDER_COMPOSITING
 
@@ -96,7 +96,6 @@ Compositor::Compositor(const CompositorConfig &config) throw(InitException) :
 
     initHeads();
     for (size_t i = 0; i < m_screens.size(); i++) {
-        m_screens[i]->initPlugins(config.plugins());
         m_screens[i]->initWindows();
     }
 
