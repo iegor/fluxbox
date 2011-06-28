@@ -68,6 +68,9 @@ namespace FbCompositor {
         /** \returns the refresh rate. */
         int framesPerSecond() const throw();
 
+        /** \returns plugins and their arguments. */
+        const std::vector< std::pair< FbTk::FbString, std::vector<FbTk::FbString> > > &plugins() const throw();
+
         /** \returns the selected rendering mode. */
         RenderingMode renderingMode() const throw();
 
@@ -123,6 +126,8 @@ namespace FbCompositor {
         /** The refresh rate. */
         int m_framesPerSecond;
 
+        /** Plugins and their arguments. */
+        std::vector< std::pair< FbTk::FbString, std::vector<FbTk::FbString> > > m_plugins;
     };
 
 
@@ -136,6 +141,11 @@ namespace FbCompositor {
     // Returns the refresh rate.
     inline int CompositorConfig::framesPerSecond() const throw() {
         return m_framesPerSecond;
+    }
+
+    // Returns plugins and their arguments.
+    inline const std::vector< std::pair< FbTk::FbString, std::vector<FbTk::FbString> > > &CompositorConfig::plugins() const throw() {
+        return m_plugins;
     }
 
     // Returns the rendering mode.

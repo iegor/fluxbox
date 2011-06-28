@@ -23,9 +23,9 @@
 #ifndef FBCOMPOSITOR_TESTPLUGIN_HH
 #define FBCOMPOSITOR_TESTPLUGIN_HH
 
-#include "BasePlugin.hh"
 #include "Constants.hh"
 #include "Exceptions.hh"
+#include "OpenGLPlugin.hh"
 
 #include "FbTk/FbString.hh"
 
@@ -34,15 +34,15 @@
 
 namespace FbCompositor {
 
-    class BasePlugin;
     class InitException;
+    class OpenGLPlugin;
     class TestPlugin;
 
     /**
      * A simple plugin for testing purposes. Will be removed or replaced with a
      * better fitting example.
      */
-    class TestPlugin : public BasePlugin {
+    class TestPlugin : public OpenGLPlugin {
     public :
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 

@@ -37,7 +37,7 @@ using namespace FbCompositor;
 
 // Constructor.
 XRenderScreen::XRenderScreen(int screenNumber, const char *pictFilter) :
-    BaseScreen(screenNumber),
+    BaseScreen(screenNumber, Plugin_XRender),
     m_pictFilter(pictFilter) {
 
     initRenderingSurface();

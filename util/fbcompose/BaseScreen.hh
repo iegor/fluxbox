@@ -30,6 +30,7 @@
 #include "BaseCompWindow.hh"
 #include "Constants.hh"
 #include "Exceptions.hh"
+#include "PluginManager.hh"
 
 #include <X11/Xlib.h>
 
@@ -43,6 +44,7 @@ namespace FbCompositor {
     class BaseCompWindow;
     class BaseScreen;
     class InitException;
+    class PluginManager;
 
 
     /** << output stream operator for the BaseScreen class. */
@@ -60,7 +62,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        BaseScreen(int screenNumber);
+        BaseScreen(int screenNumber, PluginType pluginType);
 
         /** Destructor. */
         virtual ~BaseScreen();
@@ -70,6 +72,9 @@ namespace FbCompositor {
 
         /** Initializes heads on the current screen. */
         void initHeads(HeadMode headMode) throw(InitException);
+
+        /** Initializes plugins. */
+        void initPlugins(std::vector< std::pair< FbTk::FbString, std::vector<FbTk::FbString> > > plugins);
 
         /** Initializes all of the windows on the screen. */
         void initWindows() throw();
@@ -159,6 +164,9 @@ namespace FbCompositor {
 
         /** \returns the list of windows on the screen. */
         const std::list<BaseCompWindow*> &allWindows() const throw();
+
+        /** \returns the plugin manager. */
+        PluginManager &pluginManager() throw();
         
         /** \returns the reconfigure rectangle. */
         XRectangle reconfigureRectangle() const throw();
@@ -197,6 +205,9 @@ namespace FbCompositor {
 
         /** Windows that should be ignored. */
         std::vector<Window> m_ignoreList;
+
+        /** Plugin manager for this screen. */
+        PluginManager m_pluginManager;
 
         /** Screen's number. */
         int m_screenNumber;
@@ -247,6 +258,11 @@ namespace FbCompositor {
     // Returns the vector with the output heads on this screen.
     inline const std::vector<XRectangle> &BaseScreen::heads() const throw() {
         return m_heads;
+    }
+
+    // Returns the plugin manager.
+    inline PluginManager &BaseScreen::pluginManager() throw() {
+        return m_pluginManager;
     }
 
     // Returns the reconfigure rectangle.

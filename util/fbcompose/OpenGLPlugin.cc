@@ -1,4 +1,4 @@
-/** TestPlugin.cc file for the fluxbox compositor. */
+/** OpenGLPlugin.cc file for the fluxbox compositor. */
 
 // Copyright (c) 2011 Gediminas Liktaras (gliktaras at gmail dot com)
 //
@@ -20,30 +20,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include "TestPlugin.hh"
+#include "OpenGLPlugin.hh"
 
 using namespace FbCompositor;
 
 
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
-// Constructor.
-TestPlugin::TestPlugin(const std::vector<FbTk::FbString> &args) throw(InitException) :
-    OpenGLPlugin(args) {
+// Costructor.
+OpenGLPlugin::OpenGLPlugin(const std::vector<FbTk::FbString> &args) throw(InitException) :
+    BasePlugin(args) {
 }
 
 // Destructor.
-TestPlugin::~TestPlugin() { }
-
-
-//--- PLUGIN MANAGER FUNCTIONS -------------------------------------------------
-
-// Creates a plugin object.
-extern "C" BasePlugin *createPlugin(const std::vector<FbTk::FbString> &args) {
-    return new TestPlugin(args);
-}
-
-// Returns plugin's type.
-extern "C" PluginType pluginType() {
-    return Plugin_OpenGL;
-}
+OpenGLPlugin::~OpenGLPlugin() { }

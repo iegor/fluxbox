@@ -43,11 +43,13 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-BaseScreen::BaseScreen(int screenNumber) :
+BaseScreen::BaseScreen(int screenNumber, PluginType pluginType) :
     m_display(FbTk::App::instance()->display()),
+    m_pluginManager(pluginType),
     m_screenNumber(screenNumber),
     m_rootWindow(XRootWindow(m_display, m_screenNumber)) {
 
+    // Set up properties.
     m_activeWindowXID = m_rootWindow.singlePropertyValue<Window>(Atoms::activeWindowAtom(), 0);
     m_currentWorkspace = m_rootWindow.singlePropertyValue<long>(Atoms::workspaceAtom(), 0);
     m_reconfigureRect.x = m_reconfigureRect.y = m_reconfigureRect.width = m_reconfigureRect.height = 0;
@@ -98,6 +100,13 @@ void BaseScreen::initHeads(HeadMode headMode) throw(InitException) {
         m_heads.push_back(h);
     } else {
         throw InitException("Unknown screen head mode given.");
+    }
+}
+
+// Initializes plugins.
+void BaseScreen::initPlugins(std::vector< std::pair< FbTk::FbString, std::vector<FbTk::FbString> > > plugins) {
+    for(size_t i = 0; i < plugins.size(); i++) {
+        m_pluginManager.createPluginObject(plugins[i].first, plugins[i].second);
     }
 }
 

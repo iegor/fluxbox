@@ -106,7 +106,7 @@ namespace {
 
 // Constructor.
 OpenGLScreen::OpenGLScreen(int screenNumber) :
-    BaseScreen(screenNumber) {
+    BaseScreen(screenNumber, Plugin_OpenGL) {
 
     m_backgroundChanged = true;
     m_rootWindowChanged = false;

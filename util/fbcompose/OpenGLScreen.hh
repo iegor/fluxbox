@@ -32,6 +32,7 @@
 #include "BaseScreen.hh"
 #include "BaseCompWindow.hh"
 #include "Exceptions.hh"
+#include "OpenGLPlugin.hh"
 #include "OpenGLWindow.hh"
 
 #include <GL/glxew.h>
@@ -43,6 +44,7 @@ namespace FbCompositor {
 
     class BaseCompWindow;
     class InitException;
+    class OpenGLPlugin;
     class OpenGLScreen;
     class OpenGLWindow;
 

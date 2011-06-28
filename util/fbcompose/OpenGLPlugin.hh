@@ -1,4 +1,4 @@
-/** TestPlugin.cc file for the fluxbox compositor. */
+/** OpenGLPlugin.hh file for the fluxbox compositor. */
 
 // Copyright (c) 2011 Gediminas Liktaras (gliktaras at gmail dot com)
 //
@@ -20,30 +20,51 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include "TestPlugin.hh"
 
-using namespace FbCompositor;
+#ifndef FBCOMPOSITOR_OPENGLPLUGIN_HH
+#define FBCOMPOSITOR_OPENGLPLUGIN_HH
+
+#include "config.h"
+
+#ifdef USE_OPENGL_COMPOSITING
 
 
-//--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
+#include "BasePlugin.hh"
+#include "Constants.hh"
+#include "Exceptions.hh"
 
-// Constructor.
-TestPlugin::TestPlugin(const std::vector<FbTk::FbString> &args) throw(InitException) :
-    OpenGLPlugin(args) {
+#include "FbTk/FbString.hh"
+
+#include <vector>
+
+
+namespace FbCompositor {
+
+    class BasePlugin;
+    class InitException;
+
+
+    /**
+     * Plugin for OpenGL renderer.
+     */
+    class OpenGLPlugin : public BasePlugin {
+    public:
+        //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
+
+        /** Constructor. */
+        OpenGLPlugin(const std::vector<FbTk::FbString> &args) throw(InitException);
+
+        /** Destructor. */
+        ~OpenGLPlugin();
+
+
+        //--- ACCESSORS --------------------------------------------------------
+
+        /** \returns the name of the plugin. */
+        virtual const char *pluginName() const throw() = 0;
+    };
 }
 
-// Destructor.
-TestPlugin::~TestPlugin() { }
+#endif  // USE_OPENGL_COMPOSITING
 
-
-//--- PLUGIN MANAGER FUNCTIONS -------------------------------------------------
-
-// Creates a plugin object.
-extern "C" BasePlugin *createPlugin(const std::vector<FbTk::FbString> &args) {
-    return new TestPlugin(args);
-}
-
-// Returns plugin's type.
-extern "C" PluginType pluginType() {
-    return Plugin_OpenGL;
-}
+#endif  // FBCOMPOSITOR_OPENGLPLUGIN_HH

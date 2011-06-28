@@ -57,7 +57,8 @@ CompositorConfig::CompositorConfig(std::vector<FbTk::FbString> args) throw(Confi
 #endif
 
     m_displayName(""),
-    m_framesPerSecond(60) {
+    m_framesPerSecond(60),
+    m_plugins() {
 
     preScanArguments();
     processArguments();
@@ -89,6 +90,7 @@ void CompositorConfig::preScanArguments() {
 void CompositorConfig::processArguments() throw(ConfigException) {
     std::vector<FbTk::FbString>::iterator it = m_args.begin();
     std::stringstream ss;
+    bool loggingLevelSet = false;
 
     while (it != m_args.end()) {
         if ((*it == "-d") || (*it == "--display")) {
@@ -115,8 +117,17 @@ void CompositorConfig::processArguments() throw(ConfigException) {
                 ss << "Unknown rendering mode \"" << mode << "\".";
                 throw ConfigException(ss.str());
             }
+        } else if ((*it == "-p") || (*it == "--plugin")) {
+            FbTk::FbString pluginName = getNextOption(it, "No plugin name specified.");
+            m_plugins.push_back(make_pair(pluginName, std::vector<FbTk::FbString>()));
         } else if ((*it == "-q") || (*it == "--quiet")) {
             Logger::setLoggingLevel(LOG_LEVEL_NONE);
+
+            if (loggingLevelSet) {
+                throw ConfigException("Multiple logging levels specified.");
+            } else {
+                loggingLevelSet = true;
+            }
         } else if ((*it == "-r") || (*it == "--refresh-rate")) {
             ss.str(getNextOption(it, "No refresh rate specified."));
             ss >> m_framesPerSecond;
@@ -128,6 +139,12 @@ void CompositorConfig::processArguments() throw(ConfigException) {
             }
         } else if ((*it == "-v") || (*it == "--verbose")) {
             Logger::setLoggingLevel(LOG_LEVEL_INFO);
+
+            if (loggingLevelSet) {
+                throw ConfigException("Multiple logging levels specified.");
+            } else {
+                loggingLevelSet = true;
+            }
         } else {
             ss.str("");
             ss << "Unknown option \"" << *it << "\".";
@@ -168,6 +185,8 @@ void CompositorConfig::printFullHelp(std::ostream &os) throw() {
        << "  -h, --help             Print this text and exit." << std::endl
        << "  -m MODE, --mode MODE   Select the rendering mode." << std::endl
        << "                         MODE can be " << modes << "." << std::endl
+       << "  -p PLUGIN, --plugin PLUGIN" << std::endl
+       << "                         Load a specified plugin." << std::endl
        << "  -q, --quiet            Do not print anything." << std::endl
        << "  -r RATE, --refresh-rate RATE" << std::endl
        << "                         Specify the compositor's refresh rate in Hz" << std::endl
