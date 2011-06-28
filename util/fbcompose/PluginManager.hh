@@ -48,8 +48,8 @@ namespace FbCompositor {
     /** A pointer to a function that creates a plugin class instance. */
     typedef BasePlugin* (*CreatePluginFunction)(const std::vector<FbTk::FbString>&);
 
-    /** A pointer to a function that destroys a plugin class instance. */
-    typedef void (*DestroyPluginFunction)(BasePlugin*);
+    /** A pointer to a function that returns the rendering mode the plugin operates in. */
+    typedef PluginType (*PluginTypeFunction)();
 
 
     /**
@@ -62,7 +62,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        PluginManager() throw(InitException);
+        PluginManager(PluginType pluginType) throw(InitException);
 
         /** Destructor. */
         ~PluginManager();
@@ -95,6 +95,10 @@ namespace FbCompositor {
         /** Build a vector of search paths for a given plugin. */
         std::vector<FbTk::FbString> buildPluginPaths(const FbTk::FbString &name);
 
+        /** \returns some object from the given library handle. */
+        void *getLibraryObject(void *handle, const char *objectName, const char *pluginName,
+                               const char *verboseObjectName) throw(RuntimeException);
+
 
         //--- PLUGINS AND METADATA ---------------------------------------------
 
@@ -102,7 +106,6 @@ namespace FbCompositor {
         struct PluginLibData {
             void *handle;                           ///< Handle to the loaded library.
             CreatePluginFunction createFunction;    ///< Plugin creation function.
-            DestroyPluginFunction destroyFunction;  ///< Plugin destruction function.
         };
 
         /** A map, containing all loaded plugins. */
@@ -110,6 +113,9 @@ namespace FbCompositor {
 
         /** A vector with active plugin objects. */
         std::vector<BasePlugin*> m_pluginObjects;
+
+        /** Type of the plugins this object manages. */
+        PluginType m_pluginType;
     };
 
 

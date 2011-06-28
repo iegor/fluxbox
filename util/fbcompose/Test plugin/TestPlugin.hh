@@ -44,7 +44,7 @@ namespace FbCompositor {
      */
     class TestPlugin : public BasePlugin {
     public :
-        //--- CONSTRUCTORS AND DESTRUCTORS -----------------------------------------
+        //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
         TestPlugin(const std::vector<FbTk::FbString> &args) throw(InitException);
@@ -53,26 +53,18 @@ namespace FbCompositor {
         virtual ~TestPlugin();
 
 
-        //--- ACCESSORS ------------------------------------------------------------
+        //--- ACCESSORS --------------------------------------------------------
 
         /** \returns the name of the plugin. */
         const char *pluginName() const throw();
-
-        /** \returns which rendering mode the plugin is written for. */
-        RenderingMode pluginType() const throw();
     };
 
 
-    //--- INLINE FUNCTIONS ---------------------------------------------------------
+    //--- INLINE FUNCTIONS -----------------------------------------------------
 
     // Returns the name of the plugin.
     inline const char *TestPlugin::pluginName() const throw() {
         return "Test";
-    }
-
-    // Returns which rendering mode the plugin is written for.
-    inline RenderingMode TestPlugin::pluginType() const throw() {
-        return RM_OpenGL;
     }
 }
 
@@ -82,8 +74,8 @@ namespace FbCompositor {
 /** Creates a plugin object. */
 extern "C" FbCompositor::BasePlugin *createPlugin(const std::vector<FbTk::FbString> &args);
 
-/** Destroys a plugin object. */
-extern "C" void destroyPlugin(FbCompositor::BasePlugin *plugin);
+/** \returns plugin's type. */
+extern "C" FbCompositor::PluginType pluginType();
 
 
 #endif  // FBCOMPOSITOR_TESTPLUGIN_HH

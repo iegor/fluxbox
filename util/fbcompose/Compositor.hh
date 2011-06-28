@@ -48,6 +48,16 @@ namespace FbCompositor {
     class InitException;
     class RuntimeException;
 
+
+    //--- TYPEDEFS -------------------------------------------------------------
+
+    /** A pointer to an X query extension function. */
+    typedef Bool (*QueryExtensionFunction)(Display*, int*, int*);
+
+    /** A pointer to an X query version function. */
+    typedef Status (*QueryVersionFunction)(Display*, int*, int*);
+
+
     /**
      * Main class for the compositor.
      *

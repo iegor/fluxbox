@@ -58,9 +58,6 @@ namespace FbCompositor {
 
         /** \returns the name of the plugin. */
         virtual const char *pluginName() const throw() = 0;
-
-        /** \returns which rendering mode the plugin is written for. */
-        virtual RenderingMode pluginType() const throw() = 0;
     };
 }
 

@@ -43,7 +43,7 @@ extern "C" BasePlugin *createPlugin(const std::vector<FbTk::FbString> &args) {
     return new TestPlugin(args);
 }
 
-// Destroys a plugin object.
-extern "C" void destroyPlugin(BasePlugin *plugin) {
-    delete plugin;
+// Returns plugin's type.
+extern "C" PluginType pluginType() {
+    return Plugin_OpenGL;
 }

@@ -34,17 +34,11 @@ namespace FbCompositor {
     /** Monitor heads mode enumeration. */
     enum HeadMode { Heads_One, Heads_Xinerama };
 
+    /** Plugin types. */
+    enum PluginType { Plugin_OpenGL, Plugin_XRender };
+
     /** Rendering mode enumeration. */
     enum RenderingMode { RM_OpenGL, RM_XRender, RM_ServerAuto };
-
-
-    //--- TYPEDEFS -------------------------------------------------------------
-
-    /** A pointer to an X query extension function. */
-    typedef Bool (*QueryExtensionFunction)(Display*, int*, int*);
-
-    /** A pointer to an X query version function. */
-    typedef Status (*QueryVersionFunction)(Display*, int*, int*);
 
 }
 

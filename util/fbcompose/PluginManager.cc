@@ -33,13 +33,14 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Costructor.
-PluginManager::PluginManager() throw(InitException) { }
+PluginManager::PluginManager(PluginType pluginType) throw(InitException) {
+    m_pluginType = pluginType;
+}
 
 // Destructor.
 PluginManager::~PluginManager() {
     for (size_t i = 0; i < m_pluginObjects.size(); i++) {
-        // TODO: Resolve plugin name better.
-        (*(m_pluginLibs[ m_pluginObjects[i]->pluginName() ].destroyFunction))(m_pluginObjects[i]);
+        delete m_pluginObjects[i];  // Let's hope delete is not overriden. TODO: Fix.
     }
 
     std::map<FbTk::FbString, PluginLibData>::iterator it = m_pluginLibs.begin();
@@ -69,7 +70,6 @@ void PluginManager::createPluginObject(FbTk::FbString name, std::vector<FbTk::Fb
 // Load a plugin.
 void PluginManager::loadPlugin(FbTk::FbString name) throw(RuntimeException) {
     std::vector<FbTk::FbString> paths = buildPluginPaths(name);
-    const char *error = NULL;
 
     // Get the handle to the plugin so object.
     void *handle = NULL;
@@ -85,33 +85,20 @@ void PluginManager::loadPlugin(FbTk::FbString name) throw(RuntimeException) {
         throw RuntimeException(ss.str());
     }
 
-    // Get the creation function pointer.
-    dlerror();
-    void *rawCreateFunc = dlsym(handle, "createPlugin");
-    error = dlerror();
+    // Check for the correct plugin type
+    void *rawTypeFunc = getLibraryObject(handle, "pluginType", name.c_str(), "type function");
+    PluginTypeFunction typeFunc = reinterpret_cast<PluginTypeFunction>(rawTypeFunc);
 
-    if (error) {
-        dlclose(handle);
+    if ((*(typeFunc))() != m_pluginType) {
         std::stringstream ss;
-        ss << "Error in loading creation function for " << name << " plugin: " << error;
+        ss << "Bad type of plugin " << name << ".";
         throw RuntimeException(ss.str());
     }
 
-    // Get the destruction function pointer.
-    dlerror();
-    void *rawDestroyFunc = dlsym(handle, "destroyPlugin");
-    error = dlerror();
+    // Get the other functions and track the plugin.
+    void *rawCreateFunc = getLibraryObject(handle, "createPlugin", name.c_str(), "creation function");
 
-    if (error) {
-        dlclose(handle);
-        std::stringstream ss;
-        ss << "Error in loading destruction function for " << name << " plugin: " << error;
-        throw RuntimeException(ss.str());
-    }
-
-    // Track the plugin.
-    PluginLibData pluginData = { handle, reinterpret_cast<CreatePluginFunction>(rawCreateFunc),
-                                 reinterpret_cast<DestroyPluginFunction>(rawDestroyFunc) };  // TODO: Better cast, error checking.
+    PluginLibData pluginData = { handle, reinterpret_cast<CreatePluginFunction>(rawCreateFunc) };   // TODO: Better cast, error checking.
     m_pluginLibs.insert(make_pair(name, pluginData));
 }
 
@@ -134,7 +121,6 @@ void PluginManager::unloadPlugin(std::map<FbTk::FbString, PluginLibData>::iterat
 
     it->second.handle = NULL;
     it->second.createFunction = NULL;
-    it->second.destroyFunction = NULL;
 }
 
 
@@ -153,4 +139,21 @@ std::vector<FbTk::FbString> PluginManager::buildPluginPaths(const FbTk::FbString
     paths.push_back(name);  // Temporary.
 
     return paths;
+}
+
+// Returns some object from the given library handle.
+void *PluginManager::getLibraryObject(void *handle, const char *objectName, const char *pluginName,
+                                      const char *verboseObjectName) throw(RuntimeException) {
+    dlerror();
+    void *rawObject = dlsym(handle, objectName);
+    const char *error = dlerror();
+
+    if (error) {
+        dlclose(handle);    // TODO: Should this be done here?
+        std::stringstream ss;
+        ss << "Error in loading " << verboseObjectName << " for " << pluginName << " plugin: " << error;
+        throw RuntimeException(ss.str());
+    } else {
+        return rawObject;
+    }
 }
