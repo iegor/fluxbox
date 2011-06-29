@@ -56,8 +56,7 @@ using namespace FbCompositor;
 
 // The constructor.
 Compositor::Compositor(const CompositorConfig &config) throw(InitException) :
-    App(config.displayName().c_str()),
-    m_redrawTimer() {
+    App(config.displayName().c_str()) {
 
     XSynchronize(display(), True);
 
@@ -99,10 +98,8 @@ Compositor::Compositor(const CompositorConfig &config) throw(InitException) :
         m_screens[i]->initWindows();
     }
 
-    FbTk::RefCount<FbTk::Command<void> > command(new RenderScreensCommand(this));
-    m_redrawTimer.setCommand(command);
-    m_redrawTimer.setTimeout(0, 1000000.0 / config.framesPerSecond());
-    m_redrawTimer.start();
+    m_timer.setTickSize(1000000 / config.framesPerSecond());
+    m_timer.start();
 
     XFlush(display());
 }
@@ -287,8 +284,11 @@ void Compositor::eventLoop() {
             }
         }
 
-        // This calls the m_redrawTimer, which actually draws the screens.
-        FbTk::Timer::updateTimers(XConnectionNumber(display()));
+        if (m_timer.newElapsedTicks() > 0) {
+            for (size_t i = 0; i < m_screens.size(); i++) {
+                m_screens[i]->renderScreen();
+            }
+        }
 
         fbLog_debug << m_screens.size() << " screen(s) available." << std::endl;
         for (size_t i = 0; i < m_screens.size(); i++) {
@@ -300,13 +300,6 @@ void Compositor::eventLoop() {
 
 
 //--- INTERNAL FUNCTIONS -----------------------------------------------
-
-// Render the screens.
-void Compositor::renderScreens() {
-    for (size_t i = 0; i < m_screens.size(); i++) {
-        m_screens[i]->renderScreen();
-    }
-}
 
 // Locates the screen an event affects. Returns -1 on failure.
 int Compositor::screenOfEvent(const XEvent &event) {

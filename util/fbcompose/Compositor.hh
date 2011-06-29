@@ -30,10 +30,9 @@
 #include "CompositorConfig.hh"
 #include "Constants.hh"
 #include "Exceptions.hh"
+#include "Timer.hh"
 
 #include "FbTk/App.hh"
-#include "FbTk/Command.hh"
-#include "FbTk/Timer.hh"
 
 #include <X11/Xlib.h>
 
@@ -47,6 +46,7 @@ namespace FbCompositor {
     class CompositorConfig;
     class InitException;
     class RuntimeException;
+    class Timer;
 
 
     //--- TYPEDEFS -------------------------------------------------------------
@@ -103,22 +103,6 @@ namespace FbCompositor {
         Compositor operator=(const Compositor&);
 
 
-        //--- COMMANDS ---------------------------------------------------------
-
-        /** A command that renders the screens. */
-        class RenderScreensCommand : public FbTk::Command<void> {
-        public :
-            RenderScreensCommand(Compositor *instance) {
-                m_instance = instance;
-            }
-            void execute() {
-                m_instance->renderScreens();
-            }
-        private :
-            Compositor *m_instance;
-        };
-
-
         //--- INITIALIZATION FUNCTIONS -----------------------------------------
 
         /** Acquire the ownership of compositing manager selections. */
@@ -138,9 +122,6 @@ namespace FbCompositor {
 
         //--- INTERNAL FUNCTIONS -----------------------------------------------
 
-        /** Render the screens. */
-        void renderScreens();
-
         /** Locates the screen an event affects. Returns -1 on failure. */
         int screenOfEvent(const XEvent &event);
 
@@ -148,7 +129,7 @@ namespace FbCompositor {
         //--- COMPOSITOR VARIABLES ---------------------------------------------
 
         /** A timer that controls when the screen is redrawn. */
-        FbTk::Timer m_redrawTimer;
+        Timer m_timer;
 
         /** Rendering mode in use. */
         RenderingMode m_renderingMode;

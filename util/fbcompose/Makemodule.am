@@ -48,6 +48,7 @@ fbcompose_SOURCES = \
 	util/fbcompose/OpenGLWindow.hh util/fbcompose/OpenGLWindow.cc \
 	util/fbcompose/PluginManager.hh util/fbcompose/PluginManager.cc \
 	util/fbcompose/ServerAutoApp.hh util/fbcompose/ServerAutoApp.cc \
+	util/fbcompose/Timer.hh util/fbcompose/Timer.cc \
 	util/fbcompose/Utility.hh util/fbcompose/Utility.cc \
 	util/fbcompose/XRenderScreen.hh util/fbcompose/XRenderScreen.cc \
 	util/fbcompose/XRenderWindow.hh util/fbcompose/XRenderWindow.cc

@@ -39,9 +39,7 @@ namespace {
 
     /** Plugin's vertex shader source. */
     static const GLchar VERTEX_SHADER[] = "\
-        void fade() {                                                        \n\
-            gl_Position *= vec4(0.5, 0.5, 1.0, 1.0);                         \n\
-        }                                                                    \n\
+        void fade() { }                                                      \n\
     ";
 }
 
