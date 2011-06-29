@@ -49,11 +49,15 @@ using namespace FbCompositor;
 
 // Macro that eases plugin iteration.
 #define forEachPlugin(i, plugin)                                                       \
+    (plugin) = ((pluginManager().plugins().size() > 0)                                 \
+                   ? (dynamic_cast<OpenGLPlugin*>(pluginManager().plugins()[0]))       \
+                   : NULL);                                                            \
     for(size_t (i) = 0;                                                                \
-        (((i) < pluginManager().plugins().size())                                      \
-            ? ((plugin) = dynamic_cast<OpenGLPlugin*>(pluginManager().plugins()[(i)])) \
-            : false);                                                                  \
-        (i)++)
+        ((i) < pluginManager().plugins().size());                                      \
+        (i)++,                                                                         \
+        (plugin) = (((i) < pluginManager().plugins().size())                           \
+                       ? (dynamic_cast<OpenGLPlugin*>(pluginManager().plugins()[(i)])) \
+                       : NULL))
 
 
 //--- CONSTANTS ----------------------------------------------------------------
@@ -311,7 +315,6 @@ void OpenGLScreen::initShaders() throw(InitException) {
         ss << plugin->pluginName() << "();\n";
     }
     ss << OpenGLShaders::vertexShaderTail();
-    std::cout << ss.str();
     m_vertexShader = createShader(GL_VERTEX_SHADER, ss.str().length(), ss.str().c_str());
 
     // Assemble fragment shader.
