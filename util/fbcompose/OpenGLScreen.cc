@@ -591,6 +591,8 @@ void OpenGLScreen::renderWindow(OpenGLWindow &window) {
 // A function to render something onto the screen.
 void OpenGLScreen::render(GLenum renderingMode, GLuint primPosBuffer, GLuint texturePosBuffer,
                           GLuint elementBuffer, GLuint elementCount, GLuint texture, GLfloat alpha) {
+    OpenGLPlugin *plugin = NULL;
+
     // Attribute locations.
     static GLuint texPosAttrib = glGetAttribLocation(m_shaderProgram, "fb_InitTexCoord");
     static GLuint windowPosAttrib = glGetAttribLocation(m_shaderProgram, "fb_InitPointPos");
@@ -618,13 +620,24 @@ void OpenGLScreen::render(GLenum renderingMode, GLuint primPosBuffer, GLuint tex
     glBindTexture(GL_TEXTURE_2D, texture);
     glUniform1i(texturePos, 0);
 
-    // Render stuff.
+    // Final setup.
     if (m_haveDoubleBuffering) {
         glDrawBuffer(GL_BACK);
     }
     glViewport(0, 0, rootWindow().width(), rootWindow().height());
 
+    // Pre-render plugin code.
+    forEachPlugin(i, plugin) {
+        plugin->preRenderActions();
+    }
+
+    // Render stuff.
     glDrawElements(renderingMode, elementCount, GL_UNSIGNED_SHORT, (void*)0);
+
+    // Post-render plugin code.
+    forEachPlugin(i, plugin) {
+        plugin->postRenderActions();
+    }
 
     // Cleanup.
     glDisableVertexAttribArray(windowPosAttrib);

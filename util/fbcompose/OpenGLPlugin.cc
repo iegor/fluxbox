@@ -34,3 +34,12 @@ OpenGLPlugin::OpenGLPlugin(const std::vector<FbTk::FbString> &args) throw(InitEx
 
 // Destructor.
 OpenGLPlugin::~OpenGLPlugin() { }
+
+
+//--- PLUGIN ACTIONS -----------------------------------------------------------
+
+// Pre-rendering actions (uniform setup etc).
+void OpenGLPlugin::preRenderActions() throw() { }
+
+// Post-rendering actions (plugin-specific cleanup etc).
+void OpenGLPlugin::postRenderActions() throw() { }

@@ -64,6 +64,15 @@ namespace FbCompositor {
 
         /** \returns the additional source code for the vertex shader. */
         const char *vertexShader() const throw();
+
+
+        //--- PLUGIN ACTIONS ---------------------------------------------------
+
+        /** Pre-rendering actions (uniform setup etc). */
+        void preRenderActions() throw();
+
+        /** Post-rendering actions (plugin-specific cleanup etc). */
+        void postRenderActions() throw();
     };
 
 

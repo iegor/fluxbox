@@ -70,6 +70,15 @@ const char *TestPlugin::vertexShader() const throw() {
 }
 
 
+//--- PLUGIN ACTIONS -----------------------------------------------------------
+
+// Pre-rendering actions (uniform setup etc).
+void TestPlugin::preRenderActions() throw() { }
+
+// Post-rendering actions (plugin-specific cleanup etc).
+void TestPlugin::postRenderActions() throw() { }
+
+
 //--- PLUGIN MANAGER FUNCTIONS -------------------------------------------------
 
 // Creates a plugin object.
