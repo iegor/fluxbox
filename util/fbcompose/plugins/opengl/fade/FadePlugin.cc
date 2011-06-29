@@ -1,4 +1,4 @@
-/** TestPlugin.cc file for the fluxbox compositor. */
+/** FadePlugin.cc file for the fluxbox compositor. */
 
 // Copyright (c) 2011 Gediminas Liktaras (gliktaras at gmail dot com)
 //
@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include "TestPlugin.hh"
+#include "FadePlugin.hh"
 
 #include <GL/gl.h>
 
@@ -32,14 +32,14 @@ namespace {
 
     /** Plugin's fragment shader source. */
     static const GLchar FRAGMENT_SHADER[] = "\
-        void Test() {                                                        \n\
+        void fade() {                                                        \n\
             gl_FragColor *= vec4(1.0, 0.5, 0.5, 1.0);                        \n\
         }                                                                    \n\
     ";
 
     /** Plugin's vertex shader source. */
     static const GLchar VERTEX_SHADER[] = "\
-        void Test() {                                                        \n\
+        void fade() {                                                        \n\
             gl_Position *= vec4(0.5, 0.5, 1.0, 1.0);                         \n\
         }                                                                    \n\
     ";
@@ -49,23 +49,23 @@ namespace {
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-TestPlugin::TestPlugin(const std::vector<FbTk::FbString> &args) throw(InitException) :
+FadePlugin::FadePlugin(const std::vector<FbTk::FbString> &args) throw(InitException) :
     OpenGLPlugin(args) {
 }
 
 // Destructor.
-TestPlugin::~TestPlugin() { }
+FadePlugin::~FadePlugin() { }
 
 
 //--- ACCESSORS ----------------------------------------------------------------
 
 // Returns the additional source code for the fragment shader.
-const char *TestPlugin::fragmentShader() const throw() {
+const char *FadePlugin::fragmentShader() const throw() {
     return FRAGMENT_SHADER;
 }
 
 // Returns the additional source code for the vertex shader.
-const char *TestPlugin::vertexShader() const throw() {
+const char *FadePlugin::vertexShader() const throw() {
     return VERTEX_SHADER;
 }
 
@@ -73,17 +73,17 @@ const char *TestPlugin::vertexShader() const throw() {
 //--- PLUGIN ACTIONS -----------------------------------------------------------
 
 // Pre-rendering actions (uniform setup etc).
-void TestPlugin::preRenderActions() throw() { }
+void FadePlugin::preRenderActions() throw() { }
 
 // Post-rendering actions (plugin-specific cleanup etc).
-void TestPlugin::postRenderActions() throw() { }
+void FadePlugin::postRenderActions() throw() { }
 
 
 //--- PLUGIN MANAGER FUNCTIONS -------------------------------------------------
 
 // Creates a plugin object.
 extern "C" BasePlugin *createPlugin(const std::vector<FbTk::FbString> &args) {
-    return new TestPlugin(args);
+    return new FadePlugin(args);
 }
 
 // Returns plugin's type.

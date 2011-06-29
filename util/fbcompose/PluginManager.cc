@@ -131,12 +131,30 @@ std::vector<FbTk::FbString> PluginManager::buildPluginPaths(const FbTk::FbString
     std::stringstream ss;
     std::vector<FbTk::FbString> paths;
 
-    // TODO: More paths.
+    FbTk::FbString typeDir = "";
+    if (m_pluginType == Plugin_OpenGL) {
+        typeDir = "opengl/";
+    } else if (m_pluginType == Plugin_XRender) {
+        typeDir = "xrender/";
+    }
+
+    ss << "./plugins/" << typeDir << name << "/.libs/lib" << name << ".so";
+    paths.push_back(ss.str());
+    ss.str("");
+
+    ss << "./plugins/" << typeDir << name << "/lib" << name << ".so";
+    paths.push_back(ss.str());
+    ss.str("");
+
+    ss << "./plugins/" << typeDir << "lib" << name << ".so";
+    paths.push_back(ss.str());
+    ss.str("");
+
     ss << "./lib" << name << ".so";
     paths.push_back(ss.str());
     ss.str("");
 
-    paths.push_back(name);  // Temporary.
+    paths.push_back(name);
 
     return paths;
 }

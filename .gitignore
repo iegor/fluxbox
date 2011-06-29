@@ -1,5 +1,9 @@
 # Wildcard + in any subdir.
 *.o
+*.la
+.libs
+*.lo
+.*.sw[a-p]
 
 # Exact filename in any subdir.
 .deps
@@ -50,4 +54,3 @@ Makefile.in
 /util/fbcompose/fbcompose
 /version.h
 tags
-.*.sw[a-p]

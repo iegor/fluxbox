@@ -1,4 +1,4 @@
-/** TestPlugin.hh file for the fluxbox compositor. */
+/** FadePlugin.hh file for the fluxbox compositor. */
 
 // Copyright (c) 2011 Gediminas Liktaras (gliktaras at gmail dot com)
 //
@@ -20,8 +20,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifndef FBCOMPOSITOR_TESTPLUGIN_HH
-#define FBCOMPOSITOR_TESTPLUGIN_HH
+#ifndef FBCOMPOSITOR_PLUGIN_OPENGL_FADE_FADEPLUGIN_HH
+#define FBCOMPOSITOR_PLUGIN_OPENGL_FADE_FADEPLUGIN_HH
+
+#include "config.h"
+
+#ifdef USE_OPENGL_COMPOSITING
+
 
 #include "Constants.hh"
 #include "Exceptions.hh"
@@ -34,23 +39,23 @@
 
 namespace FbCompositor {
 
+    class FadePlugin;
     class InitException;
     class OpenGLPlugin;
-    class TestPlugin;
 
     /**
      * A simple plugin for testing purposes. Will be removed or replaced with a
      * better fitting example.
      */
-    class TestPlugin : public OpenGLPlugin {
+    class FadePlugin : public OpenGLPlugin {
     public :
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        TestPlugin(const std::vector<FbTk::FbString> &args) throw(InitException);
+        FadePlugin(const std::vector<FbTk::FbString> &args) throw(InitException);
 
         /** Destructor. */
-        virtual ~TestPlugin();
+        virtual ~FadePlugin();
 
 
         //--- ACCESSORS --------------------------------------------------------
@@ -79,8 +84,8 @@ namespace FbCompositor {
     //--- INLINE FUNCTIONS -----------------------------------------------------
 
     // Returns the name of the plugin.
-    inline const char *TestPlugin::pluginName() const throw() {
-        return "Test";
+    inline const char *FadePlugin::pluginName() const throw() {
+        return "fade";
     }
 }
 
@@ -94,4 +99,6 @@ extern "C" FbCompositor::BasePlugin *createPlugin(const std::vector<FbTk::FbStri
 extern "C" FbCompositor::PluginType pluginType();
 
 
-#endif  // FBCOMPOSITOR_TESTPLUGIN_HH
+#endif  // USE_OPENGL_COMPOSITING
+
+#endif  // FBCOMPOSITOR_PLUGIN_OPENGL_FADE_FADEPLUGIN_HH

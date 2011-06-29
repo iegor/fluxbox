@@ -9,6 +9,7 @@ AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 AC_USE_SYSTEM_EXTENSIONS
 AM_INIT_AUTOMAKE([foreign 1.10 tar-pax dist-bzip2 subdir-objects])
+LT_INIT
 
 dnl Determine default prefix
 AS_IF([test "x$prefix" = "xNONE"], [prefix="$ac_default_prefix"])
@@ -187,7 +188,7 @@ AC_COMPILE_IFELSE([
 
 dnl Check for compositor features
 AC_CHECK_LIB([Xcomposite],[XCompositeRedirectSubwindows])
-LDFLAGS="$LDFLAGS -Wl,-export-dynamic"
+LDFLAGS="$LDFLAGS -export-dynamic"
 
 enableval="yes"
 AC_MSG_CHECKING([whether to have XRender compositing support])
