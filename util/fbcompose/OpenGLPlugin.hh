@@ -35,6 +35,9 @@
 
 #include "FbTk/FbString.hh"
 
+#include <GL/glew.h>
+#include <GL/gl.h>
+
 #include <vector>
 
 
@@ -70,10 +73,10 @@ namespace FbCompositor {
         //--- PLUGIN ACTIONS ---------------------------------------------------
 
         /** Pre-rendering actions (uniform setup etc). */
-        virtual void preRenderActions() throw();
+        virtual void preRenderActions(GLuint shaderProgram) throw();
 
         /** Post-rendering actions (plugin-specific cleanup etc). */
-        virtual void postRenderActions() throw();
+        virtual void postRenderActions(GLuint shaderProgram) throw();
     };
 }
 

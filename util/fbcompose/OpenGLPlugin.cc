@@ -39,7 +39,7 @@ OpenGLPlugin::~OpenGLPlugin() { }
 //--- PLUGIN ACTIONS -----------------------------------------------------------
 
 // Pre-rendering actions (uniform setup etc).
-void OpenGLPlugin::preRenderActions() throw() { }
+void OpenGLPlugin::preRenderActions(GLuint /*shaderProgram*/) throw() { }
 
 // Post-rendering actions (plugin-specific cleanup etc).
-void OpenGLPlugin::postRenderActions() throw() { }
+void OpenGLPlugin::postRenderActions(GLuint /*shaderProgram*/) throw() { }

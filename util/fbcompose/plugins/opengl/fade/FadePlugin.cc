@@ -22,7 +22,7 @@
 
 #include "FadePlugin.hh"
 
-#include <GL/gl.h>
+#include <iostream>
 
 using namespace FbCompositor;
 
@@ -32,8 +32,10 @@ namespace {
 
     /** Plugin's fragment shader source. */
     static const GLchar FRAGMENT_SHADER[] = "\
+        uniform float fade_Alpha;                                            \n\
+                                                                             \n\
         void fade() {                                                        \n\
-            gl_FragColor *= vec4(1.0, 0.5, 0.5, 1.0);                        \n\
+            gl_FragColor *= vec4(0.9, 0.7, 0.5, 1.0);                        \n\
         }                                                                    \n\
     ";
 
@@ -71,10 +73,26 @@ const char *FadePlugin::vertexShader() const throw() {
 //--- PLUGIN ACTIONS -----------------------------------------------------------
 
 // Pre-rendering actions (uniform setup etc).
-void FadePlugin::preRenderActions() throw() { }
+void FadePlugin::preRenderActions(GLuint shaderProgram) throw() {
+    static GLuint alphaPos = glGetUniformLocation(shaderProgram, "fade_Alpha");
+    glUniform1f(alphaPos, 0.1);
+}
 
 // Post-rendering actions (plugin-specific cleanup etc).
-void FadePlugin::postRenderActions() throw() { }
+void FadePlugin::postRenderActions(GLuint /*shaderProgram*/) throw() { }
+
+
+//--- WINDOW EVENT CALLBACKS ---------------------------------------------------
+
+// Called, whenever a window is mapped.
+void FadePlugin::windowMapped(const BaseCompWindow &window) {
+    std::cout << window.window() << " mapped." << std::endl;
+}
+
+// Called, whenever a window is unmapped.
+void FadePlugin::windowUnmapped(const BaseCompWindow &window) {
+    std::cout << window.window() << " unmapped." << std::endl;
+}
 
 
 //--- PLUGIN MANAGER FUNCTIONS -------------------------------------------------

@@ -34,6 +34,9 @@
 
 #include "FbTk/FbString.hh"
 
+#include <GL/glew.h>
+#include <GL/gl.h>
+
 #include <vector>
 
 
@@ -74,10 +77,19 @@ namespace FbCompositor {
         //--- PLUGIN ACTIONS ---------------------------------------------------
 
         /** Pre-rendering actions (uniform setup etc). */
-        void preRenderActions() throw();
+        void preRenderActions(GLuint shaderProgram) throw();
 
         /** Post-rendering actions (plugin-specific cleanup etc). */
-        void postRenderActions() throw();
+        void postRenderActions(GLuint shaderProgram) throw();
+
+
+        //--- WINDOW EVENT CALLBACKS -------------------------------------------
+
+        /** Called, whenever a window is mapped. */
+        void windowMapped(const BaseCompWindow &window);
+
+        /** Called, whenever a window is unmapped. */
+        void windowUnmapped(const BaseCompWindow &window);
     };
 
 

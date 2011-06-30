@@ -628,7 +628,7 @@ void OpenGLScreen::render(GLenum renderingMode, GLuint primPosBuffer, GLuint tex
 
     // Pre-render plugin code.
     forEachPlugin(i, plugin) {
-        plugin->preRenderActions();
+        plugin->preRenderActions(m_shaderProgram);
     }
 
     // Render stuff.
@@ -636,7 +636,7 @@ void OpenGLScreen::render(GLenum renderingMode, GLuint primPosBuffer, GLuint tex
 
     // Post-render plugin code.
     forEachPlugin(i, plugin) {
-        plugin->postRenderActions();
+        plugin->postRenderActions(m_shaderProgram);
     }
 
     // Cleanup.
