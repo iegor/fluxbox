@@ -26,16 +26,20 @@
 
 #include "config.h"
 
+#include "BaseCompWindow.hh"
 #include "Constants.hh"
 #include "Exceptions.hh"
 
 #include "FbTk/FbString.hh"
+
+#include <X11/Xlib.h>
 
 #include <vector>
 
 
 namespace FbCompositor {
 
+    class BaseCompWindow;
     class BasePlugin;
     class InitException;
 
@@ -58,6 +62,33 @@ namespace FbCompositor {
 
         /** \returns the name of the plugin. */
         virtual const char *pluginName() const throw() = 0;
+
+
+        //--- WINDOW EVENT CALLBACKS -------------------------------------------
+
+        /** Called, whenever a new window is created. */
+        virtual void windowCreated(const BaseCompWindow &window);
+
+        /** Called, whenever a window is damaged. */
+        virtual void windowDamaged(const BaseCompWindow &window);
+
+        /** Called, whenever a window is destroyed. */
+        virtual void windowDestroyed(const BaseCompWindow &window);
+
+        /** Called, whenever a window is mapped. */
+        virtual void windowMapped(const BaseCompWindow &window);
+
+        /** Called, whenever window's property is changed. */
+        virtual void windowPropertyChanged(const BaseCompWindow &window, Atom property, int state);
+
+        /** Called, whenever a window is reconfigured. */
+        virtual void windowReconfigured(const BaseCompWindow &window);
+
+        /** Called, whenever window's shape changes. */
+        virtual void windowShapeChanged(const BaseCompWindow &window);
+
+        /** Called, whenever a window is unmapped. */
+        virtual void windowUnmapped(const BaseCompWindow &window);
     };
 }
 

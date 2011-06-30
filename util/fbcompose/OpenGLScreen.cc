@@ -47,7 +47,7 @@ using namespace FbCompositor;
 
 //--- MACROS -------------------------------------------------------------------
 
-// Macro that eases plugin iteration.
+// Macro for plugin iteration.
 #define forEachPlugin(i, plugin)                                                       \
     (plugin) = ((pluginManager().plugins().size() > 0)                                 \
                    ? (dynamic_cast<OpenGLPlugin*>(pluginManager().plugins()[0]))       \

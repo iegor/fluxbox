@@ -32,3 +32,30 @@ BasePlugin::BasePlugin(const std::vector<FbTk::FbString> &/*args*/) throw(InitEx
 
 // Destructor.
 BasePlugin::~BasePlugin() { }
+
+
+//--- WINDOW EVENT CALLBACKS ---------------------------------------------------
+
+// Called, whenever a new window is created.
+void BasePlugin::windowCreated(const BaseCompWindow &/*window*/) { }
+
+// Called, whenever a window is damaged.
+void BasePlugin::windowDamaged(const BaseCompWindow &/*window*/) { }
+
+// Called, whenever a window is destroyed.
+void BasePlugin::windowDestroyed(const BaseCompWindow &/*window*/) { }
+
+// Called, whenever a window is mapped.
+void BasePlugin::windowMapped(const BaseCompWindow &/*window*/) { }
+
+// Called, whenever window's property is changed.
+void BasePlugin::windowPropertyChanged(const BaseCompWindow &/*window*/, Atom /*property*/, int /*state*/) { }
+
+// Called, whenever a window is reconfigured.
+void BasePlugin::windowReconfigured(const BaseCompWindow &/*window*/) { }
+
+// Called, whenever window's shape changes.
+void BasePlugin::windowShapeChanged(const BaseCompWindow &/*window*/) { }
+
+// Called, whenever a window is unmapped.
+void BasePlugin::windowUnmapped(const BaseCompWindow &/*window*/) { }
