@@ -33,7 +33,9 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Costructor.
-PluginManager::PluginManager(PluginType pluginType) throw(InitException) {
+PluginManager::PluginManager(PluginType pluginType, const BaseScreen &screen) throw(InitException) :
+    m_screen(screen) {
+
     m_pluginType = pluginType;
 }
 
@@ -60,7 +62,7 @@ void PluginManager::createPluginObject(FbTk::FbString name, std::vector<FbTk::Fb
     }
 
     CreatePluginFunction createFunction = m_pluginLibs.find(name)->second.createFunction;
-    BasePlugin *newPluginObject = (*createFunction)(args);
+    BasePlugin *newPluginObject = (*createFunction)(m_screen, args);
     m_pluginObjects.push_back(newPluginObject);
 }
 

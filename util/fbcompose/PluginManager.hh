@@ -38,6 +38,7 @@
 namespace FbCompositor {
 
     class BasePlugin;
+    class BaseScreen;
     class InitException;
     class PluginManager;
     class RuntimeException;
@@ -46,7 +47,7 @@ namespace FbCompositor {
     //--- TYPEDEFS -------------------------------------------------------------
 
     /** A pointer to a function that creates a plugin class instance. */
-    typedef BasePlugin* (*CreatePluginFunction)(const std::vector<FbTk::FbString>&);
+    typedef BasePlugin* (*CreatePluginFunction)(const BaseScreen&, const std::vector<FbTk::FbString>&);
 
     /** A pointer to a function that returns the rendering mode the plugin operates in. */
     typedef PluginType (*PluginTypeFunction)();
@@ -62,7 +63,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        PluginManager(PluginType pluginType) throw(InitException);
+        PluginManager(PluginType pluginType, const BaseScreen &screen) throw(InitException);
 
         /** Destructor. */
         ~PluginManager();
@@ -116,6 +117,9 @@ namespace FbCompositor {
 
         /** Type of the plugins this object manages. */
         PluginType m_pluginType;
+
+        /** The screen this manager operates on. */
+        const BaseScreen &m_screen;
     };
 
 

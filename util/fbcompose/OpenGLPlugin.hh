@@ -44,6 +44,7 @@
 namespace FbCompositor {
 
     class BasePlugin;
+    class BaseScreen;
     class InitException;
 
 
@@ -55,7 +56,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        OpenGLPlugin(const std::vector<FbTk::FbString> &args) throw(InitException);
+        OpenGLPlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args) throw(InitException);
 
         /** Destructor. */
         ~OpenGLPlugin();

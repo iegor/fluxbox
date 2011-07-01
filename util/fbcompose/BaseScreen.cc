@@ -60,7 +60,7 @@ using namespace FbCompositor;
 // Constructor.
 BaseScreen::BaseScreen(int screenNumber, PluginType pluginType, const CompositorConfig &config) :
     m_display(FbTk::App::instance()->display()),
-    m_pluginManager(pluginType),
+    m_pluginManager(pluginType, *this),
     m_screenNumber(screenNumber),
     m_rootWindow(XRootWindow(m_display, m_screenNumber)) {
 

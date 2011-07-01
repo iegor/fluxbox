@@ -41,6 +41,7 @@ namespace FbCompositor {
 
     class BaseCompWindow;
     class BasePlugin;
+    class BaseScreen;
     class InitException;
 
 
@@ -48,11 +49,11 @@ namespace FbCompositor {
      * Base class for compositor plugins.
      */
     class BasePlugin {
-    public:
+    public :
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        BasePlugin(const std::vector<FbTk::FbString> &args) throw(InitException);
+        BasePlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args) throw(InitException);
 
         /** Destructor. */
         virtual ~BasePlugin();
@@ -62,6 +63,9 @@ namespace FbCompositor {
 
         /** \returns the name of the plugin. */
         virtual const char *pluginName() const throw() = 0;
+
+        /** \returns the screen this plugin operates on. */
+        const BaseScreen &screen() const throw();
 
 
         //--- WINDOW EVENT CALLBACKS -------------------------------------------
@@ -89,7 +93,21 @@ namespace FbCompositor {
 
         /** Called, whenever a window is unmapped. */
         virtual void windowUnmapped(const BaseCompWindow &window);
+
+    private :
+        //--- INTERNAL VARIABLES -----------------------------------------------
+
+        /** The screen this plugin operates on. */
+        const BaseScreen &m_screen;
     };
+
+
+    //--- INLINE FUNCTIONS -----------------------------------------------------
+
+    // Returns the screen this plugin operates on.
+    inline const BaseScreen &BasePlugin::screen() const throw() {
+        return m_screen;
+    }
 }
 
 

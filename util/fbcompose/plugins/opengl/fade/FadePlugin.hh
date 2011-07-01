@@ -42,6 +42,7 @@
 
 namespace FbCompositor {
 
+    class BaseScreen;
     class FadePlugin;
     class InitException;
     class OpenGLPlugin;
@@ -55,7 +56,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        FadePlugin(const std::vector<FbTk::FbString> &args) throw(InitException);
+        FadePlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args) throw(InitException);
 
         /** Destructor. */
         virtual ~FadePlugin();
@@ -105,7 +106,8 @@ namespace FbCompositor {
 //--- PLUGIN MANAGER FUNCTIONS -------------------------------------------------
 
 /** Creates a plugin object. */
-extern "C" FbCompositor::BasePlugin *createPlugin(const std::vector<FbTk::FbString> &args);
+extern "C" FbCompositor::BasePlugin *createPlugin(const FbCompositor::BaseScreen &screen,
+                                                  const std::vector<FbTk::FbString> &args);
 
 /** \returns plugin's type. */
 extern "C" FbCompositor::PluginType pluginType();

@@ -28,8 +28,8 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Costructor.
-OpenGLPlugin::OpenGLPlugin(const std::vector<FbTk::FbString> &args) throw(InitException) :
-    BasePlugin(args) {
+OpenGLPlugin::OpenGLPlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args) throw(InitException) :
+    BasePlugin(screen, args) {
 }
 
 // Destructor.

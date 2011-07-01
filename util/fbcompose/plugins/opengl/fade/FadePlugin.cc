@@ -20,7 +20,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#include "BaseScreen.hh"
 #include "FadePlugin.hh"
+#include "OpenGLScreen.hh"
 
 #include <iostream>
 
@@ -49,8 +51,8 @@ namespace {
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-FadePlugin::FadePlugin(const std::vector<FbTk::FbString> &args) throw(InitException) :
-    OpenGLPlugin(args) {
+FadePlugin::FadePlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args) throw(InitException) :
+    OpenGLPlugin(screen, args) {
 }
 
 // Destructor.
@@ -98,8 +100,8 @@ void FadePlugin::windowUnmapped(const BaseCompWindow &window) {
 //--- PLUGIN MANAGER FUNCTIONS -------------------------------------------------
 
 // Creates a plugin object.
-extern "C" BasePlugin *createPlugin(const std::vector<FbTk::FbString> &args) {
-    return new FadePlugin(args);
+extern "C" BasePlugin *createPlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args) {
+    return new FadePlugin(screen, args);
 }
 
 // Returns plugin's type.

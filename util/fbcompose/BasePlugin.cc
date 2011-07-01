@@ -28,7 +28,9 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Costructor.
-BasePlugin::BasePlugin(const std::vector<FbTk::FbString> &/*args*/) throw(InitException) { }
+BasePlugin::BasePlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &/*args*/) throw(InitException) :
+    m_screen(screen) {
+}
 
 // Destructor.
 BasePlugin::~BasePlugin() { }
