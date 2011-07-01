@@ -42,6 +42,27 @@ Timer::Timer() throw() {
     m_ticksPerSecond = 1.0;
 }
 
+// Copy constructor.
+Timer::Timer(const Timer &other) throw() :
+    m_isRunning(other.m_isRunning),
+    m_startTime(other.m_startTime),
+    m_tickSize(other.m_tickSize),
+    m_ticksPerSecond(other.m_ticksPerSecond),
+    m_observedTicks(other.m_observedTicks) {
+}
+
+// Assignment operator.
+Timer &Timer::operator=(const Timer &other) throw() {
+    if (this != &other) {
+        m_isRunning = other.m_isRunning;
+        m_startTime = other.m_startTime;
+        m_tickSize = other.m_tickSize;
+        m_ticksPerSecond = other.m_ticksPerSecond;
+        m_observedTicks = other.m_observedTicks;
+    }
+    return *this;
+}
+
 // Destructor.
 Timer::~Timer() throw() { }
 

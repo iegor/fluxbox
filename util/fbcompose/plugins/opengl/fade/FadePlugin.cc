@@ -26,6 +26,7 @@
 #include "BaseScreen.hh"
 #include "OpenGLScreen.hh"
 
+#include <algorithm>
 #include <iostream>
 
 using namespace FbCompositor;
@@ -76,26 +77,23 @@ const char *FadePlugin::vertexShader() const throw() {
 
 //--- PLUGIN ACTIONS -----------------------------------------------------------
 
-// Pre-rendering actions (uniform setup etc).
-void FadePlugin::preRenderActions(GLuint shaderProgram) throw() {
-    static GLuint alphaPos = glGetUniformLocation(shaderProgram, "fade_Alpha");
-    glUniform1f(alphaPos, 0.1);
-}
-
-// Post-rendering actions (plugin-specific cleanup etc).
-void FadePlugin::postRenderActions(GLuint /*shaderProgram*/) throw() { }
 
 
 //--- WINDOW EVENT CALLBACKS ---------------------------------------------------
 
 // Called, whenever a window is mapped.
 void FadePlugin::windowMapped(const BaseCompWindow &window) {
-    std::cout << window.window() << " mapped." << std::endl;
+    FadeData fade;
+    fade.alpha = 0;
+    // fade.timer.setTickSize(1000000 / 255);
+    // fade.timer.start();
+
+    m_appearingFades.insert(std::make_pair(window.window(), fade));
 }
 
 // Called, whenever a window is unmapped.
 void FadePlugin::windowUnmapped(const BaseCompWindow &window) {
-    std::cout << window.window() << " unmapped." << std::endl;
+    m_appearingFades.erase(window.window());
 }
 
 

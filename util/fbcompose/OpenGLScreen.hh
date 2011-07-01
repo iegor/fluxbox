@@ -61,6 +61,12 @@ namespace FbCompositor {
         ~OpenGLScreen() throw();
 
 
+        //--- ACCESSORS --------------------------------------------------------
+
+        /** \returns the screen's shader program. */
+        GLuint shaderProgram() const throw();
+
+
         //--- SCREEN MANIPULATION ----------------------------------------------
 
         /** Notifies the screen of the background change. */
@@ -218,6 +224,14 @@ namespace FbCompositor {
         /** Whether we have a double-buffered window. */
         bool m_haveDoubleBuffering;
     };
+
+
+    //--- INLINE FUNCTIONS -------------------------------------------------
+
+    // Returns the screen's shader program.
+    inline GLuint OpenGLScreen::shaderProgram() const throw() {
+        return m_shaderProgram;
+    }
 }
 
 #endif  // USE_OPENGL_COMPOSITING

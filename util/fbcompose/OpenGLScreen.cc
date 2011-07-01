@@ -546,16 +546,26 @@ void OpenGLScreen::renderScreen() {
 
 // A function to render the desktop background.
 void OpenGLScreen::renderBackground() {
+    OpenGLPlugin *plugin = NULL;
+
     if (m_backgroundChanged) {
         updateBackgroundTexture();
     }
 
+    forEachPlugin(i, plugin) {
+        plugin->preBackgroundRenderActions();
+    }
     render(GL_TRIANGLE_STRIP, m_defaultPrimPosBuffer, m_defaultTexPosBuffer, m_defaultElementBuffer,
            4, m_backgroundTexture, 1.0);
+    forEachPlugin(i, plugin) {
+        plugin->postBackgroundRenderActions();
+    }
 }
 
 // Render the reconfigure rectangle.
 void OpenGLScreen::renderReconfigureRect() {
+    OpenGLPlugin *plugin = NULL;
+
     GLfloat xLow, xHigh, yLow, yHigh;
     toOpenGLCoordinates(rootWindow().width(), rootWindow().height(),
             reconfigureRectangle().x, reconfigureRectangle().y, reconfigureRectangle().width, reconfigureRectangle().height,
@@ -568,28 +578,40 @@ void OpenGLScreen::renderReconfigureRect() {
     glEnable(GL_COLOR_LOGIC_OP);
     glLogicOp(GL_XOR);
 
+    forEachPlugin(i, plugin) {
+        plugin->preReconfigureRectRenderActions(reconfigureRectangle());
+    }
     render(GL_LINE_STRIP, m_reconfigureRectLinePosBuffer, m_defaultTexPosBuffer, m_reconfigureRectElementBuffer,
            5, m_blankTexture, 1.0);
+    forEachPlugin(i, plugin) {
+        plugin->postReconfigureRectRenderActions(reconfigureRectangle());
+    }
 
     glDisable(GL_COLOR_LOGIC_OP);
 }
 
 // A function to render a particular window onto the screen.
 void OpenGLScreen::renderWindow(OpenGLWindow &window) {
+    OpenGLPlugin *plugin = NULL;
+
     if (window.isDamaged()) {
         window.updateContents();
     }
 
+    forEachPlugin(i, plugin) {
+        plugin->preWindowRenderActions(window);
+    }
     render(GL_TRIANGLE_STRIP, window.windowPosBuffer(), m_defaultTexPosBuffer, m_defaultElementBuffer,
            4, window.contentTexture(), window.alpha() / 255.0);
+    forEachPlugin(i, plugin) {
+        plugin->postWindowRenderActions(window);
+    }
 }
 
 
 // A function to render something onto the screen.
 void OpenGLScreen::render(GLenum renderingMode, GLuint primPosBuffer, GLuint texturePosBuffer,
                           GLuint elementBuffer, GLuint elementCount, GLuint texture, GLfloat alpha) {
-    OpenGLPlugin *plugin = NULL;
-
     // Attribute locations.
     static GLuint texPosAttrib = glGetAttribLocation(m_shaderProgram, "fb_InitTexCoord");
     static GLuint windowPosAttrib = glGetAttribLocation(m_shaderProgram, "fb_InitPointPos");
@@ -623,18 +645,8 @@ void OpenGLScreen::render(GLenum renderingMode, GLuint primPosBuffer, GLuint tex
     }
     glViewport(0, 0, rootWindow().width(), rootWindow().height());
 
-    // Pre-render plugin code.
-    forEachPlugin(i, plugin) {
-        plugin->preRenderActions(m_shaderProgram);
-    }
-
     // Render stuff.
     glDrawElements(renderingMode, elementCount, GL_UNSIGNED_SHORT, (void*)0);
-
-    // Post-render plugin code.
-    forEachPlugin(i, plugin) {
-        plugin->postRenderActions(m_shaderProgram);
-    }
 
     // Cleanup.
     glDisableVertexAttribArray(windowPosAttrib);

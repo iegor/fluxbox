@@ -32,6 +32,7 @@
 #include "Constants.hh"
 #include "Exceptions.hh"
 #include "OpenGLPlugin.hh"
+// #include "Timer.hh"
 
 #include "FbTk/FbString.hh"
 
@@ -39,6 +40,7 @@
 #include <GL/gl.h>
 
 #include <vector>
+#include <map>
 
 
 namespace FbCompositor {
@@ -54,6 +56,8 @@ namespace FbCompositor {
      * better fitting example.
      */
     class FadePlugin : public OpenGLPlugin {
+        struct FadeData;
+
     public :
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
@@ -79,11 +83,6 @@ namespace FbCompositor {
 
         //--- PLUGIN ACTIONS ---------------------------------------------------
 
-        /** Pre-rendering actions (uniform setup etc). */
-        void preRenderActions(GLuint shaderProgram) throw();
-
-        /** Post-rendering actions (plugin-specific cleanup etc). */
-        void postRenderActions(GLuint shaderProgram) throw();
 
 
         //--- WINDOW EVENT CALLBACKS -------------------------------------------
@@ -93,6 +92,18 @@ namespace FbCompositor {
 
         /** Called, whenever a window is unmapped. */
         void windowUnmapped(const BaseCompWindow &window);
+
+    private :
+        //--- INTERNALS --------------------------------------------------------
+
+        /** Holds the data about fades. */
+        struct FadeData {
+            int alpha;      ///< Window's relative alpha.
+            // Timer timer;    ///< Timer that tracks the current fade.
+        };
+
+        /** A list of appearing fades. */
+        std::map<Window, FadeData> m_appearingFades;
     };
 
 

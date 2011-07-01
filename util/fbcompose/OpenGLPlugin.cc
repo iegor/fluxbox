@@ -23,6 +23,8 @@
 
 #include "OpenGLPlugin.hh"
 
+#include "OpenGLWindow.hh"
+
 using namespace FbCompositor;
 
 
@@ -39,8 +41,20 @@ OpenGLPlugin::~OpenGLPlugin() throw() { }
 
 //--- PLUGIN ACTIONS -----------------------------------------------------------
 
-// Pre-rendering actions (uniform setup etc).
-void OpenGLPlugin::preRenderActions(GLuint /*shaderProgram*/) throw() { }
+// Pre background rendering actions.
+void OpenGLPlugin::preBackgroundRenderActions() { }
 
-// Post-rendering actions (plugin-specific cleanup etc).
-void OpenGLPlugin::postRenderActions(GLuint /*shaderProgram*/) throw() { }
+// Post background rendering actions.
+void OpenGLPlugin::postBackgroundRenderActions() { }
+
+// Pre window rendering actions.
+void OpenGLPlugin::preReconfigureRectRenderActions(XRectangle /*reconfigureRect*/) { }
+
+// Post window rendering actions.
+void OpenGLPlugin::postReconfigureRectRenderActions(XRectangle /*reconfigureRect*/) { }
+
+// Pre window rendering actions.
+void OpenGLPlugin::preWindowRenderActions(const OpenGLWindow &/*window*/) { }
+
+// Post window rendering actions.
+void OpenGLPlugin::postWindowRenderActions(const OpenGLWindow &/*window*/) { }

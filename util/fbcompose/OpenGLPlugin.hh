@@ -38,6 +38,8 @@
 #include <GL/glew.h>
 #include <GL/gl.h>
 
+#include <X11/Xlib.h>
+
 #include <vector>
 
 
@@ -46,13 +48,14 @@ namespace FbCompositor {
     class BasePlugin;
     class BaseScreen;
     class InitException;
+    class OpenGLWindow;
 
 
     /**
      * Plugin for OpenGL renderer.
      */
     class OpenGLPlugin : public BasePlugin {
-    public:
+    public :
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
@@ -71,13 +74,25 @@ namespace FbCompositor {
         virtual const char *vertexShader() const throw() = 0;
 
 
-        //--- PLUGIN ACTIONS ---------------------------------------------------
+        //--- RENDERING ACTIONS ------------------------------------------------
 
-        /** Pre-rendering actions (uniform setup etc). */
-        virtual void preRenderActions(GLuint shaderProgram) throw();
+        /** Pre background rendering actions. */
+        virtual void preBackgroundRenderActions();
 
-        /** Post-rendering actions (plugin-specific cleanup etc). */
-        virtual void postRenderActions(GLuint shaderProgram) throw();
+        /** Post background rendering actions. */
+        virtual void postBackgroundRenderActions();
+
+        /** Pre window rendering actions. */
+        virtual void preReconfigureRectRenderActions(XRectangle reconfigureRect);
+
+        /** Post window rendering actions. */
+        virtual void postReconfigureRectRenderActions(XRectangle reconfigureRect);
+
+        /** Pre window rendering actions. */
+        virtual void preWindowRenderActions(const OpenGLWindow &window);
+
+        /** Post window rendering actions. */
+        virtual void postWindowRenderActions(const OpenGLWindow &window);
     };
 }
 

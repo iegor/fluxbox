@@ -51,6 +51,12 @@ namespace FbCompositor {
         /** Constructor. */
         Timer() throw();
 
+        /** Copy constructor. */
+        Timer(const Timer &other) throw();
+
+        /** Assignment operator. */
+        Timer &operator=(const Timer &other) throw();
+
         /** Destructor. */
         ~Timer() throw();
 
@@ -85,15 +91,6 @@ namespace FbCompositor {
 
 
     private:
-        //--- CONSTRUCTORS -----------------------------------------------------
-
-        /** Copy constructor. */
-        Timer(const Timer&);
-
-        /** Assignment operator. */
-        Timer &operator=(const Timer&);
-
-
         //--- CONSTANTS --------------------------------------------------------
 
         /** The accuracy of the timer (1.0 = 1 second). */
