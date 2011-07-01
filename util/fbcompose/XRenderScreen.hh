@@ -20,6 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+
 #ifndef FBCOMPOSITOR_XRENDERSCREEN_HH
 #define FBCOMPOSITOR_XRENDERSCREEN_HH
 
@@ -29,8 +30,6 @@
 
 
 #include "BaseScreen.hh"
-#include "CompositorConfig.hh"
-#include "XRenderWindow.hh"
 
 #include <X11/extensions/Xrender.h>
 #include <X11/Xlib.h>
@@ -41,6 +40,7 @@ namespace FbCompositor {
     class BaseScreen;
     class CompositorConfig;
     class XRenderScreen;
+    class XRenderWindow;
 
 
     /**
@@ -51,25 +51,25 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        XRenderScreen(int screenNumber, const CompositorConfig &config);
+        XRenderScreen(int screenNumber, const CompositorConfig &config) throw(InitException);
 
         /** Destructor. */
-        ~XRenderScreen();
+        ~XRenderScreen() throw();
 
 
         //--- SCREEN MANIPULATION ----------------------------------------------
 
         /** Notifies the screen of a background change. */
-        void setRootPixmapChanged();
+        void setRootPixmapChanged() throw();
 
         /** Notifies the screen of a root window change. */
-        void setRootWindowSizeChanged();
+        void setRootWindowSizeChanged() throw();
 
 
         //--- SCREEN RENDERING -------------------------------------------------
 
         /** Renders the screen's contents. */
-        void renderScreen();
+        void renderScreen() throw();
 
 
     protected:
@@ -86,28 +86,28 @@ namespace FbCompositor {
         void initRenderingSurface() throw(InitException);
 
         /** Initializes background picture. */
-        void initBackgroundPicture();
+        void initBackgroundPicture() throw();
 
 
         //--- SCREEN MANIPULATION ----------------------------------------------
 
         /** Update the background picture. */
-        void updateBackgroundPicture();
+        void updateBackgroundPicture() throw();
 
 
         //--- RENDERING FUNCTIONS ----------------------------------------------
 
         /** Render the desktop wallpaper. */
-        void renderBackground();
+        void renderBackground() throw();
 
         /** Render the reconfigure rectangle. */
-        void renderReconfigureRect();
+        void renderReconfigureRect() throw();
 
         /** Render a particular window onto the screen. */
-        void renderWindow(XRenderWindow &window);
+        void renderWindow(XRenderWindow &window) throw();
 
         /** Swap back and front buffers. */
-        void swapBuffers();
+        void swapBuffers() throw();
 
 
         //--- MAIN RENDERING-RELATED VARIABLES ---------------------------------

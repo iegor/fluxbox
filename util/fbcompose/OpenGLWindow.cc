@@ -20,12 +20,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+
 #include "OpenGLWindow.hh"
 
 #ifdef USE_OPENGL_COMPOSITING
 
 
-#include "Compositor.hh"
+#include "BaseScreen.hh"
 #include "Logging.hh"
 #include "Utility.hh"
 
@@ -39,28 +40,30 @@ using namespace FbCompositor;
 
 //--- CONSTANTS ----------------------------------------------------------------
 
+namespace {
+
 #ifdef GLXEW_EXT_texture_from_pixmap
-
-// Attributes of the contents' GLX pixmap.
-const int OpenGLWindow::TEX_PIXMAP_ATTRIBUTES[] = {
-    GLX_TEXTURE_TARGET_EXT, GLX_TEXTURE_2D_EXT,
-    GLX_TEXTURE_FORMAT_EXT, GLX_TEXTURE_FORMAT_RGBA_EXT,
-    None
-};
-
+    // Attributes of the contents' GLX pixmap.
+    static const int TEX_PIXMAP_ATTRIBUTES[] = {
+        GLX_TEXTURE_TARGET_EXT, GLX_TEXTURE_2D_EXT,
+        GLX_TEXTURE_FORMAT_EXT, GLX_TEXTURE_FORMAT_RGBA_EXT,
+        None
+    };
 #endif  // GLXEW_EXT_texture_from_pixmap
+
+}
 
 
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-OpenGLWindow::OpenGLWindow(Window windowXID, GLXFBConfig fbConfig) throw(InitException) :
-    BaseCompWindow(windowXID) {
+OpenGLWindow::OpenGLWindow(const BaseScreen &screen, Window windowXID, GLXFBConfig fbConfig) throw(InitException) :
+    BaseCompWindow(screen, windowXID) {
 
     m_fbConfig = fbConfig;
     m_shapePixmap = None;
-    m_rootWidth = compositorInstance()->getScreen(screenNumber()).rootWindow().width();
-    m_rootHeight = compositorInstance()->getScreen(screenNumber()).rootWindow().height();
+    m_rootWidth = screen.rootWindow().width();
+    m_rootHeight = screen.rootWindow().height();
 
     // Create OpenGL elements.
     glGenTextures(1, &m_contentTexture);
@@ -99,13 +102,6 @@ OpenGLWindow::~OpenGLWindow() throw() {
 
 
 //--- WINDOW UPDATE FUNCTIONS ------------------------------------------
-
-// Sets a new root window size.
-void OpenGLWindow::setRootWindowSize(unsigned int width, unsigned int height) throw() {
-    m_rootWidth = width;
-    m_rootHeight = height;
-    updateWindowPosArray();
-}
 
 // Updates the window's contents.
 void OpenGLWindow::updateContents() throw(RuntimeException) {
@@ -147,7 +143,7 @@ void OpenGLWindow::updateContents() throw(RuntimeException) {
         XImage *image = XGetImage(display(), m_shapePixmap, 0, 0, realWidth(), realHeight(), AllPlanes, ZPixmap);
         if (!image) {
             fbLog_warn << "Cannot create XImage for window " << std::hex << window()
-                       << ". It's probably nothing - skipping." << std::endl;
+                       << ". It's probably nothing." << std::endl;
             return;
         }
 
@@ -163,8 +159,14 @@ void OpenGLWindow::updateContents() throw(RuntimeException) {
     clearDamage();
 }
 
+// Updates window's geometry.
+void OpenGLWindow::updateGeometry(const XConfigureEvent &event) throw() {
+    BaseCompWindow::updateGeometry(event);
+    updateWindowPosArray();
+}
+
 // Updates the window's shape.
-void OpenGLWindow::updateShape() {
+void OpenGLWindow::updateShape() throw(RuntimeException) {
     BaseCompWindow::updateShape();
 
     if (m_shapePixmap) {
@@ -191,20 +193,11 @@ void OpenGLWindow::updateShape() {
     XFreeGC(display(), gc);
 }
 
-// Updates window's geometry.
-void OpenGLWindow::updateGeometry(const XConfigureEvent &event) throw() {
-    BaseCompWindow::updateGeometry(event);
-    updateWindowPosArray();
-}
-
-
-//--- INTERNAL FUNCTIONS -------------------------------------------------------
-
 // Updates the window position vertex array.
 void OpenGLWindow::updateWindowPosArray() throw() {
     GLfloat xLow, xHigh, yLow, yHigh;
-    toOpenGLCoordinates(m_rootWidth, m_rootHeight, x(), y(), realWidth(),
-                        realHeight(), &xLow, &xHigh, &yLow, &yHigh);
+    toOpenGLCoordinates(screen().rootWindow().width(), screen().rootWindow().height(),
+                        x(), y(), realWidth(), realHeight(), &xLow, &xHigh, &yLow, &yHigh);
 
     m_windowPosArray[0] = m_windowPosArray[4] = xLow;
     m_windowPosArray[2] = m_windowPosArray[6] = xHigh;

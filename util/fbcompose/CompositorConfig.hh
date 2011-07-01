@@ -42,6 +42,7 @@ namespace FbCompositor {
     class CompositorConfig;
     class ConfigException;
 
+
     /**
      * Handles the compositor's configuration.
      *
@@ -53,8 +54,14 @@ namespace FbCompositor {
     public:
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
-        /** The constructor. */
+        /** Constructor. */
         CompositorConfig(std::vector<FbTk::FbString> args) throw(ConfigException);
+
+        /** Copy constructor. */
+        CompositorConfig(const CompositorConfig &other) throw();
+
+        /** Assignment operator. */
+        CompositorConfig &operator=(const CompositorConfig &other) throw();
 
         /** Destructor. */
         ~CompositorConfig() throw();
@@ -95,7 +102,7 @@ namespace FbCompositor {
         //--- INTERNAL FUNCTIONS -----------------------------------------------
 
         /** Make the first scan of the arguments for special options. */
-        void preScanArguments();
+        void preScanArguments() throw(ConfigException);
 
         /** Properly scan the command line arguments. */
         void processArguments() throw(ConfigException);
@@ -116,7 +123,7 @@ namespace FbCompositor {
 
 #ifdef USE_XRENDER_COMPOSITING
         /** XRender picture filter. */
-        const char *m_xRenderPictFilter;
+        FbTk::FbString m_xRenderPictFilter;
 #endif  // USE_XRENDER_COMPOSITING
 
 
@@ -157,7 +164,7 @@ namespace FbCompositor {
 #ifdef USE_XRENDER_COMPOSITING
     // Returns the XRender picture filter.
     inline const char *CompositorConfig::xRenderPictFilter() const throw() {
-        return m_xRenderPictFilter;
+        return m_xRenderPictFilter.c_str();
     }
 #endif  // USE_XRENDER_COMPOSITING
 }

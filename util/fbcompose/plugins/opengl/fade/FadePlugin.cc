@@ -20,8 +20,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include "BaseScreen.hh"
+
 #include "FadePlugin.hh"
+
+#include "BaseScreen.hh"
 #include "OpenGLScreen.hh"
 
 #include <iostream>
@@ -56,7 +58,7 @@ FadePlugin::FadePlugin(const BaseScreen &screen, const std::vector<FbTk::FbStrin
 }
 
 // Destructor.
-FadePlugin::~FadePlugin() { }
+FadePlugin::~FadePlugin() throw() { }
 
 
 //--- ACCESSORS ----------------------------------------------------------------

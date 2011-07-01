@@ -20,11 +20,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+
 #ifndef FBCOMPOSITOR_ATOMS_HH
 #define FBCOMPOSITOR_ATOMS_HH
 
 #include <X11/Xlib.h>
-#include <X11/Xatom.h>
 
 
 namespace FbCompositor {

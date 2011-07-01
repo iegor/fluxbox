@@ -26,8 +26,6 @@
 
 #include "config.h"
 
-#include "BaseScreen.hh"
-#include "CompositorConfig.hh"
 #include "Constants.hh"
 #include "Exceptions.hh"
 #include "Timer.hh"
@@ -73,7 +71,7 @@ namespace FbCompositor {
         Compositor(const CompositorConfig &configuration) throw(InitException);
 
         /** Destructor. */
-        ~Compositor();
+        ~Compositor() throw();
 
 
         //--- ACCESSORS --------------------------------------------------------
@@ -91,16 +89,16 @@ namespace FbCompositor {
         //--- EVENT LOOP -------------------------------------------------------
 
         /** Enters the event loop. */
-        void eventLoop();
+        void eventLoop() throw(RuntimeException);
 
     private:
-        //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
+        //--- CONSTRUCTORS -----------------------------------------------------
 
         /** Copy constructor. */
         Compositor(const Compositor&);
 
         /** Assignment operator. */
-        Compositor operator=(const Compositor&);
+        Compositor &operator=(const Compositor&);
 
 
         //--- INITIALIZATION FUNCTIONS -----------------------------------------
@@ -123,7 +121,7 @@ namespace FbCompositor {
         //--- INTERNAL FUNCTIONS -----------------------------------------------
 
         /** Locates the screen an event affects. Returns -1 on failure. */
-        int screenOfEvent(const XEvent &event);
+        int screenOfEvent(const XEvent &event) throw();
 
 
         //--- COMPOSITOR VARIABLES ---------------------------------------------

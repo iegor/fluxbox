@@ -49,10 +49,10 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        Timer();
+        Timer() throw();
 
         /** Destructor. */
-        ~Timer();
+        ~Timer() throw();
 
 
         //--- TIMER MANIPULATION -----------------------------------------------
@@ -85,6 +85,15 @@ namespace FbCompositor {
 
 
     private:
+        //--- CONSTRUCTORS -----------------------------------------------------
+
+        /** Copy constructor. */
+        Timer(const Timer&);
+
+        /** Assignment operator. */
+        Timer &operator=(const Timer&);
+
+
         //--- CONSTANTS --------------------------------------------------------
 
         /** The accuracy of the timer (1.0 = 1 second). */
@@ -94,10 +103,10 @@ namespace FbCompositor {
         //--- INTERNAL FUNTIONS ------------------------------------------------
 
         /** \returns the difference in time between two timevals. */
-        timeval timeDifference(timeval t1, timeval t2);
+        timeval timeDifference(timeval t1, timeval t2) throw();
 
         /** \returns the difference between two timevals in ticks. */
-        int tickDifference(const timeval &t1, const timeval &t2);
+        int tickDifference(const timeval &t1, const timeval &t2) throw();
 
 
         //--- PRIVATE VARIABLES ------------------------------------------------

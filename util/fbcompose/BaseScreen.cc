@@ -23,15 +23,15 @@
 
 #include "BaseScreen.hh"
 
+#include "CompositorConfig.hh"
 #include "Logging.hh"
 
 #include "FbTk/App.hh"
 
 #include <X11/extensions/shape.h>
 #include <X11/extensions/Xcomposite.h>
-
 #ifdef XINERAMA
-#include <X11/extensions/Xinerama.h>
+    #include <X11/extensions/Xinerama.h>
 #endif  // XINERAMA
 
 #include <algorithm>
@@ -58,11 +58,11 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-BaseScreen::BaseScreen(int screenNumber, PluginType pluginType, const CompositorConfig &config) :
+BaseScreen::BaseScreen(int screenNumber, PluginType pluginType, const CompositorConfig &config) throw(InitException) :
     m_display(FbTk::App::instance()->display()),
     m_pluginManager(pluginType, *this),
     m_screenNumber(screenNumber),
-    m_rootWindow(XRootWindow(m_display, m_screenNumber)) {
+    m_rootWindow(*this, XRootWindow(m_display, m_screenNumber)) {   // TODO: Is passing half-initialized *this safe here?
 
     // Set up properties.
     m_activeWindowXID = m_rootWindow.singlePropertyValue<Window>(Atoms::activeWindowAtom(), 0);
@@ -80,10 +80,13 @@ BaseScreen::BaseScreen(int screenNumber, PluginType pluginType, const Compositor
     m_rootWindow.setEventMask(eventMask);
 
     XCompositeRedirectSubwindows(m_display, m_rootWindow.window(), CompositeRedirectManual);
+
+    // Initial head init.
+    initHeads(Heads_One);
 }
 
-// Destructor
-BaseScreen::~BaseScreen() {
+// Destructor.
+BaseScreen::~BaseScreen() throw() {
     std::list<BaseCompWindow*>::iterator it = m_windows.begin();
     while (it != m_windows.end()) {
         delete *it;
@@ -383,7 +386,7 @@ void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
 
 
 // Adds a window to ignore list, stops tracking it if it is being tracked.
-void BaseScreen::addWindowToIgnoreList(Window window) {
+void BaseScreen::addWindowToIgnoreList(Window window) throw() {
     if (find(m_ignoreList.begin(), m_ignoreList.end(), window) == m_ignoreList.end()) {
         m_ignoreList.push_back(window);
 
@@ -396,7 +399,7 @@ void BaseScreen::addWindowToIgnoreList(Window window) {
 }
 
 // Checks whether a given window is managed by the current screen.
-bool BaseScreen::isWindowManaged(Window window) {
+bool BaseScreen::isWindowManaged(Window window) throw() {
     return (getWindowIterator(window) != m_windows.end());
 }
 
@@ -404,16 +407,26 @@ bool BaseScreen::isWindowManaged(Window window) {
 //--- SCREEN MANIPULATION ----------------------------------------------
 
 // Notifies the screen of the background change.
-void BaseScreen::setRootPixmapChanged() { }
+void BaseScreen::setRootPixmapChanged() throw() {
+    BasePlugin *plugin = NULL;
+    forEachPlugin(i, plugin) {
+        plugin->setRootPixmapChanged();
+    }
+}
 
 // Notifies the screen of a root window change.
-void BaseScreen::setRootWindowSizeChanged() { }
+void BaseScreen::setRootWindowSizeChanged() throw() {
+    BasePlugin *plugin = NULL;
+    forEachPlugin(i, plugin) {
+        plugin->setRootWindowSizeChanged();
+    }
+}
 
 
 //--- INTERNAL FUNCTIONS -------------------------------------------------------
 
 // Returns the first managed ancestor of a window.
-std::list<BaseCompWindow*>::iterator BaseScreen::getFirstManagedAncestorIterator(Window window) {
+std::list<BaseCompWindow*>::iterator BaseScreen::getFirstManagedAncestorIterator(Window window) throw() {
     if (window == None) {
         return m_windows.end();
     }
@@ -432,7 +445,7 @@ std::list<BaseCompWindow*>::iterator BaseScreen::getFirstManagedAncestorIterator
 }
 
 // Returns the parent of a given window.
-Window BaseScreen::getParentWindow(Window window) {
+Window BaseScreen::getParentWindow(Window window) throw() {
     Window root;
     Window parent;
     Window *children = 0;
@@ -447,7 +460,7 @@ Window BaseScreen::getParentWindow(Window window) {
 }
 
 // Returns an iterator of m_windows that points to the given window.
-std::list<BaseCompWindow*>::iterator BaseScreen::getWindowIterator(Window window) {
+std::list<BaseCompWindow*>::iterator BaseScreen::getWindowIterator(Window window) throw() {
     std::list<BaseCompWindow*>::iterator it = m_windows.begin();
     while (it != m_windows.end()) {
         if (window == (*it)->window()) {

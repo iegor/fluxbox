@@ -29,29 +29,51 @@
 
 namespace FbCompositor {
 
-    //--- LOGGING LEVELS -------------------------------------------------------
-
+    /** Logging level 0. No messages will be printed. */
     const int LOG_LEVEL_NONE = 0;
+
+    /** Logging level 1. Only the error messages will be printed. */
     const int LOG_LEVEL_ERROR = 1;
+
+    /** Logging level 2. Level 1 and warning messages will be printed. */
     const int LOG_LEVEL_WARN = 2;
+
+    /** Logging level 3. Level 2 and information messages will be printed. */
     const int LOG_LEVEL_INFO = 3;
+
+    /** Logging level 4. Level 3 and debug messages will be printed. */
     const int LOG_LEVEL_DEBUG = 4;
 
-
-    //--- LOG MANAGER ----------------------------------------------------------
 
     /**
      * The log manager class.
      */
     class Logger {
     public :
+        //--- MAIN METHODS -----------------------------------------------------
+
         /** \returns the current logging level. */
         static int loggingLevel();
 
         /** Sets a new logging level. */
         static void setLoggingLevel(int newLevel);
 
+
     private :
+        //--- CONSTRUCTORS -----------------------------------------------------
+
+        /** Default constructor. */
+        Logger();
+
+        /** Copy constructor. */
+        Logger(const Logger&);
+
+        /** Assignment operator. */
+        Logger &operator=(const Logger&);
+
+
+        //--- PRIVATE VARIABLES ------------------------------------------------
+
         /** The logging level. */
         static int m_level;
     };
@@ -65,6 +87,7 @@ namespace FbCompositor {
 #define fbLog_debug fbLog_internal(FbCompositor::LOG_LEVEL_DEBUG, "[Debug] ")
 
 #define fbLog_internal(minLevel, levelName) if (FbCompositor::Logger::loggingLevel() >= (minLevel)) std::cerr << (levelName)
+// #define fbLog_internal(minLevel, levelName) if (0) std::cerr
 
 
 #endif  // FBCOMPOSITOR_LOGGING_HH

@@ -20,15 +20,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+
 #ifndef FBCOMPOSITOR_UTILITY_HH
 #define FBCOMPOSITOR_UTILITY_HH
 
-#include <GL/glx.h>
+#include <GL/glew.h>
+#include <GL/gl.h>
 
 
 namespace FbCompositor {
 
-    /** Converts screen coordinates to OpenGL window coordinates. */
+    /** Converts screen coordinates to OpenGL coordinates. */
     void toOpenGLCoordinates(int screenWidth, int screenHeight, int x, int y, int width, int height,
                              GLfloat *xLow_gl, GLfloat *xHigh_gl, GLfloat *yLow_gl, GLfloat *yHigh_gl);
 

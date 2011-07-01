@@ -40,6 +40,8 @@
 namespace FbCompositor {
 
     class BaseCompWindow;
+    class BaseScreen;
+    class InitException;
     class OpenGLWindow;
     class RuntimeException;
 
@@ -52,7 +54,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        OpenGLWindow(Window windowXID, GLXFBConfig fbConfig) throw(InitException);
+        OpenGLWindow(const BaseScreen &screen, Window windowXID, GLXFBConfig fbConfig) throw(InitException);
 
         /** Destructor. */
         virtual ~OpenGLWindow() throw();
@@ -69,26 +71,20 @@ namespace FbCompositor {
 
         //--- WINDOW UPDATE FUNCTIONS ------------------------------------------
 
-        /** Sets a new root window size. */
-        void setRootWindowSize(unsigned int width, unsigned int height) throw();
-
         /** Updates the window's contents. */
         void updateContents() throw(RuntimeException);
-
-        /** Updates the window's shape. */
-        void updateShape();
 
         /** Updates window's geometry. */
         void updateGeometry(const XConfigureEvent &event) throw();
 
-
-    private :
-        //--- INTERNAL FUNCTIONS -----------------------------------------------
+        /** Updates the window's shape. */
+        void updateShape() throw(RuntimeException);
 
         /** Updates the window position vertex array. */
         void updateWindowPosArray() throw();
 
 
+    private :
         //--- RENDERING-RELATED VARIABLES --------------------------------------
 
         /** Window's content texture. */
@@ -121,11 +117,8 @@ namespace FbCompositor {
         unsigned int m_rootHeight;
 
 
-        //--- texture_from_pixmap EXTENSION SPECIFIC ---------------------------
-
 #ifdef GLXEW_EXT_texture_from_pixmap
-        /** Attributes of the contents' GLX pixmap. */
-        static const int TEX_PIXMAP_ATTRIBUTES[];
+        //--- texture_from_pixmap EXTENSION SPECIFIC ---------------------------
 
         /** The GLX pixmap of window's contents. */
         GLXPixmap m_glxContents;

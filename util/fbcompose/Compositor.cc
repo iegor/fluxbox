@@ -22,31 +22,29 @@
 
 
 #include "Compositor.hh"
+
+#include "BaseScreen.hh"
+#include "CompositorConfig.hh"
 #include "Logging.hh"
 #include "OpenGLScreen.hh"
 #include "XRenderScreen.hh"
 
-#include "FbTk/RefCount.hh"
+#ifdef USE_OPENGL_COMPOSITING
+    #include <GL/glx.h>
+#endif  // USE_OPENGL_COMPOSITING
 
 #include <X11/extensions/shape.h>
 #include <X11/extensions/Xcomposite.h>
 #include <X11/extensions/Xdamage.h>
 #include <X11/extensions/Xfixes.h>
+#ifdef XINERAMA
+    #include <X11/extensions/Xinerama.h>
+#endif  // XINERAMA
+#ifdef USE_XRENDER_COMPOSITING
+    #include <X11/extensions/Xrender.h>
+#endif  // USE_XRENDER_COMPOSITING
 #include <X11/Xutil.h>
 
-#ifdef USE_OPENGL_COMPOSITING
-#include <GL/glx.h>
-#endif  // USE_OPENGL_COMPOSITING
-
-#ifdef USE_XRENDER_COMPOSITING
-#include <X11/extensions/Xrender.h>
-#endif  // USE_XRENDER_COMPOSITING
-
-#ifdef XINERAMA
-#include <X11/extensions/Xinerama.h>
-#endif  // XINERAMA
-
-#include <iostream>
 #include <sstream>
 
 using namespace FbCompositor;
@@ -105,7 +103,7 @@ Compositor::Compositor(const CompositorConfig &config) throw(InitException) :
 }
 
 // Destructor.
-Compositor::~Compositor() {
+Compositor::~Compositor() throw() {
     std::vector<BaseScreen*>::iterator it = m_screens.begin();
     while (it != m_screens.end()) {
         delete *it;
@@ -221,14 +219,15 @@ void Compositor::initHeads() throw() {
 //--- EVENT LOOP ---------------------------------------------------------------
 
 // The event loop.
-void Compositor::eventLoop() {
+void Compositor::eventLoop() throw(RuntimeException) {
     XEvent event;
+    int eventScreen;
 
     while (!done()) {
         while (XPending(display())) {
             XNextEvent(display(), &event);
 
-            int eventScreen = screenOfEvent(event);
+            eventScreen = screenOfEvent(event);
             if (eventScreen < 0) {
                 fbLog_info << "Event " << std::dec << event.xany.serial << " (window " << std::hex << event.xany.window
                            << ", type " << std::dec << event.xany.type << ") does not affect any managed windows, skipping."
@@ -284,17 +283,17 @@ void Compositor::eventLoop() {
             }
         }
 
-        if (m_timer.newElapsedTicks() > 0) {
+        if (m_timer.newElapsedTicks()) {
             for (size_t i = 0; i < m_screens.size(); i++) {
                 m_screens[i]->renderScreen();
             }
-        }
 
-        fbLog_debug << m_screens.size() << " screen(s) available." << std::endl;
-        for (size_t i = 0; i < m_screens.size(); i++) {
-            fbLog_debug << *m_screens[i];
+            fbLog_debug << m_screens.size() << " screen(s) available." << std::endl;
+            for (size_t i = 0; i < m_screens.size(); i++) {
+                fbLog_debug << *m_screens[i];
+            }
+            fbLog_debug << "======================================" << std::endl;
         }
-        fbLog_debug << "======================================" << std::endl;
     }
 }
 
@@ -302,7 +301,7 @@ void Compositor::eventLoop() {
 //--- INTERNAL FUNCTIONS -----------------------------------------------
 
 // Locates the screen an event affects. Returns -1 on failure.
-int Compositor::screenOfEvent(const XEvent &event) {
+int Compositor::screenOfEvent(const XEvent &event) throw() {
     for (size_t i = 0; i < m_screens.size(); i++) {
         if (event.xany.window == m_screens[i]->rootWindow().window()) {
             return i;

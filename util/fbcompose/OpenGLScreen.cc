@@ -20,14 +20,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+
 #include "OpenGLScreen.hh"
 
 #ifdef USE_OPENGL_COMPOSITING
 
 
+#include "CompositorConfig.hh"
 #include "Logging.hh"
+#include "OpenGLPlugin.hh"
 #include "OpenGLShaders.hh"
-#include "OpenGLWindow.hh"
 #include "Utility.hh"
 
 #include "FbTk/FbString.hh"
@@ -37,10 +39,7 @@
 #include <X11/extensions/Xfixes.h>
 
 #include <list>
-#include <iostream>
 #include <sstream>
-
-#include <cstring>
 
 using namespace FbCompositor;
 
@@ -120,7 +119,7 @@ namespace {
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-OpenGLScreen::OpenGLScreen(int screenNumber, const CompositorConfig &config) :
+OpenGLScreen::OpenGLScreen(int screenNumber, const CompositorConfig &config) throw(InitException) :
     BaseScreen(screenNumber, Plugin_OpenGL, config) {
 
     m_backgroundChanged = true;
@@ -139,7 +138,7 @@ OpenGLScreen::OpenGLScreen(int screenNumber, const CompositorConfig &config) :
 }
 
 // Destructor.
-OpenGLScreen::~OpenGLScreen() {
+OpenGLScreen::~OpenGLScreen() throw() {
     XUnmapWindow(display(), m_renderingWindow);
 
     glDetachShader(m_shaderProgram, m_vertexShader);
@@ -167,13 +166,13 @@ OpenGLScreen::~OpenGLScreen() {
 //--- SCREEN MANIPULATION ----------------------------------------------
 
 // Notifies the screen of the background change.
-void OpenGLScreen::setRootPixmapChanged() {
+void OpenGLScreen::setRootPixmapChanged() throw() {
     BaseScreen::setRootPixmapChanged();
     m_backgroundChanged = true;
 }
 
 // Notifies the screen of a root window change.
-void OpenGLScreen::setRootWindowSizeChanged() {
+void OpenGLScreen::setRootWindowSizeChanged() throw() {
     BaseScreen::setRootWindowSizeChanged();
     m_rootWindowChanged = true;
 }
@@ -206,8 +205,6 @@ void OpenGLScreen::earlyInitGLXPointers() throw(InitException) {
     if (!glXCreateWindow) {
         throw InitException("Cannot initialize glXCreateWindow function.");
     }
-
-    // TODO: glXMakeCurrent?
 }
 
 // Initializes the rendering context.
@@ -336,7 +333,7 @@ void OpenGLScreen::initShaders() throw(InitException) {
 
 
 // Creates default texture rendering buffers.
-void OpenGLScreen::createDefaultElements() {
+void OpenGLScreen::createDefaultElements() throw(InitException) {
     // Blank white texture.
     glGenTextures(1, &m_blankTexture);
     glBindTexture(GL_TEXTURE_2D, m_blankTexture);
@@ -380,7 +377,7 @@ void OpenGLScreen::createBackgroundTexture() throw(InitException) {
 }
 
 // Creates all elements, needed to draw the reconfigure rectangle.
-void OpenGLScreen::createReconfigureRectElements() {
+void OpenGLScreen::createReconfigureRectElements() throw(InitException) {
     // Buffers.
     glGenBuffers(1, &m_reconfigureRectLinePosBuffer);
 
@@ -394,7 +391,7 @@ void OpenGLScreen::createReconfigureRectElements() {
 //--- OTHER FUNCTIONS --------------------------------------------------
 
 // Renews the background texture.
-void OpenGLScreen::updateBackgroundTexture() {
+void OpenGLScreen::updateBackgroundTexture() throw() {
     Pixmap bgPixmap = rootWindowPixmap();
 
     if (bgPixmap) {
@@ -416,12 +413,12 @@ void OpenGLScreen::updateBackgroundTexture() {
 }
 
 // React to the geometry change of the root window.
-void OpenGLScreen::updateOnRootWindowResize() {
+void OpenGLScreen::updateOnRootWindowResize() throw() {
     XResizeWindow(display(), m_renderingWindow, rootWindow().width(), rootWindow().height());
 
     std::list<BaseCompWindow*>::const_iterator it = allWindows().begin();
     while (it != allWindows().end()) {
-        (dynamic_cast<OpenGLWindow*>(*it))->setRootWindowSize(rootWindow().width(), rootWindow().height());
+        (dynamic_cast<OpenGLWindow*>(*it))->updateWindowPosArray();
         ++it;
     }
 
@@ -510,7 +507,7 @@ GLuint OpenGLScreen::createShaderProgram(GLuint vertexShader, GLuint geometrySha
 
 // Creates a window object from its XID.
 BaseCompWindow *OpenGLScreen::createWindowObject(Window window) {
-    OpenGLWindow *newWindow = new OpenGLWindow(window, m_fbConfig);
+    OpenGLWindow *newWindow = new OpenGLWindow(*this, window, m_fbConfig);
     return newWindow;
 }
 

@@ -20,9 +20,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+
 #include "Atoms.hh"
 
 #include "FbTk/App.hh"
+
+#include <X11/Xatom.h>
 
 #include <sstream>
 

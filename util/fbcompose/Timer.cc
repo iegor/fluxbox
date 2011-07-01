@@ -36,14 +36,14 @@ const double Timer::EPSILON = 1e-6;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-Timer::Timer() {
+Timer::Timer() throw() {
     m_isRunning = false;
     m_tickSize = 1000000;
     m_ticksPerSecond = 1.0;
 }
 
 // Destructor.
-Timer::~Timer() { }
+Timer::~Timer() throw() { }
 
 
 //--- TIMER MANIPULATION -------------------------------------------------------
@@ -114,7 +114,7 @@ void Timer::setTickSize(int usec) throw(RuntimeException) {
 
 // Returns the difference in time between two timevals.
 // Function adapted from http://www.gnu.org/s/libc/manual/html_node/Elapsed-Time.html.
-timeval Timer::timeDifference(timeval t1, timeval t2) {
+timeval Timer::timeDifference(timeval t1, timeval t2) throw() {
     int nsec;
 
     if (t1.tv_usec < t2.tv_usec) {
@@ -135,7 +135,7 @@ timeval Timer::timeDifference(timeval t1, timeval t2) {
 }
 
 // Returns the difference between two timevals in ticks.
-int Timer::tickDifference(const timeval &t1, const timeval &t2) {
+int Timer::tickDifference(const timeval &t1, const timeval &t2) throw() {
     timeval diff = timeDifference(t1, t2);
 
     double rawDiff = diff.tv_sec * m_ticksPerSecond + (double(diff.tv_usec) / m_tickSize);

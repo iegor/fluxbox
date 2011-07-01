@@ -59,7 +59,7 @@ namespace FbCompositor {
         OpenGLPlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args) throw(InitException);
 
         /** Destructor. */
-        ~OpenGLPlugin();
+        ~OpenGLPlugin() throw();
 
 
         //--- ACCESSORS --------------------------------------------------------

@@ -26,7 +26,6 @@
 
 #include "config.h"
 
-#include "BaseCompWindow.hh"
 #include "Constants.hh"
 #include "Exceptions.hh"
 
@@ -94,7 +93,23 @@ namespace FbCompositor {
         /** Called, whenever a window is unmapped. */
         virtual void windowUnmapped(const BaseCompWindow &window);
 
+
+        //--- SCREEN CHANGES ---------------------------------------------------
+
+        /** Notifies the screen of a background change. */
+        virtual void setRootPixmapChanged() throw();
+
+        /** Notifies the screen of a root window change. */
+        virtual void setRootWindowSizeChanged() throw();
+
+
     private :
+        //--- CONSTRUCTORS -----------------------------------------------------
+
+        /** Copy constructor. */
+        BasePlugin(const BasePlugin&);
+
+
         //--- INTERNAL VARIABLES -----------------------------------------------
 
         /** The screen this plugin operates on. */

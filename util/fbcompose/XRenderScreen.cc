@@ -25,6 +25,10 @@
 #ifdef USE_XRENDER_COMPOSITING
 
 
+#include "CompositorConfig.hh"
+#include "Logging.hh"
+#include "XRenderWindow.hh"
+
 #include <X11/extensions/shape.h>
 #include <X11/extensions/Xcomposite.h>
 #include <X11/extensions/Xfixes.h>
@@ -36,7 +40,7 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-XRenderScreen::XRenderScreen(int screenNumber, const CompositorConfig &config) :
+XRenderScreen::XRenderScreen(int screenNumber, const CompositorConfig &config) throw(InitException):
     BaseScreen(screenNumber, Plugin_XRender, config),
     m_pictFilter(config.xRenderPictFilter()) {
 
@@ -45,7 +49,7 @@ XRenderScreen::XRenderScreen(int screenNumber, const CompositorConfig &config) :
 }
 
 // Destructor.
-XRenderScreen::~XRenderScreen() {
+XRenderScreen::~XRenderScreen() throw() {
     if (m_backBufferGC) {
         XFreeGC(display(), m_backBufferGC);
     }
@@ -122,7 +126,7 @@ void XRenderScreen::initRenderingSurface() throw(InitException) {
 }
 
 // Initializes background picture.
-void XRenderScreen::initBackgroundPicture() {
+void XRenderScreen::initBackgroundPicture() throw() {
     m_rootChanged = false;
     m_rootPictFormat = XRenderFindVisualFormat(display(), rootWindow().visual());
     m_rootPicture = None;
@@ -134,12 +138,14 @@ void XRenderScreen::initBackgroundPicture() {
 //--- SCREEN MANIPULATION ------------------------------------------------------
 
 // Notifies the screen of a background change.
-void XRenderScreen::setRootPixmapChanged() {
+void XRenderScreen::setRootPixmapChanged() throw() {
+    BaseScreen::setRootPixmapChanged();
     m_rootChanged = true;
 }
 
 // Notifies the screen of a root window change.
-void XRenderScreen::setRootWindowSizeChanged() {
+void XRenderScreen::setRootWindowSizeChanged() throw() {
+    BaseScreen::setRootWindowSizeChanged();
     m_rootChanged = true;
 
     if (m_backBufferGC) {
@@ -176,7 +182,7 @@ void XRenderScreen::setRootWindowSizeChanged() {
 
 
 // Update the background picture.
-void XRenderScreen::updateBackgroundPicture() {
+void XRenderScreen::updateBackgroundPicture() throw() {
     Pixmap bgPixmap = rootWindowPixmap();
 
     if (bgPixmap) {
@@ -200,7 +206,7 @@ void XRenderScreen::updateBackgroundPicture() {
 //--- SCREEN RENDERING ---------------------------------------------------------
 
 // Renders the screen's contents.
-void XRenderScreen::renderScreen() {
+void XRenderScreen::renderScreen() throw() {
     renderBackground();
 
     std::list<BaseCompWindow*>::const_iterator it = allWindows().begin();
@@ -219,7 +225,7 @@ void XRenderScreen::renderScreen() {
 }
 
 // Render the desktop wallpaper.
-void XRenderScreen::renderBackground() {
+void XRenderScreen::renderBackground() throw() {
     // TODO: Simply make the window transparent.
     if (m_rootChanged) {
         updateBackgroundPicture();
@@ -230,7 +236,7 @@ void XRenderScreen::renderBackground() {
 }
 
 // Render the reconfigure rectangle.
-void XRenderScreen::renderReconfigureRect() {
+void XRenderScreen::renderReconfigureRect() throw() {
     XSetForeground(display(), m_backBufferGC, XWhitePixel(display(), screenNumber()));
     XSetFunction(display(), m_backBufferGC, GXxor);
     XSetLineAttributes(display(), m_backBufferGC, 1, LineSolid, CapNotLast, JoinMiter);
@@ -240,7 +246,7 @@ void XRenderScreen::renderReconfigureRect() {
 }
 
 // Render a particular window onto the screen.
-void XRenderScreen::renderWindow(XRenderWindow &window) {
+void XRenderScreen::renderWindow(XRenderWindow &window) throw() {
     if (window.isDamaged()) {
         window.updateContents();
     }
@@ -250,7 +256,7 @@ void XRenderScreen::renderWindow(XRenderWindow &window) {
 }
 
 // Swap back and front buffers.
-void XRenderScreen::swapBuffers() {
+void XRenderScreen::swapBuffers() throw() {
     XRenderComposite(display(), PictOpSrc, m_backBufferPicture, None, m_renderingPicture,
                      0, 0, 0, 0, 0, 0, rootWindow().width(), rootWindow().height());
 }
@@ -260,7 +266,7 @@ void XRenderScreen::swapBuffers() {
 
 // Creates a window object from its XID.
 BaseCompWindow *XRenderScreen::createWindowObject(Window window) {
-    XRenderWindow *newWindow = new XRenderWindow(window, m_pictFilter);
+    XRenderWindow *newWindow = new XRenderWindow(*this, window, m_pictFilter);
     return newWindow;
 }
 

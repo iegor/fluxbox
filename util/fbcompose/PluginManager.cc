@@ -20,8 +20,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include "Logging.hh"
+
 #include "PluginManager.hh"
+
+#include "Logging.hh"
 
 #include <algorithm>
 #include <dlfcn.h>
@@ -40,7 +42,7 @@ PluginManager::PluginManager(PluginType pluginType, const BaseScreen &screen) th
 }
 
 // Destructor.
-PluginManager::~PluginManager() {
+PluginManager::~PluginManager() throw() {
     for (size_t i = 0; i < m_pluginObjects.size(); i++) {
         delete m_pluginObjects[i];  // Let's hope delete is not overriden. TODO: Fix.
     }
@@ -118,7 +120,7 @@ void PluginManager::unloadPlugin(FbTk::FbString name) throw(RuntimeException) {
 }
 
 // Unload a plugin (actual worker function).
-void PluginManager::unloadPlugin(std::map<FbTk::FbString, PluginLibData>::iterator it) {
+void PluginManager::unloadPlugin(std::map<FbTk::FbString, PluginLibData>::iterator it) throw() {
     dlclose(it->second.handle);
 
     it->second.handle = NULL;
@@ -129,7 +131,7 @@ void PluginManager::unloadPlugin(std::map<FbTk::FbString, PluginLibData>::iterat
 //--- CONVENIENCE FUNCTIONS ----------------------------------------------------
 
 // Build a vector of search paths for a given plugin.
-std::vector<FbTk::FbString> PluginManager::buildPluginPaths(const FbTk::FbString &name) {
+std::vector<FbTk::FbString> PluginManager::buildPluginPaths(const FbTk::FbString &name) throw() {
     std::stringstream ss;
     std::vector<FbTk::FbString> paths;
 

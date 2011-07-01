@@ -20,6 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+
 #include "XRenderWindow.hh"
 
 #ifdef USE_XRENDER_COMPOSITING
@@ -33,8 +34,8 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-XRenderWindow::XRenderWindow(Window windowXID, const char *pictFilter) throw(InitException) :
-    BaseCompWindow(windowXID),
+XRenderWindow::XRenderWindow(const BaseScreen &screen, Window windowXID, const char *pictFilter) throw(InitException) :
+    BaseCompWindow(screen, windowXID),
     m_pictFilter(pictFilter) {
 
     m_maskPicture = None;
@@ -60,7 +61,7 @@ XRenderWindow::~XRenderWindow() throw() {
 //--- WINDOW MANIPULATION ------------------------------------------------------
 
 // Update the window's contents.
-void XRenderWindow::updateContents() {
+void XRenderWindow::updateContents() throw(RuntimeException) {
     if (isWindowBad()) {
         return;
     }
@@ -86,7 +87,7 @@ void XRenderWindow::updateContents() {
 }
 
 // Update window's property.
-void XRenderWindow::updateProperty(Atom property, int state) {
+void XRenderWindow::updateProperty(Atom property, int state) throw(RuntimeException) {
     BaseCompWindow::updateProperty(property, state);
 
     if (property == Atoms::opacityAtom()) {
@@ -98,7 +99,7 @@ void XRenderWindow::updateProperty(Atom property, int state) {
 //--- PROTECTED WINDOW MANIPULATION --------------------------------------------
 
 // Update the window's clip shape.
-void XRenderWindow::updateShape() {
+void XRenderWindow::updateShape() throw(RuntimeException) {
     BaseCompWindow::updateShape();
     updateMaskPicture();
 }

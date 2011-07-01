@@ -64,14 +64,41 @@ CompositorConfig::CompositorConfig(std::vector<FbTk::FbString> args) throw(Confi
     processArguments();
 }
 
+// Copy constructor.
+CompositorConfig::CompositorConfig(const CompositorConfig &other) throw() :
+    m_args(other.m_args),
+    m_renderingMode(other.m_renderingMode),
+#ifdef USE_XRENDER_COMPOSITING
+    m_xRenderPictFilter(other.m_xRenderPictFilter),
+#endif  // USE_XRENDER_COMPOSITING
+    m_displayName(other.m_displayName),
+    m_framesPerSecond(other.m_framesPerSecond),
+    m_plugins(other.m_plugins) {
+}
+
+// Assignment operator.
+CompositorConfig &CompositorConfig::operator=(const CompositorConfig &other) throw() {
+    if (this != &other) {
+        m_args = other.m_args;
+        m_renderingMode = other.m_renderingMode;
+#ifdef USE_XRENDER_COMPOSITING
+        m_xRenderPictFilter = other.m_xRenderPictFilter;
+#endif  // USE_XRENDER_COMPOSITING
+        m_displayName = other.m_displayName;
+        m_framesPerSecond = other.m_framesPerSecond;
+        m_plugins = other.m_plugins;
+    }
+    return *this;
+}
+
 // Destructor.
-CompositorConfig::~CompositorConfig() throw() {}
+CompositorConfig::~CompositorConfig() throw() { }
 
 
 //--- INTERNAL FUNCTIONS -------------------------------------------------------
 
 // Make the first scan of the arguments for special options.
-void CompositorConfig::preScanArguments() {
+void CompositorConfig::preScanArguments() throw(ConfigException) {
     std::vector<FbTk::FbString>::iterator it = m_args.begin();
 
     while (it != m_args.end()) {

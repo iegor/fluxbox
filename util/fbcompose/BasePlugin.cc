@@ -20,7 +20,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+
 #include "BasePlugin.hh"
+
+#include "BaseCompWindow.hh"
+#include "BaseScreen.hh"
 
 using namespace FbCompositor;
 
@@ -61,3 +65,12 @@ void BasePlugin::windowShapeChanged(const BaseCompWindow &/*window*/) { }
 
 // Called, whenever a window is unmapped.
 void BasePlugin::windowUnmapped(const BaseCompWindow &/*window*/) { }
+
+
+//--- SCREEN CHANGES -----------------------------------------------------------
+
+// Notifies the screen of a background change.
+void BasePlugin::setRootPixmapChanged() throw() { }
+
+// Notifies the screen of a root window change.
+void BasePlugin::setRootWindowSizeChanged() throw() { }

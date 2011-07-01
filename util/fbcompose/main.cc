@@ -22,6 +22,7 @@
 
 
 #include "Compositor.hh"
+#include "CompositorConfig.hh"
 #include "Constants.hh"
 #include "Exceptions.hh"
 #include "Logging.hh"
@@ -33,8 +34,6 @@
 
 #include <vector>
 #include <cstdlib>
-
-#include "PluginManager.hh"
 
 using namespace FbCompositor;
 

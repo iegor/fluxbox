@@ -20,6 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+
 #ifndef FBCOMPOSITOR_XRENDERWINDOW_HH
 #define FBCOMPOSITOR_XRENDERWINDOW_HH
 
@@ -37,7 +38,9 @@
 namespace FbCompositor {
 
     class BaseCompWindow;
+    class BaseScreen;
     class InitException;
+    class RuntimeException;
     class XRenderWindow;
 
 
@@ -49,7 +52,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        XRenderWindow(Window windowXID, const char *pictFilter) throw(InitException);
+        XRenderWindow(const BaseScreen &screen, Window windowXID, const char *pictFilter) throw(InitException);
 
         /** Destructor. */
         ~XRenderWindow() throw();
@@ -67,17 +70,17 @@ namespace FbCompositor {
         //--- WINDOW MANIPULATION ----------------------------------------------
 
         /** Update the window's contents. */
-        void updateContents();
+        void updateContents() throw(RuntimeException);
 
         /** Update window's property. */
-        void updateProperty(Atom property, int state);
+        void updateProperty(Atom property, int state) throw(RuntimeException);
 
 
     protected:
         //--- PROTECTED WINDOW MANIPULATION ------------------------------------
 
         /** Update the window's clip shape. */
-        void updateShape();
+        void updateShape() throw(RuntimeException);
 
 
     private:

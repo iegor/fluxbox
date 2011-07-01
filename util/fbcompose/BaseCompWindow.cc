@@ -21,8 +21,11 @@
 // THE SOFTWARE.
 
 
-#include "Atoms.hh"
 #include "BaseCompWindow.hh"
+
+#include "Atoms.hh"
+#include "BaseScreen.hh"
+#include "Logging.hh"
 
 #include <X11/extensions/shape.h>
 #include <X11/extensions/Xcomposite.h>
@@ -36,8 +39,9 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-BaseCompWindow::BaseCompWindow(Window windowXID) throw(InitException) :
-    FbTk::FbWindow(windowXID) {
+BaseCompWindow::BaseCompWindow(const BaseScreen &screen, Window windowXID) throw(InitException) :
+    FbTk::FbWindow(windowXID),
+    m_screen(screen) {
 
     m_alpha = singlePropertyValue<long>(Atoms::opacityAtom(), 0xff) & 0xff;
 
@@ -96,7 +100,7 @@ void BaseCompWindow::setUnmapped() throw() {
 }
 
 // Update the window's contents.
-void BaseCompWindow::updateContents() {
+void BaseCompWindow::updateContents() throw(RuntimeException) {
     if (isWindowBad()) {
         return;
     }
@@ -123,7 +127,7 @@ void BaseCompWindow::updateGeometry(const XConfigureEvent &/*event*/) throw() {
 }
 
 // Update the window's clip shape.
-void BaseCompWindow::updateShape() {
+void BaseCompWindow::updateShape() throw(RuntimeException) {
     if (m_clipShapeRects) {
         XFree(m_clipShapeRects);
         m_clipShapeRects = NULL;
@@ -137,7 +141,7 @@ void BaseCompWindow::updateShape() {
 }
 
 // Update window's property.
-void BaseCompWindow::updateProperty(Atom property, int /*state*/) {
+void BaseCompWindow::updateProperty(Atom property, int /*state*/) throw(RuntimeException) {
     if (property == Atoms::opacityAtom()) {
         m_alpha = singlePropertyValue<long>(Atoms::opacityAtom(), 0xff) & 0xff;
     }
@@ -177,7 +181,7 @@ void BaseCompWindow::updateContentPixmap() throw() {
 //--- OTHER FUNCTIONS --------------------------------------------------
 
 // Checks whether the current window is bad.
-bool BaseCompWindow::isWindowBad() {
+bool BaseCompWindow::isWindowBad() throw() {
     static XWindowAttributes xwa;
     return (!XGetWindowAttributes(display(), window(), &xwa));
 }
@@ -187,7 +191,7 @@ bool BaseCompWindow::isWindowBad() {
 
 // Reads and returns raw property contents.
 bool BaseCompWindow::rawPropertyData(Atom propertyAtom, Atom propertyType,
-                                     unsigned long *itemCount_return, unsigned char **data_return) {
+                                     unsigned long *itemCount_return, unsigned char **data_return) throw() {
     Atom actualType;
     int actualFormat;
     unsigned long bytesLeft;

@@ -30,10 +30,7 @@
 
 
 #include "BaseScreen.hh"
-#include "BaseCompWindow.hh"
-#include "CompositorConfig.hh"
 #include "Exceptions.hh"
-#include "OpenGLPlugin.hh"
 #include "OpenGLWindow.hh"
 
 #include <GL/glxew.h>
@@ -46,7 +43,6 @@ namespace FbCompositor {
     class BaseCompWindow;
     class CompositorConfig;
     class InitException;
-    class OpenGLPlugin;
     class OpenGLScreen;
     class OpenGLWindow;
 
@@ -59,19 +55,19 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        OpenGLScreen(int screenNumber, const CompositorConfig &config);
+        OpenGLScreen(int screenNumber, const CompositorConfig &config) throw(InitException);
 
         /** Destructor. */
-        ~OpenGLScreen();
+        ~OpenGLScreen() throw();
 
 
         //--- SCREEN MANIPULATION ----------------------------------------------
 
         /** Notifies the screen of the background change. */
-        void setRootPixmapChanged();
+        void setRootPixmapChanged() throw();
 
         /** Notifies the screen of a root window change. */
-        void setRootWindowSizeChanged();
+        void setRootWindowSizeChanged() throw();
 
 
         //--- SCREEN RENDERING -------------------------------------------------
@@ -94,10 +90,10 @@ namespace FbCompositor {
         void createBackgroundTexture() throw(InitException);
 
         /** Creates default texture rendering buffers. */
-        void createDefaultElements();
+        void createDefaultElements() throw(InitException);
 
         /** Creates all elements, needed to draw the reconfigure rectangle. */
-        void createReconfigureRectElements();
+        void createReconfigureRectElements() throw(InitException);
 
         /** Early initialization of GLX function pointers. */
         void earlyInitGLXPointers() throw(InitException);
@@ -121,10 +117,10 @@ namespace FbCompositor {
         //--- OTHER FUNCTIONS --------------------------------------------------
 
         /** Renews the background texture. */
-        void updateBackgroundTexture();
+        void updateBackgroundTexture() throw();
 
         /** React to the geometry change of the root window. */
-        void updateOnRootWindowResize();
+        void updateOnRootWindowResize() throw();
 
 
         //--- CONVENIENCE OPENGL WRAPPERS --------------------------------------

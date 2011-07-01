@@ -20,6 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+
 #ifndef FBCOMPOSITOR_PLUGIN_OPENGL_FADE_FADEPLUGIN_HH
 #define FBCOMPOSITOR_PLUGIN_OPENGL_FADE_FADEPLUGIN_HH
 
@@ -47,6 +48,7 @@ namespace FbCompositor {
     class InitException;
     class OpenGLPlugin;
 
+
     /**
      * A simple plugin for testing purposes. Will be removed or replaced with a
      * better fitting example.
@@ -59,7 +61,7 @@ namespace FbCompositor {
         FadePlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args) throw(InitException);
 
         /** Destructor. */
-        virtual ~FadePlugin();
+        ~FadePlugin() throw();
 
 
         //--- ACCESSORS --------------------------------------------------------
@@ -106,8 +108,7 @@ namespace FbCompositor {
 //--- PLUGIN MANAGER FUNCTIONS -------------------------------------------------
 
 /** Creates a plugin object. */
-extern "C" FbCompositor::BasePlugin *createPlugin(const FbCompositor::BaseScreen &screen,
-                                                  const std::vector<FbTk::FbString> &args);
+extern "C" FbCompositor::BasePlugin *createPlugin(const FbCompositor::BaseScreen &screen, const std::vector<FbTk::FbString> &args);
 
 /** \returns plugin's type. */
 extern "C" FbCompositor::PluginType pluginType();

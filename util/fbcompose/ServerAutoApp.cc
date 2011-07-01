@@ -20,8 +20,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include "Atoms.hh"
+
 #include "ServerAutoApp.hh"
+
+#include "Atoms.hh"
+#include "CompositorConfig.hh"
 
 #include <X11/extensions/Xcomposite.h>
 #include <X11/Xlib.h>
@@ -33,7 +36,13 @@
 using namespace FbCompositor;
 
 
-//--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
+//--- CONSTANTS ----------------------------------------------------------------
+
+/** How many us to sleep before checking if the compositor should quit. */
+const int ServerAutoApp::SLEEP_TIME_US = 10000;
+
+
+//--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
 ServerAutoApp::ServerAutoApp(const CompositorConfig &config) throw(InitException) :
@@ -49,7 +58,7 @@ ServerAutoApp::ServerAutoApp(const CompositorConfig &config) throw(InitException
 }
 
 // Destructor.
-ServerAutoApp::~ServerAutoApp() { }
+ServerAutoApp::~ServerAutoApp() throw() { }
 
 
 //--- INITIALIZATION FUNCTIONS -------------------------------------------------
@@ -99,8 +108,8 @@ void ServerAutoApp::initScreens() throw(InitException) {
 //--- EVENT LOOP ---------------------------------------------------------------
 
 // Enters the event loop.
-void ServerAutoApp::eventLoop() {
+void ServerAutoApp::eventLoop() throw() {
     while (!done()) {
-        usleep(10000);
+        usleep(SLEEP_TIME_US);
     }
 }

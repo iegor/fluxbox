@@ -27,15 +27,12 @@
 #include "config.h"
 
 #include "Exceptions.hh"
-#include "Logging.hh"
 
 #include "FbTk/FbWindow.hh"
 
 #include <X11/Xlib.h>
-#include <X11/Xatom.h>
-
 #ifdef HAVE_XDAMAGE
-#include <X11/extensions/Xdamage.h>
+    #include <X11/extensions/Xdamage.h>
 #endif  // HAVE_XDAMAGE
 
 #include <iosfwd>
@@ -45,7 +42,8 @@
 namespace FbCompositor {
 
     class BaseCompWindow;
-    class InitException;
+    class BaseScreen;
+
 
     /** << output stream operator for the BaseCompWindow class. */
     std::ostream &operator<<(std::ostream& out, const BaseCompWindow& window);
@@ -63,7 +61,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        BaseCompWindow(Window windowXID) throw(InitException);
+        BaseCompWindow(const BaseScreen &screen, Window windowXID) throw(InitException);
 
         /** Destructor. */
         virtual ~BaseCompWindow() throw();
@@ -82,9 +80,15 @@ namespace FbCompositor {
 
         /** \returns whether the screen is mapped or not. */
         bool isMapped() const throw();
+
+        /** \returns the window's screen. */
+        const BaseScreen &screen() const throw();
         
         /** \returns the window's visual. */
         Visual *visual() throw();
+
+        /** \returns the window's visual (const version). */
+        const Visual *visual() const throw();
 
         /** \returns the window's class. */
         int windowClass() const throw();
@@ -101,11 +105,11 @@ namespace FbCompositor {
 
         /** \returns the value of the specified property. */
         template<class T>
-        std::vector<T> propertyValue(Atom propertyAtom);
+        std::vector<T> propertyValue(Atom propertyAtom) throw();
 
         /** Convenience function for accessing properties with a single value. */
         template<class T>
-        T singlePropertyValue(Atom propertyAtom, T defaultValue);
+        T singlePropertyValue(Atom propertyAtom, T defaultValue) throw();
 
 
         //--- WINDOW MANIPULATION ----------------------------------------------
@@ -120,13 +124,13 @@ namespace FbCompositor {
         virtual void setUnmapped() throw();
 
         /** Update the window's contents. */
-        virtual void updateContents();
+        virtual void updateContents() throw(RuntimeException);
 
         /** Update window's geometry. */
         virtual void updateGeometry(const XConfigureEvent &event) throw();
 
         /** Update window's property. */
-        virtual void updateProperty(Atom property, int state);
+        virtual void updateProperty(Atom property, int state) throw(RuntimeException);
 
 
         /** Set the clip shape as changed. */
@@ -162,24 +166,37 @@ namespace FbCompositor {
         void updateContentPixmap() throw();
 
         /** Update the window's clip shape. */
-        virtual void updateShape();
+        virtual void updateShape() throw(RuntimeException);
 
 
         //--- OTHER FUNCTIONS --------------------------------------------------
 
         /** Checks whether the current window is bad. */
-        bool isWindowBad();
+        bool isWindowBad() throw();
 
 
     private:
+        //--- CONSTRUCTORS -----------------------------------------------------
+
+        /** Copy constructor. */
+        BaseCompWindow(const BaseCompWindow&);
+
+        /** Assignment operator. */
+        BaseCompWindow &operator=(const BaseCompWindow&);
+
+
         //--- INTERNAL FUNCTIONS -----------------------------------------------
 
         /** Returns the raw contents of a property. */
         bool rawPropertyData(Atom propertyAtom, Atom propertyType,
-                             unsigned long *itemCount_return, unsigned char **data_return);
+                             unsigned long *itemCount_return, unsigned char **data_return) throw();
 
 
         //--- WINDOW ATTRIBUTES ------------------------------------------------
+
+        /** Window's screen. */
+        const BaseScreen &m_screen;
+
 
         /** Window opacity. */
         int m_alpha;
@@ -270,6 +287,11 @@ namespace FbCompositor {
         return m_isResized;
     }
 
+    // Returns the window's screen.
+    inline const BaseScreen &BaseCompWindow::screen() const throw() {
+        return m_screen;
+    }
+
     // Returns the window's height with borders factored in.
     inline unsigned int BaseCompWindow::realHeight() const throw() {
         return height() + 2 * borderWidth();
@@ -285,6 +307,11 @@ namespace FbCompositor {
         return m_visual;
     }
 
+    // Returns the window's visual (const version).
+    inline const Visual *BaseCompWindow::visual() const throw() {
+        return m_visual;
+    }
+
     // Returns the window's class.
     inline int BaseCompWindow::windowClass() const throw() {
         return m_class;
@@ -295,7 +322,7 @@ namespace FbCompositor {
 
     // Returns the value of the specified property.
     template<class T>
-    std::vector<T> BaseCompWindow::propertyValue(Atom propertyAtom) {
+    std::vector<T> BaseCompWindow::propertyValue(Atom propertyAtom) throw() {
         unsigned long nItems;
         T *data;
 
@@ -310,7 +337,7 @@ namespace FbCompositor {
 
     // Convenience function for accessing properties with a single value.
     template<class T>
-    T BaseCompWindow::singlePropertyValue(Atom propertyAtom, T defaultValue) {
+    T BaseCompWindow::singlePropertyValue(Atom propertyAtom, T defaultValue) throw() {
         if (!propertyAtom) {
             return defaultValue;
         }

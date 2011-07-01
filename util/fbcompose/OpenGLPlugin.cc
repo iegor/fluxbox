@@ -20,6 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+
 #include "OpenGLPlugin.hh"
 
 using namespace FbCompositor;
@@ -33,7 +34,7 @@ OpenGLPlugin::OpenGLPlugin(const BaseScreen &screen, const std::vector<FbTk::FbS
 }
 
 // Destructor.
-OpenGLPlugin::~OpenGLPlugin() { }
+OpenGLPlugin::~OpenGLPlugin() throw() { }
 
 
 //--- PLUGIN ACTIONS -----------------------------------------------------------

@@ -20,12 +20,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+
 #include "OpenGLShaders.hh"
 
 #ifdef USE_OPENGL_COMPOSITING
 
-
-#include <cstring>
 
 using namespace FbCompositor;
 

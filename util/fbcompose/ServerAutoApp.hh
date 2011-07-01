@@ -24,7 +24,6 @@
 #ifndef FBCOMPOSITOR_SERVERAUTOAPP_HH
 #define FBCOMPOSITOR_SERVERAUTOAPP_HH
 
-#include "CompositorConfig.hh"
 #include "Constants.hh"
 #include "Exceptions.hh"
 
@@ -49,17 +48,23 @@ namespace FbCompositor {
         ServerAutoApp(const CompositorConfig &config) throw(InitException);
 
         /** Destructor. */
-        ~ServerAutoApp();
+        ~ServerAutoApp() throw();
 
 
         //--- EVENT LOOP -------------------------------------------------------
 
         /** Enters the event loop. */
-        void eventLoop();
+        void eventLoop() throw();
 
 
     private:
-        //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
+        //--- CONSTANTS --------------------------------------------------------
+
+        /** How many us to sleep before checking if the compositor should quit. */
+        static const int SLEEP_TIME_US;
+
+
+        //--- CONSTRUCTORS -----------------------------------------------------
 
         /** Copy constructor. */
         ServerAutoApp(const ServerAutoApp&);

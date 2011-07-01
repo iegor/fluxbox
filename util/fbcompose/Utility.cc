@@ -20,12 +20,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+
 #include "Utility.hh"
 
 using namespace FbCompositor;
 
 
-// Converts screen coordinates to OpenGL window coordinates.
+// Converts screen coordinates to OpenGL coordinates.
 void FbCompositor::toOpenGLCoordinates(int screenWidth, int screenHeight, int x, int y, int width, int height,
                                        GLfloat *xLow_gl, GLfloat *xHigh_gl, GLfloat *yLow_gl, GLfloat *yHigh_gl) {
     *xLow_gl  = ((x * 2.0) / screenWidth) - 1.0;

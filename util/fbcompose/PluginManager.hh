@@ -20,6 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+
 #ifndef FBCOMPOSITOR_PLUGINMANAGER_HH
 #define FBCOMPOSITOR_PLUGINMANAGER_HH
 
@@ -66,7 +67,7 @@ namespace FbCompositor {
         PluginManager(PluginType pluginType, const BaseScreen &screen) throw(InitException);
 
         /** Destructor. */
-        ~PluginManager();
+        ~PluginManager() throw();
 
 
         //--- PLUGIN MANIPULATION ----------------------------------------------
@@ -77,8 +78,20 @@ namespace FbCompositor {
         /** \returns a reference to a vector with plugin objects. */
         std::vector<BasePlugin*> &plugins() throw();
 
+        /** \returns a reference to a vector with plugin objects (const version). */
+        const std::vector<BasePlugin*> &plugins() const throw();
+
 
     private :
+        //--- CONSTRUCTORS -----------------------------------------------------
+
+        /** Copy constructor. */
+        PluginManager(const PluginManager&);
+
+        /** Assignment operator. */
+        PluginManager &operator=(const PluginManager&);
+
+
         //--- INTERNAL PLUGIN MANIPULATION -------------------------------------
 
         /** Load a plugin. */
@@ -88,13 +101,13 @@ namespace FbCompositor {
         void unloadPlugin(FbTk::FbString name) throw(RuntimeException);
 
         /** Unload a plugin (actual worker function). */
-        void unloadPlugin(std::map<FbTk::FbString, PluginLibData>::iterator it);
+        void unloadPlugin(std::map<FbTk::FbString, PluginLibData>::iterator it) throw();
 
 
         //--- CONVENIENCE FUNCTIONS --------------------------------------------
 
         /** Build a vector of search paths for a given plugin. */
-        std::vector<FbTk::FbString> buildPluginPaths(const FbTk::FbString &name);
+        std::vector<FbTk::FbString> buildPluginPaths(const FbTk::FbString &name) throw();
 
         /** \returns some object from the given library handle. */
         void *getLibraryObject(void *handle, const char *objectName, const char *pluginName,
@@ -127,6 +140,11 @@ namespace FbCompositor {
 
     // Returns a reference to a vector with plugin objects.
     inline std::vector<BasePlugin*> &PluginManager::plugins() throw() {
+        return m_pluginObjects;
+    }
+
+    // Returns a reference to a vector with plugin objects (const version).
+    inline const std::vector<BasePlugin*> &PluginManager::plugins() const throw() {
         return m_pluginObjects;
     }
 }

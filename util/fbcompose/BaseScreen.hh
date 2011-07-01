@@ -28,7 +28,6 @@
 
 #include "Atoms.hh"
 #include "BaseCompWindow.hh"
-#include "CompositorConfig.hh"
 #include "Constants.hh"
 #include "Exceptions.hh"
 #include "PluginManager.hh"
@@ -52,6 +51,7 @@ namespace FbCompositor {
     /** << output stream operator for the BaseScreen class. */
     std::ostream &operator<<(std::ostream& out, const BaseScreen& s);
 
+
     /**
      * Base class for screen managing classes.
      */
@@ -64,10 +64,10 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        BaseScreen(int screenNumber, PluginType pluginType, const CompositorConfig &config);
+        BaseScreen(int screenNumber, PluginType pluginType, const CompositorConfig &config) throw(InitException);
 
         /** Destructor. */
-        virtual ~BaseScreen();
+        virtual ~BaseScreen() throw();
 
 
         //--- OTHER INITIALIZATION ---------------------------------------------
@@ -89,6 +89,9 @@ namespace FbCompositor {
 
         /** \returns the current connection to the X server. */
         Display *display() throw();
+
+        /** \returns the current connection to the X server (const version). */
+        const Display *display() const throw();
 
         /** \returns the vector with the output heads on this screen. */
         const std::vector<XRectangle> &heads() const throw();
@@ -137,19 +140,19 @@ namespace FbCompositor {
 
 
         /** Adds a window to ignore list, stops tracking it if it is being tracked. */
-        void addWindowToIgnoreList(Window window);
+        void addWindowToIgnoreList(Window window) throw();
 
         /** Checks whether a given window is managed by the current screen. */
-        bool isWindowManaged(Window window);
+        bool isWindowManaged(Window window) throw();
 
 
         //--- SCREEN MANIPULATION ----------------------------------------------
 
         /** Notifies the screen of a background change. */
-        virtual void setRootPixmapChanged();
+        virtual void setRootPixmapChanged() throw();
 
         /** Notifies the screen of a root window change. */
-        virtual void setRootWindowSizeChanged();
+        virtual void setRootWindowSizeChanged() throw();
 
 
         //--- SCREEN RENDERING -------------------------------------------------
@@ -165,7 +168,7 @@ namespace FbCompositor {
         const std::list<BaseCompWindow*> &allWindows() const throw();
 
         /** \returns the plugin manager. */
-        PluginManager &pluginManager() throw();
+        const PluginManager &pluginManager() const throw();
         
         /** \returns the reconfigure rectangle. */
         XRectangle reconfigureRectangle() const throw();
@@ -181,17 +184,23 @@ namespace FbCompositor {
 
 
     private:
+        //--- CONSTRUCTORS -----------------------------------------------------
+
+        /** Copy constructor. */
+        BaseScreen(const BaseScreen&);
+
+
         //--- INTERNAL FUNCTIONS -----------------------------------------------
 
         /** \returns the parent of a given window. */
-        Window getParentWindow(Window window);
+        Window getParentWindow(Window window) throw();
 
 
         /** \returns the first managed ancestor of a window. */
-        std::list<BaseCompWindow*>::iterator getFirstManagedAncestorIterator(Window window);
+        std::list<BaseCompWindow*>::iterator getFirstManagedAncestorIterator(Window window) throw();
 
         /** \returns an iterator of m_windows that points to the given window. */
-        std::list<BaseCompWindow*>::iterator getWindowIterator(Window windowXID);
+        std::list<BaseCompWindow*>::iterator getWindowIterator(Window windowXID) throw();
 
 
         //--- PRIVATE VARIABLES ------------------------------------------------
@@ -254,13 +263,18 @@ namespace FbCompositor {
         return m_display;
     }
 
+    // Returns the current connection to the X server (const version).
+    inline const Display *BaseScreen::display() const throw() {
+        return m_display;
+    }
+
     // Returns the vector with the output heads on this screen.
     inline const std::vector<XRectangle> &BaseScreen::heads() const throw() {
         return m_heads;
     }
 
     // Returns the plugin manager.
-    inline PluginManager &BaseScreen::pluginManager() throw() {
+    inline const PluginManager &BaseScreen::pluginManager() const throw() {
         return m_pluginManager;
     }
 
