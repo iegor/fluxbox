@@ -72,6 +72,12 @@ namespace FbCompositor {
         ~FadePlugin() throw();
 
 
+        //--- OTHER INITIALIZATION ---------------------------------------------
+
+        /** Initialize OpenGL-specific code. */
+        void initOpenGL(GLuint shaderProgram) throw(InitException);
+
+
         //--- ACCESSORS --------------------------------------------------------
 
         /** \returns the name of the plugin. */
@@ -105,8 +111,15 @@ namespace FbCompositor {
         /** Called, whenever a window is unmapped. */
         void windowUnmapped(const BaseCompWindow &window);
 
+
     private :
-        //--- INTERNALS --------------------------------------------------------
+        //--- GENERAL RENDERING VARIABLES --------------------------------------
+
+        /** Location of the fade_Alpha uniform. */
+        GLuint alphaUniformPos;
+
+
+        //--- FADE SPECIFIC ----------------------------------------------------
 
         /** Holds the data about fades. */
         struct FadeData {

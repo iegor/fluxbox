@@ -135,6 +135,7 @@ OpenGLScreen::OpenGLScreen(int screenNumber, const CompositorConfig &config) thr
     createDefaultElements();
     createBackgroundTexture();
     createReconfigureRectElements();
+    initPlugins();
 }
 
 // Destructor.
@@ -385,6 +386,14 @@ void OpenGLScreen::createReconfigureRectElements() throw(InitException) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_reconfigureRectElementBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(RECONFIGURE_RECT_ELEMENT_ARRAY),
                  (const GLvoid*)(RECONFIGURE_RECT_ELEMENT_ARRAY), GL_STATIC_DRAW);
+}
+
+// Finish plugin initialization.
+void OpenGLScreen::initPlugins() throw(InitException) {
+    OpenGLPlugin *plugin = NULL;
+    forEachPlugin(i, plugin) {
+        plugin->initOpenGL(m_shaderProgram);
+    }
 }
 
 

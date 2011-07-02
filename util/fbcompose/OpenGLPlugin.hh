@@ -65,6 +65,12 @@ namespace FbCompositor {
         ~OpenGLPlugin() throw();
 
 
+        //--- OTHER INITIALIZATION ---------------------------------------------
+
+        /** Initialize OpenGL-specific code. */
+        virtual void initOpenGL(GLuint shaderProgram) throw(InitException);
+
+
         //--- ACCESSORS --------------------------------------------------------
 
         /** \returns the additional source code for the fragment shader. */

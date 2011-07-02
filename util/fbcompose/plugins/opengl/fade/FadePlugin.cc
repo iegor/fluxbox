@@ -62,6 +62,14 @@ FadePlugin::FadePlugin(const BaseScreen &screen, const std::vector<FbTk::FbStrin
 FadePlugin::~FadePlugin() throw() { }
 
 
+//--- OTHER INITIALIZATION -----------------------------------------------------
+
+// Initialize OpenGL-specific code.
+void FadePlugin::initOpenGL(GLuint shaderProgram) throw(InitException) {
+    alphaUniformPos = glGetUniformLocation(shaderProgram, "fade_Alpha");
+}
+
+
 //--- ACCESSORS ----------------------------------------------------------------
 
 // Returns the additional source code for the fragment shader.
@@ -79,32 +87,28 @@ const char *FadePlugin::vertexShader() const throw() {
 
 // Pre background rendering actions.
 void FadePlugin::preBackgroundRenderActions() {
-    static GLuint alphaPos = glGetUniformLocation(dynamic_cast<const OpenGLScreen&>(screen()).shaderProgram(), "fade_Alpha");
-    glUniform1f(alphaPos, 1.0);
+    glUniform1f(alphaUniformPos, 1.0);
 }
 
 // Pre window rendering actions.
 void FadePlugin::preReconfigureRectRenderActions(XRectangle /*reconfigureRect*/) {
-    static GLuint alphaPos = glGetUniformLocation(dynamic_cast<const OpenGLScreen&>(screen()).shaderProgram(), "fade_Alpha");
-    glUniform1f(alphaPos, 1.0);
+    glUniform1f(alphaUniformPos, 1.0);
 }
 
 // Pre window rendering actions.
 void FadePlugin::preWindowRenderActions(const OpenGLWindow &window) {
-    static GLuint alphaPos = glGetUniformLocation(dynamic_cast<const OpenGLScreen&>(screen()).shaderProgram(), "fade_Alpha");
-
     std::map<Window, FadeData>::iterator it = m_positiveFades.find(window.window());
     if (it != m_positiveFades.end()) {
         it->second.alpha += it->second.timer.newElapsedTicks();
         
         if (it->second.alpha >= 255) {
-            glUniform1f(alphaPos, 1.0);
+            glUniform1f(alphaUniformPos, 1.0);
             m_positiveFades.erase(it);
         } else {
-            glUniform1f(alphaPos, (it->second.alpha / 255.0));
+            glUniform1f(alphaUniformPos, (it->second.alpha / 255.0));
         }
     } else {
-        glUniform1f(alphaPos, 1.0);
+        glUniform1f(alphaUniformPos, 1.0);
     }
 }
 
@@ -115,7 +119,7 @@ void FadePlugin::preWindowRenderActions(const OpenGLWindow &window) {
 void FadePlugin::windowMapped(const BaseCompWindow &window) {
     FadeData fade;
     fade.alpha = 0;
-    fade.timer.setTickSize(500000 / 255);
+    fade.timer.setTickSize(250000 / 255);
     fade.timer.start();
 
     m_positiveFades.insert(std::make_pair(window.window(), fade));

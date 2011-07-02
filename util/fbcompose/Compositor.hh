@@ -91,7 +91,14 @@ namespace FbCompositor {
         /** Enters the event loop. */
         void eventLoop() throw(RuntimeException);
 
+
     private:
+        //--- CONSTANTS --------------------------------------------------------
+
+        /** How many micro seconds to sleep before restarting the event loop. */
+        static const int SLEEP_TIME;
+
+
         //--- CONSTRUCTORS -----------------------------------------------------
 
         /** Copy constructor. */
@@ -183,6 +190,9 @@ namespace FbCompositor {
 
 
     //--- VARIOUS HANDLERS -----------------------------------------------------
+
+    /** Custom signal handler. */
+    void handleSignal(int signal);
 
     /** Custom X error handler. */
     int handleXError(Display *display, XErrorEvent *error);

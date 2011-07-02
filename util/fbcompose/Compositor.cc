@@ -47,7 +47,16 @@
 
 #include <sstream>
 
+#include <csignal>
+#include <unistd.h>
+
 using namespace FbCompositor;
+
+
+//--- CONSTANTS ----------------------------------------------------------------
+
+// How many micro seconds to sleep before restarting the event loop.
+const int Compositor::SLEEP_TIME = 5000;
 
 
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
@@ -100,6 +109,9 @@ Compositor::Compositor(const CompositorConfig &config) throw(InitException) :
     m_timer.start();
 
     XFlush(display());
+
+    signal(SIGINT, handleSignal);
+    signal(SIGTERM, handleSignal);
 }
 
 // Destructor.
@@ -294,6 +306,8 @@ void Compositor::eventLoop() throw(RuntimeException) {
             }
             fbLog_debug << "======================================" << std::endl;
         }
+
+        usleep(SLEEP_TIME);
     }
 }
 
@@ -319,6 +333,13 @@ int Compositor::screenOfEvent(const XEvent &event) throw() {
 
 
 //--- VARIOUS HANDLERS ---------------------------------------------------------
+
+// Custom signal handler.
+void FbCompositor::handleSignal(int sig) {
+    if ((sig == SIGINT) || (sig == SIGTERM)) {
+        FbTk::App::instance()->end();
+    }
+}
 
 // Custom X error handler.
 int FbCompositor::handleXError(Display *display, XErrorEvent *error) {

@@ -38,8 +38,8 @@ using namespace FbCompositor;
 
 //--- CONSTANTS ----------------------------------------------------------------
 
-/** How many us to sleep before checking if the compositor should quit. */
-const int ServerAutoApp::SLEEP_TIME_US = 10000;
+// How many micro seconds to sleep before restarting the event loop.
+const int ServerAutoApp::SLEEP_TIME = 10000;
 
 
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
@@ -110,6 +110,6 @@ void ServerAutoApp::initScreens() throw(InitException) {
 // Enters the event loop.
 void ServerAutoApp::eventLoop() throw() {
     while (!done()) {
-        usleep(SLEEP_TIME_US);
+        usleep(SLEEP_TIME);
     }
 }

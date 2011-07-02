@@ -60,8 +60,8 @@ namespace FbCompositor {
     private:
         //--- CONSTANTS --------------------------------------------------------
 
-        /** How many us to sleep before checking if the compositor should quit. */
-        static const int SLEEP_TIME_US;
+        /** How many micro seconds to sleep before restarting the event loop. */
+        static const int SLEEP_TIME;
 
 
         //--- CONSTRUCTORS -----------------------------------------------------

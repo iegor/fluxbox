@@ -39,6 +39,12 @@ OpenGLPlugin::OpenGLPlugin(const BaseScreen &screen, const std::vector<FbTk::FbS
 OpenGLPlugin::~OpenGLPlugin() throw() { }
 
 
+//--- OTHER INITIALIZATION -----------------------------------------------------
+
+// Initialize OpenGL-specific code.
+void OpenGLPlugin::initOpenGL(GLuint /*shaderProgram*/) throw(InitException) { }
+
+
 //--- PLUGIN ACTIONS -----------------------------------------------------------
 
 // Pre background rendering actions.
