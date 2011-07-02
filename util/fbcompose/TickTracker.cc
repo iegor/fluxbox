@@ -1,4 +1,4 @@
-/** Timer.cc file for the fluxbox compositor. */
+/** TickTracker.cc file for the fluxbox compositor. */
 
 // Copyright (c) 2011 Gediminas Liktaras (gliktaras at gmail dot com)
 //
@@ -22,7 +22,7 @@
 
 
 #include "Logging.hh"
-#include "Timer.hh"
+#include "TickTracker.hh"
 
 using namespace FbCompositor;
 
@@ -30,20 +30,20 @@ using namespace FbCompositor;
 //--- CONSTANTS ----------------------------------------------------------------
 
 // The accuracy of the timer (1.0 = 1 second).
-const double Timer::EPSILON = 1e-6;
+const double TickTracker::EPSILON = 1e-6;
 
 
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-Timer::Timer() throw() {
+TickTracker::TickTracker() throw() {
     m_isRunning = false;
     m_tickSize = 1000000;
     m_ticksPerSecond = 1.0;
 }
 
 // Copy constructor.
-Timer::Timer(const Timer &other) throw() :
+TickTracker::TickTracker(const TickTracker &other) throw() :
     m_isRunning(other.m_isRunning),
     m_startTime(other.m_startTime),
     m_tickSize(other.m_tickSize),
@@ -52,7 +52,7 @@ Timer::Timer(const Timer &other) throw() :
 }
 
 // Assignment operator.
-Timer &Timer::operator=(const Timer &other) throw() {
+TickTracker &TickTracker::operator=(const TickTracker &other) throw() {
     if (this != &other) {
         m_isRunning = other.m_isRunning;
         m_startTime = other.m_startTime;
@@ -64,13 +64,13 @@ Timer &Timer::operator=(const Timer &other) throw() {
 }
 
 // Destructor.
-Timer::~Timer() throw() { }
+TickTracker::~TickTracker() throw() { }
 
 
 //--- TIMER MANIPULATION -------------------------------------------------------
 
 // Starts the timer.
-void Timer::start() throw(RuntimeException) {
+void TickTracker::start() throw(RuntimeException) {
     if (m_isRunning) {
         fbLog_warn << "Starting a running timer." << std::endl;
     }
@@ -83,7 +83,7 @@ void Timer::start() throw(RuntimeException) {
 }
 
 /** Stops the timer. */
-void Timer::stop() throw() {
+void TickTracker::stop() throw() {
     if (!m_isRunning) {
         fbLog_warn << "Stopping an inactive timer." << std::endl;
     }
@@ -95,7 +95,7 @@ void Timer::stop() throw() {
 //--- TIMER QUERIES ------------------------------------------------------------
 
 // Returns the new number of elapsed ticks since last call of this function.
-int Timer::newElapsedTicks() throw(RuntimeException) {
+int TickTracker::newElapsedTicks() throw(RuntimeException) {
     int totalTicks = totalElapsedTicks();
     int newTicks = totalTicks - m_observedTicks;
     m_observedTicks = totalTicks;
@@ -108,7 +108,7 @@ int Timer::newElapsedTicks() throw(RuntimeException) {
 }
 
 // Returns the total number of elapsed ticks.
-int Timer::totalElapsedTicks() throw(RuntimeException) {
+int TickTracker::totalElapsedTicks() throw(RuntimeException) {
     static timeval now;
 
     if (gettimeofday(&now, NULL)) {
@@ -121,7 +121,7 @@ int Timer::totalElapsedTicks() throw(RuntimeException) {
 
 
 // Sets the size of a tick.
-void Timer::setTickSize(int usec) throw(RuntimeException) {
+void TickTracker::setTickSize(int usec) throw(RuntimeException) {
     if (usec < 1) {
         throw RuntimeException("Invalid tick size.");
     }
@@ -135,7 +135,7 @@ void Timer::setTickSize(int usec) throw(RuntimeException) {
 
 // Returns the difference in time between two timevals.
 // Function adapted from http://www.gnu.org/s/libc/manual/html_node/Elapsed-Time.html.
-timeval Timer::timeDifference(timeval t1, timeval t2) throw() {
+timeval TickTracker::timeDifference(timeval t1, timeval t2) throw() {
     int nsec;
 
     if (t1.tv_usec < t2.tv_usec) {
@@ -156,7 +156,7 @@ timeval Timer::timeDifference(timeval t1, timeval t2) throw() {
 }
 
 // Returns the difference between two timevals in ticks.
-int Timer::tickDifference(const timeval &t1, const timeval &t2) throw() {
+int TickTracker::tickDifference(const timeval &t1, const timeval &t2) throw() {
     timeval diff = timeDifference(t1, t2);
 
     double rawDiff = diff.tv_sec * m_ticksPerSecond + (double(diff.tv_usec) / m_tickSize);

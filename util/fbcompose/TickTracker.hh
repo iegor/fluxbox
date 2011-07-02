@@ -1,4 +1,4 @@
-/** Timer.hh file for the fluxbox compositor. */
+/** TickTracker.hh file for the fluxbox compositor. */
 
 // Copyright (c) 2011 Gediminas Liktaras (gliktaras at gmail dot com)
 //
@@ -34,7 +34,7 @@
 namespace FbCompositor {
 
     class RuntimeException;
-    class Timer;
+    class TickTracker;
 
 
     /**
@@ -42,23 +42,23 @@ namespace FbCompositor {
      *
      * This class provides a simpler and more flexible interface to deal with
      * time. It was added, since it is not possible to make continuous time
-     * measurements with FbTk::FbTimer.
+     * measurements with FbTk::FbTickTracker.
      */
-    class Timer {
+    class TickTracker {
     public:
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        Timer() throw();
+        TickTracker() throw();
 
         /** Copy constructor. */
-        Timer(const Timer &other) throw();
+        TickTracker(const TickTracker &other) throw();
 
         /** Assignment operator. */
-        Timer &operator=(const Timer &other) throw();
+        TickTracker &operator=(const TickTracker &other) throw();
 
         /** Destructor. */
-        ~Timer() throw();
+        ~TickTracker() throw();
 
 
         //--- TIMER MANIPULATION -----------------------------------------------
@@ -130,12 +130,12 @@ namespace FbCompositor {
     //--- INLINE FUNCTIONS -----------------------------------------------------
 
     // Returns whether the timer is running.
-    inline bool Timer::isRunning() const throw() {
+    inline bool TickTracker::isRunning() const throw() {
         return m_isRunning;
     }
 
     // Returns the tick size.
-    inline int Timer::tickSize() const throw() {
+    inline int TickTracker::tickSize() const throw() {
         return m_tickSize;
     }
 }

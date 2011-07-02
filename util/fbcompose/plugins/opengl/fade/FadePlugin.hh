@@ -32,12 +32,14 @@
 #include "Constants.hh"
 #include "Exceptions.hh"
 #include "OpenGLPlugin.hh"
-// #include "Timer.hh"
+#include "TickTracker.hh"
 
 #include "FbTk/FbString.hh"
 
 #include <GL/glew.h>
 #include <GL/gl.h>
+
+#include <X11/Xlib.h>
 
 #include <vector>
 #include <map>
@@ -49,6 +51,8 @@ namespace FbCompositor {
     class FadePlugin;
     class InitException;
     class OpenGLPlugin;
+    class OpenGLWindow;
+    class TickTracker;
 
 
     /**
@@ -83,6 +87,14 @@ namespace FbCompositor {
 
         //--- PLUGIN ACTIONS ---------------------------------------------------
 
+        /** Pre background rendering actions. */
+        void preBackgroundRenderActions();
+
+        /** Pre window rendering actions. */
+        void preReconfigureRectRenderActions(XRectangle reconfigureRect);
+
+        /** Pre window rendering actions. */
+        void preWindowRenderActions(const OpenGLWindow &window);
 
 
         //--- WINDOW EVENT CALLBACKS -------------------------------------------
@@ -98,12 +110,12 @@ namespace FbCompositor {
 
         /** Holds the data about fades. */
         struct FadeData {
-            int alpha;      ///< Window's relative alpha.
-            // Timer timer;    ///< Timer that tracks the current fade.
+            int alpha;              ///< Window's relative alpha.
+            TickTracker timer;      ///< Timer that tracks the current fade.
         };
 
-        /** A list of appearing fades. */
-        std::map<Window, FadeData> m_appearingFades;
+        /** A list of appearing (positive) fades. */
+        std::map<Window, FadeData> m_positiveFades;
     };
 
 

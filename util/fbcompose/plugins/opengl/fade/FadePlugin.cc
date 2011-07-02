@@ -40,7 +40,7 @@ namespace {
         uniform float fade_Alpha;                                            \n\
                                                                              \n\
         void fade() {                                                        \n\
-            gl_FragColor *= vec4(0.9, 0.7, 0.5, 1.0);                        \n\
+            gl_FragColor *= vec4(1.0, 1.0, 1.0, fade_Alpha);                 \n\
         }                                                                    \n\
     ";
 
@@ -77,6 +77,36 @@ const char *FadePlugin::vertexShader() const throw() {
 
 //--- PLUGIN ACTIONS -----------------------------------------------------------
 
+// Pre background rendering actions.
+void FadePlugin::preBackgroundRenderActions() {
+    static GLuint alphaPos = glGetUniformLocation(dynamic_cast<const OpenGLScreen&>(screen()).shaderProgram(), "fade_Alpha");
+    glUniform1f(alphaPos, 1.0);
+}
+
+// Pre window rendering actions.
+void FadePlugin::preReconfigureRectRenderActions(XRectangle /*reconfigureRect*/) {
+    static GLuint alphaPos = glGetUniformLocation(dynamic_cast<const OpenGLScreen&>(screen()).shaderProgram(), "fade_Alpha");
+    glUniform1f(alphaPos, 1.0);
+}
+
+// Pre window rendering actions.
+void FadePlugin::preWindowRenderActions(const OpenGLWindow &window) {
+    static GLuint alphaPos = glGetUniformLocation(dynamic_cast<const OpenGLScreen&>(screen()).shaderProgram(), "fade_Alpha");
+
+    std::map<Window, FadeData>::iterator it = m_positiveFades.find(window.window());
+    if (it != m_positiveFades.end()) {
+        it->second.alpha += it->second.timer.newElapsedTicks();
+        
+        if (it->second.alpha >= 255) {
+            glUniform1f(alphaPos, 1.0);
+            m_positiveFades.erase(it);
+        } else {
+            glUniform1f(alphaPos, (it->second.alpha / 255.0));
+        }
+    } else {
+        glUniform1f(alphaPos, 1.0);
+    }
+}
 
 
 //--- WINDOW EVENT CALLBACKS ---------------------------------------------------
@@ -85,15 +115,15 @@ const char *FadePlugin::vertexShader() const throw() {
 void FadePlugin::windowMapped(const BaseCompWindow &window) {
     FadeData fade;
     fade.alpha = 0;
-    // fade.timer.setTickSize(1000000 / 255);
-    // fade.timer.start();
+    fade.timer.setTickSize(500000 / 255);
+    fade.timer.start();
 
-    m_appearingFades.insert(std::make_pair(window.window(), fade));
+    m_positiveFades.insert(std::make_pair(window.window(), fade));
 }
 
 // Called, whenever a window is unmapped.
 void FadePlugin::windowUnmapped(const BaseCompWindow &window) {
-    m_appearingFades.erase(window.window());
+    m_positiveFades.erase(window.window());
 }
 
 

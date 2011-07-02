@@ -28,7 +28,7 @@
 
 #include "Constants.hh"
 #include "Exceptions.hh"
-#include "Timer.hh"
+#include "TickTracker.hh"
 
 #include "FbTk/App.hh"
 
@@ -44,7 +44,7 @@ namespace FbCompositor {
     class CompositorConfig;
     class InitException;
     class RuntimeException;
-    class Timer;
+    class TickTracker;
 
 
     //--- TYPEDEFS -------------------------------------------------------------
@@ -126,8 +126,8 @@ namespace FbCompositor {
 
         //--- COMPOSITOR VARIABLES ---------------------------------------------
 
-        /** A timer that controls when the screen is redrawn. */
-        Timer m_timer;
+        /** A tick tracker that controls when the screen is redrawn. */
+        TickTracker m_timer;
 
         /** Rendering mode in use. */
         RenderingMode m_renderingMode;
