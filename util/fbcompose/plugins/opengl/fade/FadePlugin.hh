@@ -61,8 +61,6 @@ namespace FbCompositor {
      * better fitting example.
      */
     class FadePlugin : public OpenGLPlugin {
-        struct FadeData;
-
     public :
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
