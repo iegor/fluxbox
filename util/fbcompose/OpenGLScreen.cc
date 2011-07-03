@@ -30,7 +30,7 @@
 #include "Logging.hh"
 #include "OpenGLPlugin.hh"
 #include "OpenGLShaders.hh"
-#include "Utility.hh"
+#include "OpenGLUtility.hh"
 
 #include "FbTk/FbString.hh"
 
@@ -546,6 +546,8 @@ void OpenGLScreen::renderScreen() {
         renderReconfigureRect();
     }
 
+    renderExtraJobs();
+
     glFlush();
     if (m_haveDoubleBuffering) {
         glXSwapBuffers(display(), m_glxRenderingWindow);
@@ -568,6 +570,39 @@ void OpenGLScreen::renderBackground() {
            4, m_backgroundTexture, 1.0);
     forEachPlugin(i, plugin) {
         plugin->postBackgroundRenderActions();
+    }
+}
+
+// Perform extra rendering jobs from plugins.
+void OpenGLScreen::renderExtraJobs() {
+    OpenGLPlugin *plugin = NULL;
+
+    GLfloat alpha;
+    GLuint primPosBuffer;
+    GLuint texturePosBuffer;
+    GLuint texture;
+
+    forEachPlugin(i, plugin) {
+        plugin->preExtraRenderingActions();
+
+        for (int j = 0; j < plugin->extraRenderingJobCount(); j++) {
+            plugin->extraRenderingJobInit(j, primPosBuffer, texturePosBuffer, texture, alpha);
+
+            if (!primPosBuffer) {
+                primPosBuffer = m_defaultPrimPosBuffer;
+            }
+            if (!texturePosBuffer) {
+                texturePosBuffer = m_defaultTexPosBuffer;
+            }
+            if (!texture) {
+                texture = m_blankTexture;
+            }
+
+            render(GL_TRIANGLE_STRIP, primPosBuffer, texturePosBuffer, m_defaultElementBuffer, 4, texture, alpha);
+            plugin->extraRenderingJobCleanup(j);
+        }
+
+        plugin->postExtraRenderingActions();
     }
 }
 
@@ -610,8 +645,8 @@ void OpenGLScreen::renderWindow(OpenGLWindow &window) {
     forEachPlugin(i, plugin) {
         plugin->preWindowRenderActions(window);
     }
-    render(GL_TRIANGLE_STRIP, window.windowPosBuffer(), m_defaultTexPosBuffer, m_defaultElementBuffer,
-           4, window.contentTexture(), window.alpha() / 255.0);
+    render(GL_TRIANGLE_STRIP, window.windowPosBuffer()->buffer(), m_defaultTexPosBuffer, m_defaultElementBuffer,
+           4, window.contentTexture()->texture(), window.alpha() / 255.0);
     forEachPlugin(i, plugin) {
         plugin->postWindowRenderActions(window);
     }

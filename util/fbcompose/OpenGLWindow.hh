@@ -31,6 +31,7 @@
 
 #include "BaseCompWindow.hh"
 #include "Exceptions.hh"
+#include "OpenGLUtility.hh"
 
 #include <GL/glxew.h>
 #include <GL/glx.h>
@@ -62,11 +63,11 @@ namespace FbCompositor {
 
         //--- ACCESSORS --------------------------------------------------------
 
-        /** \returns the window's contents as a OpenGL texture. */
-        GLuint contentTexture() const throw();
+        /** \returns an object, holding the the window's contents as a OpenGL texture. */
+        OpenGLTexturePtr contentTexture() const throw();
 
-        /** \returns the window position buffer. */
-        GLuint windowPosBuffer() const throw();
+        /** \returns an object, holding the window position buffer. */
+        OpenGLBufferPtr windowPosBuffer() const throw();
 
 
         //--- WINDOW UPDATE FUNCTIONS ------------------------------------------
@@ -85,10 +86,19 @@ namespace FbCompositor {
 
 
     private :
+        //--- CONVENIENCE ACCESSORS --------------------------------------------
+
+        /** \returns the window's contents as a OpenGL texture. */
+        GLuint rawContentTexture() const throw();
+
+        /** \returns the window position buffer. */
+        GLuint rawWindowPosBuffer() const throw();
+
+
         //--- RENDERING-RELATED VARIABLES --------------------------------------
 
-        /** Window's content texture. */
-        GLuint m_contentTexture;
+        /** Window's content texture holder. */
+        OpenGLTexturePtr m_contentTexturePtr;
 
         /** Screen's FBConfig. */
         GLXFBConfig m_fbConfig;
@@ -96,8 +106,8 @@ namespace FbCompositor {
         /** Window position array. */
         GLfloat m_windowPosArray[8];
 
-        /** Window position buffer. */
-        GLuint m_windowPosBuffer;
+        /** Window position buffer holder. */
+        OpenGLBufferPtr m_windowPosBufferPtr;
 
 
         /**
@@ -129,14 +139,26 @@ namespace FbCompositor {
     //--- INLINE FUNCTIONS -------------------------------------------------
 
     // Returns the window's contents as a OpenGL texture.
-    inline GLuint OpenGLWindow::contentTexture() const throw() {
-        return m_contentTexture;
+    inline OpenGLTexturePtr OpenGLWindow::contentTexture() const throw() {
+        return m_contentTexturePtr;
+    }
+
+    // Returns the window's contents as a OpenGL texture.
+    inline GLuint OpenGLWindow::rawContentTexture() const throw() {
+        return m_contentTexturePtr->texture();
     }
 
     // Returns the window position buffer.
-    inline GLuint OpenGLWindow::windowPosBuffer() const throw() {
-        return m_windowPosBuffer;
+    inline GLuint OpenGLWindow::rawWindowPosBuffer() const throw() {
+        return m_windowPosBufferPtr->buffer();
     }
+
+    // Returns the window position buffer.
+    inline OpenGLBufferPtr OpenGLWindow::windowPosBuffer() const throw() {
+        return m_windowPosBufferPtr;
+    }
+
+
 }
 
 #endif  // USE_OPENGL_COMPOSITING

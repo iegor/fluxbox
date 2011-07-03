@@ -64,3 +64,22 @@ void OpenGLPlugin::preWindowRenderActions(const OpenGLWindow &/*window*/) { }
 
 // Post window rendering actions.
 void OpenGLPlugin::postWindowRenderActions(const OpenGLWindow &/*window*/) { }
+
+
+// Called before the extra rendering jobs are executed.
+void OpenGLPlugin::preExtraRenderingActions() { }
+
+// Returns the number of extra rendering jobs the plugin will do.
+int OpenGLPlugin::extraRenderingJobCount() throw() {
+    return 0;
+}
+
+// Initialize the specified extra rendering job.
+void OpenGLPlugin::extraRenderingJobInit(int /*job*/, GLuint &/*primPosBuffer_return*/, GLuint &/*texPosBuffer_return*/,
+                                         GLuint &/*texture_return*/, GLfloat &/*alpha_return*/) { }
+
+// Clean up after an extra rendering job.
+void OpenGLPlugin::extraRenderingJobCleanup(int /*job*/) { }
+
+// Called after the extra rendering jobs are executed.
+void OpenGLPlugin::postExtraRenderingActions() { }

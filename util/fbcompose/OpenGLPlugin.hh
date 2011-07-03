@@ -99,6 +99,23 @@ namespace FbCompositor {
 
         /** Post window rendering actions. */
         virtual void postWindowRenderActions(const OpenGLWindow &window);
+
+
+        /** Called before the extra rendering jobs are executed. */
+        virtual void preExtraRenderingActions();
+
+        /** \returns the number of extra rendering jobs the plugin will do. */
+        virtual int extraRenderingJobCount() throw();
+
+        /** Initialize the specified extra rendering job. */
+        virtual void extraRenderingJobInit(int job, GLuint &primPosBuffer_return, GLuint &texPosBuffer_return,
+                                           GLuint &texture_return, GLfloat &alpha_return);
+
+        /** Clean up after an extra rendering job. */
+        virtual void extraRenderingJobCleanup(int job);
+
+        /** Called after the extra rendering jobs are executed. */
+        virtual void postExtraRenderingActions();
     };
 }
 

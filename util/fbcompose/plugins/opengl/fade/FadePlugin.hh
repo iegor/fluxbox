@@ -32,6 +32,7 @@
 #include "Constants.hh"
 #include "Exceptions.hh"
 #include "OpenGLPlugin.hh"
+#include "OpenGLUtility.hh"
 #include "TickTracker.hh"
 
 #include "FbTk/FbString.hh"
@@ -91,7 +92,16 @@ namespace FbCompositor {
         const char *vertexShader() const throw();
 
 
-        //--- PLUGIN ACTIONS ---------------------------------------------------
+        //--- WINDOW EVENT CALLBACKS -------------------------------------------
+
+        /** Called, whenever a window is mapped. */
+        void windowMapped(const BaseCompWindow &window);
+
+        /** Called, whenever a window is unmapped. */
+        void windowUnmapped(const BaseCompWindow &window);
+
+
+        //--- RENDERING ACTIONS ------------------------------------------------
 
         /** Pre background rendering actions. */
         void preBackgroundRenderActions();
@@ -103,13 +113,15 @@ namespace FbCompositor {
         void preWindowRenderActions(const OpenGLWindow &window);
 
 
-        //--- WINDOW EVENT CALLBACKS -------------------------------------------
+        /** \returns the number of extra rendering jobs the plugin will do. */
+        int extraRenderingJobCount() throw();
 
-        /** Called, whenever a window is mapped. */
-        void windowMapped(const BaseCompWindow &window);
+        /** Initialize the specified extra rendering job. */
+        void extraRenderingJobInit(int job, GLuint &primPosBuffer_return, GLuint &texPosBuffer_return,
+                                   GLuint &texture_return, GLfloat &alpha_return);
 
-        /** Called, whenever a window is unmapped. */
-        void windowUnmapped(const BaseCompWindow &window);
+        /** Called after the extra rendering jobs are executed. */
+        void postExtraRenderingActions();
 
 
     private :
@@ -121,14 +133,28 @@ namespace FbCompositor {
 
         //--- FADE SPECIFIC ----------------------------------------------------
 
-        /** Holds the data about fades. */
-        struct FadeData {
-            int alpha;              ///< Window's relative alpha.
+        /** Holds the data about positive fades. */
+        struct PosFadeData {
+            int fadeAlpha;          ///< Window's relative fade alpha.
             TickTracker timer;      ///< Timer that tracks the current fade.
         };
 
         /** A list of appearing (positive) fades. */
-        std::map<Window, FadeData> m_positiveFades;
+        std::map<Window, PosFadeData> m_positiveFades;
+
+
+        /** Holds the data about positive fades. */
+        struct NegFadeData {
+            int origAlpha;                          ///< Window's original opacity.
+            OpenGLTexturePtr windowTextureHolder;   ///< Window's contents.
+            OpenGLBufferPtr windowPosBufferHolder;  ///< Window position buffer.
+
+            int fadeAlpha;                          ///< Window's fade relative alpha.
+            TickTracker timer;                      ///< Timer that tracks the current fade.
+        };
+
+        /** A list of disappearing (negative) fades. */
+        std::vector<NegFadeData> m_negativeFades;
     };
 
 

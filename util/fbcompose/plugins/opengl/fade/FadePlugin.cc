@@ -83,7 +83,43 @@ const char *FadePlugin::vertexShader() const throw() {
 }
 
 
-//--- PLUGIN ACTIONS -----------------------------------------------------------
+//--- WINDOW EVENT CALLBACKS ---------------------------------------------------
+
+// Called, whenever a window is mapped.
+void FadePlugin::windowMapped(const BaseCompWindow &window) {
+    PosFadeData fade;
+    fade.fadeAlpha = 0;
+    fade.timer.setTickSize(250000 / 255);
+    fade.timer.start();
+
+    m_positiveFades.insert(std::make_pair(window.window(), fade));
+}
+
+// Called, whenever a window is unmapped.
+void FadePlugin::windowUnmapped(const BaseCompWindow &window) {
+    NegFadeData fade;
+    const OpenGLWindow &glWindow = dynamic_cast<const OpenGLWindow&>(window);
+
+    std::map<Window, PosFadeData>::iterator it = m_positiveFades.find(window.window());
+    if (it != m_positiveFades.end()) {
+        fade.fadeAlpha = it->second.fadeAlpha;
+        m_positiveFades.erase(it);
+    } else {
+        fade.fadeAlpha = 255;
+    }
+
+    fade.origAlpha = glWindow.alpha();
+    fade.windowTextureHolder = glWindow.contentTexture();
+    fade.windowPosBufferHolder = glWindow.windowPosBuffer();
+
+    fade.timer.setTickSize(250000 / 255);
+    fade.timer.start();
+
+    m_negativeFades.push_back(fade);
+}
+
+
+//--- RENDERING ACTIONS --------------------------------------------------------
 
 // Pre background rendering actions.
 void FadePlugin::preBackgroundRenderActions() {
@@ -97,15 +133,15 @@ void FadePlugin::preReconfigureRectRenderActions(XRectangle /*reconfigureRect*/)
 
 // Pre window rendering actions.
 void FadePlugin::preWindowRenderActions(const OpenGLWindow &window) {
-    std::map<Window, FadeData>::iterator it = m_positiveFades.find(window.window());
+    std::map<Window, PosFadeData>::iterator it = m_positiveFades.find(window.window());
     if (it != m_positiveFades.end()) {
-        it->second.alpha += it->second.timer.newElapsedTicks();
+        it->second.fadeAlpha += it->second.timer.newElapsedTicks();
         
-        if (it->second.alpha >= 255) {
+        if (it->second.fadeAlpha >= 255) {
             glUniform1f(alphaUniformPos, 1.0);
             m_positiveFades.erase(it);
         } else {
-            glUniform1f(alphaUniformPos, (it->second.alpha / 255.0));
+            glUniform1f(alphaUniformPos, (it->second.fadeAlpha / 255.0));
         }
     } else {
         glUniform1f(alphaUniformPos, 1.0);
@@ -113,21 +149,37 @@ void FadePlugin::preWindowRenderActions(const OpenGLWindow &window) {
 }
 
 
-//--- WINDOW EVENT CALLBACKS ---------------------------------------------------
-
-// Called, whenever a window is mapped.
-void FadePlugin::windowMapped(const BaseCompWindow &window) {
-    FadeData fade;
-    fade.alpha = 0;
-    fade.timer.setTickSize(250000 / 255);
-    fade.timer.start();
-
-    m_positiveFades.insert(std::make_pair(window.window(), fade));
+// Returns the number of extra rendering jobs the plugin will do.
+int FadePlugin::extraRenderingJobCount() throw() {
+    return m_negativeFades.size();
 }
 
-// Called, whenever a window is unmapped.
-void FadePlugin::windowUnmapped(const BaseCompWindow &window) {
-    m_positiveFades.erase(window.window());
+// Initialize the specified extra rendering job.
+void FadePlugin::extraRenderingJobInit(int job, GLuint &primPosBuffer_return, GLuint &texPosBuffer_return,
+                                       GLuint &texture_return, GLfloat &alpha_return) {
+    primPosBuffer_return = m_negativeFades[job].windowPosBufferHolder->buffer();
+    texPosBuffer_return = 0;
+    texture_return = m_negativeFades[job].windowTextureHolder->texture();
+    alpha_return = m_negativeFades[job].origAlpha / 255.0;
+
+    m_negativeFades[job].fadeAlpha -= m_negativeFades[job].timer.newElapsedTicks();
+    if (m_negativeFades[job].fadeAlpha <= 0) {
+        glUniform1f(alphaUniformPos, 0.0);
+    } else {
+        glUniform1f(alphaUniformPos, (m_negativeFades[job].fadeAlpha / 255.0));
+    }
+}
+
+// Called after the extra rendering jobs are executed.
+void FadePlugin::postExtraRenderingActions() {
+    std::vector<NegFadeData>::iterator it = m_negativeFades.begin();
+    while (it != m_negativeFades.end()) {
+        if (it->fadeAlpha <= 0) {
+            it = m_negativeFades.erase(it);
+        } else {
+            ++it;
+        }
+    }
 }
 
 

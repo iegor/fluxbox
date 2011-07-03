@@ -140,6 +140,9 @@ namespace FbCompositor {
         /** Render the desktop background. */
         void renderBackground();
 
+        /** Perform extra rendering jobs from plugins. */
+        void renderExtraJobs();
+
         /** Render the reconfigure rectangle. */
         void renderReconfigureRect();
 

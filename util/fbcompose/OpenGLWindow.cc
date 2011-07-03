@@ -28,7 +28,7 @@
 
 #include "BaseScreen.hh"
 #include "Logging.hh"
-#include "Utility.hh"
+#include "OpenGLUtility.hh"
 
 #include <X11/Xutil.h>
 
@@ -66,14 +66,14 @@ OpenGLWindow::OpenGLWindow(const BaseScreen &screen, Window windowXID, GLXFBConf
     m_rootHeight = screen.rootWindow().height();
 
     // Create OpenGL elements.
-    glGenTextures(1, &m_contentTexture);
-    glGenBuffers(1, &m_windowPosBuffer);
+    m_contentTexturePtr = new OpenGLTextureHolder();
+    m_windowPosBufferPtr = new OpenGLBufferHolder();
 
     // Fill window position array.
     updateWindowPosArray();
 
     // Initialize the content texture.
-    glBindTexture(GL_TEXTURE_2D, m_contentTexture);
+    glBindTexture(GL_TEXTURE_2D, rawContentTexture());
 
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -90,14 +90,12 @@ OpenGLWindow::~OpenGLWindow() throw() {
     if (m_shapePixmap) {
         XFreePixmap(display(), m_shapePixmap);
     }
+
 #ifdef GLXEW_EXT_texture_from_pixmap
     if (m_glxContents) {
         glXDestroyPixmap(display(), m_glxContents);
     }
 #endif
-
-    glDeleteTextures(1, &m_contentTexture);
-    glDeleteBuffers(1, &m_windowPosBuffer);
 }
 
 
@@ -126,7 +124,7 @@ void OpenGLWindow::updateContents() throw(RuntimeException) {
         XFreeGC(display(), gc);
 
 #ifdef GLXEW_EXT_texture_from_pixmap
-        glBindTexture(GL_TEXTURE_2D, contentTexture());
+        glBindTexture(GL_TEXTURE_2D, rawContentTexture());
         glXReleaseTexImageEXT(display(), m_glxContents, GLX_BACK_LEFT_EXT);
 
         // Bind the pixmap to a GLX texture.
@@ -148,7 +146,7 @@ void OpenGLWindow::updateContents() throw(RuntimeException) {
         }
 
         // Update the texture.
-        glBindTexture(GL_TEXTURE_2D, m_contentTexture);
+        glBindTexture(GL_TEXTURE_2D, rawContentTexture());
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, realWidth(), realHeight(), 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)(&(image->data[0])));
 
         XDestroyImage(image);
@@ -204,7 +202,7 @@ void OpenGLWindow::updateWindowPosArray() throw() {
     m_windowPosArray[1] = m_windowPosArray[3] = yLow;
     m_windowPosArray[5] = m_windowPosArray[7] = yHigh;
 
-    glBindBuffer(GL_ARRAY_BUFFER, m_windowPosBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, rawWindowPosBuffer());
     glBufferData(GL_ARRAY_BUFFER, sizeof(m_windowPosArray), (const GLvoid*)(m_windowPosArray), GL_STATIC_DRAW);
 }
 

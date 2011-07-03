@@ -4,6 +4,7 @@
 .libs
 *.lo
 .*.sw[a-p]
+.fuse_hidden*
 
 # Exact filename in any subdir.
 .deps

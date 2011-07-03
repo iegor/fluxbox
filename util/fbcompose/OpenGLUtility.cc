@@ -1,4 +1,4 @@
-/** Utility.cc file for the fluxbox compositor. */
+/** OpenGLUtility.cc file for the fluxbox compositor. */
 
 // Copyright (c) 2011 Gediminas Liktaras (gliktaras at gmail dot com)
 //
@@ -21,10 +21,35 @@
 // THE SOFTWARE.
 
 
-#include "Utility.hh"
+#include "OpenGLUtility.hh"
 
 using namespace FbCompositor;
 
+//--- OPENGL RESOURCE WRAPPERS -------------------------------------------------
+
+// Buffer holder constructor.
+OpenGLBufferHolder::OpenGLBufferHolder() throw() {
+    glGenBuffers(1, &m_buffer);
+}
+
+// Buffer holder destructor.
+OpenGLBufferHolder::~OpenGLBufferHolder() throw() {
+    glDeleteBuffers(1, &m_buffer);
+}
+
+
+// Texture holder constructor.
+OpenGLTextureHolder::OpenGLTextureHolder() throw() {
+    glGenTextures(1, &m_texture);
+}
+
+// Texture holder destructor.
+OpenGLTextureHolder::~OpenGLTextureHolder() throw() {
+    glDeleteTextures(1, &m_texture);
+}
+
+
+//--- FUNCTIONS ----------------------------------------------------------------
 
 // Converts screen coordinates to OpenGL coordinates.
 void FbCompositor::toOpenGLCoordinates(int screenWidth, int screenHeight, int x, int y, int width, int height,
