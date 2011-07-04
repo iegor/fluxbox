@@ -55,7 +55,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        CompositorConfig(std::vector<FbTk::FbString> args) throw(ConfigException);
+        CompositorConfig(std::vector<FbTk::FbString> args) throw(InitException);
 
         /** Copy constructor. */
         CompositorConfig(const CompositorConfig &other) throw();

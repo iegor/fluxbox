@@ -39,7 +39,7 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-CompositorConfig::CompositorConfig(std::vector<FbTk::FbString> args) throw(ConfigException) :
+CompositorConfig::CompositorConfig(std::vector<FbTk::FbString> args) throw(InitException) :
     m_args(args),
 
 #ifdef USE_OPENGL_COMPOSITING

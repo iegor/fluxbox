@@ -192,10 +192,10 @@ namespace FbCompositor {
     //--- VARIOUS HANDLERS -----------------------------------------------------
 
     /** Custom signal handler. */
-    void handleSignal(int signal);
+    void handleSignal(int signal) throw();
 
     /** Custom X error handler. */
-    int handleXError(Display *display, XErrorEvent *error);
+    int handleXError(Display *display, XErrorEvent *error) throw();
 
 
     //--- OTHER FUNCTIONS ------------------------------------------------------

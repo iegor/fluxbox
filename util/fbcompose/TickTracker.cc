@@ -76,7 +76,7 @@ void TickTracker::start() throw(RuntimeException) {
     }
 
     if (gettimeofday(&m_startTime, NULL)) {
-        throw RuntimeException("Cannot obtain the current time.");
+        throw TimeException("Cannot obtain the current time.");
     }
     m_observedTicks = 0;
     m_isRunning = true;
@@ -112,7 +112,7 @@ int TickTracker::totalElapsedTicks() throw(RuntimeException) {
     static timeval now;
 
     if (gettimeofday(&now, NULL)) {
-        throw RuntimeException("Cannot obtain the current time.");
+        throw TimeException("Cannot obtain the current time.");
     }
 
     // TODO: Make sure it reacts to time changes appropriately (especially backwards).

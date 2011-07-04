@@ -515,7 +515,7 @@ GLuint OpenGLScreen::createShaderProgram(GLuint vertexShader, GLuint geometrySha
 //--- WINDOW MANIPULATION ------------------------------------------------------
 
 // Creates a window object from its XID.
-BaseCompWindow *OpenGLScreen::createWindowObject(Window window) {
+BaseCompWindow *OpenGLScreen::createWindowObject(Window window) throw(InitException) {
     OpenGLWindow *newWindow = new OpenGLWindow(*this, window, m_fbConfig);
     return newWindow;
 }
@@ -524,7 +524,7 @@ BaseCompWindow *OpenGLScreen::createWindowObject(Window window) {
 //--- SCREEN RENDERING ---------------------------------------------------------
 
 // Renders the screen's contents.
-void OpenGLScreen::renderScreen() {
+void OpenGLScreen::renderScreen() throw(RuntimeException) {
     if (m_rootWindowChanged) {
         updateOnRootWindowResize();
     }
@@ -556,7 +556,7 @@ void OpenGLScreen::renderScreen() {
 
 
 // A function to render the desktop background.
-void OpenGLScreen::renderBackground() {
+void OpenGLScreen::renderBackground() throw(RuntimeException) {
     OpenGLPlugin *plugin = NULL;
 
     if (m_backgroundChanged) {
@@ -574,7 +574,7 @@ void OpenGLScreen::renderBackground() {
 }
 
 // Perform extra rendering jobs from plugins.
-void OpenGLScreen::renderExtraJobs() {
+void OpenGLScreen::renderExtraJobs() throw(RuntimeException) {
     OpenGLPlugin *plugin = NULL;
 
     GLfloat alpha;
@@ -607,7 +607,7 @@ void OpenGLScreen::renderExtraJobs() {
 }
 
 // Render the reconfigure rectangle.
-void OpenGLScreen::renderReconfigureRect() {
+void OpenGLScreen::renderReconfigureRect() throw(RuntimeException) {
     OpenGLPlugin *plugin = NULL;
 
     GLfloat xLow, xHigh, yLow, yHigh;
@@ -635,7 +635,7 @@ void OpenGLScreen::renderReconfigureRect() {
 }
 
 // A function to render a particular window onto the screen.
-void OpenGLScreen::renderWindow(OpenGLWindow &window) {
+void OpenGLScreen::renderWindow(OpenGLWindow &window) throw(RuntimeException) {
     OpenGLPlugin *plugin = NULL;
 
     if (window.isDamaged()) {
@@ -655,7 +655,7 @@ void OpenGLScreen::renderWindow(OpenGLWindow &window) {
 
 // A function to render something onto the screen.
 void OpenGLScreen::render(GLenum renderingMode, GLuint primPosBuffer, GLuint texturePosBuffer,
-                          GLuint elementBuffer, GLuint elementCount, GLuint texture, GLfloat alpha) {
+                          GLuint elementBuffer, GLuint elementCount, GLuint texture, GLfloat alpha) throw() {
     // Attribute locations.
     static GLuint texPosAttrib = glGetAttribLocation(m_shaderProgram, "fb_InitTexCoord");
     static GLuint windowPosAttrib = glGetAttribLocation(m_shaderProgram, "fb_InitPointPos");

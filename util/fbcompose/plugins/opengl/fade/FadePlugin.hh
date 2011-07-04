@@ -65,7 +65,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        FadePlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args) throw(InitException);
+        FadePlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args) throw();
 
         /** Destructor. */
         ~FadePlugin() throw();
@@ -74,7 +74,7 @@ namespace FbCompositor {
         //--- OTHER INITIALIZATION ---------------------------------------------
 
         /** Initialize OpenGL-specific code. */
-        void initOpenGL(GLuint shaderProgram) throw(InitException);
+        void initOpenGL(GLuint shaderProgram) throw();
 
 
         //--- ACCESSORS --------------------------------------------------------
@@ -93,22 +93,22 @@ namespace FbCompositor {
         //--- WINDOW EVENT CALLBACKS -------------------------------------------
 
         /** Called, whenever a window is mapped. */
-        void windowMapped(const BaseCompWindow &window);
+        void windowMapped(const BaseCompWindow &window) throw();
 
         /** Called, whenever a window is unmapped. */
-        void windowUnmapped(const BaseCompWindow &window);
+        void windowUnmapped(const BaseCompWindow &window) throw();
 
 
         //--- RENDERING ACTIONS ------------------------------------------------
 
         /** Pre background rendering actions. */
-        void preBackgroundRenderActions();
+        void preBackgroundRenderActions() throw();
 
         /** Pre window rendering actions. */
-        void preReconfigureRectRenderActions(XRectangle reconfigureRect);
+        void preReconfigureRectRenderActions(XRectangle reconfigureRect) throw();
 
         /** Pre window rendering actions. */
-        void preWindowRenderActions(const OpenGLWindow &window);
+        void preWindowRenderActions(const OpenGLWindow &window) throw();
 
 
         /** \returns the number of extra rendering jobs the plugin will do. */
@@ -116,10 +116,10 @@ namespace FbCompositor {
 
         /** Initialize the specified extra rendering job. */
         void extraRenderingJobInit(int job, GLuint &primPosBuffer_return, GLuint &texPosBuffer_return,
-                                   GLuint &texture_return, GLfloat &alpha_return);
+                                   GLuint &texture_return, GLfloat &alpha_return) throw();
 
         /** Called after the extra rendering jobs are executed. */
-        void postExtraRenderingActions();
+        void postExtraRenderingActions() throw();
 
 
     private :

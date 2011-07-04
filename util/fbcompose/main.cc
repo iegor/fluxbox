@@ -63,6 +63,9 @@ int main(int argc, char **argv) {
         std::cerr << e.what() << std::endl;
         CompositorConfig::printShortHelp(std::cerr);
         return EXIT_FAILURE;
+    } catch (const PluginException &e) {
+        std::cerr << "Failed to initialize plugins: " << e.what() << std::endl;
+        return EXIT_FAILURE;
     } catch (const CompositorException &e) {
         fbLog_error << e.what() << std::endl;
         return EXIT_FAILURE;

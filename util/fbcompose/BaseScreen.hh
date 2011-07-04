@@ -45,7 +45,9 @@ namespace FbCompositor {
     class BaseScreen;
     class CompositorConfig;
     class InitException;
+    class PluginException;
     class PluginManager;
+    class RuntimeException;
 
 
     /** << output stream operator for the BaseScreen class. */
@@ -64,7 +66,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        BaseScreen(int screenNumber, PluginType pluginType, const CompositorConfig &config) throw(InitException);
+        BaseScreen(int screenNumber, PluginType pluginType, const CompositorConfig &config) throw(InitException, PluginException);
 
         /** Destructor. */
         virtual ~BaseScreen() throw();
@@ -112,31 +114,31 @@ namespace FbCompositor {
         //--- WINDOW MANIPULATION ----------------------------------------------
 
         /** Creates a new window on this screen. */
-        void createWindow(Window window);
+        void createWindow(Window window) throw(RuntimeException);
 
         /** Damages a window on this screen. */
-        void damageWindow(Window window);
+        void damageWindow(Window window) throw(RuntimeException);
 
         /** Destroys a window on this screen. */
-        void destroyWindow(Window window);
+        void destroyWindow(Window window) throw(RuntimeException);
 
         /** Maps a window on this screen. */
-        void mapWindow(Window window);
+        void mapWindow(Window window) throw(RuntimeException);
 
         /** Updates window's configuration. */
-        void reconfigureWindow(const XConfigureEvent &event);
+        void reconfigureWindow(const XConfigureEvent &event) throw(RuntimeException);
 
         /** Reparents a window. */
-        void reparentWindow(Window window, Window parent);
+        void reparentWindow(Window window, Window parent) throw(RuntimeException);
 
         /** Updates window's shape. */
-        void updateShape(Window window);
+        void updateShape(Window window) throw(RuntimeException);
 
         /** Unmaps a window on this screen. */
-        void unmapWindow(Window window);
+        void unmapWindow(Window window) throw(RuntimeException);
 
         /** Updates the value of some window's property. */
-        void updateWindowProperty(Window window, Atom property, int state);
+        void updateWindowProperty(Window window, Atom property, int state) throw(RuntimeException);
 
 
         /** Adds a window to ignore list, stops tracking it if it is being tracked. */
@@ -158,7 +160,7 @@ namespace FbCompositor {
         //--- SCREEN RENDERING -------------------------------------------------
 
         /** Renders the screen's contents. */
-        virtual void renderScreen() = 0;
+        virtual void renderScreen() throw(RuntimeException) = 0;
 
 
     protected:
@@ -180,7 +182,7 @@ namespace FbCompositor {
         //--- SPECIALIZED WINDOW MANIPULATION FUNCTIONS ------------------------
 
         /** Creates a window object from its XID. */
-        virtual BaseCompWindow *createWindowObject(Window window) = 0;
+        virtual BaseCompWindow *createWindowObject(Window window) throw(InitException) = 0;
 
 
     private:
@@ -190,17 +192,19 @@ namespace FbCompositor {
         BaseScreen(const BaseScreen&);
 
 
-        //--- INTERNAL FUNCTIONS -----------------------------------------------
-
-        /** \returns the parent of a given window. */
-        Window getParentWindow(Window window) throw();
-
+        //--- CONVENIENCE FUNCTIONS --------------------------------------------
 
         /** \returns the first managed ancestor of a window. */
         std::list<BaseCompWindow*>::iterator getFirstManagedAncestorIterator(Window window) throw();
 
+        /** \returns the parent of a given window. */
+        Window getParentWindow(Window window) throw();
+
         /** \returns an iterator of m_windows that points to the given window. */
         std::list<BaseCompWindow*>::iterator getWindowIterator(Window windowXID) throw();
+        
+        /** \returns whether the given window is in the ignore list. */
+        bool isWindowIgnored(Window window) throw();
 
 
         //--- PRIVATE VARIABLES ------------------------------------------------

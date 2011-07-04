@@ -73,14 +73,14 @@ namespace FbCompositor {
         //--- SCREEN RENDERING -------------------------------------------------
 
         /** Renders the screen's contents. */
-        void renderScreen();
+        void renderScreen() throw(RuntimeException);
 
 
     protected:
         //--- WINDOW MANIPULATION ----------------------------------------------
 
         /** Creates a window object from its XID. */
-        BaseCompWindow *createWindowObject(Window window);
+        BaseCompWindow *createWindowObject(Window window) throw(InitException);
 
 
     private:
@@ -138,21 +138,21 @@ namespace FbCompositor {
         //--- RENDERING FUNCTIONS ----------------------------------------------
 
         /** Render the desktop background. */
-        void renderBackground();
+        void renderBackground() throw(RuntimeException);
 
         /** Perform extra rendering jobs from plugins. */
-        void renderExtraJobs();
+        void renderExtraJobs() throw(RuntimeException);
 
         /** Render the reconfigure rectangle. */
-        void renderReconfigureRect();
+        void renderReconfigureRect() throw(RuntimeException);
 
         /** Render a particular window onto the screen. */
-        void renderWindow(OpenGLWindow &window);
+        void renderWindow(OpenGLWindow &window) throw(RuntimeException);
 
 
         /** Render something onto the screen. */
         void render(GLenum renderingMode, GLuint primPosBuffer, GLuint texturePosBuffer,
-                    GLuint elementBuffer, GLuint elementCount, GLuint texture, GLfloat alpha);
+                    GLuint elementBuffer, GLuint elementCount, GLuint texture, GLfloat alpha) throw();
 
 
         //--- MAIN RENDERING-RELATED VARIABLES ---------------------------------

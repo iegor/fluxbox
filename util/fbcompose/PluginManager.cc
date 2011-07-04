@@ -35,7 +35,7 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Costructor.
-PluginManager::PluginManager(PluginType pluginType, const BaseScreen &screen) throw(InitException) :
+PluginManager::PluginManager(PluginType pluginType, const BaseScreen &screen) throw() :
     m_screen(screen) {
 
     m_pluginType = pluginType;
@@ -58,7 +58,7 @@ PluginManager::~PluginManager() throw() {
 //--- PLUGIN MANIPULATION ------------------------------------------------------
 
 // Create a plugin object, load the appropriate library if needed.
-void PluginManager::createPluginObject(FbTk::FbString name, std::vector<FbTk::FbString> args) throw(RuntimeException) {
+void PluginManager::createPluginObject(FbTk::FbString name, std::vector<FbTk::FbString> args) throw(InitException) {
     if (m_pluginLibs.find(name) == m_pluginLibs.end()) {
         loadPlugin(name);
     }
@@ -72,7 +72,7 @@ void PluginManager::createPluginObject(FbTk::FbString name, std::vector<FbTk::Fb
 //--- INTERNAL PLUGIN MANIPULATION ---------------------------------------------
 
 // Load a plugin.
-void PluginManager::loadPlugin(FbTk::FbString name) throw(RuntimeException) {
+void PluginManager::loadPlugin(FbTk::FbString name) throw(PluginException) {
     std::vector<FbTk::FbString> paths = buildPluginPaths(name);
 
     // Get the handle to the plugin so object.
@@ -86,7 +86,7 @@ void PluginManager::loadPlugin(FbTk::FbString name) throw(RuntimeException) {
     if (!handle) {
         std::stringstream ss;
         ss << "Could not find/load plugin " << name << ".";
-        throw RuntimeException(ss.str());
+        throw PluginException(ss.str());
     }
 
     // Check for the correct plugin type
@@ -96,7 +96,7 @@ void PluginManager::loadPlugin(FbTk::FbString name) throw(RuntimeException) {
     if ((*(typeFunc))() != m_pluginType) {
         std::stringstream ss;
         ss << "Bad type of plugin " << name << ".";
-        throw RuntimeException(ss.str());
+        throw PluginException(ss.str());
     }
 
     // Get the other functions and track the plugin.
@@ -107,13 +107,13 @@ void PluginManager::loadPlugin(FbTk::FbString name) throw(RuntimeException) {
 }
 
 // Unload a plugin.
-void PluginManager::unloadPlugin(FbTk::FbString name) throw(RuntimeException) {
+void PluginManager::unloadPlugin(FbTk::FbString name) throw(PluginException) {
     std::map<FbTk::FbString, PluginLibData>::iterator it = m_pluginLibs.find(name);
 
     if (it == m_pluginLibs.end()) {
         std::stringstream ss;
         ss << "Plugin " << name << " is not loaded (unloadPlugin).";
-        throw RuntimeException(ss.str());
+        throw PluginException(ss.str());
     } else {
         unloadPlugin(it);
     }
@@ -157,7 +157,7 @@ std::vector<FbTk::FbString> PluginManager::buildPluginPaths(const FbTk::FbString
 
 // Returns some object from the given library handle.
 void *PluginManager::getLibraryObject(void *handle, const char *objectName, const char *pluginName,
-                                      const char *verboseObjectName) throw(RuntimeException) {
+                                      const char *verboseObjectName) throw(PluginException) {
     dlerror();
     void *rawObject = dlsym(handle, objectName);
     const char *error = dlerror();
@@ -166,7 +166,7 @@ void *PluginManager::getLibraryObject(void *handle, const char *objectName, cons
         dlclose(handle);    // TODO: Should this be done here?
         std::stringstream ss;
         ss << "Error in loading " << verboseObjectName << " for " << pluginName << " plugin: " << error;
-        throw RuntimeException(ss.str());
+        throw PluginException(ss.str());
     } else {
         return rawObject;
     }

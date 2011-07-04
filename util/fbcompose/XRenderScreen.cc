@@ -265,7 +265,7 @@ void XRenderScreen::swapBuffers() throw() {
 //--- SPECIALIZED WINDOW MANIPULATION FUNCTIONS --------------------------------
 
 // Creates a window object from its XID.
-BaseCompWindow *XRenderScreen::createWindowObject(Window window) {
+BaseCompWindow *XRenderScreen::createWindowObject(Window window) throw(InitException) {
     XRenderWindow *newWindow = new XRenderWindow(*this, window, m_pictFilter);
     return newWindow;
 }

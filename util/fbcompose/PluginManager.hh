@@ -41,8 +41,8 @@ namespace FbCompositor {
     class BasePlugin;
     class BaseScreen;
     class InitException;
+    class PluginException;
     class PluginManager;
-    class RuntimeException;
 
 
     //--- TYPEDEFS -------------------------------------------------------------
@@ -64,7 +64,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        PluginManager(PluginType pluginType, const BaseScreen &screen) throw(InitException);
+        PluginManager(PluginType pluginType, const BaseScreen &screen) throw();
 
         /** Destructor. */
         ~PluginManager() throw();
@@ -73,7 +73,7 @@ namespace FbCompositor {
         //--- PLUGIN MANIPULATION ----------------------------------------------
 
         /** Create a plugin object, load the appropriate library if needed. */
-        void createPluginObject(FbTk::FbString name, std::vector<FbTk::FbString> args = std::vector<FbTk::FbString>()) throw(RuntimeException);
+        void createPluginObject(FbTk::FbString name, std::vector<FbTk::FbString> args = std::vector<FbTk::FbString>()) throw(InitException);
 
         /** \returns a reference to a vector with plugin objects. */
         std::vector<BasePlugin*> &plugins() throw();
@@ -95,10 +95,10 @@ namespace FbCompositor {
         //--- INTERNAL PLUGIN MANIPULATION -------------------------------------
 
         /** Load a plugin. */
-        void loadPlugin(FbTk::FbString name) throw(RuntimeException);
+        void loadPlugin(FbTk::FbString name) throw(PluginException);
 
         /** Unload a plugin. */
-        void unloadPlugin(FbTk::FbString name) throw(RuntimeException);
+        void unloadPlugin(FbTk::FbString name) throw(PluginException);
 
         /** Unload a plugin (actual worker function). */
         void unloadPlugin(std::map<FbTk::FbString, PluginLibData>::iterator it) throw();
@@ -111,7 +111,7 @@ namespace FbCompositor {
 
         /** \returns some object from the given library handle. */
         void *getLibraryObject(void *handle, const char *objectName, const char *pluginName,
-                               const char *verboseObjectName) throw(RuntimeException);
+                               const char *verboseObjectName) throw(PluginException);
 
 
         //--- PLUGINS AND METADATA ---------------------------------------------

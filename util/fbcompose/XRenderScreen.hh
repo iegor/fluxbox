@@ -76,7 +76,7 @@ namespace FbCompositor {
         //--- SPECIALIZED WINDOW MANIPULATION FUNCTIONS ------------------------
 
         /** Creates a window object from its XID. */
-        BaseCompWindow *createWindowObject(Window window);
+        BaseCompWindow *createWindowObject(Window window) throw(InitException);
 
 
     private:

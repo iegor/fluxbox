@@ -35,11 +35,11 @@ int Logger::m_level = LOG_LEVEL_NONE;
 //--- FUNCTIONS ----------------------------------------------------------------
 
 // Returns the current logging level.
-int Logger::loggingLevel() {
+int Logger::loggingLevel() throw() {
     return m_level;
 }
 
 // Sets a new logging level.
-void Logger::setLoggingLevel(int newLevel) {
+void Logger::setLoggingLevel(int newLevel) throw() {
     m_level = newLevel;
 }

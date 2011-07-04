@@ -53,10 +53,10 @@ namespace FbCompositor {
         //--- MAIN METHODS -----------------------------------------------------
 
         /** \returns the current logging level. */
-        static int loggingLevel();
+        static int loggingLevel() throw();
 
         /** Sets a new logging level. */
-        static void setLoggingLevel(int newLevel);
+        static void setLoggingLevel(int newLevel) throw();
 
 
     private :

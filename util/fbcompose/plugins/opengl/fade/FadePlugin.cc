@@ -54,7 +54,7 @@ namespace {
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-FadePlugin::FadePlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args) throw(InitException) :
+FadePlugin::FadePlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args) throw() :
     OpenGLPlugin(screen, args) {
 }
 
@@ -65,7 +65,7 @@ FadePlugin::~FadePlugin() throw() { }
 //--- OTHER INITIALIZATION -----------------------------------------------------
 
 // Initialize OpenGL-specific code.
-void FadePlugin::initOpenGL(GLuint shaderProgram) throw(InitException) {
+void FadePlugin::initOpenGL(GLuint shaderProgram) throw() {
     alphaUniformPos = glGetUniformLocation(shaderProgram, "fade_Alpha");
 }
 
@@ -86,7 +86,7 @@ const char *FadePlugin::vertexShader() const throw() {
 //--- WINDOW EVENT CALLBACKS ---------------------------------------------------
 
 // Called, whenever a window is mapped.
-void FadePlugin::windowMapped(const BaseCompWindow &window) {
+void FadePlugin::windowMapped(const BaseCompWindow &window) throw() {
     PosFadeData fade;
     fade.fadeAlpha = 0;
     fade.timer.setTickSize(250000 / 255);
@@ -96,7 +96,7 @@ void FadePlugin::windowMapped(const BaseCompWindow &window) {
 }
 
 // Called, whenever a window is unmapped.
-void FadePlugin::windowUnmapped(const BaseCompWindow &window) {
+void FadePlugin::windowUnmapped(const BaseCompWindow &window) throw() {
     NegFadeData fade;
     const OpenGLWindow &glWindow = dynamic_cast<const OpenGLWindow&>(window);
 
@@ -122,17 +122,17 @@ void FadePlugin::windowUnmapped(const BaseCompWindow &window) {
 //--- RENDERING ACTIONS --------------------------------------------------------
 
 // Pre background rendering actions.
-void FadePlugin::preBackgroundRenderActions() {
+void FadePlugin::preBackgroundRenderActions() throw() {
     glUniform1f(alphaUniformPos, 1.0);
 }
 
 // Pre window rendering actions.
-void FadePlugin::preReconfigureRectRenderActions(XRectangle /*reconfigureRect*/) {
+void FadePlugin::preReconfigureRectRenderActions(XRectangle /*reconfigureRect*/) throw() {
     glUniform1f(alphaUniformPos, 1.0);
 }
 
 // Pre window rendering actions.
-void FadePlugin::preWindowRenderActions(const OpenGLWindow &window) {
+void FadePlugin::preWindowRenderActions(const OpenGLWindow &window) throw() {
     std::map<Window, PosFadeData>::iterator it = m_positiveFades.find(window.window());
     if (it != m_positiveFades.end()) {
         it->second.fadeAlpha += it->second.timer.newElapsedTicks();
@@ -156,7 +156,7 @@ int FadePlugin::extraRenderingJobCount() throw() {
 
 // Initialize the specified extra rendering job.
 void FadePlugin::extraRenderingJobInit(int job, GLuint &primPosBuffer_return, GLuint &texPosBuffer_return,
-                                       GLuint &texture_return, GLfloat &alpha_return) {
+                                       GLuint &texture_return, GLfloat &alpha_return) throw() {
     primPosBuffer_return = m_negativeFades[job].windowPosBufferHolder->buffer();
     texPosBuffer_return = 0;
     texture_return = m_negativeFades[job].windowTextureHolder->texture();
@@ -171,7 +171,7 @@ void FadePlugin::extraRenderingJobInit(int job, GLuint &primPosBuffer_return, GL
 }
 
 // Called after the extra rendering jobs are executed.
-void FadePlugin::postExtraRenderingActions() {
+void FadePlugin::postExtraRenderingActions() throw() {
     std::vector<NegFadeData>::iterator it = m_negativeFades.begin();
     while (it != m_negativeFades.end()) {
         if (it->fadeAlpha <= 0) {

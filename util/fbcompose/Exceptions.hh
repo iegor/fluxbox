@@ -57,21 +57,6 @@ namespace FbCompositor {
     //--- DERIVED EXCEPTIONS ---------------------------------------------------
 
     /**
-     * This exception is thrown whenever an error condition is encountered
-     * when processing the configuration data.
-     */
-    class ConfigException : public CompositorException {
-    public:
-        /** Public constructor. */
-        ConfigException(FbTk::FbString errorMessage) throw() :
-            CompositorException(errorMessage) {}
-
-        /** Destructor. */
-        virtual ~ConfigException() throw() {}
-    };
-
-
-    /**
      * This exception is thrown whenever an error condition is encountered in
      * initialization of compositor's components.
      */
@@ -85,7 +70,6 @@ namespace FbCompositor {
         virtual ~InitException() throw() {}
     };
 
-
     /**
      * This exception is thrown whenever an error condition is encountered when
      * the compositor has been initialized and is running.
@@ -98,6 +82,81 @@ namespace FbCompositor {
 
         /** Destructor. */
         virtual ~RuntimeException() throw() {}
+    };
+
+
+    //--- MORE CONCRETE EXCEPTION TYPES ----------------------------------------
+
+    /**
+     * This exception is thrown whenever an error condition is encountered
+     * when processing the configuration data.
+     */
+    class ConfigException : public InitException {
+    public:
+        /** Public constructor. */
+        ConfigException(FbTk::FbString errorMessage) throw() :
+            InitException(errorMessage) {}
+
+        /** Destructor. */
+        virtual ~ConfigException() throw() {}
+    };
+
+    /**
+     * This exception is thrown whenever an error condition is encountered
+     * while initializing (loading, creating instances etc) plugins.
+     */
+    class PluginException : public InitException {
+    public:
+        /** Public constructor. */
+        PluginException(FbTk::FbString errorMessage) throw() :
+            InitException(errorMessage) {}
+
+        /** Destructor. */
+        virtual ~PluginException() throw() {}
+    };
+
+
+
+    /**
+     * This exception is thrown whenever an error occurs during rendering of
+     * the screen.
+     */
+    class RenderingException : public RuntimeException {
+    public:
+        /** Public constructor. */
+        RenderingException(FbTk::FbString errorMessage) throw() :
+            RuntimeException(errorMessage) {}
+
+        /** Destructor. */
+        virtual ~RenderingException() throw() {}
+    };
+
+    /**
+     * This exception is thrown whenever an error occurs while attempting to
+     * obtain current system time.
+     */
+    class TimeException : public RuntimeException {
+    public:
+        /** Public constructor. */
+        TimeException(FbTk::FbString errorMessage) throw() :
+            RuntimeException(errorMessage) {}
+
+        /** Destructor. */
+        virtual ~TimeException() throw() {}
+    };
+
+    /**
+     * This exception is thrown whenever an error occurs while manipulating the
+     * windows in response to X's events.
+     */
+    class WindowException : public RuntimeException {
+    public:
+        /** Public constructor. */
+        WindowException(FbTk::FbString errorMessage) throw() :
+            RuntimeException(errorMessage) {}
+
+        /** Destructor. */
+        virtual ~WindowException() throw() {}
     };
 }
 

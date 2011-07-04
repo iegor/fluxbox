@@ -335,14 +335,14 @@ int Compositor::screenOfEvent(const XEvent &event) throw() {
 //--- VARIOUS HANDLERS ---------------------------------------------------------
 
 // Custom signal handler.
-void FbCompositor::handleSignal(int sig) {
+void FbCompositor::handleSignal(int sig) throw() {
     if ((sig == SIGINT) || (sig == SIGTERM)) {
         FbTk::App::instance()->end();
     }
 }
 
 // Custom X error handler.
-int FbCompositor::handleXError(Display *display, XErrorEvent *error) {
+int FbCompositor::handleXError(Display *display, XErrorEvent *error) throw() {
     static const int ERROR_TEXT_LENGTH = 128;
 
     char errorText[ERROR_TEXT_LENGTH];

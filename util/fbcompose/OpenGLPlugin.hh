@@ -49,6 +49,7 @@ namespace FbCompositor {
     class BaseScreen;
     class InitException;
     class OpenGLWindow;
+    class RenderingException;
 
 
     /**
@@ -83,39 +84,39 @@ namespace FbCompositor {
         //--- RENDERING ACTIONS ------------------------------------------------
 
         /** Pre background rendering actions. */
-        virtual void preBackgroundRenderActions();
+        virtual void preBackgroundRenderActions() throw(RuntimeException);
 
         /** Post background rendering actions. */
-        virtual void postBackgroundRenderActions();
+        virtual void postBackgroundRenderActions() throw(RuntimeException);
 
         /** Pre window rendering actions. */
-        virtual void preReconfigureRectRenderActions(XRectangle reconfigureRect);
+        virtual void preReconfigureRectRenderActions(XRectangle reconfigureRect) throw(RuntimeException);
 
         /** Post window rendering actions. */
-        virtual void postReconfigureRectRenderActions(XRectangle reconfigureRect);
+        virtual void postReconfigureRectRenderActions(XRectangle reconfigureRect) throw(RuntimeException);
 
         /** Pre window rendering actions. */
-        virtual void preWindowRenderActions(const OpenGLWindow &window);
+        virtual void preWindowRenderActions(const OpenGLWindow &window) throw(RuntimeException);
 
         /** Post window rendering actions. */
-        virtual void postWindowRenderActions(const OpenGLWindow &window);
+        virtual void postWindowRenderActions(const OpenGLWindow &window) throw(RuntimeException);
 
 
         /** Called before the extra rendering jobs are executed. */
-        virtual void preExtraRenderingActions();
+        virtual void preExtraRenderingActions() throw(RuntimeException);
 
         /** \returns the number of extra rendering jobs the plugin will do. */
-        virtual int extraRenderingJobCount() throw();
+        virtual int extraRenderingJobCount() throw(RuntimeException);
 
         /** Initialize the specified extra rendering job. */
         virtual void extraRenderingJobInit(int job, GLuint &primPosBuffer_return, GLuint &texPosBuffer_return,
-                                           GLuint &texture_return, GLfloat &alpha_return);
+                                           GLuint &texture_return, GLfloat &alpha_return) throw(RuntimeException);
 
         /** Clean up after an extra rendering job. */
-        virtual void extraRenderingJobCleanup(int job);
+        virtual void extraRenderingJobCleanup(int job) throw(RuntimeException);
 
         /** Called after the extra rendering jobs are executed. */
-        virtual void postExtraRenderingActions();
+        virtual void postExtraRenderingActions() throw(RuntimeException);
     };
 }
 
