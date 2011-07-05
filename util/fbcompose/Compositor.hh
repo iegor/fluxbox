@@ -85,6 +85,9 @@ namespace FbCompositor {
         /** \returns the application's rendering mode. */
         RenderingMode renderingMode() const throw();
 
+        /** \returns whether the X errors should be printed or not. */
+        bool showXErrors() const throw();
+
 
         //--- EVENT LOOP -------------------------------------------------------
 
@@ -186,6 +189,12 @@ namespace FbCompositor {
 
         /** Error base of the Xinerama extension. */
         int m_xineramaErrorBase;
+
+
+        //--- OTHER VARIABLES --------------------------------------------------
+
+        /** Whether the X errors should be printed or not. */
+        bool m_showXErrors;
     };
 
 
@@ -227,6 +236,11 @@ namespace FbCompositor {
     // Returns the number of screens.
     inline int Compositor::screenCount() const throw() {
         return m_screens.size();
+    }
+
+    // Returns whether the X errors should be printed.
+    inline bool Compositor::showXErrors() const throw() {
+        return m_showXErrors;
     }
 }
 

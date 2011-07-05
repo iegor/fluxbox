@@ -58,7 +58,8 @@ CompositorConfig::CompositorConfig(std::vector<FbTk::FbString> args) throw(InitE
 
     m_displayName(""),
     m_framesPerSecond(60),
-    m_plugins() {
+    m_plugins(),
+    m_showXErrors(true) {
 
     preScanArguments();
     processArguments();
@@ -73,7 +74,8 @@ CompositorConfig::CompositorConfig(const CompositorConfig &other) throw() :
 #endif  // USE_XRENDER_COMPOSITING
     m_displayName(other.m_displayName),
     m_framesPerSecond(other.m_framesPerSecond),
-    m_plugins(other.m_plugins) {
+    m_plugins(other.m_plugins),
+    m_showXErrors(other.m_showXErrors) {
 }
 
 // Assignment operator.
@@ -87,6 +89,7 @@ CompositorConfig &CompositorConfig::operator=(const CompositorConfig &other) thr
         m_displayName = other.m_displayName;
         m_framesPerSecond = other.m_framesPerSecond;
         m_plugins = other.m_plugins;
+        m_showXErrors = other.m_showXErrors;
     }
     return *this;
 }
@@ -122,6 +125,7 @@ void CompositorConfig::processArguments() throw(ConfigException) {
     while (it != m_args.end()) {
         if ((*it == "-d") || (*it == "--display")) {
             m_displayName = getNextOption(it, "No display string specified.");
+
         } else if ((*it == "-m") || (*it == "--mode")) {
             FbTk::FbString mode = getNextOption(it, "No rendering mode specified.");
 
@@ -144,9 +148,11 @@ void CompositorConfig::processArguments() throw(ConfigException) {
                 ss << "Unknown rendering mode \"" << mode << "\".";
                 throw ConfigException(ss.str());
             }
+
         } else if ((*it == "-p") || (*it == "--plugin")) {
             FbTk::FbString pluginName = getNextOption(it, "No plugin name specified.");
             m_plugins.push_back(make_pair(pluginName, std::vector<FbTk::FbString>()));
+
         } else if ((*it == "-q") || (*it == "--quiet")) {
             Logger::setLoggingLevel(LOG_LEVEL_NONE);
 
@@ -155,6 +161,7 @@ void CompositorConfig::processArguments() throw(ConfigException) {
             } else {
                 loggingLevelSet = true;
             }
+
         } else if ((*it == "-r") || (*it == "--refresh-rate")) {
             ss.str(getNextOption(it, "No refresh rate specified."));
             ss >> m_framesPerSecond;
@@ -164,6 +171,10 @@ void CompositorConfig::processArguments() throw(ConfigException) {
                 ss << "Invalid refresh rate given.";
                 throw ConfigException(ss.str());
             }
+
+        } else if (*it == "--no-x-errors") {
+            m_showXErrors = false;
+
         } else if ((*it == "-v") || (*it == "--verbose")) {
             Logger::setLoggingLevel(LOG_LEVEL_INFO);
 
@@ -172,6 +183,7 @@ void CompositorConfig::processArguments() throw(ConfigException) {
             } else {
                 loggingLevelSet = true;
             }
+
         } else {
             ss.str("");
             ss << "Unknown option \"" << *it << "\".";
@@ -212,6 +224,7 @@ void CompositorConfig::printFullHelp(std::ostream &os) throw() {
        << "  -h, --help             Print this text and exit." << std::endl
        << "  -m MODE, --mode MODE   Select the rendering mode." << std::endl
        << "                         MODE can be " << modes << "." << std::endl
+       << "  --no-x-errors          Do not print X errors." << std::endl
        << "  -p PLUGIN, --plugin PLUGIN" << std::endl
        << "                         Load a specified plugin." << std::endl
        << "  -q, --quiet            Do not print anything." << std::endl

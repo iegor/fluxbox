@@ -81,6 +81,9 @@ namespace FbCompositor {
         /** \returns the selected rendering mode. */
         RenderingMode renderingMode() const throw();
 
+        /** \returns whether the X errors should be printed. */
+        bool showXErrors() const throw();
+
 #ifdef USE_XRENDER_COMPOSITING
         /** \returns the XRender picture filter. */
         const char *xRenderPictFilter() const throw();
@@ -135,6 +138,9 @@ namespace FbCompositor {
 
         /** Plugins and their arguments. */
         std::vector< std::pair< FbTk::FbString, std::vector<FbTk::FbString> > > m_plugins;
+
+        /** Whether the X errors should be printed. */
+        bool m_showXErrors;
     };
 
 
@@ -158,6 +164,11 @@ namespace FbCompositor {
     // Returns the rendering mode.
     inline RenderingMode CompositorConfig::renderingMode() const throw() {
         return m_renderingMode;
+    }
+
+    // Returns whether the X errors should be printed.
+    inline bool CompositorConfig::showXErrors() const throw() {
+        return m_showXErrors;
     }
 
 
