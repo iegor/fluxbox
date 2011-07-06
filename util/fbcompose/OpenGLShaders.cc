@@ -36,16 +36,19 @@ namespace {
     static const GLchar VERTEX_SHADER_HEAD[] = "\
         #version 120                                                         \n\
                                                                              \n\
-        attribute vec2 fb_InitPointPos;                                      \n\
+        attribute vec2 fb_InitPrimPos;                                       \n\
+        attribute vec2 fb_InitShapeCoord;                                    \n\
         attribute vec2 fb_InitTexCoord;                                      \n\
                                                                              \n\
+        varying vec2 fb_ShapeCoord;                                          \n\
         varying vec2 fb_TexCoord;                                            \n\
     ";
 
     /** Middle of the vertex shader source code. */
     static const GLchar VERTEX_SHADER_MIDDLE[] = "\
         void main() {                                                        \n\
-            gl_Position = vec4(fb_InitPointPos, 0.0, 1.0);                   \n\
+            gl_Position = vec4(fb_InitPrimPos, 0.0, 1.0);                    \n\
+            fb_ShapeCoord = fb_InitShapeCoord;                               \n\
             fb_TexCoord = fb_InitTexCoord;                                   \n\
     ";
 
@@ -60,16 +63,19 @@ namespace {
         #version 120                                                         \n\
                                                                              \n\
         uniform float fb_Alpha;                                              \n\
-        uniform sampler2D fb_Texture;                                        \n\
+        uniform sampler2D fb_MainTexture;                                    \n\
+        uniform sampler2D fb_ShapeTexture;                                   \n\
                                                                              \n\
+        varying vec2 fb_ShapeCoord;                                          \n\
         varying vec2 fb_TexCoord;                                            \n\
     ";
 
     /** Middle of the fragment shader source code. */
     static const GLchar FRAGMENT_SHADER_MIDDLE[] = "\
         void main() {                                                        \n\
-            gl_FragColor = texture2D(fb_Texture, fb_TexCoord)                \n\
-                    * vec4(1.0, 1.0, 1.0, fb_Alpha);                         \n\
+            gl_FragColor = texture2D(fb_MainTexture, fb_TexCoord)            \n\
+                           * texture2D(fb_ShapeTexture, fb_ShapeCoord)       \n\
+                           * vec4(1.0, 1.0, 1.0, fb_Alpha);                  \n\
     ";
 
     /** Tail of the fragment shader source code. */

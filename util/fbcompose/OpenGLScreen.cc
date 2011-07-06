@@ -525,15 +525,19 @@ BaseCompWindow *OpenGLScreen::createWindowObject(Window window) throw(InitExcept
 
 // Renders the screen's contents.
 void OpenGLScreen::renderScreen() throw(RuntimeException) {
+    // React to root window changes.
     if (m_rootWindowChanged) {
         updateOnRootWindowResize();
     }
 
+    // Prepare for rendering.
     glXMakeCurrent(display(), m_glxRenderingWindow, m_glxContext);
     glUseProgram(m_shaderProgram);
 
+    // Render desktop background.
     renderBackground();
 
+    // Render the windows.
     std::list<BaseCompWindow*>::const_iterator it = allWindows().begin();
     while (it != allWindows().end()) {
         if ((*it)->isMapped()) {
@@ -542,12 +546,15 @@ void OpenGLScreen::renderScreen() throw(RuntimeException) {
         ++it;
     }
 
+    // Render the reconfigure rectangle.
     if ((reconfigureRectangle().width != 0) && (reconfigureRectangle().height != 0)) {
         renderReconfigureRect();
     }
 
+    // Execute any extra jobs plugins may request.
     renderExtraJobs();
 
+    // Finish.
     glFlush();
     if (m_haveDoubleBuffering) {
         glXSwapBuffers(display(), m_glxRenderingWindow);
@@ -559,15 +566,17 @@ void OpenGLScreen::renderScreen() throw(RuntimeException) {
 void OpenGLScreen::renderBackground() throw(RuntimeException) {
     OpenGLPlugin *plugin = NULL;
 
+    // Update desktop background texture.
     if (m_backgroundChanged) {
         updateBackgroundTexture();
     }
 
+    // Render it.
     forEachPlugin(i, plugin) {
         plugin->preBackgroundRenderActions();
     }
-    render(GL_TRIANGLE_STRIP, m_defaultPrimPosBuffer, m_defaultTexPosBuffer, m_defaultElementBuffer,
-           4, m_backgroundTexture, 1.0);
+    render(GL_TRIANGLE_STRIP, m_defaultPrimPosBuffer, m_defaultTexPosBuffer, m_backgroundTexture,
+           m_defaultTexPosBuffer, m_blankTexture, m_defaultElementBuffer, 4, 1.0);
     forEachPlugin(i, plugin) {
         plugin->postBackgroundRenderActions();
     }
@@ -598,7 +607,8 @@ void OpenGLScreen::renderExtraJobs() throw(RuntimeException) {
                 texture = m_blankTexture;
             }
 
-            render(GL_TRIANGLE_STRIP, primPosBuffer, texturePosBuffer, m_defaultElementBuffer, 4, texture, alpha);
+            render(GL_TRIANGLE_STRIP, primPosBuffer, texturePosBuffer, texture,
+                   m_defaultTexPosBuffer, m_blankTexture, m_defaultElementBuffer, 4, alpha);
             plugin->extraRenderingJobCleanup(j);
         }
 
@@ -610,6 +620,7 @@ void OpenGLScreen::renderExtraJobs() throw(RuntimeException) {
 void OpenGLScreen::renderReconfigureRect() throw(RuntimeException) {
     OpenGLPlugin *plugin = NULL;
 
+    // Convert reconfigure rectangle to OpenGL coordinates.
     GLfloat xLow, xHigh, yLow, yHigh;
     toOpenGLCoordinates(rootWindow().width(), rootWindow().height(),
             reconfigureRectangle().x, reconfigureRectangle().y, reconfigureRectangle().width, reconfigureRectangle().height,
@@ -619,14 +630,15 @@ void OpenGLScreen::renderReconfigureRect() throw(RuntimeException) {
     glBindBuffer(GL_ARRAY_BUFFER, m_reconfigureRectLinePosBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(linePosArray), (const GLvoid*)(linePosArray), GL_STATIC_DRAW);
 
+    // Render it.
     glEnable(GL_COLOR_LOGIC_OP);
     glLogicOp(GL_XOR);
 
     forEachPlugin(i, plugin) {
         plugin->preReconfigureRectRenderActions(reconfigureRectangle());
     }
-    render(GL_LINE_STRIP, m_reconfigureRectLinePosBuffer, m_defaultTexPosBuffer, m_reconfigureRectElementBuffer,
-           5, m_blankTexture, 1.0);
+    render(GL_LINE_STRIP, m_reconfigureRectLinePosBuffer, m_defaultTexPosBuffer, m_blankTexture,
+           m_defaultTexPosBuffer, m_blankTexture, m_reconfigureRectElementBuffer, 5, 1.0);
     forEachPlugin(i, plugin) {
         plugin->postReconfigureRectRenderActions(reconfigureRectangle());
     }
@@ -638,15 +650,19 @@ void OpenGLScreen::renderReconfigureRect() throw(RuntimeException) {
 void OpenGLScreen::renderWindow(OpenGLWindow &window) throw(RuntimeException) {
     OpenGLPlugin *plugin = NULL;
 
+    // Update window's contents.
     if (window.isDamaged()) {
         window.updateContents();
     }
 
+    // Render it.
     forEachPlugin(i, plugin) {
         plugin->preWindowRenderActions(window);
     }
-    render(GL_TRIANGLE_STRIP, window.windowPosBuffer()->buffer(), m_defaultTexPosBuffer, m_defaultElementBuffer,
-           4, window.contentTexture()->texture(), window.alpha() / 255.0);
+    render(GL_TRIANGLE_STRIP, window.windowPosBuffer()->buffer(),
+           m_defaultTexPosBuffer, window.contentTexture()->texture(),
+           m_defaultTexPosBuffer, window.shapeTexture()->texture(),
+           m_defaultElementBuffer, 4, window.alpha() / 255.0);
     forEachPlugin(i, plugin) {
         plugin->postWindowRenderActions(window);
     }
@@ -654,34 +670,48 @@ void OpenGLScreen::renderWindow(OpenGLWindow &window) throw(RuntimeException) {
 
 
 // A function to render something onto the screen.
-void OpenGLScreen::render(GLenum renderingMode, GLuint primPosBuffer, GLuint texturePosBuffer,
-                          GLuint elementBuffer, GLuint elementCount, GLuint texture, GLfloat alpha) throw() {
+void OpenGLScreen::render(GLenum renderingMode, GLuint primPosBuffer, GLuint mainTexPosBuffer, GLuint mainTexture,
+                          GLuint shapeTexPosBuffer, GLuint shapeTexture, GLuint elementBuffer, GLuint elementCount,
+                          GLfloat alpha) throw() {
     // Attribute locations.
+    static GLuint primPosAttrib = glGetAttribLocation(m_shaderProgram, "fb_InitPrimPos");
+    static GLuint shapePosAttrib = glGetAttribLocation(m_shaderProgram, "fb_InitShapeCoord");
     static GLuint texPosAttrib = glGetAttribLocation(m_shaderProgram, "fb_InitTexCoord");
-    static GLuint windowPosAttrib = glGetAttribLocation(m_shaderProgram, "fb_InitPointPos");
+
     // Uniform locations.
-    static GLuint alphaPos = glGetUniformLocation(m_shaderProgram, "fb_Alpha");
-    static GLuint texturePos = glGetUniformLocation(m_shaderProgram, "fb_Texture");
+    static GLuint alphaUniform = glGetUniformLocation(m_shaderProgram, "fb_Alpha");
+    static GLuint mainTexUniform = glGetUniformLocation(m_shaderProgram, "fb_MainTexture");
+    static GLuint shapeTexUniform = glGetUniformLocation(m_shaderProgram, "fb_ShapeTexture");
 
     // Load primitive position vertex array.
     glBindBuffer(GL_ARRAY_BUFFER, primPosBuffer);
-    glVertexAttribPointer(windowPosAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
-    glEnableVertexAttribArray(windowPosAttrib);
+    glVertexAttribPointer(primPosAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
+    glEnableVertexAttribArray(primPosAttrib);
 
-    // Load texture position vertex array.
-    glBindBuffer(GL_ARRAY_BUFFER, texturePosBuffer);
+    // Load main texture position vertex array.
+    glBindBuffer(GL_ARRAY_BUFFER, mainTexPosBuffer);
     glVertexAttribPointer(texPosAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
     glEnableVertexAttribArray(texPosAttrib);
 
+    // Load shape texture position vertex array.
+    glBindBuffer(GL_ARRAY_BUFFER, shapeTexPosBuffer);
+    glVertexAttribPointer(shapePosAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
+    glEnableVertexAttribArray(shapePosAttrib);
+
+    // Set up textures.
+    glUniform1i(mainTexUniform, 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, mainTexture);
+
+    glUniform1i(shapeTexUniform, 1);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, shapeTexture);
+
+    // Set up other uniforms.
+    glUniform1f(alphaUniform, alpha);
+
     // Load element array.
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
-
-    // Set up uniforms.
-    glUniform1f(alphaPos, alpha);
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glUniform1i(texturePos, 0);
 
     // Final setup.
     if (m_haveDoubleBuffering) {
@@ -689,11 +719,12 @@ void OpenGLScreen::render(GLenum renderingMode, GLuint primPosBuffer, GLuint tex
     }
     glViewport(0, 0, rootWindow().width(), rootWindow().height());
 
-    // Render stuff.
+    // Render!
     glDrawElements(renderingMode, elementCount, GL_UNSIGNED_SHORT, (void*)0);
 
     // Cleanup.
-    glDisableVertexAttribArray(windowPosAttrib);
+    glDisableVertexAttribArray(primPosAttrib);
+    glDisableVertexAttribArray(shapePosAttrib);
     glDisableVertexAttribArray(texPosAttrib);
 }
 

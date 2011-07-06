@@ -1,4 +1,4 @@
-/** Constants.hh file for the fluxbox compositor. */
+/** Utility.hh file for the fluxbox compositor. */
 
 // Copyright (c) 2011 Gediminas Liktaras (gliktaras at gmail dot com)
 //
@@ -21,23 +21,18 @@
 // THE SOFTWARE.
 
 
-#ifndef FBCOMPOSITOR_CONSTANTS_HH
-#define FBCOMPOSITOR_CONSTANTS_HH
+#ifndef FBCOMPOSITOR_UTILITY_HH
+#define FBCOMPOSITOR_UTILITY_HH
 
 
 namespace FbCompositor {
 
-    //--- ENUMERATIONS ---------------------------------------------------------
+    //--- MACROS ---------------------------------------------------------------
 
-    /** Monitor heads mode enumeration. */
-    enum HeadMode { Heads_One, Heads_Xinerama };
-
-    /** Plugin types. */
-    enum PluginType { Plugin_OpenGL, Plugin_XRender };
-
-    /** Rendering mode enumeration. */
-    enum RenderingMode { RM_OpenGL, RM_XRender, RM_ServerAuto };
+    /** Suppress compiler warning for unused parameters. */
+    #define MARK_PARAMETER_UNUSED(x) (void)(x)
 
 }
 
-#endif  // FBCOMPOSITOR_CONSTANTS_HH
+#endif  // FBCOMPOSITOR_UTILITY_HH
+

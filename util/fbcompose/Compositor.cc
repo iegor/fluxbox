@@ -316,9 +316,9 @@ void Compositor::eventLoop() throw(RuntimeException) {
                 fbLog_debug << *m_screens[i];
             }
             fbLog_debug << "======================================" << std::endl;
+        } else {
+            usleep(SLEEP_TIME);
         }
-
-        usleep(SLEEP_TIME);
     }
 }
 

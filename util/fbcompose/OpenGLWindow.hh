@@ -63,8 +63,11 @@ namespace FbCompositor {
 
         //--- ACCESSORS --------------------------------------------------------
 
-        /** \returns an object, holding the the window's contents as a OpenGL texture. */
+        /** \returns an object, holding the window's contents as an OpenGL texture. */
         OpenGLTexturePtr contentTexture() const throw();
+
+        /** \returns an object, holding the window's shape as an OpenGL texture. */
+        OpenGLTexturePtr shapeTexture() const throw();
 
         /** \returns an object, holding the window position buffer. */
         OpenGLBufferPtr windowPosBuffer() const throw();
@@ -91,17 +94,24 @@ namespace FbCompositor {
         /** \returns the window's contents as a OpenGL texture. */
         GLuint rawContentTexture() const throw();
 
+        /** \returns the window's shape as an OpenGL texture. */
+        GLuint rawShapeTexture() const throw();
+
         /** \returns the window position buffer. */
         GLuint rawWindowPosBuffer() const throw();
 
 
         //--- RENDERING-RELATED VARIABLES --------------------------------------
 
+        /** Screen's FBConfig. */
+        GLXFBConfig m_fbConfig;
+
+
         /** Window's content texture holder. */
         OpenGLTexturePtr m_contentTexturePtr;
 
-        /** Screen's FBConfig. */
-        GLXFBConfig m_fbConfig;
+        /** Window's shape texture holder. */
+        OpenGLTexturePtr m_shapeTexturePtr;
 
         /** Window position array. */
         GLfloat m_windowPosArray[8];
@@ -110,47 +120,30 @@ namespace FbCompositor {
         OpenGLBufferPtr m_windowPosBufferPtr;
 
 
-        /**
-         * A pixmap that contains the window's shape as a mask. This pixmap can
-         * be used in any way necessary, as long as planes 0xff000000 are not
-         * modified. That is, it is perfectly acceptable to draw things onto
-         * the pixmap for performance reasons, as long as the alpha values are
-         * unchanged.
-         */
+        /** Window's shape pixmap. */
         Pixmap m_shapePixmap;
 
 
-        /** Width of the window's root. */
-        unsigned int m_rootWidth;
-
-        /** Height of the window's root. */
-        unsigned int m_rootHeight;
-
-
-#ifdef GLXEW_EXT_texture_from_pixmap
         //--- texture_from_pixmap EXTENSION SPECIFIC ---------------------------
 
         /** The GLX pixmap of window's contents. */
         GLXPixmap m_glxContents;
-#endif  // GLXEW_EXT_texture_from_pixmap
+
+        /** The GLX pixmap of window's shape. */
+        GLXPixmap m_glxShape;
     };
 
 
     //--- INLINE FUNCTIONS -------------------------------------------------
 
-    // Returns the window's contents as a OpenGL texture.
+    // Returns the window's contents as an OpenGL texture.
     inline OpenGLTexturePtr OpenGLWindow::contentTexture() const throw() {
         return m_contentTexturePtr;
     }
 
-    // Returns the window's contents as a OpenGL texture.
-    inline GLuint OpenGLWindow::rawContentTexture() const throw() {
-        return m_contentTexturePtr->texture();
-    }
-
-    // Returns the window position buffer.
-    inline GLuint OpenGLWindow::rawWindowPosBuffer() const throw() {
-        return m_windowPosBufferPtr->buffer();
+    // Returns an object, holding the window's shape as an OpenGL texture.
+    inline OpenGLTexturePtr OpenGLWindow::shapeTexture() const throw() {
+        return m_shapeTexturePtr;
     }
 
     // Returns the window position buffer.
@@ -159,6 +152,20 @@ namespace FbCompositor {
     }
 
 
+    // Returns the window's contents as an OpenGL texture.
+    inline GLuint OpenGLWindow::rawContentTexture() const throw() {
+        return m_contentTexturePtr->texture();
+    }
+
+    // Returns the window's shape as an OpenGL texture.
+    inline GLuint OpenGLWindow::rawShapeTexture() const throw() {
+        return m_shapeTexturePtr->texture();
+    }
+
+    // Returns the window position buffer.
+    inline GLuint OpenGLWindow::rawWindowPosBuffer() const throw() {
+        return m_windowPosBufferPtr->buffer();
+    }
 }
 
 #endif  // USE_OPENGL_COMPOSITING

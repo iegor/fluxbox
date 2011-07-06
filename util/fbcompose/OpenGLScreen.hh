@@ -151,8 +151,9 @@ namespace FbCompositor {
 
 
         /** Render something onto the screen. */
-        void render(GLenum renderingMode, GLuint primPosBuffer, GLuint texturePosBuffer,
-                    GLuint elementBuffer, GLuint elementCount, GLuint texture, GLfloat alpha) throw();
+        void render(GLenum renderingMode, GLuint primPosBuffer, GLuint mainTexPosBuffer, GLuint mainTexture,
+                    GLuint shapeTexPosBuffer, GLuint shapeTexture, GLuint elementBuffer, GLuint elementCount,
+                    GLfloat alpha) throw();
 
 
         //--- MAIN RENDERING-RELATED VARIABLES ---------------------------------
