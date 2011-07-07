@@ -151,7 +151,7 @@ OpenGLScreen::~OpenGLScreen() throw() {
     glDeleteTextures(1, &m_blankTexture);
     glDeleteBuffers(1, &m_defaultElementBuffer);
     glDeleteBuffers(1, &m_defaultPrimPosBuffer);
-    glDeleteBuffers(1, &m_defaultTexPosBuffer);
+    glDeleteBuffers(1, &m_defaultTexCoordBuffer);
 
     glDeleteTextures(1, &m_backgroundTexture);
 
@@ -370,8 +370,8 @@ void OpenGLScreen::createDefaultElements() throw(InitException) {
                  (const GLvoid*)(DEFAULT_PRIM_POS_ARRAY), GL_STATIC_DRAW);
 
     // Default texture position buffer.
-    glGenBuffers(1, &m_defaultTexPosBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, m_defaultTexPosBuffer);
+    glGenBuffers(1, &m_defaultTexCoordBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, m_defaultTexCoordBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(DEFAULT_TEX_POS_ARRAY),
                  (const GLvoid*)(DEFAULT_TEX_POS_ARRAY), GL_STATIC_DRAW);
 }
@@ -585,8 +585,8 @@ void OpenGLScreen::renderBackground() throw(RuntimeException) {
     forEachPlugin(i, plugin) {
         plugin->preBackgroundRenderActions();
     }
-    render(GL_TRIANGLE_STRIP, m_defaultPrimPosBuffer, m_defaultTexPosBuffer, m_backgroundTexture,
-           m_defaultTexPosBuffer, m_blankTexture, m_defaultElementBuffer, 4, 1.0);
+    render(GL_TRIANGLE_STRIP, m_defaultPrimPosBuffer, m_defaultTexCoordBuffer, m_backgroundTexture,
+           m_defaultTexCoordBuffer, m_blankTexture, m_defaultElementBuffer, 4, 1.0);
     forEachPlugin(i, plugin) {
         plugin->postBackgroundRenderActions();
     }
@@ -597,28 +597,37 @@ void OpenGLScreen::renderExtraJobs() throw(RuntimeException) {
     OpenGLPlugin *plugin = NULL;
 
     GLfloat alpha;
+    GLuint mainTexCoordBuffer;
+    GLuint mainTexture;
     GLuint primPosBuffer;
-    GLuint texturePosBuffer;
-    GLuint texture;
+    GLuint shapeTexCoordBuffer;
+    GLuint shapeTexture;
 
     forEachPlugin(i, plugin) {
         plugin->preExtraRenderingActions();
 
         for (int j = 0; j < plugin->extraRenderingJobCount(); j++) {
-            plugin->extraRenderingJobInit(j, primPosBuffer, texturePosBuffer, texture, alpha);
+            plugin->extraRenderingJobInit(j, primPosBuffer, mainTexCoordBuffer, mainTexture,
+                                          shapeTexCoordBuffer, shapeTexture, alpha);
 
+            if (!mainTexCoordBuffer) {
+                mainTexCoordBuffer = m_defaultTexCoordBuffer;
+            }
+            if (!mainTexture) {
+                mainTexture = m_blankTexture;
+            }
             if (!primPosBuffer) {
                 primPosBuffer = m_defaultPrimPosBuffer;
             }
-            if (!texturePosBuffer) {
-                texturePosBuffer = m_defaultTexPosBuffer;
+            if (!shapeTexCoordBuffer) {
+                shapeTexCoordBuffer = m_defaultTexCoordBuffer;
             }
-            if (!texture) {
-                texture = m_blankTexture;
+            if (!shapeTexture) {
+                shapeTexture = m_blankTexture;
             }
 
-            render(GL_TRIANGLE_STRIP, primPosBuffer, texturePosBuffer, texture,
-                   m_defaultTexPosBuffer, m_blankTexture, m_defaultElementBuffer, 4, alpha);
+            render(GL_TRIANGLE_STRIP, primPosBuffer, mainTexCoordBuffer, mainTexture,
+                   shapeTexCoordBuffer, shapeTexture, m_defaultElementBuffer, 4, alpha);
             plugin->extraRenderingJobCleanup(j);
         }
 
@@ -647,8 +656,8 @@ void OpenGLScreen::renderReconfigureRect() throw(RuntimeException) {
     forEachPlugin(i, plugin) {
         plugin->preReconfigureRectRenderActions(reconfigureRectangle());
     }
-    render(GL_LINE_STRIP, m_reconfigureRectLinePosBuffer, m_defaultTexPosBuffer, m_blankTexture,
-           m_defaultTexPosBuffer, m_blankTexture, m_reconfigureRectElementBuffer, 5, 1.0);
+    render(GL_LINE_STRIP, m_reconfigureRectLinePosBuffer, m_defaultTexCoordBuffer, m_blankTexture,
+           m_defaultTexCoordBuffer, m_blankTexture, m_reconfigureRectElementBuffer, 5, 1.0);
     forEachPlugin(i, plugin) {
         plugin->postReconfigureRectRenderActions(reconfigureRectangle());
     }
@@ -670,8 +679,8 @@ void OpenGLScreen::renderWindow(OpenGLWindow &window) throw(RuntimeException) {
         plugin->preWindowRenderActions(window);
     }
     render(GL_TRIANGLE_STRIP, window.windowPosBuffer()->buffer(),
-           m_defaultTexPosBuffer, window.contentTexture()->texture(),
-           m_defaultTexPosBuffer, window.shapeTexture()->texture(),
+           m_defaultTexCoordBuffer, window.contentTexture()->texture(),
+           m_defaultTexCoordBuffer, window.shapeTexture()->texture(),
            m_defaultElementBuffer, 4, window.alpha() / 255.0);
     forEachPlugin(i, plugin) {
         plugin->postWindowRenderActions(window);
@@ -680,8 +689,8 @@ void OpenGLScreen::renderWindow(OpenGLWindow &window) throw(RuntimeException) {
 
 
 // A function to render something onto the screen.
-void OpenGLScreen::render(GLenum renderingMode, GLuint primPosBuffer, GLuint mainTexPosBuffer, GLuint mainTexture,
-                          GLuint shapeTexPosBuffer, GLuint shapeTexture, GLuint elementBuffer, GLuint elementCount,
+void OpenGLScreen::render(GLenum renderingMode, GLuint primPosBuffer, GLuint mainTexCoordBuffer, GLuint mainTexture,
+                          GLuint shapeTexCoordBuffer, GLuint shapeTexture, GLuint elementBuffer, GLuint elementCount,
                           GLfloat alpha) throw() {
     // Load primitive position vertex array.
     glBindBuffer(GL_ARRAY_BUFFER, primPosBuffer);
@@ -689,12 +698,12 @@ void OpenGLScreen::render(GLenum renderingMode, GLuint primPosBuffer, GLuint mai
     glEnableVertexAttribArray(m_primPosAttrib);
 
     // Load main texture position vertex array.
-    glBindBuffer(GL_ARRAY_BUFFER, mainTexPosBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, mainTexCoordBuffer);
     glVertexAttribPointer(m_mainTexCoordAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
     glEnableVertexAttribArray(m_mainTexCoordAttrib);
 
     // Load shape texture position vertex array.
-    glBindBuffer(GL_ARRAY_BUFFER, shapeTexPosBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, shapeTexCoordBuffer);
     glVertexAttribPointer(m_shapeTexCoordAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
     glEnableVertexAttribArray(m_shapeTexCoordAttrib);
 

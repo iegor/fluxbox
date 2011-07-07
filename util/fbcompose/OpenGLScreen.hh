@@ -205,7 +205,7 @@ namespace FbCompositor {
         GLuint m_defaultPrimPosBuffer;
 
         /** Default texture position buffer. */
-        GLuint m_defaultTexPosBuffer;
+        GLuint m_defaultTexCoordBuffer;
 
 
         //--- SHADER-RELATED ---------------------------------------------------

@@ -92,13 +92,13 @@ namespace FbCompositor {
         //--- CONVENIENCE ACCESSORS --------------------------------------------
 
         /** \returns the window's contents as a OpenGL texture. */
-        GLuint rawContentTexture() const throw();
+        GLuint direct_contentTexture() const throw();
 
         /** \returns the window's shape as an OpenGL texture. */
-        GLuint rawShapeTexture() const throw();
+        GLuint direct_shapeTexture() const throw();
 
         /** \returns the window position buffer. */
-        GLuint rawWindowPosBuffer() const throw();
+        GLuint direct_windowPosBuffer() const throw();
 
 
         //--- RENDERING-RELATED VARIABLES --------------------------------------
@@ -153,17 +153,17 @@ namespace FbCompositor {
 
 
     // Returns the window's contents as an OpenGL texture.
-    inline GLuint OpenGLWindow::rawContentTexture() const throw() {
+    inline GLuint OpenGLWindow::direct_contentTexture() const throw() {
         return m_contentTexturePtr->texture();
     }
 
     // Returns the window's shape as an OpenGL texture.
-    inline GLuint OpenGLWindow::rawShapeTexture() const throw() {
+    inline GLuint OpenGLWindow::direct_shapeTexture() const throw() {
         return m_shapeTexturePtr->texture();
     }
 
     // Returns the window position buffer.
-    inline GLuint OpenGLWindow::rawWindowPosBuffer() const throw() {
+    inline GLuint OpenGLWindow::direct_windowPosBuffer() const throw() {
         return m_windowPosBufferPtr->buffer();
     }
 }

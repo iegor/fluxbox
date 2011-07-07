@@ -115,8 +115,9 @@ namespace FbCompositor {
         int extraRenderingJobCount() throw();
 
         /** Initialize the specified extra rendering job. */
-        void extraRenderingJobInit(int job, GLuint &primPosBuffer_return, GLuint &texPosBuffer_return,
-                                   GLuint &texture_return, GLfloat &alpha_return) throw();
+        void extraRenderingJobInit(int job, GLuint &primPosBuffer_return, GLuint &mainTexCoordBuffer_return,
+                                   GLuint &mainTexture_return, GLuint &shapeTexCoordBuffer_return,
+                                   GLuint &shapeTexture_return, GLfloat &alpha_return) throw();
 
         /** Called after the extra rendering jobs are executed. */
         void postExtraRenderingActions() throw();
@@ -144,7 +145,8 @@ namespace FbCompositor {
         /** Holds the data about positive fades. */
         struct NegFadeData {
             int origAlpha;                          ///< Window's original opacity.
-            OpenGLTexturePtr windowTextureHolder;   ///< Window's contents.
+            OpenGLTexturePtr contentTextureHolder;  ///< Window's contents.
+            OpenGLTexturePtr shapeTextureHolder;    ///< Window's shape.
             OpenGLBufferPtr windowPosBufferHolder;  ///< Window position buffer.
 
             int fadeAlpha;                          ///< Window's fade relative alpha.

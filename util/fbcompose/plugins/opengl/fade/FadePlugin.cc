@@ -109,7 +109,8 @@ void FadePlugin::windowUnmapped(const BaseCompWindow &window) throw() {
     }
 
     fade.origAlpha = glWindow.alpha();
-    fade.windowTextureHolder = glWindow.contentTexture();
+    fade.contentTextureHolder = glWindow.contentTexture();
+    fade.shapeTextureHolder = glWindow.shapeTexture();
     fade.windowPosBufferHolder = glWindow.windowPosBuffer();
 
     fade.timer.setTickSize(250000 / 255);
@@ -155,11 +156,15 @@ int FadePlugin::extraRenderingJobCount() throw() {
 }
 
 // Initialize the specified extra rendering job.
-void FadePlugin::extraRenderingJobInit(int job, GLuint &primPosBuffer_return, GLuint &texPosBuffer_return,
-                                       GLuint &texture_return, GLfloat &alpha_return) throw() {
+void FadePlugin::extraRenderingJobInit(int job, GLuint &primPosBuffer_return, GLuint &mainTexCoordBuffer_return,
+        GLuint &mainTexture_return, GLuint &shapeTexCoordBuffer_return, GLuint &shapeTexture_return,
+        GLfloat &alpha_return) throw() {
+
     primPosBuffer_return = m_negativeFades[job].windowPosBufferHolder->buffer();
-    texPosBuffer_return = 0;
-    texture_return = m_negativeFades[job].windowTextureHolder->texture();
+    mainTexCoordBuffer_return = 0;
+    mainTexture_return = m_negativeFades[job].contentTextureHolder->texture();
+    shapeTexCoordBuffer_return = 0;
+    shapeTexture_return = m_negativeFades[job].shapeTextureHolder->texture();
     alpha_return = m_negativeFades[job].origAlpha / 255.0;
 
     m_negativeFades[job].fadeAlpha -= m_negativeFades[job].timer.newElapsedTicks();

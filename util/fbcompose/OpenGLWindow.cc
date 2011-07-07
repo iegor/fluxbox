@@ -76,7 +76,7 @@ OpenGLWindow::OpenGLWindow(const BaseScreen &screen, Window windowXID, GLXFBConf
     updateWindowPosArray();
 
     // Initialize the content texture.
-    glBindTexture(GL_TEXTURE_2D, rawContentTexture());
+    glBindTexture(GL_TEXTURE_2D, direct_contentTexture());
 
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -85,7 +85,7 @@ OpenGLWindow::OpenGLWindow(const BaseScreen &screen, Window windowXID, GLXFBConf
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, GL_ONE);
 
     // Initialize the shape texture.
-    glBindTexture(GL_TEXTURE_2D, rawShapeTexture());
+    glBindTexture(GL_TEXTURE_2D, direct_shapeTexture());
 
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -121,7 +121,7 @@ void OpenGLWindow::updateContents() throw(RuntimeException) {
     }
 
     if (contentPixmap()) {
-        pixmapToTexture(display(), contentPixmap(), rawContentTexture(), m_fbConfig,
+        pixmapToTexture(display(), contentPixmap(), direct_contentTexture(), m_fbConfig,
                         m_glxContents, realWidth(), realHeight(), TEX_PIXMAP_ATTRIBUTES);
     }
 
@@ -161,7 +161,7 @@ void OpenGLWindow::updateShape() throw(RuntimeException) {
 
     XFreeGC(display(), gc);
 
-    pixmapToTexture(display(), m_shapePixmap, rawShapeTexture(), m_fbConfig,
+    pixmapToTexture(display(), m_shapePixmap, direct_shapeTexture(), m_fbConfig,
                     m_glxShape, realWidth(), realHeight(), TEX_PIXMAP_ATTRIBUTES);
 }
 
@@ -176,7 +176,7 @@ void OpenGLWindow::updateWindowPosArray() throw() {
     m_windowPosArray[1] = m_windowPosArray[3] = yLow;
     m_windowPosArray[5] = m_windowPosArray[7] = yHigh;
 
-    glBindBuffer(GL_ARRAY_BUFFER, rawWindowPosBuffer());
+    glBindBuffer(GL_ARRAY_BUFFER, direct_windowPosBuffer());
     glBufferData(GL_ARRAY_BUFFER, sizeof(m_windowPosArray), (const GLvoid*)(m_windowPosArray), GL_STATIC_DRAW);
 }
 

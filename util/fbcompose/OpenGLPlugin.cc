@@ -75,8 +75,9 @@ int OpenGLPlugin::extraRenderingJobCount() throw(RuntimeException) {
 }
 
 // Initialize the specified extra rendering job.
-void OpenGLPlugin::extraRenderingJobInit(int /*job*/, GLuint &/*primPosBuffer_return*/, GLuint &/*texPosBuffer_return*/,
-                                         GLuint &/*texture_return*/, GLfloat &/*alpha_return*/) throw(RuntimeException) { }
+void OpenGLPlugin::extraRenderingJobInit(int /*job*/, GLuint &/*primPosBuffer_return*/,
+        GLuint &/*mainTexCoordBuffer_return*/, GLuint &/*mainTexture_return*/, GLuint &/*shapeTexCoordBuffer_return*/,
+        GLuint &/*shapeTexture_return*/, GLfloat &/*alpha_return*/) throw(RuntimeException) { }
 
 // Clean up after an extra rendering job.
 void OpenGLPlugin::extraRenderingJobCleanup(int /*job*/) throw(RuntimeException) { }
