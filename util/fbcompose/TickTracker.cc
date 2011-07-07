@@ -71,10 +71,6 @@ TickTracker::~TickTracker() throw() { }
 
 // Starts the timer.
 void TickTracker::start() throw(RuntimeException) {
-    if (m_isRunning) {
-        fbLog_warn << "Starting a running timer." << std::endl;
-    }
-
     if (gettimeofday(&m_startTime, NULL)) {
         throw TimeException("Cannot obtain the current time.");
     }
@@ -84,10 +80,6 @@ void TickTracker::start() throw(RuntimeException) {
 
 /** Stops the timer. */
 void TickTracker::stop() throw() {
-    if (!m_isRunning) {
-        fbLog_warn << "Stopping an inactive timer." << std::endl;
-    }
-
     m_isRunning = false;
 }
 

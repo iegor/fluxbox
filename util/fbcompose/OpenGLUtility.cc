@@ -82,7 +82,7 @@ void FbCompositor::pixmapToTexture(Display *display, Pixmap pixmap, GLuint textu
 #else
     XImage *image = XGetImage(display, pixmap, 0, 0, width, height, AllPlanes, ZPixmap);
     if (!image) {
-        fbLog_warn << "Cannot create XImage for pixmap to texture conversion." << std::endl;
+        fbLog_warn << "Could not create XImage for pixmap to texture conversion." << std::endl;
         return;
     }
 

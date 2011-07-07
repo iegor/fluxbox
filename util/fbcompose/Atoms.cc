@@ -32,6 +32,8 @@
 using namespace FbCompositor;
 
 
+//--- MAIN METHODS -------------------------------------------------------------
+
 // Returns the _NET_ACTIVE_WINDOW atom.
 Atom Atoms::activeWindowAtom() throw() {
     static Atom atom = XInternAtom(FbTk::App::instance()->display(), "_NET_ACTIVE_WINDOW", False);

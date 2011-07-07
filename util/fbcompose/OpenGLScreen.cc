@@ -220,10 +220,10 @@ void OpenGLScreen::initRenderingContext() throw(InitException) {
         fbConfigs = glXChooseFBConfig(display(), screenNumber(), FALLBACK_FBCONFIG_ATTRIBUTES, &nConfigs);
         m_haveDoubleBuffering = false;
 
-        fbLog_warn << "Could not get a double-buffered FB config, trying single buffer." << std::endl;
+        fbLog_warn << "Could not get a double-buffered framebuffer config, trying single buffer. Expect tearing." << std::endl;
 
         if (!fbConfigs) {
-            throw InitException("Screen does not support the required GLXFBConfigs.");
+            throw InitException("Screen does not support the required framebuffer configuration.");
         }
     }
 
@@ -296,6 +296,10 @@ void OpenGLScreen::finishRenderingInit() throw(InitException) {
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+#ifndef GLXEW_EXT_texture_from_pixmap
+    fbLog_warn << "GLX_EXT_texture_from_pixmap extension not found, expect a performance hit." << std::endl;
+#endif
 }
 
 // Initializes shaders.
@@ -431,7 +435,7 @@ void OpenGLScreen::updateBackgroundTexture() throw() {
     if (bgPixmap) {
         XImage *image = XGetImage(display(), bgPixmap, 0, 0, rootWindow().width(), rootWindow().height(), AllPlanes, ZPixmap);
         if (!image) {
-            fbLog_warn << "Cannot create background texture (cannot create XImage)." << std::endl;
+            fbLog_warn << "Cannot create background texture (reason: cannot create XImage)." << std::endl;
             return;
         }
 
@@ -442,7 +446,7 @@ void OpenGLScreen::updateBackgroundTexture() throw() {
         XDestroyImage(image);
         m_backgroundChanged = false;
     } else {
-        fbLog_warn << "Cannot create background texture (cannot find background pixmap)." << std::endl;
+        fbLog_warn << "Cannot create background texture (reason: cannot find bg pixmap atom)." << std::endl;
     }
 }
 

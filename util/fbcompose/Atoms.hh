@@ -34,6 +34,8 @@ namespace FbCompositor {
      */
     class Atoms {
     public :
+        //--- MAIN METHODS -----------------------------------------------------
+
         /** \returns the _NET_ACTIVE_WINDOW atom. */
         static Atom activeWindowAtom() throw();
 
@@ -54,6 +56,19 @@ namespace FbCompositor {
 
         /** \returns the _WIN_WORKSPACE_COUNT atom. */
         static Atom workspaceCountAtom() throw();
+
+
+    private :
+        //--- CONSTRUCTORS -----------------------------------------------------
+
+        /** Default constructor. */
+        Atoms();
+
+        /** Copy constructor. */
+        Atoms(const Atoms&);
+
+        /** Assignment operator. */
+        Atoms &operator=(const Atoms&);
     };
 }
 
