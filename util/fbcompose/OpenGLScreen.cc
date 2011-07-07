@@ -330,6 +330,16 @@ void OpenGLScreen::initShaders() throw(InitException) {
 
     // Create shader program.
     m_shaderProgram = createShaderProgram(m_vertexShader, 0, m_fragmentShader);
+
+    // Initialize attribute locations.
+    m_mainTexCoordAttrib = glGetAttribLocation(m_shaderProgram, "fb_InitMainTexCoord");
+    m_primPosAttrib = glGetAttribLocation(m_shaderProgram, "fb_InitPrimPos");
+    m_shapeTexCoordAttrib = glGetAttribLocation(m_shaderProgram, "fb_InitShapeTexCoord");
+
+    // Initialize uniform locations.
+    m_alphaUniform = glGetUniformLocation(m_shaderProgram, "fb_Alpha");
+    m_mainTexUniform = glGetUniformLocation(m_shaderProgram, "fb_MainTexture");
+    m_shapeTexUniform = glGetUniformLocation(m_shaderProgram, "fb_ShapeTexture");
 }
 
 
@@ -673,42 +683,32 @@ void OpenGLScreen::renderWindow(OpenGLWindow &window) throw(RuntimeException) {
 void OpenGLScreen::render(GLenum renderingMode, GLuint primPosBuffer, GLuint mainTexPosBuffer, GLuint mainTexture,
                           GLuint shapeTexPosBuffer, GLuint shapeTexture, GLuint elementBuffer, GLuint elementCount,
                           GLfloat alpha) throw() {
-    // Attribute locations.
-    static GLuint primPosAttrib = glGetAttribLocation(m_shaderProgram, "fb_InitPrimPos");
-    static GLuint shapePosAttrib = glGetAttribLocation(m_shaderProgram, "fb_InitShapeCoord");
-    static GLuint texPosAttrib = glGetAttribLocation(m_shaderProgram, "fb_InitTexCoord");
-
-    // Uniform locations.
-    static GLuint alphaUniform = glGetUniformLocation(m_shaderProgram, "fb_Alpha");
-    static GLuint mainTexUniform = glGetUniformLocation(m_shaderProgram, "fb_MainTexture");
-    static GLuint shapeTexUniform = glGetUniformLocation(m_shaderProgram, "fb_ShapeTexture");
-
     // Load primitive position vertex array.
     glBindBuffer(GL_ARRAY_BUFFER, primPosBuffer);
-    glVertexAttribPointer(primPosAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
-    glEnableVertexAttribArray(primPosAttrib);
+    glVertexAttribPointer(m_primPosAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
+    glEnableVertexAttribArray(m_primPosAttrib);
 
     // Load main texture position vertex array.
     glBindBuffer(GL_ARRAY_BUFFER, mainTexPosBuffer);
-    glVertexAttribPointer(texPosAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
-    glEnableVertexAttribArray(texPosAttrib);
+    glVertexAttribPointer(m_mainTexCoordAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
+    glEnableVertexAttribArray(m_mainTexCoordAttrib);
 
     // Load shape texture position vertex array.
     glBindBuffer(GL_ARRAY_BUFFER, shapeTexPosBuffer);
-    glVertexAttribPointer(shapePosAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
-    glEnableVertexAttribArray(shapePosAttrib);
+    glVertexAttribPointer(m_shapeTexCoordAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
+    glEnableVertexAttribArray(m_shapeTexCoordAttrib);
 
     // Set up textures.
-    glUniform1i(mainTexUniform, 0);
+    glUniform1i(m_mainTexUniform, 0);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, mainTexture);
 
-    glUniform1i(shapeTexUniform, 1);
+    glUniform1i(m_shapeTexUniform, 1);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, shapeTexture);
 
     // Set up other uniforms.
-    glUniform1f(alphaUniform, alpha);
+    glUniform1f(m_alphaUniform, alpha);
 
     // Load element array.
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
@@ -723,9 +723,9 @@ void OpenGLScreen::render(GLenum renderingMode, GLuint primPosBuffer, GLuint mai
     glDrawElements(renderingMode, elementCount, GL_UNSIGNED_SHORT, (void*)0);
 
     // Cleanup.
-    glDisableVertexAttribArray(primPosAttrib);
-    glDisableVertexAttribArray(shapePosAttrib);
-    glDisableVertexAttribArray(texPosAttrib);
+    glDisableVertexAttribArray(m_mainTexCoordAttrib);
+    glDisableVertexAttribArray(m_primPosAttrib);
+    glDisableVertexAttribArray(m_shapeTexCoordAttrib);
 }
 
 #endif  // USE_OPENGL_COMPOSITING

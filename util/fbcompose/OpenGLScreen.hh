@@ -220,6 +220,26 @@ namespace FbCompositor {
         GLuint m_shaderProgram;
 
 
+        /** Location of the fb_InitMainTexCoord attribute. */
+        GLuint m_mainTexCoordAttrib;
+
+        /** Location of the fb_InitPrimPos attribute. */
+        GLuint m_primPosAttrib;
+
+        /** Location of the fb_InitShapeTexCoord attribute. */
+        GLuint m_shapeTexCoordAttrib;
+
+
+        /** Location of the fb_Alpha uniform. */
+        GLuint m_alphaUniform;
+        
+        /** Location of the fb_MainTexture uniform. */
+        GLuint m_mainTexUniform;
+
+        /** Location of the fb_ShapeTexture uniform. */
+        GLuint m_shapeTexUniform;
+
+
         //--- OTHER VARIABLES --------------------------------------------------
 
         /** Whether we have a double-buffered window. */
