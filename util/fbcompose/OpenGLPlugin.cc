@@ -23,6 +23,7 @@
 
 #include "OpenGLPlugin.hh"
 
+#include "OpenGLScreen.hh"
 #include "OpenGLWindow.hh"
 
 using namespace FbCompositor;
@@ -43,6 +44,15 @@ OpenGLPlugin::~OpenGLPlugin() throw() { }
 
 // Initialize OpenGL-specific code.
 void OpenGLPlugin::initOpenGL(GLuint /*shaderProgram*/) throw(InitException) { }
+
+
+//--- ACCESSORS ----------------------------------------------------------------
+
+// Returns a reference screen object, cast into the correct class.
+const OpenGLScreen &OpenGLPlugin::openGLScreen() const throw() {
+    static const OpenGLScreen &s = dynamic_cast<const OpenGLScreen&>(BasePlugin::screen());
+    return s;
+}
 
 
 //--- PLUGIN ACTIONS -----------------------------------------------------------

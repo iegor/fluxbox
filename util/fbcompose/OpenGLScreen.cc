@@ -148,10 +148,11 @@ OpenGLScreen::~OpenGLScreen() throw() {
     glDeleteShader(m_vertexShader);
     glDeleteShader(m_fragmentShader);
 
-    glDeleteTextures(1, &m_blankTexture);
+    glDeleteTextures(1, &m_blackTexture);
     glDeleteBuffers(1, &m_defaultElementBuffer);
     glDeleteBuffers(1, &m_defaultPrimPosBuffer);
     glDeleteBuffers(1, &m_defaultTexCoordBuffer);
+    glDeleteTextures(1, &m_whiteTexture);
 
     glDeleteTextures(1, &m_backgroundTexture);
 
@@ -345,16 +346,18 @@ void OpenGLScreen::initShaders() throw(InitException) {
 
 // Creates default texture rendering buffers.
 void OpenGLScreen::createDefaultElements() throw(InitException) {
-    // Blank white texture.
-    glGenTextures(1, &m_blankTexture);
-    glBindTexture(GL_TEXTURE_2D, m_blankTexture);
+    int textureData[1][1];
+
+    // Default black texture.
+    glGenTextures(1, &m_blackTexture);
+    glBindTexture(GL_TEXTURE_2D, m_blackTexture);
 
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    int textureData[1][1] = {{ 0xffffffff }};
+    textureData[0][0] = 0x00000000;
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, (void*)(textureData));
 
     // Default element buffer.
@@ -374,6 +377,18 @@ void OpenGLScreen::createDefaultElements() throw(InitException) {
     glBindBuffer(GL_ARRAY_BUFFER, m_defaultTexCoordBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(DEFAULT_TEX_POS_ARRAY),
                  (const GLvoid*)(DEFAULT_TEX_POS_ARRAY), GL_STATIC_DRAW);
+
+    // Default white texture.
+    glGenTextures(1, &m_whiteTexture);
+    glBindTexture(GL_TEXTURE_2D, m_whiteTexture);
+
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    textureData[0][0] = 0xffffffff;
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, (void*)(textureData));
 }
 
 // Creates the background texture.
@@ -586,7 +601,7 @@ void OpenGLScreen::renderBackground() throw(RuntimeException) {
         plugin->preBackgroundRenderActions();
     }
     render(GL_TRIANGLE_STRIP, m_defaultPrimPosBuffer, m_defaultTexCoordBuffer, m_backgroundTexture,
-           m_defaultTexCoordBuffer, m_blankTexture, m_defaultElementBuffer, 4, 1.0);
+           m_defaultTexCoordBuffer, m_whiteTexture, m_defaultElementBuffer, 4, 1.0);
     forEachPlugin(i, plugin) {
         plugin->postBackgroundRenderActions();
     }
@@ -609,23 +624,6 @@ void OpenGLScreen::renderExtraJobs() throw(RuntimeException) {
         for (int j = 0; j < plugin->extraRenderingJobCount(); j++) {
             plugin->extraRenderingJobInit(j, primPosBuffer, mainTexCoordBuffer, mainTexture,
                                           shapeTexCoordBuffer, shapeTexture, alpha);
-
-            if (!mainTexCoordBuffer) {
-                mainTexCoordBuffer = m_defaultTexCoordBuffer;
-            }
-            if (!mainTexture) {
-                mainTexture = m_blankTexture;
-            }
-            if (!primPosBuffer) {
-                primPosBuffer = m_defaultPrimPosBuffer;
-            }
-            if (!shapeTexCoordBuffer) {
-                shapeTexCoordBuffer = m_defaultTexCoordBuffer;
-            }
-            if (!shapeTexture) {
-                shapeTexture = m_blankTexture;
-            }
-
             render(GL_TRIANGLE_STRIP, primPosBuffer, mainTexCoordBuffer, mainTexture,
                    shapeTexCoordBuffer, shapeTexture, m_defaultElementBuffer, 4, alpha);
             plugin->extraRenderingJobCleanup(j);
@@ -656,8 +654,8 @@ void OpenGLScreen::renderReconfigureRect() throw(RuntimeException) {
     forEachPlugin(i, plugin) {
         plugin->preReconfigureRectRenderActions(reconfigureRectangle());
     }
-    render(GL_LINE_STRIP, m_reconfigureRectLinePosBuffer, m_defaultTexCoordBuffer, m_blankTexture,
-           m_defaultTexCoordBuffer, m_blankTexture, m_reconfigureRectElementBuffer, 5, 1.0);
+    render(GL_LINE_STRIP, m_reconfigureRectLinePosBuffer, m_defaultTexCoordBuffer, m_whiteTexture,
+           m_defaultTexCoordBuffer, m_whiteTexture, m_reconfigureRectElementBuffer, 5, 1.0);
     forEachPlugin(i, plugin) {
         plugin->postReconfigureRectRenderActions(reconfigureRectangle());
     }

@@ -97,8 +97,8 @@ void FadePlugin::windowMapped(const BaseCompWindow &window) throw() {
 
 // Called, whenever a window is unmapped.
 void FadePlugin::windowUnmapped(const BaseCompWindow &window) throw() {
-    NegFadeData fade;
     const OpenGLWindow &glWindow = dynamic_cast<const OpenGLWindow&>(window);
+    NegFadeData fade;
 
     std::map<Window, PosFadeData>::iterator it = m_positiveFades.find(window.window());
     if (it != m_positiveFades.end()) {
@@ -161,9 +161,9 @@ void FadePlugin::extraRenderingJobInit(int job, GLuint &primPosBuffer_return, GL
         GLfloat &alpha_return) throw() {
 
     primPosBuffer_return = m_negativeFades[job].windowPosBufferHolder->buffer();
-    mainTexCoordBuffer_return = 0;
+    mainTexCoordBuffer_return = openGLScreen().defaultTexCoordBuffer();
     mainTexture_return = m_negativeFades[job].contentTextureHolder->texture();
-    shapeTexCoordBuffer_return = 0;
+    shapeTexCoordBuffer_return = openGLScreen().defaultTexCoordBuffer();
     shapeTexture_return = m_negativeFades[job].shapeTextureHolder->texture();
     alpha_return = m_negativeFades[job].origAlpha / 255.0;
 

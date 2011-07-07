@@ -61,6 +61,24 @@ namespace FbCompositor {
         ~OpenGLScreen() throw();
 
 
+        //--- DEFAULT OPENGL OBJECT ACCESSORS ----------------------------------
+
+        /** \returns the default black texture. */
+        GLuint blackTexture() const throw();
+
+        /** \returns the default element buffer (rectangle, corners in order of NW, NE, SW, SE). */
+        GLuint defaultElementBuffer() const throw();
+
+        /** \returns the default primitive position buffer (four corners of the root window). */
+        GLuint defaultPrimPosBuffer() const throw();
+
+        /** \returns the default texture position buffer (the whole texture). */
+        GLuint defaultTexCoordBuffer() const throw();
+
+        /** \returns the default white texture. */
+        GLuint whiteTexture() const throw();
+
+
         //--- SCREEN MANIPULATION ----------------------------------------------
 
         /** Notifies the screen of the background change. */
@@ -184,19 +202,10 @@ namespace FbCompositor {
         bool m_backgroundChanged;
 
 
-        //--- RESIZE FRAME RELATED ---------------------------------------------
-
-        /** The reconfigure rectangle element buffer. */
-        GLuint m_reconfigureRectElementBuffer;
-
-        /** The reconfigure rectangle primitive position array buffer. */
-        GLuint m_reconfigureRectLinePosBuffer;
-
-
         //--- DEFAULT OPENGL ELEMENTS ------------------------------------------
 
-        /** Blank texture. */
-        GLuint m_blankTexture;
+        /** Default black texture. */
+        GLuint m_blackTexture;
 
         /** Default element buffer. */
         GLuint m_defaultElementBuffer;
@@ -206,6 +215,18 @@ namespace FbCompositor {
 
         /** Default texture position buffer. */
         GLuint m_defaultTexCoordBuffer;
+
+        /** Default white texture. */
+        GLuint m_whiteTexture;
+
+
+        //--- RESIZE FRAME RELATED ---------------------------------------------
+
+        /** The reconfigure rectangle element buffer. */
+        GLuint m_reconfigureRectElementBuffer;
+
+        /** The reconfigure rectangle primitive position array buffer. */
+        GLuint m_reconfigureRectLinePosBuffer;
 
 
         //--- SHADER-RELATED ---------------------------------------------------
@@ -245,6 +266,34 @@ namespace FbCompositor {
         /** Whether we have a double-buffered window. */
         bool m_haveDoubleBuffering;
     };
+
+
+    //--- INLINE FUNCTIONS -----------------------------------------------------
+
+    // Returns the default black texture.
+    inline GLuint OpenGLScreen::blackTexture() const throw() {
+        return m_blackTexture;
+    }
+
+    // Returns the default element buffer.
+    inline GLuint OpenGLScreen::defaultElementBuffer() const throw() {
+        return m_defaultElementBuffer;
+    }
+
+    // Returns the default primitive position buffer.
+    inline GLuint OpenGLScreen::defaultPrimPosBuffer() const throw() {
+        return m_defaultPrimPosBuffer;
+    }
+
+    // Returns the default texture position buffer.
+    inline GLuint OpenGLScreen::defaultTexCoordBuffer() const throw() {
+        return m_defaultTexCoordBuffer;
+    }
+
+    // Returns the default white texture.
+    inline GLuint OpenGLScreen::whiteTexture() const throw() {
+        return m_whiteTexture;
+    }
 }
 
 #endif  // USE_OPENGL_COMPOSITING

@@ -48,6 +48,7 @@ namespace FbCompositor {
     class BasePlugin;
     class BaseScreen;
     class InitException;
+    class OpenGLScreen;
     class OpenGLWindow;
     class RenderingException;
 
@@ -73,6 +74,10 @@ namespace FbCompositor {
 
 
         //--- ACCESSORS --------------------------------------------------------
+
+        /** \returns the screen object, cast into the correct class. */
+        const OpenGLScreen &openGLScreen() const throw();
+
 
         /** \returns the additional source code for the fragment shader. */
         virtual const char *fragmentShader() const throw() = 0;
