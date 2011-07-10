@@ -23,6 +23,9 @@
 
 #include "FadePlugin.hh"
 
+#ifdef USE_OPENGL_COMPOSITING
+
+
 #include "BaseScreen.hh"
 #include "OpenGLScreen.hh"
 
@@ -199,3 +202,5 @@ extern "C" BasePlugin *createPlugin(const BaseScreen &screen, const std::vector<
 extern "C" PluginType pluginType() {
     return Plugin_OpenGL;
 }
+
+#endif  // USE_OPENGL_COMPOSITING

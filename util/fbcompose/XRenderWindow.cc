@@ -38,22 +38,19 @@ XRenderWindow::XRenderWindow(const BaseScreen &screen, Window windowXID, const c
     BaseCompWindow(screen, windowXID),
     m_pictFilter(pictFilter) {
 
-    m_maskPicture = None;
     m_maskPixmap = None;
-    m_pictFormat = XRenderFindVisualFormat(display(), visual());
-    m_picture = None;
+
+    XRenderPictFormat *contentPictFormat = XRenderFindVisualFormat(display(), visual());
+    m_contentPicture = new XRenderPictureHolder(display(), contentPictFormat, m_pictFilter);
+
+    XRenderPictFormat *maskPictFormat = XRenderFindStandardFormat(display(), PictStandardARGB32);
+    m_maskPicture = new XRenderPictureHolder(display(), maskPictFormat, m_pictFilter);
 }
 
 // Destructor.
 XRenderWindow::~XRenderWindow() throw() {
-    if (m_maskPicture) {
-        XRenderFreePicture(display(), m_maskPicture);
-    }
     if (m_maskPixmap) {
         XFreePixmap(display(), m_maskPixmap);
-    }
-    if (m_picture) {
-        XRenderFreePicture(display(), m_picture);
     }
 }
 
@@ -71,17 +68,11 @@ void XRenderWindow::updateContents() throw(RuntimeException) {
         updateShape();
     }
 
-    if (m_picture) {
-        XRenderFreePicture(display(), m_picture);
-        m_picture = None;
-    }
-
     XRenderPictureAttributes pa;
     pa.subwindow_mode = IncludeInferiors;
     long paMask = CPSubwindowMode;
 
-    m_picture = XRenderCreatePicture(display(), contentPixmap(), m_pictFormat, paMask, &pa);
-    XRenderSetPictureFilter(display(), m_picture, m_pictFilter, NULL, 0);
+    m_contentPicture->setPixmap(contentPixmap(), pa, paMask);
 
     clearDamage();
 }
@@ -114,21 +105,16 @@ void XRenderWindow::updateMaskPicture() throw() {
             XFreePixmap(display(), m_maskPixmap);
             m_maskPixmap = None;
         }
-        if (m_maskPicture) {
-            XRenderFreePicture(display(), m_maskPicture);
-            m_maskPicture = None;
-        }
-
         m_maskPixmap = XCreatePixmap(display(), window(), realWidth(), realHeight(), 32);
-        m_maskPicture = XRenderCreatePicture(display(), m_maskPixmap, XRenderFindStandardFormat(display(), PictStandardARGB32), 0, NULL);
-        XRenderSetPictureFilter(display(), m_maskPicture, m_pictFilter, NULL, 0);
+
+        m_maskPicture->setPixmap(m_maskPixmap);
     }
 
     XRenderColor color = { 0, 0, 0, 0 };
-    XRenderFillRectangle(display(), PictOpSrc, m_maskPicture, &color, 0, 0, realWidth(), realHeight());
+    XRenderFillRectangle(display(), PictOpSrc, direct_maskPicture(), &color, 0, 0, realWidth(), realHeight());
 
     color.alpha = (unsigned int)((alpha() * 0xffff) / 255.0);
-    XRenderFillRectangles(display(), PictOpSrc, m_maskPicture, &color, clipShapeRects(), clipShapeRectCount());
+    XRenderFillRectangles(display(), PictOpSrc, direct_maskPicture(), &color, clipShapeRects(), clipShapeRectCount());
 }
 
 #endif  // USE_XRENDER_COMPOSITING

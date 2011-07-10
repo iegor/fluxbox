@@ -1,4 +1,4 @@
-/** Utility.hh file for the fluxbox compositor. */
+/** Utility.cc file for the fluxbox compositor. */
 
 // Copyright (c) 2011 Gediminas Liktaras (gliktaras at gmail dot com)
 //
@@ -21,26 +21,20 @@
 // THE SOFTWARE.
 
 
-#ifndef FBCOMPOSITOR_UTILITY_HH
-#define FBCOMPOSITOR_UTILITY_HH
-
-#include <X11/Xlib.h>
+#include "Utility.hh"
 
 
-namespace FbCompositor {
+//--- FUNCTIONS ----------------------------------------------------------------
 
-    //--- MACROS ---------------------------------------------------------------
+// Creates a new pixmap, filled with the specified color.
+Pixmap FbCompositor::createSolidPixmap(Display *display, Window rootWindow, int width,
+                                       int height, unsigned long color) {
+    Pixmap pixmap = XCreatePixmap(display, rootWindow, width, height, 32);
 
-    /** Suppress compiler warning for unused parameters. */
-    #define MARK_PARAMETER_UNUSED(x) (void)(x)
+    GC gc = XCreateGC(display, pixmap, 0, NULL);
+    XSetForeground(display, gc, color);
+    XFillRectangle(display, pixmap, gc, 0, 0, width, height);
+    XFreeGC(display, gc);
 
-
-    //--- FUNCTIONS ------------------------------------------------------------
-
-    /** Creates a new pixmap, filled with the specified color. */
-    Pixmap createSolidPixmap(Display *display, Window rootWindow, int width, int height, unsigned long color);
-
+    return pixmap;
 }
-
-#endif  // FBCOMPOSITOR_UTILITY_HH
-

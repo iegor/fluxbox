@@ -82,6 +82,7 @@ include util/Makemodule.am
 include util/fbrun/Makemodule.am
 include util/fbcompose/Makemodule.am
 include util/fbcompose/plugins/opengl/fade/Makemodule.am
+include util/fbcompose/plugins/xrender/fade/Makemodule.am
 
 uninstall-hook:
 	rmdir $(DESTDIR)$(pkgdatadir)

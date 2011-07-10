@@ -21,26 +21,24 @@
 // THE SOFTWARE.
 
 
-#ifndef FBCOMPOSITOR_PLUGIN_OPENGL_FADE_FADEPLUGIN_HH
-#define FBCOMPOSITOR_PLUGIN_OPENGL_FADE_FADEPLUGIN_HH
+#ifndef FBCOMPOSITOR_PLUGIN_XRENDER_FADE_FADEPLUGIN_HH
+#define FBCOMPOSITOR_PLUGIN_XRENDER_FADE_FADEPLUGIN_HH
 
 #include "config.h"
 
-#ifdef USE_OPENGL_COMPOSITING
+#ifdef USE_XRENDER_COMPOSITING
 
 
 #include "Constants.hh"
 #include "Exceptions.hh"
-#include "OpenGLPlugin.hh"
-#include "OpenGLUtility.hh"
 #include "TickTracker.hh"
+#include "XRenderPlugin.hh"
+#include "XRenderUtility.hh"
 
 #include "FbTk/FbString.hh"
 
-#include <GL/glew.h>
-#include <GL/gl.h>
-
 #include <X11/Xlib.h>
+#include <X11/extensions/Xrender.h>
 
 #include <vector>
 #include <map>
@@ -51,42 +49,30 @@ namespace FbCompositor {
     class BaseScreen;
     class FadePlugin;
     class InitException;
-    class OpenGLPlugin;
-    class OpenGLWindow;
     class TickTracker;
+    class XRenderPlugin;
+    class XRenderScreen;
+    class XRenderWindow;
 
 
     /**
-     * A simple plugin that provides window fades.
+     * A simple plugin that provides window fades for XRender renderer.
      */
-    class FadePlugin : public OpenGLPlugin {
+    class FadePlugin : public XRenderPlugin {
     public :
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        FadePlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args) throw();
+        FadePlugin(Display *display, const BaseScreen &screen, const std::vector<FbTk::FbString> &args) throw();
 
         /** Destructor. */
         ~FadePlugin() throw();
-
-
-        //--- OTHER INITIALIZATION ---------------------------------------------
-
-        /** Initialize OpenGL-specific code. */
-        void initOpenGL(GLuint shaderProgram) throw();
 
 
         //--- ACCESSORS --------------------------------------------------------
 
         /** \returns the name of the plugin. */
         const char *pluginName() const throw();
-
-        
-        /** \returns the additional source code for the fragment shader. */
-        const char *fragmentShader() const throw();
-
-        /** \returns the additional source code for the vertex shader. */
-        const char *vertexShader() const throw();
 
 
         //--- WINDOW EVENT CALLBACKS -------------------------------------------
@@ -100,33 +86,36 @@ namespace FbCompositor {
 
         //--- RENDERING ACTIONS ------------------------------------------------
 
-        /** Pre background rendering actions. */
-        void preBackgroundRenderActions() throw();
+        /** Window rendering job initialization. */
+        virtual void windowRenderingJobInit(const XRenderWindow &window, int &op_return,
+                                            Picture &maskPic_return) throw(RuntimeException);
 
-        /** Pre window rendering actions. */
-        void preReconfigureRectRenderActions(XRectangle reconfigureRect) throw();
-
-        /** Pre window rendering actions. */
-        void preWindowRenderActions(const OpenGLWindow &window) throw();
+        /** Window rendering job cleanup. */
+        virtual void windowRenderingJobCleanup(const XRenderWindow &window) throw(RuntimeException);
 
 
         /** \returns the number of extra rendering jobs the plugin will do. */
-        int extraRenderingJobCount() throw();
+        virtual int extraRenderingJobCount() throw(RuntimeException);
 
         /** Initialize the specified extra rendering job. */
-        void extraRenderingJobInit(int job, GLuint &primPosBuffer_return, GLuint &mainTexCoordBuffer_return,
-                                   GLuint &mainTexture_return, GLuint &shapeTexCoordBuffer_return,
-                                   GLuint &shapeTexture_return, GLfloat &alpha_return) throw();
+        virtual void extraRenderingJobInit(int job, int &op_return,
+                                           Picture &srcPic_return, int &srcX_return, int &srcY_return,
+                                           Picture &maskPic_return, int &maskX_return, int &maskY_return,
+                                           int &destX_return, int &destY_return,
+                                           int &width_return, int &height_return) throw(RuntimeException);
 
         /** Called after the extra rendering jobs are executed. */
-        void postExtraRenderingActions() throw();
+        virtual void postExtraRenderingActions() throw(RuntimeException);
 
 
     private :
         //--- GENERAL RENDERING VARIABLES --------------------------------------
 
-        /** Location of the fade_Alpha uniform. */
-        GLuint alphaUniformPos;
+        /** Connection to the X server. */
+        Display *m_display;
+
+        /** PictFormat for mask pictures. */
+        const XRenderPictFormat *m_maskPictFormat;
 
 
         //--- FADE SPECIFIC ----------------------------------------------------
@@ -134,6 +123,7 @@ namespace FbCompositor {
         /** Holds the data about positive fades. */
         struct PosFadeData {
             int fadeAlpha;          ///< Window's relative fade alpha.
+            Picture mask;           ///< Mask of the faded window.
             TickTracker timer;      ///< Timer that tracks the current fade.
         };
 
@@ -144,11 +134,15 @@ namespace FbCompositor {
         /** Holds the data about positive fades. */
         struct NegFadeData {
             int origAlpha;                          ///< Window's original opacity.
-            OpenGLTexturePtr contentTextureHolder;  ///< Window's contents.
-            OpenGLTexturePtr shapeTextureHolder;    ///< Window's shape.
-            OpenGLBufferPtr windowPosBufferHolder;  ///< Window position buffer.
+            XRenderPicturePtr contentPictureHolder; ///< Window's contents.
+            XRenderPicturePtr maskPictureHolder;    ///< Window's shape mask.
+            int xCoord;                             ///< Window's X coordinate.
+            int yCoord;                             ///< Window's Y coordinate.
+            int width;                              ///< Window's width.
+            int height;                             ///< Window's height.
 
             int fadeAlpha;                          ///< Window's fade relative alpha.
+            Picture mask;                           ///< Mask of the faded window.
             TickTracker timer;                      ///< Timer that tracks the current fade.
         };
 
@@ -175,6 +169,6 @@ extern "C" FbCompositor::BasePlugin *createPlugin(const FbCompositor::BaseScreen
 extern "C" FbCompositor::PluginType pluginType();
 
 
-#endif  // USE_OPENGL_COMPOSITING
+#endif  // USE_XRENDER_COMPOSITING
 
-#endif  // FBCOMPOSITOR_PLUGIN_OPENGL_FADE_FADEPLUGIN_HH
+#endif  // FBCOMPOSITOR_PLUGIN_XRENDER_FADE_FADEPLUGIN_HH
