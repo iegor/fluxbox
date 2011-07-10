@@ -51,6 +51,7 @@ fbcompose_SOURCES = \
 	util/fbcompose/ServerAutoApp.hh util/fbcompose/ServerAutoApp.cc \
 	util/fbcompose/TickTracker.hh util/fbcompose/TickTracker.cc \
 	util/fbcompose/Utility.hh \
+	util/fbcompose/XRenderPlugin.hh util/fbcompose/XRenderPlugin.cc \
 	util/fbcompose/XRenderScreen.hh util/fbcompose/XRenderScreen.cc \
 	util/fbcompose/XRenderWindow.hh util/fbcompose/XRenderWindow.cc
 

@@ -69,7 +69,7 @@ namespace FbCompositor {
         //--- SCREEN RENDERING -------------------------------------------------
 
         /** Renders the screen's contents. */
-        void renderScreen() throw();
+        void renderScreen() throw(RuntimeException);
 
 
     protected:
@@ -98,13 +98,16 @@ namespace FbCompositor {
         //--- RENDERING FUNCTIONS ----------------------------------------------
 
         /** Render the desktop wallpaper. */
-        void renderBackground() throw();
+        void renderBackground() throw(RuntimeException);
+
+        /** Perform extra rendering jobs from plugins. */
+        void renderExtraJobs() throw(RuntimeException);
 
         /** Render the reconfigure rectangle. */
-        void renderReconfigureRect() throw();
+        void renderReconfigureRect() throw(RuntimeException);
 
         /** Render a particular window onto the screen. */
-        void renderWindow(XRenderWindow &window) throw();
+        void renderWindow(XRenderWindow &window) throw(RuntimeException);
 
         /** Swap back and front buffers. */
         void swapBuffers() throw();

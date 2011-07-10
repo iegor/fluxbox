@@ -27,6 +27,7 @@
 
 #include "CompositorConfig.hh"
 #include "Logging.hh"
+#include "XRenderPlugin.hh"
 #include "XRenderWindow.hh"
 
 #include <X11/extensions/shape.h>
@@ -35,6 +36,21 @@
 #include <X11/Xutil.h>
 
 using namespace FbCompositor;
+
+
+//--- MACROS -------------------------------------------------------------------
+
+// Macro for plugin iteration.
+#define forEachPlugin(i, plugin)                                                        \
+    (plugin) = ((pluginManager().plugins().size() > 0)                                  \
+                   ? (dynamic_cast<XRenderPlugin*>(pluginManager().plugins()[0]))       \
+                   : NULL);                                                             \
+    for(size_t (i) = 0;                                                                 \
+        ((i) < pluginManager().plugins().size());                                       \
+        (i)++,                                                                          \
+        (plugin) = (((i) < pluginManager().plugins().size())                            \
+                       ? (dynamic_cast<XRenderPlugin*>(pluginManager().plugins()[(i)])) \
+                       : NULL))
 
 
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
@@ -206,9 +222,11 @@ void XRenderScreen::updateBackgroundPicture() throw() {
 //--- SCREEN RENDERING ---------------------------------------------------------
 
 // Renders the screen's contents.
-void XRenderScreen::renderScreen() throw() {
+void XRenderScreen::renderScreen() throw(RuntimeException) {
+    // Render desktop background.
     renderBackground();
 
+    // Render windows.
     std::list<BaseCompWindow*>::const_iterator it = allWindows().begin();
     while (it != allWindows().end()) {
         if ((*it)->isMapped()) {
@@ -217,42 +235,128 @@ void XRenderScreen::renderScreen() throw() {
         ++it;
     }
 
+    // Render reconfigure rectangle.
     if ((reconfigureRectangle().width != 0) && (reconfigureRectangle().height != 0)) {
         renderReconfigureRect();
     }
+    
+    // Perform any extra rendering jobs from plugins.
+    renderExtraJobs();
 
+    // Swap buffers.
     swapBuffers();
 }
 
 // Render the desktop wallpaper.
-void XRenderScreen::renderBackground() throw() {
+void XRenderScreen::renderBackground() throw(RuntimeException) {
     // TODO: Simply make the window transparent.
+    XRenderPlugin *plugin = NULL;
+
+    // React to desktop background change.
     if (m_rootChanged) {
         updateBackgroundPicture();
     }
 
+    // Draw the desktop.
     XRenderComposite(display(), PictOpSrc, m_rootPicture, None, m_backBufferPicture,
                      0, 0, 0, 0, 0, 0, rootWindow().width(), rootWindow().height());
+
+    // Additional rendering of desktop.
+    Picture srcPic, maskPic;
+    int op, srcX, srcY, maskX, maskY, destX, destY, width, height;
+
+    forEachPlugin(i, plugin) {
+        plugin->extraBackgroundRenderingJob(op, srcPic, srcX, srcY, maskPic, maskX, maskY, destX, destY, width, height);
+        if (op != PictOpClear) {
+            XRenderComposite(display(), op, srcPic, maskPic, m_backBufferPicture, srcX, srcY,
+                             maskX, maskY, destX, destY, width, height);
+        }
+    }
+}
+
+// Perform extra rendering jobs from plugins.
+void XRenderScreen::renderExtraJobs() throw(RuntimeException) {
+    XRenderPlugin *plugin = NULL;
+
+    Picture srcPic, maskPic;
+    int op, srcX, srcY, maskX, maskY, destX, destY, width, height;
+
+    forEachPlugin(i, plugin) {
+        plugin->preExtraRenderingActions();
+
+        for (int j = 0; j < plugin->extraRenderingJobCount(); j++) {
+            plugin->extraRenderingJobInit(j, op, srcPic, srcX, srcY, maskPic, maskX, maskY, destX, destY, width, height);
+            if (op != PictOpClear) {
+                XRenderComposite(display(), op, srcPic, maskPic, m_backBufferPicture, srcX, srcY,
+                                 maskX, maskY, destX, destY, width, height);
+            }
+            plugin->extraRenderingJobCleanup(j);
+        }
+
+        plugin->postExtraRenderingActions();
+    }
 }
 
 // Render the reconfigure rectangle.
-void XRenderScreen::renderReconfigureRect() throw() {
+void XRenderScreen::renderReconfigureRect() throw(RuntimeException) {
+    XRenderPlugin *plugin = NULL;
+
+    XRectangle rect = reconfigureRectangle();
+
     XSetForeground(display(), m_backBufferGC, XWhitePixel(display(), screenNumber()));
     XSetFunction(display(), m_backBufferGC, GXxor);
     XSetLineAttributes(display(), m_backBufferGC, 1, LineSolid, CapNotLast, JoinMiter);
 
-    XRectangle rect = reconfigureRectangle();
+    forEachPlugin(i, plugin) {
+        plugin->reconfigureRectRenderActions(rect, m_backBufferGC);
+    }
     XDrawRectangles(display(), m_backBufferPixmap, m_backBufferGC, &rect, 1);
 }
 
 // Render a particular window onto the screen.
-void XRenderScreen::renderWindow(XRenderWindow &window) throw() {
+void XRenderScreen::renderWindow(XRenderWindow &window) throw(RuntimeException) {
+    XRenderPlugin *plugin = NULL;
+
+    // Update window contents.
     if (window.isDamaged()) {
         window.updateContents();
     }
 
-    XRenderComposite(display(), PictOpOver, window.contentPicture(), window.maskPicture(), m_backBufferPicture,
+    // Extra rendering jobs before the window is drawn.
+    Picture srcPic, maskPic;
+    int op, srcX, srcY, maskX, maskY, destX, destY, width, height;
+
+    forEachPlugin(i, plugin) {
+        plugin->extraPreWindowRenderingJob(window, op, srcPic, srcX, srcY, maskPic,
+                                           maskX, maskY, destX, destY, width, height);
+        if (op != PictOpClear) {
+            XRenderComposite(display(), op, srcPic, maskPic, m_backBufferPicture, srcX, srcY,
+                             maskX, maskY, destX, destY, width, height);
+        }
+    }
+
+    // Render the window.
+    op = PictOpOver;
+    maskPic = window.maskPicture();
+
+    forEachPlugin(i, plugin) {
+        plugin->windowRenderingJobInit(window, op, maskPic);
+    }
+    XRenderComposite(display(), op, window.contentPicture(), maskPic, m_backBufferPicture,
                      0, 0, 0, 0, window.x(), window.y(), window.realWidth(), window.realHeight());
+    forEachPlugin(i, plugin) {
+        plugin->windowRenderingJobCleanup(window);
+    }
+
+    // Extra rendering jobs after the window is drawn.
+    forEachPlugin(i, plugin) {
+        plugin->extraPostWindowRenderingJob(window, op, srcPic, srcX, srcY, maskPic,
+                                            maskX, maskY, destX, destY, width, height);
+        if (op != PictOpClear) {
+            XRenderComposite(display(), op, srcPic, maskPic, m_backBufferPicture, srcX, srcY,
+                             maskX, maskY, destX, destY, width, height);
+        }
+    }
 }
 
 // Swap back and front buffers.
