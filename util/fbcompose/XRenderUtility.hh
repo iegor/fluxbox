@@ -24,10 +24,6 @@
 #ifndef FBCOMPOSITOR_XRENDERUTILITY_HH
 #define FBCOMPOSITOR_XRENDERUTILITY_HH
 
-#include "config.h"
-
-#ifdef USE_XRENDER_COMPOSITING
-
 
 #include "FbTk/RefCount.hh"
 
@@ -106,7 +102,5 @@ namespace FbCompositor {
     typedef FbTk::RefCount<XRenderPictureHolder> XRenderPicturePtr;
 
 }
-
-#endif  // USE_XRENDER_COMPOSITING
 
 #endif  // FBCOMPOSITOR_XRENDERUTILITY_HH

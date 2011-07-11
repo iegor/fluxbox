@@ -23,9 +23,6 @@
 
 #include "XRenderWindow.hh"
 
-#ifdef USE_XRENDER_COMPOSITING
-
-
 #include "Atoms.hh"
 
 using namespace FbCompositor;
@@ -116,5 +113,3 @@ void XRenderWindow::updateMaskPicture() throw() {
     color.alpha = (unsigned long)((alpha() * 0xffff) / 255.0);
     XRenderFillRectangles(display(), PictOpSrc, direct_maskPicture(), &color, clipShapeRects(), clipShapeRectCount());
 }
-
-#endif  // USE_XRENDER_COMPOSITING

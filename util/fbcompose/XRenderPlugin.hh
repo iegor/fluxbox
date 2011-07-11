@@ -24,11 +24,6 @@
 #ifndef FBCOMPOSITOR_XRENDERPLUGIN_HH
 #define FBCOMPOSITOR_XRENDERPLUGIN_HH
 
-#include "config.h"
-
-#ifdef USE_XRENDER_COMPOSITING
-
-
 #include "BasePlugin.hh"
 #include "Constants.hh"
 #include "Exceptions.hh"
@@ -127,7 +122,4 @@ namespace FbCompositor {
     };
 }
 
-#endif  // USE_XRENDER_COMPOSITING
-
 #endif  // FBCOMPOSITOR_XRENDERPLUGIN_HH
-

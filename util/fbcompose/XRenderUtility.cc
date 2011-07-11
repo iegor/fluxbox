@@ -23,8 +23,6 @@
 
 #include "XRenderUtility.hh"
 
-#ifdef USE_XRENDER_COMPOSITING
-
 
 using namespace FbCompositor;
 
@@ -57,6 +55,3 @@ void XRenderPictureHolder::setPixmap(Pixmap pixmap, XRenderPictureAttributes pa,
     m_picture = XRenderCreatePicture(m_display, pixmap, m_pictFormat, paMask, &pa);
     XRenderSetPictureFilter(m_display, m_picture, m_pictFilter, NULL, 0);
 }
-
-
-#endif  // USE_XRENDER_COMPOSITING

@@ -23,9 +23,6 @@
 
 #include "OpenGLShaders.hh"
 
-#ifdef USE_OPENGL_COMPOSITING
-
-
 using namespace FbCompositor;
 
 
@@ -116,6 +113,3 @@ const GLchar *OpenGLShaders::vertexShaderMiddle() throw() {
 const GLchar *OpenGLShaders::vertexShaderTail() throw() {
     return VERTEX_SHADER_TAIL;
 }
-
-
-#endif  // USE_OPENGL_COMPOSITING

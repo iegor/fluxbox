@@ -22,9 +22,6 @@
 
 #include "XRenderScreen.hh"
 
-#ifdef USE_XRENDER_COMPOSITING
-
-
 #include "CompositorConfig.hh"
 #include "Logging.hh"
 #include "XRenderPlugin.hh"
@@ -373,5 +370,3 @@ BaseCompWindow *XRenderScreen::createWindowObject(Window window) throw(InitExcep
     XRenderWindow *newWindow = new XRenderWindow(*this, window, m_pictFilter);
     return newWindow;
 }
-
-#endif // USE_XRENDER_COMPOSITING

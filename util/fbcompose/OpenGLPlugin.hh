@@ -24,10 +24,6 @@
 #ifndef FBCOMPOSITOR_OPENGLPLUGIN_HH
 #define FBCOMPOSITOR_OPENGLPLUGIN_HH
 
-#include "config.h"
-
-#ifdef USE_OPENGL_COMPOSITING
-
 
 #include "BasePlugin.hh"
 #include "Constants.hh"
@@ -125,7 +121,5 @@ namespace FbCompositor {
         virtual void postExtraRenderingActions() throw(RuntimeException);
     };
 }
-
-#endif  // USE_OPENGL_COMPOSITING
 
 #endif  // FBCOMPOSITOR_OPENGLPLUGIN_HH

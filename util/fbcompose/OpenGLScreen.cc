@@ -23,9 +23,6 @@
 
 #include "OpenGLScreen.hh"
 
-#ifdef USE_OPENGL_COMPOSITING
-
-
 #include "CompositorConfig.hh"
 #include "Logging.hh"
 #include "OpenGLPlugin.hh"
@@ -738,5 +735,3 @@ void OpenGLScreen::render(GLenum renderingMode, GLuint primPosBuffer, GLuint mai
     glDisableVertexAttribArray(m_primPosAttrib);
     glDisableVertexAttribArray(m_shapeTexCoordAttrib);
 }
-
-#endif  // USE_OPENGL_COMPOSITING

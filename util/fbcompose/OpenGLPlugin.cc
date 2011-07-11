@@ -23,9 +23,6 @@
 
 #include "OpenGLPlugin.hh"
 
-#ifdef USE_OPENGL_COMPOSITING
-
-
 #include "OpenGLScreen.hh"
 #include "OpenGLWindow.hh"
 
@@ -97,6 +94,3 @@ void OpenGLPlugin::extraRenderingJobCleanup(int /*job*/) throw(RuntimeException)
 
 // Called after the extra rendering jobs are executed.
 void OpenGLPlugin::postExtraRenderingActions() throw(RuntimeException) { }
-
-
-#endif  // USE_OPENGL_COMPOSITING

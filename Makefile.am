@@ -81,8 +81,12 @@ include src/tests/Makemodule.am
 include util/Makemodule.am
 include util/fbrun/Makemodule.am
 include util/fbcompose/Makemodule.am
+if OPENGL_COMPOSITING
 include util/fbcompose/plugins/opengl/fade/Makemodule.am
+endif
+if XRENDER_COMPOSITING
 include util/fbcompose/plugins/xrender/fade/Makemodule.am
+endif
 
 uninstall-hook:
 	rmdir $(DESTDIR)$(pkgdatadir)

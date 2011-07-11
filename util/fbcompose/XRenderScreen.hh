@@ -24,10 +24,6 @@
 #ifndef FBCOMPOSITOR_XRENDERSCREEN_HH
 #define FBCOMPOSITOR_XRENDERSCREEN_HH
 
-#include "config.h"
-
-#ifdef USE_XRENDER_COMPOSITING
-
 
 #include "BaseScreen.hh"
 
@@ -153,7 +149,5 @@ namespace FbCompositor {
     };
 
 }
-
-#endif  // USE_XRENDER_COMPOSITING
 
 #endif  // FBCOMPOSITOR_XRENDERSCREEN_HH

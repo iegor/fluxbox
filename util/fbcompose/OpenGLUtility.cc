@@ -23,9 +23,6 @@
 
 #include "OpenGLUtility.hh"
 
-#ifdef USE_OPENGL_COMPOSITING
-
-
 #include "Logging.hh"
 #include "Utility.hh"
 
@@ -110,6 +107,3 @@ void FbCompositor::toOpenGLCoordinates(int screenWidth, int screenHeight, int x,
     *yLow_gl  = 1.0 - ((y * 2.0) / screenHeight);
     *yHigh_gl = 1.0 - (((y + height) * 2.0) / screenHeight);
 }
-
-
-#endif  // USE_OPENGL_COMPOSITING

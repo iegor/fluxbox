@@ -23,9 +23,6 @@
 
 #include "FadePlugin.hh"
 
-#ifdef USE_XRENDER_COMPOSITING
-
-
 #include "BaseScreen.hh"
 #include "Utility.hh"
 #include "XRenderScreen.hh"
@@ -250,5 +247,3 @@ extern "C" BasePlugin *createPlugin(const BaseScreen &screen, const std::vector<
 extern "C" PluginType pluginType() {
     return Plugin_XRender;
 }
-
-#endif  // USE_XRENDER_COMPOSITING

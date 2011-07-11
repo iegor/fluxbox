@@ -24,10 +24,6 @@
 #ifndef FBCOMPOSITOR_PLUGIN_OPENGL_FADE_FADEPLUGIN_HH
 #define FBCOMPOSITOR_PLUGIN_OPENGL_FADE_FADEPLUGIN_HH
 
-#include "config.h"
-
-#ifdef USE_OPENGL_COMPOSITING
-
 
 #include "Constants.hh"
 #include "Exceptions.hh"
@@ -174,7 +170,5 @@ extern "C" FbCompositor::BasePlugin *createPlugin(const FbCompositor::BaseScreen
 /** \returns plugin's type. */
 extern "C" FbCompositor::PluginType pluginType();
 
-
-#endif  // USE_OPENGL_COMPOSITING
 
 #endif  // FBCOMPOSITOR_PLUGIN_OPENGL_FADE_FADEPLUGIN_HH

@@ -20,6 +20,27 @@
 
 bin_PROGRAMS += fbcompose
 
+if OPENGL_COMPOSITING
+fbcompose_opengl_SOURCES = \
+	util/fbcompose/OpenGLPlugin.hh util/fbcompose/OpenGLPlugin.cc \
+	util/fbcompose/OpenGLScreen.hh util/fbcompose/OpenGLScreen.cc \
+	util/fbcompose/OpenGLShaders.hh util/fbcompose/OpenGLShaders.cc \
+	util/fbcompose/OpenGLUtility.hh util/fbcompose/OpenGLUtility.cc \
+	util/fbcompose/OpenGLWindow.hh util/fbcompose/OpenGLWindow.cc
+else
+fbcompose_opengl_SOURCES =
+endif # OPENGL_COMPOSITING
+
+if XRENDER_COMPOSITING
+fbcompose_xrender_SOURCES = \
+	util/fbcompose/XRenderPlugin.hh util/fbcompose/XRenderPlugin.cc \
+	util/fbcompose/XRenderScreen.hh util/fbcompose/XRenderScreen.cc \
+	util/fbcompose/XRenderUtility.hh util/fbcompose/XRenderUtility.cc \
+	util/fbcompose/XRenderWindow.hh util/fbcompose/XRenderWindow.cc
+else
+fbcompose_xrender_SOURCES =
+endif # XRENDER_COMPOSITING
+
 fbcompose_CPPFLAGS = \
 	$(AM_CPPFLAGS) \
 	-I$(src_incdir) \
@@ -42,19 +63,12 @@ fbcompose_SOURCES = \
 	util/fbcompose/Constants.hh \
 	util/fbcompose/Exceptions.hh \
 	util/fbcompose/Logging.hh util/fbcompose/Logging.cc \
-	util/fbcompose/OpenGLPlugin.hh util/fbcompose/OpenGLPlugin.cc \
-	util/fbcompose/OpenGLScreen.hh util/fbcompose/OpenGLScreen.cc \
-	util/fbcompose/OpenGLShaders.hh util/fbcompose/OpenGLShaders.cc \
-	util/fbcompose/OpenGLUtility.hh util/fbcompose/OpenGLUtility.cc \
-	util/fbcompose/OpenGLWindow.hh util/fbcompose/OpenGLWindow.cc \
 	util/fbcompose/PluginManager.hh util/fbcompose/PluginManager.cc \
 	util/fbcompose/ServerAutoApp.hh util/fbcompose/ServerAutoApp.cc \
 	util/fbcompose/TickTracker.hh util/fbcompose/TickTracker.cc \
 	util/fbcompose/Utility.hh util/fbcompose/Utility.cc \
-	util/fbcompose/XRenderPlugin.hh util/fbcompose/XRenderPlugin.cc \
-	util/fbcompose/XRenderScreen.hh util/fbcompose/XRenderScreen.cc \
-	util/fbcompose/XRenderUtility.hh util/fbcompose/XRenderUtility.cc \
-	util/fbcompose/XRenderWindow.hh util/fbcompose/XRenderWindow.cc
+	${fbcompose_opengl_SOURCES} \
+	${fbcompose_xrender_SOURCES}
 
 #  FLUXBOX_SRC_DIR=	../../src/
 # INCLUDES= 		-I$(top_srcdir)/src -I$(top_srcdir)/src/FbTk

@@ -23,9 +23,6 @@
 
 #include "XRenderPlugin.hh"
 
-#ifdef USE_XRENDER_COMPOSITING
-
-
 #include "XRenderScreen.hh"
 #include "XRenderWindow.hh"
 
@@ -111,6 +108,3 @@ void XRenderPlugin::extraRenderingJobCleanup(int /*job*/) throw(RuntimeException
 
 // Called after the extra rendering jobs are executed.
 void XRenderPlugin::postExtraRenderingActions() throw(RuntimeException) { }
-
-
-#endif  // USE_XRENDER_COMPOSITING

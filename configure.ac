@@ -212,9 +212,12 @@ if test "x$enableval" = "xyes"; then
                  [AC_MSG_ERROR([Could not find X shape extension.])])
     AC_DEFINE(USE_XRENDER_COMPOSITING,[1],[Define to 1 if you want XRender compositing.])
     LIBS="$LIBS -ldl -lXext -lXdamage -lXrender"
+    XRENDER_COMPOSITING=true
 else
     AC_MSG_RESULT([no])
+    XRENDER_COMPOSITING=false
 fi
+AM_CONDITIONAL(XRENDER_COMPOSITING, test x$XRENDER_COMPOSITING = xtrue)
 
 enableval="yes"
 AC_MSG_CHECKING([whether to have OpenGL compositing support])
@@ -244,9 +247,12 @@ if test "x$enableval" = "xyes"; then
                  [AC_MSG_ERROR([Could not find X shape extension.])])
     AC_DEFINE(USE_OPENGL_COMPOSITE,[1],[Define to 1 if you want OpenGL compositing.])
     LIBS="$LIBS -ldl -lXext -lXdamage -lGL -lGLEW"
+    OPENGL_COMPOSITING=true
 else
     AC_MSG_RESULT([no])
+    OPENGL_COMPOSITING=false
 fi
+AM_CONDITIONAL(OPENGL_COMPOSITING, test x$OPENGL_COMPOSITING = xtrue)
 
 AM_ICONV
 AS_IF([test x$am_cv_proto_iconv_arg1 = "xconst"], [

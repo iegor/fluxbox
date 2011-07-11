@@ -24,10 +24,6 @@
 #ifndef FBCOMPOSITOR_OPENGLUTILITY_HH
 #define FBCOMPOSITOR_OPENGLUTILITY_HH
 
-#include "config.h"
-
-#ifdef USE_OPENGL_COMPOSITING
-
 
 #include "FbTk/RefCount.hh"
 
@@ -154,7 +150,5 @@ namespace FbCompositor {
                              GLfloat *xLow_gl, GLfloat *xHigh_gl, GLfloat *yLow_gl, GLfloat *yHigh_gl) throw();
 
 }
-
-#endif  // USE_OPENGL_COMPOSITING
 
 #endif  // FBCOMPOSITOR_OPENGLUTILITY_HH
