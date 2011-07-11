@@ -139,6 +139,7 @@ namespace FbCompositor {
 
         /** Holds the data about positive fades. */
         struct NegFadeData {
+            Window windowId;                        ///< ID of the window being faded.
             int origAlpha;                          ///< Window's original opacity.
             OpenGLTexturePtr contentTextureHolder;  ///< Window's contents.
             OpenGLTexturePtr shapeTextureHolder;    ///< Window's shape.

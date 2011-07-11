@@ -88,10 +88,27 @@ const char *FadePlugin::vertexShader() const throw() {
 // Called, whenever a window is mapped.
 void FadePlugin::windowMapped(const BaseCompWindow &window) throw() {
     PosFadeData fade;
-    fade.fadeAlpha = 0;
+
+    // Is the window being faded out?
+    std::vector<NegFadeData>::iterator it = m_negativeFades.begin();
+    while (true) {
+        if (it == m_negativeFades.end()) {
+            fade.fadeAlpha = 0;
+            break;
+        } else if (it->windowId == window.window()) {
+            fade.fadeAlpha = it->fadeAlpha;
+            m_negativeFades.erase(it);
+            break;
+        } else {
+            ++it;
+        }
+    }
+
+    // Initialize the remaining fields.
     fade.timer.setTickSize(250000 / 255);
     fade.timer.start();
 
+    // Track the fade.
     m_positiveFades.insert(std::make_pair(window.window(), fade));
 }
 
@@ -100,6 +117,7 @@ void FadePlugin::windowUnmapped(const BaseCompWindow &window) throw() {
     const OpenGLWindow &glWindow = dynamic_cast<const OpenGLWindow&>(window);
     NegFadeData fade;
 
+    // Is the window being faded in?
     std::map<Window, PosFadeData>::iterator it = m_positiveFades.find(window.window());
     if (it != m_positiveFades.end()) {
         fade.fadeAlpha = it->second.fadeAlpha;
@@ -108,14 +126,17 @@ void FadePlugin::windowUnmapped(const BaseCompWindow &window) throw() {
         fade.fadeAlpha = 255;
     }
 
-    fade.origAlpha = glWindow.alpha();
+    // Initialize the remaining fields.
     fade.contentTextureHolder = glWindow.contentTexture();
+    fade.origAlpha = glWindow.alpha();
     fade.shapeTextureHolder = glWindow.shapeTexture();
+    fade.windowId = glWindow.window();
     fade.windowPosBufferHolder = glWindow.windowPosBuffer();
 
     fade.timer.setTickSize(250000 / 255);
     fade.timer.start();
 
+    // Track the fade.
     m_negativeFades.push_back(fade);
 }
 
@@ -160,18 +181,20 @@ void FadePlugin::extraRenderingJobInit(int job, GLuint &primPosBuffer_return, GL
         GLuint &mainTexture_return, GLuint &shapeTexCoordBuffer_return, GLuint &shapeTexture_return,
         GLfloat &alpha_return) throw() {
 
-    primPosBuffer_return = m_negativeFades[job].windowPosBufferHolder->buffer();
-    mainTexCoordBuffer_return = openGLScreen().defaultTexCoordBuffer();
-    mainTexture_return = m_negativeFades[job].contentTextureHolder->texture();
-    shapeTexCoordBuffer_return = openGLScreen().defaultTexCoordBuffer();
-    shapeTexture_return = m_negativeFades[job].shapeTextureHolder->texture();
-    alpha_return = m_negativeFades[job].origAlpha / 255.0;
+    NegFadeData &curFade = m_negativeFades[job];
 
-    m_negativeFades[job].fadeAlpha -= m_negativeFades[job].timer.newElapsedTicks();
-    if (m_negativeFades[job].fadeAlpha <= 0) {
+    primPosBuffer_return = curFade.windowPosBufferHolder->buffer();
+    mainTexCoordBuffer_return = openGLScreen().defaultTexCoordBuffer();
+    mainTexture_return = curFade.contentTextureHolder->texture();
+    shapeTexCoordBuffer_return = openGLScreen().defaultTexCoordBuffer();
+    shapeTexture_return = curFade.shapeTextureHolder->texture();
+    alpha_return = curFade.origAlpha / 255.0;
+
+    curFade.fadeAlpha -= curFade.timer.newElapsedTicks();
+    if (curFade.fadeAlpha <= 0) {
         glUniform1f(alphaUniformPos, 0.0);
     } else {
-        glUniform1f(alphaUniformPos, (m_negativeFades[job].fadeAlpha / 255.0));
+        glUniform1f(alphaUniformPos, (curFade.fadeAlpha / 255.0));
     }
 }
 
