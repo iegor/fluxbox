@@ -113,7 +113,7 @@ void XRenderWindow::updateMaskPicture() throw() {
     XRenderColor color = { 0, 0, 0, 0 };
     XRenderFillRectangle(display(), PictOpSrc, direct_maskPicture(), &color, 0, 0, realWidth(), realHeight());
 
-    color.alpha = (unsigned int)((alpha() * 0xffff) / 255.0);
+    color.alpha = (unsigned long)((alpha() * 0xffff) / 255.0);
     XRenderFillRectangles(display(), PictOpSrc, direct_maskPicture(), &color, clipShapeRects(), clipShapeRectCount());
 }
 

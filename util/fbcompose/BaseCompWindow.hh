@@ -94,6 +94,9 @@ namespace FbCompositor {
         int windowClass() const throw();
 
 
+        /** \returns the window's dimensions as an XRectangle. */
+        XRectangle dimensions() const throw();
+
         /** \returns the window's height with borders factored in. */
         unsigned int realHeight() const throw();
 
@@ -270,6 +273,12 @@ namespace FbCompositor {
     // Returns the window's contents as a pixmap.
     inline Pixmap BaseCompWindow::contentPixmap() const throw() {
         return m_contentPixmap;
+    }
+
+    // Returns the window's dimensions as an XRectangle.
+    inline XRectangle BaseCompWindow::dimensions() const throw() {
+        XRectangle dim = { x(), y(), realWidth(), realHeight() };
+        return dim;
     }
 
     // Returns whether the window is damaged or not.

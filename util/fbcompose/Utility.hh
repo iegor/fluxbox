@@ -43,4 +43,3 @@ namespace FbCompositor {
 }
 
 #endif  // FBCOMPOSITOR_UTILITY_HH
-

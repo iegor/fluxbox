@@ -40,10 +40,10 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-FadePlugin::FadePlugin(Display *display, const BaseScreen &screen, const std::vector<FbTk::FbString> &args) throw() :
-    XRenderPlugin(screen, args),
-    m_display(display),
-    m_maskPictFormat(XRenderFindStandardFormat(m_display, PictStandardARGB32)) {
+FadePlugin::FadePlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args) throw() :
+    XRenderPlugin(screen, args) {
+
+    m_maskPictFormat = XRenderFindStandardFormat(display(), PictStandardARGB32);
 }
 
 // Destructor.
@@ -55,11 +55,31 @@ FadePlugin::~FadePlugin() throw() { }
 // Called, whenever a window is mapped.
 void FadePlugin::windowMapped(const BaseCompWindow &window) throw() {
     PosFadeData fade;
-    fade.fadeAlpha = 0;
-    fade.mask = None;
+
+    // Is the window being faded out?
+    std::vector<NegFadeData>::iterator it = m_negativeFades.begin();
+    while (true) {
+        if (it == m_negativeFades.end()) {
+            fade.fadeAlpha = 0;
+            fade.fadePicture = None;
+            fade.fadePixmap = None;
+            break;
+        } else if (it->windowId == window.window()) {
+            fade.fadeAlpha = it->fadeAlpha;
+            fade.fadePicture = it->fadePicture;
+            fade.fadePixmap = it->fadePixmap;
+            m_negativeFades.erase(it);
+            break;
+        } else {
+            ++it;
+        }
+    }
+
+    // Initialize the remaining fields.
     fade.timer.setTickSize(250000 / 255);
     fade.timer.start();
 
+    // Track the fade.
     m_positiveFades.insert(std::make_pair(window.window(), fade));
 }
 
@@ -68,26 +88,30 @@ void FadePlugin::windowUnmapped(const BaseCompWindow &window) throw() {
     const XRenderWindow &xrWindow = dynamic_cast<const XRenderWindow&>(window);
     NegFadeData fade;
 
+    // Is the window being faded in?
     std::map<Window, PosFadeData>::iterator it = m_positiveFades.find(window.window());
     if (it != m_positiveFades.end()) {
         fade.fadeAlpha = it->second.fadeAlpha;
+        fade.fadePicture = it->second.fadePicture;
+        fade.fadePixmap = it->second.fadePixmap;
         m_positiveFades.erase(it);
     } else {
         fade.fadeAlpha = 255;
+        fade.fadePicture = None;
+        fade.fadePixmap = None;
     }
 
+    // Initialize the remaining fields.
+    fade.contentPicture = xrWindow.contentPicture();
+    fade.dimensions = xrWindow.dimensions();
+    fade.maskPicture = xrWindow.maskPicture();
     fade.origAlpha = xrWindow.alpha();
-    fade.contentPictureHolder = xrWindow.contentPicture();
-    fade.maskPictureHolder = xrWindow.maskPicture();
-    fade.mask = None;
-    fade.width = xrWindow.realWidth();
-    fade.height = xrWindow.realHeight();
-    fade.xCoord = xrWindow.x();
-    fade.yCoord = xrWindow.y();
+    fade.windowId = xrWindow.window();
 
     fade.timer.setTickSize(250000 / 255);
     fade.timer.start();
 
+    // Track the fade.
     m_negativeFades.push_back(fade);
 }
 
@@ -99,25 +123,21 @@ void FadePlugin::windowRenderingJobInit(const XRenderWindow &window, int &/*op_r
                                         Picture &maskPic_return) throw(RuntimeException) {
     std::map<Window, PosFadeData>::iterator it = m_positiveFades.find(window.window());
     if (it != m_positiveFades.end()) {
-        it->second.fadeAlpha += it->second.timer.newElapsedTicks();
-        if (it->second.fadeAlpha > 255) {
-            it->second.fadeAlpha = 255;
+        PosFadeData &curFade = it->second;
+
+        int newTicks = curFade.timer.newElapsedTicks();
+        if ((newTicks > 0) || (curFade.fadePicture == None)) {
+            curFade.fadeAlpha += newTicks;
+            if (curFade.fadeAlpha > 255) {
+                curFade.fadeAlpha = 255;
+            }
+
+            createFadedMask(curFade.fadeAlpha, window.maskPicture(), window.dimensions(),
+                            curFade.fadePixmap, curFade.fadePicture);
         }
 
-        Pixmap newMaskPixmap = createSolidPixmap(m_display, screen().rootWindow().window(),
-                                                 window.realWidth(), window.realHeight(), it->second.fadeAlpha * 0x01010101);
-
-        if (it->second.mask) {
-            XRenderFreePicture(m_display, it->second.mask);
-            it->second.mask = None;
-        }
-        it->second.mask = XRenderCreatePicture(m_display, newMaskPixmap, m_maskPictFormat, 0, NULL);
-
-        XRenderComposite(m_display, PictOpDst, window.maskPicture()->picture(),
-                         None, it->second.mask, 0, 0, 0, 0, 0, 0, window.realWidth(), window.realHeight());
-
-        maskPic_return = it->second.mask;
-    } 
+        maskPic_return = curFade.fadePicture;
+    }
 }
 
 // Window rendering job cleanup.
@@ -125,8 +145,11 @@ void FadePlugin::windowRenderingJobCleanup(const XRenderWindow &window) throw(Ru
     std::map<Window, PosFadeData>::iterator it = m_positiveFades.find(window.window());
     if (it != m_positiveFades.end()) {
         if (it->second.fadeAlpha >= 255) {
-            if (it->second.mask) {
-                XRenderFreePicture(m_display, it->second.mask);
+            if (it->second.fadePicture) {
+                XRenderFreePicture(display(), it->second.fadePicture);
+            }
+            if (it->second.fadePixmap) {
+                XFreePixmap(display(), it->second.fadePixmap);
             }
             m_positiveFades.erase(it);
         }
@@ -134,7 +157,7 @@ void FadePlugin::windowRenderingJobCleanup(const XRenderWindow &window) throw(Ru
 }
 
 
-// \returns the number of extra rendering jobs the plugin will do.
+// Returns the number of extra rendering jobs the plugin will do.
 int FadePlugin::extraRenderingJobCount() throw(RuntimeException) {
     return m_negativeFades.size();
 }
@@ -145,35 +168,33 @@ void FadePlugin::extraRenderingJobInit(int job, int &op_return, Picture &srcPic_
         int &maskY_return, int &destX_return, int &destY_return, int &width_return,
         int &height_return) throw(RuntimeException) {
 
+    NegFadeData &curFade = m_negativeFades[job];
+
+    // Set up the fade mask.
+    int newTicks = curFade.timer.newElapsedTicks();
+    if ((newTicks > 0) || (curFade.fadePicture == None)) {
+        curFade.fadeAlpha -= newTicks;
+        if (curFade.fadeAlpha < 0) {
+            curFade.fadeAlpha = 0;
+        }
+
+        createFadedMask(curFade.fadeAlpha, curFade.maskPicture, curFade.dimensions,
+                        curFade.fadePixmap, curFade.fadePicture);
+    }
+
+    maskPic_return = curFade.fadePicture;
+
+    // Initialize the other rendering variables.
     op_return = PictOpOver;
-    srcPic_return = m_negativeFades[job].contentPictureHolder->picture();
+    srcPic_return = curFade.contentPicture->picture();
     srcX_return = 0;
     srcY_return = 0;
     maskX_return = 0;
     maskY_return = 0;
-    destX_return = m_negativeFades[job].xCoord;
-    destY_return = m_negativeFades[job].yCoord;
-    width_return = m_negativeFades[job].width;
-    height_return = m_negativeFades[job].height;
-
-    m_negativeFades[job].fadeAlpha -= m_negativeFades[job].timer.newElapsedTicks();
-    if (m_negativeFades[job].fadeAlpha < 0) {
-        m_negativeFades[job].fadeAlpha = 0;
-    }
-
-    Pixmap newMaskPixmap = createSolidPixmap(m_display, screen().rootWindow().window(), m_negativeFades[job].width,
-                                             m_negativeFades[job].height, m_negativeFades[job].fadeAlpha * 0x01010101);
-
-    if (m_negativeFades[job].mask) {
-        XRenderFreePicture(m_display, m_negativeFades[job].mask);
-        m_negativeFades[job].mask = None;
-    }
-    m_negativeFades[job].mask = XRenderCreatePicture(m_display, newMaskPixmap, m_maskPictFormat, 0, NULL);
-
-    XRenderComposite(m_display, PictOpDst, m_negativeFades[job].maskPictureHolder->picture(),
-                     None, m_negativeFades[job].mask, 0, 0, 0, 0, 0, 0, m_negativeFades[job].width, m_negativeFades[job].height);
-
-    maskPic_return = m_negativeFades[job].mask;
+    destX_return = curFade.dimensions.x;
+    destY_return = curFade.dimensions.y;
+    width_return = curFade.dimensions.width;
+    height_return = curFade.dimensions.height;
 }
 
 // Called after the extra rendering jobs are executed.
@@ -181,8 +202,11 @@ void FadePlugin::postExtraRenderingActions() throw(RuntimeException) {
     std::vector<NegFadeData>::iterator it = m_negativeFades.begin();
     while (it != m_negativeFades.end()) {
         if (it->fadeAlpha <= 0) {
-            if (it->mask) {
-                XRenderFreePicture(m_display, it->mask);
+            if (it->fadePicture) {
+                XRenderFreePicture(display(), it->fadePicture);
+            }
+            if (it->fadePixmap) {
+                XFreePixmap(display(), it->fadePixmap);
             }
             it = m_negativeFades.erase(it);
         } else {
@@ -192,15 +216,34 @@ void FadePlugin::postExtraRenderingActions() throw(RuntimeException) {
 }
 
 
+//--- INTERNAL FUNCTIONS -------------------------------------------------------
+
+// Returns the faded mask picture for the given window fade.
+void FadePlugin::createFadedMask(int alpha, XRenderPicturePtr mask, XRectangle dimensions,
+                                 Pixmap &fadePixmap_return, Picture &fadePicture_return) throw() {
+    if (fadePixmap_return) {
+        XFreePixmap(display(), fadePixmap_return);
+        fadePixmap_return = None;
+    }
+    fadePixmap_return = createSolidPixmap(display(), screen().rootWindow().window(),
+                                          dimensions.width, dimensions.height, alpha * 0x01010101);
+
+    if (fadePicture_return) {
+        XRenderFreePicture(display(), fadePicture_return);
+        fadePicture_return = None;
+    }
+    fadePicture_return = XRenderCreatePicture(display(), fadePixmap_return, m_maskPictFormat, 0, NULL);
+
+    XRenderComposite(display(), PictOpIn, mask->picture(), None, fadePicture_return,
+                     0, 0, 0, 0, 0, 0, dimensions.width, dimensions.height);
+}
+
+
 //--- PLUGIN MANAGER FUNCTIONS -------------------------------------------------
 
 // Creates a plugin object.
 extern "C" BasePlugin *createPlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args) {
-    // The screen must remain const, but there is no way to return a non-const
-    // Display* from it. Since the plugin needs that pointer, I have to
-    // const_cast it.
-    Display *display = const_cast<Display*>(screen.display());
-    return new FadePlugin(display, screen, args);
+    return new FadePlugin(screen, args);
 }
 
 // Returns plugin's type.

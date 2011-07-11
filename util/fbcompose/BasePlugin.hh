@@ -61,6 +61,9 @@ namespace FbCompositor {
 
         //--- ACCESSORS --------------------------------------------------------
 
+        /** \returns the current connection to the X server. */
+        Display *display() const throw();
+
         /** \returns the name of the plugin. */
         virtual const char *pluginName() const throw() = 0;
 
@@ -113,12 +116,20 @@ namespace FbCompositor {
 
         //--- INTERNAL VARIABLES -----------------------------------------------
 
+        /** The current connection to the X server. */
+        Display *m_display;
+
         /** The screen this plugin operates on. */
         const BaseScreen &m_screen;
     };
 
 
     //--- INLINE FUNCTIONS -----------------------------------------------------
+
+    /** \returns the current connection to the X server. */
+    inline Display *BasePlugin::display() const throw() {
+        return m_display;
+    }
 
     // Returns the screen this plugin operates on.
     inline const BaseScreen &BasePlugin::screen() const throw() {

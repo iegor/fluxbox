@@ -63,7 +63,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        FadePlugin(Display *display, const BaseScreen &screen, const std::vector<FbTk::FbString> &args) throw();
+        FadePlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args) throw();
 
         /** Destructor. */
         ~FadePlugin() throw();
@@ -109,13 +109,17 @@ namespace FbCompositor {
 
 
     private :
+        //--- INTERNAL FUNCTIONS -----------------------------------------------
+
+        /** \returns the faded mask picture for the given window fade. */
+        void createFadedMask(int alpha, XRenderPicturePtr mask, XRectangle dimensions,
+                             Pixmap &fadePixmap_return, Picture &fadePicture_return) throw();
+
+
         //--- GENERAL RENDERING VARIABLES --------------------------------------
 
-        /** Connection to the X server. */
-        Display *m_display;
-
         /** PictFormat for mask pictures. */
-        const XRenderPictFormat *m_maskPictFormat;
+        XRenderPictFormat *m_maskPictFormat;
 
 
         //--- FADE SPECIFIC ----------------------------------------------------
@@ -123,7 +127,8 @@ namespace FbCompositor {
         /** Holds the data about positive fades. */
         struct PosFadeData {
             int fadeAlpha;          ///< Window's relative fade alpha.
-            Picture mask;           ///< Mask of the faded window.
+            Picture fadePicture;    ///< Picture of the faded window mask.
+            Pixmap fadePixmap;      ///< Pixmap of the faded window mask.
             TickTracker timer;      ///< Timer that tracks the current fade.
         };
 
@@ -133,17 +138,16 @@ namespace FbCompositor {
 
         /** Holds the data about positive fades. */
         struct NegFadeData {
-            int origAlpha;                          ///< Window's original opacity.
-            XRenderPicturePtr contentPictureHolder; ///< Window's contents.
-            XRenderPicturePtr maskPictureHolder;    ///< Window's shape mask.
-            int xCoord;                             ///< Window's X coordinate.
-            int yCoord;                             ///< Window's Y coordinate.
-            int width;                              ///< Window's width.
-            int height;                             ///< Window's height.
+            Window windowId;                    ///< ID of the window that is being faded.
+            int origAlpha;                      ///< Window's original opacity.
+            XRenderPicturePtr contentPicture;   ///< Window's contents.
+            XRenderPicturePtr maskPicture;      ///< Window's shape mask.
+            XRectangle dimensions;              ///< Window's dimensions.
 
-            int fadeAlpha;                          ///< Window's fade relative alpha.
-            Picture mask;                           ///< Mask of the faded window.
-            TickTracker timer;                      ///< Timer that tracks the current fade.
+            int fadeAlpha;                      ///< Window's relative fade alpha.
+            Picture fadePicture;                ///< Picture of the faded window mask.
+            Pixmap fadePixmap;                  ///< Pixmap of the faded window mask.
+            TickTracker timer;                  ///< Timer that tracks the current fade.
         };
 
         /** A list of disappearing (negative) fades. */
