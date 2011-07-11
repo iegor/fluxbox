@@ -217,8 +217,3 @@ void FadePlugin::postExtraRenderingActions() throw() {
 extern "C" BasePlugin *createPlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args) {
     return new FadePlugin(screen, args);
 }
-
-// Returns plugin's type.
-extern "C" PluginType pluginType() {
-    return Plugin_OpenGL;
-}

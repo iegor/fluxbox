@@ -44,7 +44,7 @@ PluginManager::PluginManager(PluginType pluginType, const BaseScreen &screen) th
 // Destructor.
 PluginManager::~PluginManager() throw() {
     for (size_t i = 0; i < m_pluginObjects.size(); i++) {
-        delete m_pluginObjects[i];  // Let's hope delete is not overriden. TODO: Fix.
+        delete m_pluginObjects[i];      // Let's hope delete is not overriden. TODO: Fix.
     }
 
     std::map<FbTk::FbString, PluginLibData>::iterator it = m_pluginLibs.begin();
@@ -89,20 +89,12 @@ void PluginManager::loadPlugin(FbTk::FbString name) throw(PluginException) {
         throw PluginException(ss.str());
     }
 
-    // Check for the correct plugin type
-    void *rawTypeFunc = getLibraryObject(handle, "pluginType", name.c_str(), "type function");
-    PluginTypeFunction typeFunc = reinterpret_cast<PluginTypeFunction>(rawTypeFunc);
-
-    if ((*(typeFunc))() != m_pluginType) {
-        std::stringstream ss;
-        ss << "Bad type of plugin " << name << ".";
-        throw PluginException(ss.str());
-    }
-
-    // Get the other functions and track the plugin.
+    // Get the plugin creation function.
     void *rawCreateFunc = getLibraryObject(handle, "createPlugin", name.c_str(), "creation function");
 
-    PluginLibData pluginData = { handle, reinterpret_cast<CreatePluginFunction>(rawCreateFunc) };   // TODO: Better cast, error checking.
+    // Track the loaded plugin.
+    // I don't like that cast either, but there does not seem to be a different way.
+    PluginLibData pluginData = { handle, reinterpret_cast<CreatePluginFunction>(rawCreateFunc) };
     m_pluginLibs.insert(make_pair(name, pluginData));
 }
 

@@ -165,8 +165,5 @@ namespace FbCompositor {
 /** Creates a plugin object. */
 extern "C" FbCompositor::BasePlugin *createPlugin(const FbCompositor::BaseScreen &screen, const std::vector<FbTk::FbString> &args);
 
-/** \returns plugin's type. */
-extern "C" FbCompositor::PluginType pluginType();
-
 
 #endif  // FBCOMPOSITOR_PLUGIN_XRENDER_FADE_FADEPLUGIN_HH
