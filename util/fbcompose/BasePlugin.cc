@@ -35,11 +35,7 @@ using namespace FbCompositor;
 BasePlugin::BasePlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &/*args*/) throw(InitException) :
     m_screen(screen) {
 
-    // Here is the problem: all functions in Xlib that take a pointer to the
-    // Display struct require a non-const version of it. Since screen can only
-    // return a const version of it and the only other way to get it is via
-    // FbTk::App (I'd rather not use that singleton), const_cast it is.
-    m_display = const_cast<Display*>(screen.display());
+    m_display = (Display*)(screen.display());
 }
 
 // Destructor.

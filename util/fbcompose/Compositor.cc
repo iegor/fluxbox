@@ -354,16 +354,30 @@ void FbCompositor::handleSignal(int sig) throw() {
 
 // Custom X error handler.
 int FbCompositor::handleXError(Display *display, XErrorEvent *error) throw() {
-    static const int ERROR_TEXT_LENGTH = 128;
+    static const int ERROR_BUFFER_LENGTH = 128;
+
+    static const char name[] = "XRequest";
+    static const char defaultMessage[] = "<UNKNOWN>";
+    static std::stringstream ss;
 
     if (compositorInstance()->showXErrors()) {
-        char errorText[ERROR_TEXT_LENGTH];
-        XGetErrorText(display, error->error_code, errorText, ERROR_TEXT_LENGTH);
+        // Get error message.
+        char errorText[ERROR_BUFFER_LENGTH];
+        XGetErrorText(display, error->error_code, errorText, ERROR_BUFFER_LENGTH);
 
-        fbLog_warn << "X Error: " << errorText << " (errorCode=" << std::dec << int(error->error_code)
-                   << ", majorOpCode=" << int(error->request_code) << ", minorOpCode="
-                   << int(error->minor_code) << ", resourceId=" << std::hex << error->resourceid
-                   << std::dec << ")" << std::endl;
+        // Get the name of the offending request.
+        ss.str("");
+        ss << int(error->request_code);
+
+        char requestName[ERROR_BUFFER_LENGTH];
+        XGetErrorDatabaseText(display, (char*)(name), (char*)(ss.str().c_str()),
+                              (char*)(defaultMessage), requestName, ERROR_BUFFER_LENGTH);
+
+        // Print the message
+        fbLog_warn << "X Error: " << errorText << " in " << requestName << " request, errorCode="
+                   << std::dec << int(error->error_code) << ", majorOpCode=" << int(error->request_code)
+                   << ", minorOpCode=" << int(error->minor_code) << ", resourceId=" << std::hex
+                   << error->resourceid << "." << std::endl;
     }
     return 0;
 }
