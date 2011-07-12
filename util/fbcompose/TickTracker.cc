@@ -70,7 +70,7 @@ TickTracker::~TickTracker() throw() { }
 //--- TIMER MANIPULATION -------------------------------------------------------
 
 // Starts the timer.
-void TickTracker::start() throw(RuntimeException) {
+void TickTracker::start() throw(TimeException) {
     if (gettimeofday(&m_startTime, NULL)) {
         throw TimeException("Cannot obtain the current time.");
     }
@@ -87,7 +87,7 @@ void TickTracker::stop() throw() {
 //--- TIMER QUERIES ------------------------------------------------------------
 
 // Returns the new number of elapsed ticks since last call of this function.
-int TickTracker::newElapsedTicks() throw(RuntimeException) {
+int TickTracker::newElapsedTicks() throw(TimeException) {
     int totalTicks = totalElapsedTicks();
     int newTicks = totalTicks - m_observedTicks;
     m_observedTicks = totalTicks;
@@ -100,7 +100,7 @@ int TickTracker::newElapsedTicks() throw(RuntimeException) {
 }
 
 // Returns the total number of elapsed ticks.
-int TickTracker::totalElapsedTicks() throw(RuntimeException) {
+int TickTracker::totalElapsedTicks() throw(TimeException) {
     static timeval now;
 
     if (gettimeofday(&now, NULL)) {
@@ -113,9 +113,9 @@ int TickTracker::totalElapsedTicks() throw(RuntimeException) {
 
 
 // Sets the size of a tick.
-void TickTracker::setTickSize(int usec) throw(RuntimeException) {
+void TickTracker::setTickSize(int usec) throw(TimeException) {
     if (usec < 1) {
-        throw RuntimeException("Invalid tick size.");
+        throw TimeException("Invalid tick size.");
     }
 
     m_tickSize = usec;

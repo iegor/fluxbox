@@ -33,7 +33,7 @@
 
 namespace FbCompositor {
 
-    class RuntimeException;
+    class TimeException;
     class TickTracker;
 
 
@@ -64,7 +64,7 @@ namespace FbCompositor {
         //--- TIMER MANIPULATION -----------------------------------------------
 
         /** Starts the timer. */
-        void start() throw(RuntimeException);
+        void start() throw(TimeException);
 
         /** Stops the timer. */
         void stop() throw();
@@ -80,14 +80,14 @@ namespace FbCompositor {
 
 
         /** \returns the new number of elapsed ticks since last call of this function. */
-        int newElapsedTicks() throw(RuntimeException);
+        int newElapsedTicks() throw(TimeException);
 
         /** \returns the total number of elapsed ticks. */
-        int totalElapsedTicks() throw(RuntimeException);
+        int totalElapsedTicks() throw(TimeException);
 
 
         /** Sets the size of a tick. */
-        void setTickSize(int usec) throw(RuntimeException);
+        void setTickSize(int usec) throw(TimeException);
 
 
     private:

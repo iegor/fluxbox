@@ -120,7 +120,9 @@ void CompositorConfig::preScanArguments() throw(ConfigException) {
 void CompositorConfig::processArguments() throw(ConfigException) {
     std::vector<FbTk::FbString>::iterator it = m_args.begin();
     std::stringstream ss;
-    bool loggingLevelSet = false;
+
+    bool beQuiet = false;
+    int loggingLevel = 0;
 
     while (it != m_args.end()) {
         if ((*it == "-d") || (*it == "--display")) {
@@ -154,13 +156,7 @@ void CompositorConfig::processArguments() throw(ConfigException) {
             m_plugins.push_back(make_pair(pluginName, std::vector<FbTk::FbString>()));
 
         } else if ((*it == "-q") || (*it == "--quiet")) {
-            Logger::setLoggingLevel(LOG_LEVEL_NONE);
-
-            if (loggingLevelSet) {
-                throw ConfigException("Multiple logging levels specified.");
-            } else {
-                loggingLevelSet = true;
-            }
+            beQuiet = true;
 
         } else if ((*it == "-r") || (*it == "--refresh-rate")) {
             ss.str(getNextOption(it, "No refresh rate specified."));
@@ -176,13 +172,10 @@ void CompositorConfig::processArguments() throw(ConfigException) {
             m_showXErrors = false;
 
         } else if ((*it == "-v") || (*it == "--verbose")) {
-            Logger::setLoggingLevel(LOG_LEVEL_INFO);
+            loggingLevel += 1;
 
-            if (loggingLevelSet) {
-                throw ConfigException("Multiple logging levels specified.");
-            } else {
-                loggingLevelSet = true;
-            }
+        } else if (*it == "-vv") {
+            loggingLevel += 2;
 
         } else {
             ss.str("");
@@ -190,6 +183,18 @@ void CompositorConfig::processArguments() throw(ConfigException) {
             throw ConfigException(ss.str());
         }
         ++it;
+    }
+
+    if (beQuiet) {
+        Logger::setLoggingLevel(LOG_LEVEL_NONE);
+    } else {
+        if (loggingLevel == 0) {
+            Logger::setLoggingLevel(LOG_LEVEL_WARN);
+        } else if (loggingLevel == 1) {
+            Logger::setLoggingLevel(LOG_LEVEL_INFO);
+        } else if (loggingLevel >= 2) {
+            Logger::setLoggingLevel(LOG_LEVEL_DEBUG);
+        }
     }
 }
 
@@ -231,7 +236,7 @@ void CompositorConfig::printFullHelp(std::ostream &os) throw() {
        << "  -r RATE, --refresh-rate RATE" << std::endl
        << "                         Specify the compositor's refresh rate in Hz" << std::endl
        << "                         (aka frames per second)." << std::endl
-       << "  -v, --verbose          Print more information." << std::endl
+       << "  -v, --verbose          Print more information. Pass twice for debug output." << std::endl
        << "  -V, --version          Print version and exit." << std::endl;
 }
 
@@ -243,6 +248,6 @@ void CompositorConfig::printShortHelp(std::ostream &os) throw() {
 
 // Output version information.
 void CompositorConfig::printVersion(std::ostream &os) throw() {
-    os << "Fluxbox compositor %VERSION%" << std::endl
+    os << "Fluxbox compositor %VERSION%" << std::endl       // TODO: Compositor version.
        << "Copyright (c) 2011 Gediminas Liktaras" << std::endl;
 }
