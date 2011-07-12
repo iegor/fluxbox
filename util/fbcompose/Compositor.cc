@@ -67,16 +67,23 @@ Compositor::Compositor(const CompositorConfig &config) throw(InitException) :
 
     XSynchronize(display(), True);
 
+    // Set rendering mode.
     if (config.renderingMode() == RM_ServerAuto) {
         throw InitException("Compositor class does not provide the serverauto renderer.");
     }
     m_renderingMode = config.renderingMode();
 
-    m_showXErrors = config.showXErrors();
+    // Set X error handler.
+    if (config.showXErrors()) {
+        XSetErrorHandler(&printXError);
+    } else {
+        XSetErrorHandler(&ignoreXError);
+    }
 
-    XSetErrorHandler(&handleXError);
+    // Initialize extensions.
     initAllExtensions();
 
+    // Initialize screens.
     int screenCount = XScreenCount(display());
     m_screens.reserve(screenCount);
     for (int i = 0; i < screenCount; i++) {
@@ -107,11 +114,14 @@ Compositor::Compositor(const CompositorConfig &config) throw(InitException) :
         m_screens[i]->initWindows();
     }
 
+    // Set up the main timer.
     m_timer.setTickSize(1000000 / config.framesPerSecond());
     m_timer.start();
 
+    // Finish.
     XFlush(display());
 
+    // Set up other handlers.
     signal(SIGINT, handleSignal);
     signal(SIGTERM, handleSignal);
 }
@@ -178,6 +188,7 @@ void Compositor::initExtension(const char *extensionName, QueryExtensionFunction
     int majorVer;
     int minorVer;
 
+    // Check that the extension exists.
     if (!(*extensionFunc)(display(), eventBase, errorBase)) {
         *eventBase = -1;
         *errorBase = -1;
@@ -187,6 +198,7 @@ void Compositor::initExtension(const char *extensionName, QueryExtensionFunction
         throw InitException(ss.str());
     }
 
+    // Get extension version.
     if (!(*versionFunc)(display(), &majorVer, &minorVer)) {
         *eventBase = -1;
         *errorBase = -1;
@@ -196,6 +208,7 @@ void Compositor::initExtension(const char *extensionName, QueryExtensionFunction
         throw InitException(ss.str());
     }
 
+    // Make sure the extension version is at least what we require.
     if ((majorVer < minMajorVer) || ((majorVer == minMajorVer) && (minorVer < minMinorVer))) {
         *eventBase = -1;
         *errorBase = -1;
@@ -238,6 +251,7 @@ void Compositor::eventLoop() throw(RuntimeException) {
     int eventScreen;
 
     while (!done()) {
+        // Handle incoming X events.
         while (XPending(display())) {
             XNextEvent(display(), &event);
 
@@ -306,6 +320,7 @@ void Compositor::eventLoop() throw(RuntimeException) {
             }
         }
 
+        // Redraw the screens.
         if (m_timer.newElapsedTicks()) {
             for (size_t i = 0; i < m_screens.size(); i++) {
                 m_screens[i]->renderScreen();
@@ -352,32 +367,39 @@ void FbCompositor::handleSignal(int sig) throw() {
     }
 }
 
-// Custom X error handler.
-int FbCompositor::handleXError(Display *display, XErrorEvent *error) throw() {
-    static const int ERROR_BUFFER_LENGTH = 128;
 
-    static const char name[] = "XRequest";
-    static const char defaultMessage[] = "<UNKNOWN>";
+// Custom X error handler (ignore).
+int FbCompositor::ignoreXError(Display * /*display*/, XErrorEvent * /*error*/) {
+    return 0;
+}
+
+// Custom X error handler (print, continue).
+int FbCompositor::printXError(Display *display, XErrorEvent *error) {
+    // Constants.
+    static const int ERROR_BUFFER_LENGTH = 128;
+    static const char ERROR_DB_TEXT_NAME[] = "XRequest";
+    static const char REQUEST_NAME_UNKNOWN_MESSAGE[] = "<UNKNOWN>";
+
+    // Other static variables.
     static std::stringstream ss;
 
-    if (compositorInstance()->showXErrors()) {
-        // Get error message.
-        char errorText[ERROR_BUFFER_LENGTH];
-        XGetErrorText(display, error->error_code, errorText, ERROR_BUFFER_LENGTH);
+    // Get the error message.
+    char errorText[ERROR_BUFFER_LENGTH];
+    XGetErrorText(display, error->error_code, errorText, ERROR_BUFFER_LENGTH);
 
-        // Get the name of the offending request.
-        ss.str("");
-        ss << int(error->request_code);
+    // Get the name of the offending request.
+    ss.str("");
+    ss << int(error->request_code);
 
-        char requestName[ERROR_BUFFER_LENGTH];
-        XGetErrorDatabaseText(display, (char*)(name), (char*)(ss.str().c_str()),
-                              (char*)(defaultMessage), requestName, ERROR_BUFFER_LENGTH);
+    char requestName[ERROR_BUFFER_LENGTH];
+    XGetErrorDatabaseText(display, (char*)(ERROR_DB_TEXT_NAME), (char*)(ss.str().c_str()),
+                          (char*)(REQUEST_NAME_UNKNOWN_MESSAGE), requestName, ERROR_BUFFER_LENGTH);
 
-        // Print the message
-        fbLog_warn << "X Error: " << errorText << " in " << requestName << " request, errorCode="
-                   << std::dec << int(error->error_code) << ", majorOpCode=" << int(error->request_code)
-                   << ", minorOpCode=" << int(error->minor_code) << ", resourceId=" << std::hex
-                   << error->resourceid << "." << std::endl;
-    }
+    // Print the message
+    fbLog_warn << "X Error: " << errorText << " in " << requestName << " request, errorCode="
+               << std::dec << int(error->error_code) << ", majorOpCode=" << int(error->request_code)
+               << ", minorOpCode=" << int(error->minor_code) << ", resourceId=" << std::hex
+               << error->resourceid << "." << std::endl;
+
     return 0;
 }
