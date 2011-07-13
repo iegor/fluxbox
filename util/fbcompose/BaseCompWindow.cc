@@ -100,7 +100,7 @@ void BaseCompWindow::setUnmapped() throw() {
 }
 
 // Update the window's contents.
-void BaseCompWindow::updateContents() throw(RuntimeException) {
+void BaseCompWindow::updateContents() throw() {
     if (isWindowBad()) {
         return;
     }
@@ -127,7 +127,7 @@ void BaseCompWindow::updateGeometry(const XConfigureEvent &/*event*/) throw() {
 }
 
 // Update the window's clip shape.
-void BaseCompWindow::updateShape() throw(RuntimeException) {
+void BaseCompWindow::updateShape() throw() {
     if (m_clipShapeRects) {
         XFree(m_clipShapeRects);
         m_clipShapeRects = NULL;
@@ -141,7 +141,7 @@ void BaseCompWindow::updateShape() throw(RuntimeException) {
 }
 
 // Update window's property.
-void BaseCompWindow::updateProperty(Atom property, int /*state*/) throw(RuntimeException) {
+void BaseCompWindow::updateProperty(Atom property, int /*state*/) throw() {
     if (property == Atoms::opacityAtom()) {
         m_alpha = singlePropertyValue<long>(Atoms::opacityAtom(), 0xff) & 0xff;
     }

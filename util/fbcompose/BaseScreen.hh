@@ -47,7 +47,6 @@ namespace FbCompositor {
     class InitException;
     class PluginException;
     class PluginManager;
-    class RuntimeException;
 
 
     /** << output stream operator for the BaseScreen class. */
@@ -114,31 +113,31 @@ namespace FbCompositor {
         //--- WINDOW MANIPULATION ----------------------------------------------
 
         /** Creates a new window on this screen. */
-        void createWindow(Window window) throw(RuntimeException);
+        void createWindow(Window window) throw(WindowException);
 
         /** Damages a window on this screen. */
-        void damageWindow(Window window) throw(RuntimeException);
+        void damageWindow(Window window) throw();
 
         /** Destroys a window on this screen. */
-        void destroyWindow(Window window) throw(RuntimeException);
+        void destroyWindow(Window window) throw();
 
         /** Maps a window on this screen. */
-        void mapWindow(Window window) throw(RuntimeException);
+        void mapWindow(Window window) throw();
 
         /** Updates window's configuration. */
-        void reconfigureWindow(const XConfigureEvent &event) throw(RuntimeException);
+        void reconfigureWindow(const XConfigureEvent &event) throw();
 
         /** Reparents a window. */
-        void reparentWindow(Window window, Window parent) throw(RuntimeException);
+        void reparentWindow(Window window, Window parent) throw();
 
         /** Updates window's shape. */
-        void updateShape(Window window) throw(RuntimeException);
+        void updateShape(Window window) throw();
 
         /** Unmaps a window on this screen. */
-        void unmapWindow(Window window) throw(RuntimeException);
+        void unmapWindow(Window window) throw();
 
         /** Updates the value of some window's property. */
-        void updateWindowProperty(Window window, Atom property, int state) throw(RuntimeException);
+        void updateWindowProperty(Window window, Atom property, int state) throw();
 
 
         /** Adds a window to ignore list, stops tracking it if it is being tracked. */
@@ -160,7 +159,7 @@ namespace FbCompositor {
         //--- SCREEN RENDERING -------------------------------------------------
 
         /** Renders the screen's contents. */
-        virtual void renderScreen() throw(RuntimeException) = 0;
+        virtual void renderScreen() throw() = 0;
 
 
     protected:

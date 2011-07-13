@@ -127,13 +127,13 @@ namespace FbCompositor {
         virtual void setUnmapped() throw();
 
         /** Update the window's contents. */
-        virtual void updateContents() throw(RuntimeException);
+        virtual void updateContents() throw();
 
         /** Update window's geometry. */
         virtual void updateGeometry(const XConfigureEvent &event) throw();
 
         /** Update window's property. */
-        virtual void updateProperty(Atom property, int state) throw(RuntimeException);
+        virtual void updateProperty(Atom property, int state) throw();
 
 
         /** Set the clip shape as changed. */
@@ -169,7 +169,7 @@ namespace FbCompositor {
         void updateContentPixmap() throw();
 
         /** Update the window's clip shape. */
-        virtual void updateShape() throw(RuntimeException);
+        virtual void updateShape() throw();
 
 
         //--- OTHER FUNCTIONS --------------------------------------------------

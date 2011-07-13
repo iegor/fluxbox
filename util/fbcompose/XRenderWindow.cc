@@ -55,7 +55,7 @@ XRenderWindow::~XRenderWindow() throw() {
 //--- WINDOW MANIPULATION ------------------------------------------------------
 
 // Update the window's contents.
-void XRenderWindow::updateContents() throw(RuntimeException) {
+void XRenderWindow::updateContents() throw() {
     if (isWindowBad()) {
         return;
     }
@@ -75,7 +75,7 @@ void XRenderWindow::updateContents() throw(RuntimeException) {
 }
 
 // Update window's property.
-void XRenderWindow::updateProperty(Atom property, int state) throw(RuntimeException) {
+void XRenderWindow::updateProperty(Atom property, int state) throw() {
     BaseCompWindow::updateProperty(property, state);
 
     if (property == Atoms::opacityAtom()) {
@@ -87,7 +87,7 @@ void XRenderWindow::updateProperty(Atom property, int state) throw(RuntimeExcept
 //--- PROTECTED WINDOW MANIPULATION --------------------------------------------
 
 // Update the window's clip shape.
-void XRenderWindow::updateShape() throw(RuntimeException) {
+void XRenderWindow::updateShape() throw() {
     BaseCompWindow::updateShape();
     updateMaskPicture();
 }

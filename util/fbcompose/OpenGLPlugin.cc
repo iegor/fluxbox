@@ -58,39 +58,39 @@ const OpenGLScreen &OpenGLPlugin::openGLScreen() const throw() {
 //--- PLUGIN ACTIONS -----------------------------------------------------------
 
 // Pre background rendering actions.
-void OpenGLPlugin::preBackgroundRenderActions() throw(RuntimeException) { }
+void OpenGLPlugin::preBackgroundRenderActions() throw() { }
 
 // Post background rendering actions.
-void OpenGLPlugin::postBackgroundRenderActions() throw(RuntimeException) { }
+void OpenGLPlugin::postBackgroundRenderActions() throw() { }
 
 // Pre window rendering actions.
-void OpenGLPlugin::preReconfigureRectRenderActions(XRectangle /*reconfigureRect*/) throw(RuntimeException) { }
+void OpenGLPlugin::preReconfigureRectRenderActions(XRectangle /*reconfigureRect*/) throw() { }
 
 // Post window rendering actions.
-void OpenGLPlugin::postReconfigureRectRenderActions(XRectangle /*reconfigureRect*/) throw(RuntimeException) { }
+void OpenGLPlugin::postReconfigureRectRenderActions(XRectangle /*reconfigureRect*/) throw() { }
 
 // Pre window rendering actions.
-void OpenGLPlugin::preWindowRenderActions(const OpenGLWindow &/*window*/) throw(RuntimeException) { }
+void OpenGLPlugin::preWindowRenderActions(const OpenGLWindow &/*window*/) throw() { }
 
 // Post window rendering actions.
-void OpenGLPlugin::postWindowRenderActions(const OpenGLWindow &/*window*/) throw(RuntimeException) { }
+void OpenGLPlugin::postWindowRenderActions(const OpenGLWindow &/*window*/) throw() { }
 
 
 // Called before the extra rendering jobs are executed.
-void OpenGLPlugin::preExtraRenderingActions() throw(RuntimeException) { }
+void OpenGLPlugin::preExtraRenderingActions() throw() { }
 
 // Returns the number of extra rendering jobs the plugin will do.
-int OpenGLPlugin::extraRenderingJobCount() throw(RuntimeException) {
+int OpenGLPlugin::extraRenderingJobCount() throw() {
     return 0;
 }
 
 // Initialize the specified extra rendering job.
 void OpenGLPlugin::extraRenderingJobInit(int /*job*/, GLuint &/*primPosBuffer_return*/,
         GLuint &/*mainTexCoordBuffer_return*/, GLuint &/*mainTexture_return*/, GLuint &/*shapeTexCoordBuffer_return*/,
-        GLuint &/*shapeTexture_return*/, GLfloat &/*alpha_return*/) throw(RuntimeException) { }
+        GLuint &/*shapeTexture_return*/, GLfloat &/*alpha_return*/) throw() { }
 
 // Clean up after an extra rendering job.
-void OpenGLPlugin::extraRenderingJobCleanup(int /*job*/) throw(RuntimeException) { }
+void OpenGLPlugin::extraRenderingJobCleanup(int /*job*/) throw() { }
 
 // Called after the extra rendering jobs are executed.
-void OpenGLPlugin::postExtraRenderingActions() throw(RuntimeException) { }
+void OpenGLPlugin::postExtraRenderingActions() throw() { }

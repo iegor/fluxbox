@@ -84,24 +84,24 @@ namespace FbCompositor {
 
         /** Window rendering job initialization. */
         virtual void windowRenderingJobInit(const XRenderWindow &window, int &op_return,
-                                            Picture &maskPic_return) throw(RuntimeException);
+                                            Picture &maskPic_return) throw();
 
         /** Window rendering job cleanup. */
-        virtual void windowRenderingJobCleanup(const XRenderWindow &window) throw(RuntimeException);
+        virtual void windowRenderingJobCleanup(const XRenderWindow &window) throw();
 
 
         /** \returns the number of extra rendering jobs the plugin will do. */
-        virtual int extraRenderingJobCount() throw(RuntimeException);
+        virtual int extraRenderingJobCount() throw();
 
         /** Initialize the specified extra rendering job. */
         virtual void extraRenderingJobInit(int job, int &op_return,
                                            Picture &srcPic_return, int &srcX_return, int &srcY_return,
                                            Picture &maskPic_return, int &maskX_return, int &maskY_return,
                                            int &destX_return, int &destY_return,
-                                           int &width_return, int &height_return) throw(RuntimeException);
+                                           int &width_return, int &height_return) throw();
 
         /** Called after the extra rendering jobs are executed. */
-        virtual void postExtraRenderingActions() throw(RuntimeException);
+        virtual void postExtraRenderingActions() throw();
 
 
     private :

@@ -148,7 +148,7 @@ void BaseScreen::initWindows() throw() {
 //--- WINDOW MANIPULATION ------------------------------------------------------
 
 // Creates a new window and inserts it into the list of windows.
-void BaseScreen::createWindow(Window window) throw(RuntimeException) {
+void BaseScreen::createWindow(Window window) throw(WindowException) {
     if (isWindowIgnored(window)) {
         return;
     }
@@ -182,7 +182,7 @@ void BaseScreen::createWindow(Window window) throw(RuntimeException) {
 }
 
 // Damages a window on this screen.
-void BaseScreen::damageWindow(Window window) throw(RuntimeException) {
+void BaseScreen::damageWindow(Window window) throw() {
     if (isWindowIgnored(window)) {
         return;
     }
@@ -203,7 +203,7 @@ void BaseScreen::damageWindow(Window window) throw(RuntimeException) {
 }
 
 // Destroys a window on this screen.
-void BaseScreen::destroyWindow(Window window) throw(RuntimeException) {
+void BaseScreen::destroyWindow(Window window) throw() {
     if (isWindowIgnored(window)) {
         return;
     }
@@ -223,7 +223,7 @@ void BaseScreen::destroyWindow(Window window) throw(RuntimeException) {
 }
 
 // Maps a window on this screen.
-void BaseScreen::mapWindow(Window window) throw(RuntimeException) {
+void BaseScreen::mapWindow(Window window) throw() {
     if (isWindowIgnored(window)) {
         return;
     }
@@ -242,7 +242,7 @@ void BaseScreen::mapWindow(Window window) throw(RuntimeException) {
 }
 
 // Updates window's configuration.
-void BaseScreen::reconfigureWindow(const XConfigureEvent &event) throw(RuntimeException) {
+void BaseScreen::reconfigureWindow(const XConfigureEvent &event) throw() {
     if (isWindowIgnored(event.window)) {
         return;
     }
@@ -292,7 +292,7 @@ void BaseScreen::reconfigureWindow(const XConfigureEvent &event) throw(RuntimeEx
 }
 
 // Reparents a window.
-void BaseScreen::reparentWindow(Window window, Window parent) throw(RuntimeException) {
+void BaseScreen::reparentWindow(Window window, Window parent) throw() {
     if (parent == rootWindow().window()) {
         createWindow(window);
     } else {
@@ -301,7 +301,7 @@ void BaseScreen::reparentWindow(Window window, Window parent) throw(RuntimeExcep
 }
 
 // Updates window's shape.
-void BaseScreen::updateShape(Window window) throw(RuntimeException) {
+void BaseScreen::updateShape(Window window) throw() {
     if (isWindowIgnored(window)) {
         return;
     }
@@ -320,7 +320,7 @@ void BaseScreen::updateShape(Window window) throw(RuntimeException) {
 }
 
 // Unmaps a window on this screen.
-void BaseScreen::unmapWindow(Window window) throw(RuntimeException) {
+void BaseScreen::unmapWindow(Window window) throw() {
     if (isWindowIgnored(window)) {
         return;
     }
@@ -339,7 +339,7 @@ void BaseScreen::unmapWindow(Window window) throw(RuntimeException) {
 }
 
 // Updates the value of some window's property.
-void BaseScreen::updateWindowProperty(Window window, Atom property, int state) throw(RuntimeException) {
+void BaseScreen::updateWindowProperty(Window window, Atom property, int state) throw() {
     if (isWindowIgnored(window)) {
         return;
     }

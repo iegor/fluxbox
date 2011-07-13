@@ -42,7 +42,6 @@ namespace FbCompositor {
     class BasePlugin;
     class BaseScreen;
     class InitException;
-    class RuntimeException;
 
 
     /**
@@ -74,28 +73,28 @@ namespace FbCompositor {
         //--- WINDOW EVENT CALLBACKS -------------------------------------------
 
         /** Called, whenever a new window is created. */
-        virtual void windowCreated(const BaseCompWindow &window) throw(RuntimeException);
+        virtual void windowCreated(const BaseCompWindow &window) throw();
 
         /** Called, whenever a window is damaged. */
-        virtual void windowDamaged(const BaseCompWindow &window) throw(RuntimeException);
+        virtual void windowDamaged(const BaseCompWindow &window) throw();
 
         /** Called, whenever a window is destroyed. */
-        virtual void windowDestroyed(const BaseCompWindow &window) throw(RuntimeException);
+        virtual void windowDestroyed(const BaseCompWindow &window) throw();
 
         /** Called, whenever a window is mapped. */
-        virtual void windowMapped(const BaseCompWindow &window) throw(RuntimeException);
+        virtual void windowMapped(const BaseCompWindow &window) throw();
 
         /** Called, whenever window's property is changed. */
-        virtual void windowPropertyChanged(const BaseCompWindow &window, Atom property, int state) throw(RuntimeException);
+        virtual void windowPropertyChanged(const BaseCompWindow &window, Atom property, int state) throw();
 
         /** Called, whenever a window is reconfigured. */
-        virtual void windowReconfigured(const BaseCompWindow &window) throw(RuntimeException);
+        virtual void windowReconfigured(const BaseCompWindow &window) throw();
 
         /** Called, whenever window's shape changes. */
-        virtual void windowShapeChanged(const BaseCompWindow &window) throw(RuntimeException);
+        virtual void windowShapeChanged(const BaseCompWindow &window) throw();
 
         /** Called, whenever a window is unmapped. */
-        virtual void windowUnmapped(const BaseCompWindow &window) throw(RuntimeException);
+        virtual void windowUnmapped(const BaseCompWindow &window) throw();
 
 
         //--- SCREEN CHANGES ---------------------------------------------------

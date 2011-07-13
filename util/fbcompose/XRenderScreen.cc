@@ -219,7 +219,7 @@ void XRenderScreen::updateBackgroundPicture() throw() {
 //--- SCREEN RENDERING ---------------------------------------------------------
 
 // Renders the screen's contents.
-void XRenderScreen::renderScreen() throw(RuntimeException) {
+void XRenderScreen::renderScreen() throw() {
     // Render desktop background.
     renderBackground();
 
@@ -245,7 +245,7 @@ void XRenderScreen::renderScreen() throw(RuntimeException) {
 }
 
 // Render the desktop wallpaper.
-void XRenderScreen::renderBackground() throw(RuntimeException) {
+void XRenderScreen::renderBackground() throw() {
     // TODO: Simply make the window transparent.
     XRenderPlugin *plugin = NULL;
 
@@ -272,7 +272,7 @@ void XRenderScreen::renderBackground() throw(RuntimeException) {
 }
 
 // Perform extra rendering jobs from plugins.
-void XRenderScreen::renderExtraJobs() throw(RuntimeException) {
+void XRenderScreen::renderExtraJobs() throw() {
     XRenderPlugin *plugin = NULL;
 
     Picture srcPic, maskPic;
@@ -295,7 +295,7 @@ void XRenderScreen::renderExtraJobs() throw(RuntimeException) {
 }
 
 // Render the reconfigure rectangle.
-void XRenderScreen::renderReconfigureRect() throw(RuntimeException) {
+void XRenderScreen::renderReconfigureRect() throw() {
     XRenderPlugin *plugin = NULL;
 
     XRectangle rect = reconfigureRectangle();
@@ -311,7 +311,7 @@ void XRenderScreen::renderReconfigureRect() throw(RuntimeException) {
 }
 
 // Render a particular window onto the screen.
-void XRenderScreen::renderWindow(XRenderWindow &window) throw(RuntimeException) {
+void XRenderScreen::renderWindow(XRenderWindow &window) throw() {
     XRenderPlugin *plugin = NULL;
 
     // Update window contents.

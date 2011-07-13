@@ -157,7 +157,11 @@ void FadePlugin::preReconfigureRectRenderActions(XRectangle /*reconfigureRect*/)
 void FadePlugin::preWindowRenderActions(const OpenGLWindow &window) throw() {
     std::map<Window, PosFadeData>::iterator it = m_positiveFades.find(window.window());
     if (it != m_positiveFades.end()) {
-        it->second.fadeAlpha += it->second.timer.newElapsedTicks();
+        try {
+            it->second.fadeAlpha += it->second.timer.newElapsedTicks();
+        } catch (const TimeException &e) {
+            it->second.fadeAlpha = 255;
+        }
         
         if (it->second.fadeAlpha >= 255) {
             glUniform1f(alphaUniformPos, 1.0);
@@ -190,7 +194,12 @@ void FadePlugin::extraRenderingJobInit(int job, GLuint &primPosBuffer_return, GL
     shapeTexture_return = curFade.shapeTexture->unwrap();
     alpha_return = curFade.origAlpha / 255.0;
 
-    curFade.fadeAlpha -= curFade.timer.newElapsedTicks();
+    try {
+        curFade.fadeAlpha -= curFade.timer.newElapsedTicks();
+    } catch (const TimeException &e) {
+        curFade.fadeAlpha = 0;
+    }
+
     if (curFade.fadeAlpha <= 0) {
         glUniform1f(alphaUniformPos, 0.0);
     } else {

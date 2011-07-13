@@ -37,7 +37,6 @@ namespace FbCompositor {
     class BaseCompWindow;
     class BaseScreen;
     class InitException;
-    class RuntimeException;
     class XRenderWindow;
 
 
@@ -67,17 +66,17 @@ namespace FbCompositor {
         //--- WINDOW MANIPULATION ----------------------------------------------
 
         /** Update the window's contents. */
-        void updateContents() throw(RuntimeException);
+        void updateContents() throw();
 
         /** Update window's property. */
-        void updateProperty(Atom property, int state) throw(RuntimeException);
+        void updateProperty(Atom property, int state) throw();
 
 
     protected:
         //--- PROTECTED WINDOW MANIPULATION ------------------------------------
 
         /** Update the window's clip shape. */
-        void updateShape() throw(RuntimeException);
+        void updateShape() throw();
 
 
     private:

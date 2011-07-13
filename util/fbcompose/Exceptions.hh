@@ -116,21 +116,6 @@ namespace FbCompositor {
     };
 
 
-
-    /**
-     * This exception is thrown whenever an error occurs during rendering of
-     * the screen.
-     */
-    class RenderingException : public RuntimeException {
-    public:
-        /** Public constructor. */
-        RenderingException(FbTk::FbString errorMessage) throw() :
-            RuntimeException(errorMessage) {}
-
-        /** Destructor. */
-        virtual ~RenderingException() throw() {}
-    };
-
     /**
      * This exception is thrown whenever an error occurs while attempting to
      * obtain current system time.

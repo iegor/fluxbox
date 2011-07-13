@@ -73,10 +73,10 @@ namespace FbCompositor {
                                                  Picture &srcPic_return, int &srcX_return, int &srcY_return,
                                                  Picture &maskPic_return, int &maskX_return, int &maskY_return,
                                                  int &destX_return, int &destY_return,
-                                                 int &width_return, int &height_return) throw(RuntimeException);
+                                                 int &width_return, int &height_return) throw();
 
         /** Reconfigure rectangle rendering options. */
-        virtual void reconfigureRectRenderActions(XRectangle &rect_return, GC gc) throw(RuntimeException);
+        virtual void reconfigureRectRenderActions(XRectangle &rect_return, GC gc) throw();
 
 
         /** Extra pre window rendering job. */
@@ -84,41 +84,41 @@ namespace FbCompositor {
                                                 Picture &srcPic_return, int &srcX_return, int &srcY_return,
                                                 Picture &maskPic_return, int &maskX_return, int &maskY_return,
                                                 int &destX_return, int &destY_return,
-                                                int &width_return, int &height_return) throw(RuntimeException);
+                                                int &width_return, int &height_return) throw();
 
         /** Window rendering job initialization. */
         virtual void windowRenderingJobInit(const XRenderWindow &window, int &op_return,
-                                            Picture &maskPic_return) throw(RuntimeException);
+                                            Picture &maskPic_return) throw();
 
         /** Window rendering job cleanup. */
-        virtual void windowRenderingJobCleanup(const XRenderWindow &window) throw(RuntimeException);
+        virtual void windowRenderingJobCleanup(const XRenderWindow &window) throw();
 
         /** Extra post window rendering job. */
         virtual void extraPostWindowRenderingJob(const XRenderWindow &window, int &op_return,
                                                  Picture &srcPic_return, int &srcX_return, int &srcY_return,
                                                  Picture &maskPic_return, int &maskX_return, int &maskY_return,
                                                  int &destX_return, int &destY_return,
-                                                 int &width_return, int &height_return) throw(RuntimeException);
+                                                 int &width_return, int &height_return) throw();
 
 
         /** Called before the extra rendering jobs are executed. */
-        virtual void preExtraRenderingActions() throw(RuntimeException);
+        virtual void preExtraRenderingActions() throw();
 
         /** \returns the number of extra rendering jobs the plugin will do. */
-        virtual int extraRenderingJobCount() throw(RuntimeException);
+        virtual int extraRenderingJobCount() throw();
 
         /** Initialize the specified extra rendering job. */
         virtual void extraRenderingJobInit(int job, int &op_return,
                                            Picture &srcPic_return, int &srcX_return, int &srcY_return,
                                            Picture &maskPic_return, int &maskX_return, int &maskY_return,
                                            int &destX_return, int &destY_return,
-                                           int &width_return, int &height_return) throw(RuntimeException);
+                                           int &width_return, int &height_return) throw();
 
         /** Clean up after an extra rendering job. */
-        virtual void extraRenderingJobCleanup(int job) throw(RuntimeException);
+        virtual void extraRenderingJobCleanup(int job) throw();
 
         /** Called after the extra rendering jobs are executed. */
-        virtual void postExtraRenderingActions() throw(RuntimeException);
+        virtual void postExtraRenderingActions() throw();
     };
 }
 

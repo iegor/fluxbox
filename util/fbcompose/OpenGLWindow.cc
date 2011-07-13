@@ -107,7 +107,7 @@ OpenGLWindow::~OpenGLWindow() throw() {
 //--- WINDOW UPDATE FUNCTIONS ------------------------------------------
 
 // Updates the window's contents.
-void OpenGLWindow::updateContents() throw(RuntimeException) {
+void OpenGLWindow::updateContents() throw() {
     if (isWindowBad()) {
         return;
     }
@@ -132,7 +132,7 @@ void OpenGLWindow::updateGeometry(const XConfigureEvent &event) throw() {
 }
 
 // Updates the window's shape.
-void OpenGLWindow::updateShape() throw(RuntimeException) {
+void OpenGLWindow::updateShape() throw() {
     BaseCompWindow::updateShape();
 
     if (m_shapePixmap) {

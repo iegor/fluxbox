@@ -117,12 +117,18 @@ void FadePlugin::windowUnmapped(const BaseCompWindow &window) throw() {
 
 // Window rendering job initialization.
 void FadePlugin::windowRenderingJobInit(const XRenderWindow &window, int &/*op_return*/,
-                                        Picture &maskPic_return) throw(RuntimeException) {
+                                        Picture &maskPic_return) throw() {
     std::map<Window, PosFadeData>::iterator it = m_positiveFades.find(window.window());
     if (it != m_positiveFades.end()) {
         PosFadeData &curFade = it->second;
 
-        int newTicks = curFade.timer.newElapsedTicks();
+        int newTicks;
+        try {
+            newTicks = curFade.timer.newElapsedTicks();
+        } catch (const TimeException &e) {
+            newTicks = 255;
+        }
+
         if ((newTicks > 0) || (curFade.fadePicture == None)) {
             curFade.fadeAlpha += newTicks;
             if (curFade.fadeAlpha > 255) {
@@ -138,7 +144,7 @@ void FadePlugin::windowRenderingJobInit(const XRenderWindow &window, int &/*op_r
 }
 
 // Window rendering job cleanup.
-void FadePlugin::windowRenderingJobCleanup(const XRenderWindow &window) throw(RuntimeException) {
+void FadePlugin::windowRenderingJobCleanup(const XRenderWindow &window) throw() {
     std::map<Window, PosFadeData>::iterator it = m_positiveFades.find(window.window());
     if (it != m_positiveFades.end()) {
         if (it->second.fadeAlpha >= 255) {
@@ -155,7 +161,7 @@ void FadePlugin::windowRenderingJobCleanup(const XRenderWindow &window) throw(Ru
 
 
 // Returns the number of extra rendering jobs the plugin will do.
-int FadePlugin::extraRenderingJobCount() throw(RuntimeException) {
+int FadePlugin::extraRenderingJobCount() throw() {
     return m_negativeFades.size();
 }
 
@@ -163,12 +169,18 @@ int FadePlugin::extraRenderingJobCount() throw(RuntimeException) {
 void FadePlugin::extraRenderingJobInit(int job, int &op_return, Picture &srcPic_return,
         int &srcX_return, int &srcY_return, Picture &maskPic_return, int &maskX_return,
         int &maskY_return, int &destX_return, int &destY_return, int &width_return,
-        int &height_return) throw(RuntimeException) {
+        int &height_return) throw() {
 
     NegFadeData &curFade = m_negativeFades[job];
 
     // Set up the fade mask.
-    int newTicks = curFade.timer.newElapsedTicks();
+    int newTicks;
+    try {
+        newTicks = curFade.timer.newElapsedTicks();
+    } catch (const TimeException &e) {
+        newTicks = 255;
+    }
+
     if ((newTicks > 0) || (curFade.fadePicture == None)) {
         curFade.fadeAlpha -= newTicks;
         if (curFade.fadeAlpha < 0) {
@@ -195,7 +207,7 @@ void FadePlugin::extraRenderingJobInit(int job, int &op_return, Picture &srcPic_
 }
 
 // Called after the extra rendering jobs are executed.
-void FadePlugin::postExtraRenderingActions() throw(RuntimeException) {
+void FadePlugin::postExtraRenderingActions() throw() {
     std::vector<NegFadeData>::iterator it = m_negativeFades.begin();
     while (it != m_negativeFades.end()) {
         if (it->fadeAlpha <= 0) {

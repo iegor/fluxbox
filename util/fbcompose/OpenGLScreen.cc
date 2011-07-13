@@ -551,7 +551,7 @@ BaseCompWindow *OpenGLScreen::createWindowObject(Window window) throw(InitExcept
 //--- SCREEN RENDERING ---------------------------------------------------------
 
 // Renders the screen's contents.
-void OpenGLScreen::renderScreen() throw(RuntimeException) {
+void OpenGLScreen::renderScreen() throw() {
     // React to root window changes.
     if (m_rootWindowChanged) {
         updateOnRootWindowResize();
@@ -590,7 +590,7 @@ void OpenGLScreen::renderScreen() throw(RuntimeException) {
 
 
 // A function to render the desktop background.
-void OpenGLScreen::renderBackground() throw(RuntimeException) {
+void OpenGLScreen::renderBackground() throw() {
     OpenGLPlugin *plugin = NULL;
 
     // Update desktop background texture.
@@ -610,7 +610,7 @@ void OpenGLScreen::renderBackground() throw(RuntimeException) {
 }
 
 // Perform extra rendering jobs from plugins.
-void OpenGLScreen::renderExtraJobs() throw(RuntimeException) {
+void OpenGLScreen::renderExtraJobs() throw() {
     OpenGLPlugin *plugin = NULL;
 
     GLfloat alpha;
@@ -636,7 +636,7 @@ void OpenGLScreen::renderExtraJobs() throw(RuntimeException) {
 }
 
 // Render the reconfigure rectangle.
-void OpenGLScreen::renderReconfigureRect() throw(RuntimeException) {
+void OpenGLScreen::renderReconfigureRect() throw() {
     OpenGLPlugin *plugin = NULL;
 
     // Convert reconfigure rectangle to OpenGL coordinates.
@@ -666,7 +666,7 @@ void OpenGLScreen::renderReconfigureRect() throw(RuntimeException) {
 }
 
 // A function to render a particular window onto the screen.
-void OpenGLScreen::renderWindow(OpenGLWindow &window) throw(RuntimeException) {
+void OpenGLScreen::renderWindow(OpenGLWindow &window) throw() {
     OpenGLPlugin *plugin = NULL;
 
     // Update window's contents.

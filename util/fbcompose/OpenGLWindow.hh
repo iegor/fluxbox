@@ -41,7 +41,6 @@ namespace FbCompositor {
     class BaseScreen;
     class InitException;
     class OpenGLWindow;
-    class RuntimeException;
 
 
     /**
@@ -73,13 +72,13 @@ namespace FbCompositor {
         //--- WINDOW UPDATE FUNCTIONS ------------------------------------------
 
         /** Updates the window's contents. */
-        void updateContents() throw(RuntimeException);
+        void updateContents() throw();
 
         /** Updates window's geometry. */
         void updateGeometry(const XConfigureEvent &event) throw();
 
         /** Updates the window's shape. */
-        void updateShape() throw(RuntimeException);
+        void updateShape() throw();
 
         /** Updates the window position vertex array. */
         void updateWindowPosArray() throw();

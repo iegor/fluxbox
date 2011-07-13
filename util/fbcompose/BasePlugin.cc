@@ -45,28 +45,28 @@ BasePlugin::~BasePlugin() throw() { }
 //--- WINDOW EVENT CALLBACKS ---------------------------------------------------
 
 // Called, whenever a new window is created.
-void BasePlugin::windowCreated(const BaseCompWindow &/*window*/) throw(RuntimeException) { }
+void BasePlugin::windowCreated(const BaseCompWindow &/*window*/) throw() { }
 
 // Called, whenever a window is damaged.
-void BasePlugin::windowDamaged(const BaseCompWindow &/*window*/) throw(RuntimeException) { }
+void BasePlugin::windowDamaged(const BaseCompWindow &/*window*/) throw() { }
 
 // Called, whenever a window is destroyed.
-void BasePlugin::windowDestroyed(const BaseCompWindow &/*window*/) throw(RuntimeException) { }
+void BasePlugin::windowDestroyed(const BaseCompWindow &/*window*/) throw() { }
 
 // Called, whenever a window is mapped.
-void BasePlugin::windowMapped(const BaseCompWindow &/*window*/) throw(RuntimeException) { }
+void BasePlugin::windowMapped(const BaseCompWindow &/*window*/) throw() { }
 
 // Called, whenever window's property is changed.
-void BasePlugin::windowPropertyChanged(const BaseCompWindow &/*window*/, Atom /*property*/, int /*state*/) throw(RuntimeException) { }
+void BasePlugin::windowPropertyChanged(const BaseCompWindow &/*window*/, Atom /*property*/, int /*state*/) throw() { }
 
 // Called, whenever a window is reconfigured.
-void BasePlugin::windowReconfigured(const BaseCompWindow &/*window*/) throw(RuntimeException) { }
+void BasePlugin::windowReconfigured(const BaseCompWindow &/*window*/) throw() { }
 
 // Called, whenever window's shape changes.
-void BasePlugin::windowShapeChanged(const BaseCompWindow &/*window*/) throw(RuntimeException) { }
+void BasePlugin::windowShapeChanged(const BaseCompWindow &/*window*/) throw() { }
 
 // Called, whenever a window is unmapped.
-void BasePlugin::windowUnmapped(const BaseCompWindow &/*window*/) throw(RuntimeException) { }
+void BasePlugin::windowUnmapped(const BaseCompWindow &/*window*/) throw() { }
 
 
 //--- SCREEN CHANGES -----------------------------------------------------------

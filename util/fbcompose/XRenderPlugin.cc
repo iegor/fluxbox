@@ -55,43 +55,43 @@ const XRenderScreen &XRenderPlugin::xrenderScreen() const throw() {
 void XRenderPlugin::extraBackgroundRenderingJob(int &op_return, Picture &/*srcPic_return*/,
         int &/*srcX_return*/, int &/*srcY_return*/, Picture &/*maskPic_return*/, int &/*maskX_return*/,
         int &/*maskY_return*/, int &/*destX_return*/, int &/*destY_return*/, int &/*width_return*/,
-        int &/*height_return*/) throw(RuntimeException) {
+        int &/*height_return*/) throw() {
     op_return = PictOpClear;
 }
 
 // Reconfigure rectangle rendering options.
-void XRenderPlugin::reconfigureRectRenderActions(XRectangle &/*rect_return*/, GC /*gc*/) throw(RuntimeException) { }
+void XRenderPlugin::reconfigureRectRenderActions(XRectangle &/*rect_return*/, GC /*gc*/) throw() { }
 
 
 // Extra pre window rendering job.
 void XRenderPlugin::extraPreWindowRenderingJob(const XRenderWindow &/*window*/, int &op_return,
         Picture &/*srcPic_return*/, int &/*srcX_return*/, int &/*srcY_return*/, Picture &/*maskPic_return*/,
         int &/*maskX_return*/, int &/*maskY_return*/, int &/*destX_return*/, int &/*destY_return*/,
-        int &/*width_return*/, int &/*height_return*/) throw(RuntimeException) {
+        int &/*width_return*/, int &/*height_return*/) throw() {
     op_return = PictOpClear;
 }
 
 // Window rendering options.
 void XRenderPlugin::windowRenderingJobInit(const XRenderWindow &/*window*/, int &/*op_return*/,
-                                           Picture &/*maskPic_return*/) throw(RuntimeException) { }
+                                           Picture &/*maskPic_return*/) throw() { }
 
 // Window rendering job cleanup.
-void XRenderPlugin::windowRenderingJobCleanup(const XRenderWindow &/*window*/) throw(RuntimeException) { }
+void XRenderPlugin::windowRenderingJobCleanup(const XRenderWindow &/*window*/) throw() { }
 
 // Extra post window rendering job.
 void XRenderPlugin::extraPostWindowRenderingJob(const XRenderWindow &/*window*/, int &op_return,
         Picture &/*srcPic_return*/, int &/*srcX_return*/, int &/*srcY_return*/, Picture &/*maskPic_return*/,
         int &/*maskX_return*/, int &/*maskY_return*/, int &/*destX_return*/, int &/*destY_return*/,
-        int &/*width_return*/, int &/*height_return*/) throw(RuntimeException) {
+        int &/*width_return*/, int &/*height_return*/) throw() {
     op_return = PictOpClear;
 }
 
 
 // Called before the extra rendering jobs are executed.
-void XRenderPlugin::preExtraRenderingActions() throw(RuntimeException) { }
+void XRenderPlugin::preExtraRenderingActions() throw() { }
 
 // Returns the number of extra rendering jobs the plugin will do.
-int XRenderPlugin::extraRenderingJobCount() throw(RuntimeException) {
+int XRenderPlugin::extraRenderingJobCount() throw() {
     return 0;
 }
 
@@ -99,12 +99,12 @@ int XRenderPlugin::extraRenderingJobCount() throw(RuntimeException) {
 void XRenderPlugin::extraRenderingJobInit(int /*job*/, int &op_return, Picture &/*srcPic_return*/,
         int &/*srcX_return*/, int &/*srcY_return*/, Picture &/*maskPic_return*/, int &/*maskX_return*/,
         int &/*maskY_return*/, int &/*destX_return*/, int &/*destY_return*/, int &/*width_return*/,
-        int &/*height_return*/) throw(RuntimeException) {
+        int &/*height_return*/) throw() {
     op_return = PictOpClear;
 }
 
 // Clean up after an extra rendering job.
-void XRenderPlugin::extraRenderingJobCleanup(int /*job*/) throw(RuntimeException) { }
+void XRenderPlugin::extraRenderingJobCleanup(int /*job*/) throw() { }
 
 // Called after the extra rendering jobs are executed.
-void XRenderPlugin::postExtraRenderingActions() throw(RuntimeException) { }
+void XRenderPlugin::postExtraRenderingActions() throw() { }
