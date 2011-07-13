@@ -28,6 +28,7 @@
 #include "OpenGLPlugin.hh"
 #include "OpenGLShaders.hh"
 #include "OpenGLUtility.hh"
+#include "ResourceWrappers.hh"
 
 #include "FbTk/FbString.hh"
 
@@ -677,9 +678,9 @@ void OpenGLScreen::renderWindow(OpenGLWindow &window) throw(RuntimeException) {
     forEachPlugin(i, plugin) {
         plugin->preWindowRenderActions(window);
     }
-    render(GL_TRIANGLE_STRIP, window.windowPosBuffer()->buffer(),
-           m_defaultTexCoordBuffer, window.contentTexture()->texture(),
-           m_defaultTexCoordBuffer, window.shapeTexture()->texture(),
+    render(GL_TRIANGLE_STRIP, window.windowPosBuffer()->unwrap(),
+           m_defaultTexCoordBuffer, window.contentTexture()->unwrap(),
+           m_defaultTexCoordBuffer, window.shapeTexture()->unwrap(),
            m_defaultElementBuffer, 4, window.alpha() / 255.0);
     forEachPlugin(i, plugin) {
         plugin->postWindowRenderActions(window);

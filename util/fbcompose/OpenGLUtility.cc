@@ -29,30 +29,6 @@
 using namespace FbCompositor;
 
 
-//--- OPENGL RESOURCE WRAPPERS -------------------------------------------------
-
-// Buffer holder constructor.
-OpenGLBufferHolder::OpenGLBufferHolder() throw() {
-    glGenBuffers(1, &m_buffer);
-}
-
-// Buffer holder destructor.
-OpenGLBufferHolder::~OpenGLBufferHolder() throw() {
-    glDeleteBuffers(1, &m_buffer);
-}
-
-
-// Texture holder constructor.
-OpenGLTextureHolder::OpenGLTextureHolder() throw() {
-    glGenTextures(1, &m_texture);
-}
-
-// Texture holder destructor.
-OpenGLTextureHolder::~OpenGLTextureHolder() throw() {
-    glDeleteTextures(1, &m_texture);
-}
-
-
 //--- FUNCTIONS ----------------------------------------------------------------
 
 /** Converts an X pixmap to an OpenGL texture. */

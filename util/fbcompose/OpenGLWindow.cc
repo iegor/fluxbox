@@ -65,9 +65,9 @@ OpenGLWindow::OpenGLWindow(const BaseScreen &screen, Window windowXID, GLXFBConf
     m_shapePixmap = None;
 
     // Create OpenGL elements.
-    m_contentTexturePtr = new OpenGLTextureHolder();
-    m_shapeTexturePtr = new OpenGLTextureHolder();
-    m_windowPosBufferPtr = new OpenGLBufferHolder();
+    m_contentTexturePtr = new OpenGLTextureWrapper();
+    m_shapeTexturePtr = new OpenGLTextureWrapper();
+    m_windowPosBufferPtr = new OpenGLBufferWrapper();
 
     // Fill window position array.
     updateWindowPosArray();

@@ -27,7 +27,7 @@
 
 #include "BaseCompWindow.hh"
 #include "Exceptions.hh"
-#include "XRenderUtility.hh"
+#include "ResourceWrappers.hh"
 
 #include <X11/extensions/Xrender.h>
 
@@ -58,10 +58,10 @@ namespace FbCompositor {
         //--- ACCESSORS --------------------------------------------------------
 
         /** \returns an object, holding the window's contents as an XRender picture. */
-        XRenderPicturePtr contentPicture() const throw();
+        XRenderPictureWrapperPtr contentPicture() const throw();
         
         /** \returns an object, the window's mask picture. */
-        XRenderPicturePtr maskPicture() const throw();
+        XRenderPictureWrapperPtr maskPicture() const throw();
 
 
         //--- WINDOW MANIPULATION ----------------------------------------------
@@ -103,10 +103,10 @@ namespace FbCompositor {
 
 
         /** The window's content picture. */
-        XRenderPicturePtr m_contentPicture;
+        XRenderPictureWrapperPtr m_contentPicture;
 
         /** The window's mask picture. */
-        XRenderPicturePtr m_maskPicture;
+        XRenderPictureWrapperPtr m_maskPicture;
 
 
         /** The picture filter. */
@@ -117,24 +117,24 @@ namespace FbCompositor {
     //--- INLINE FUNCTIONS -----------------------------------------------------
 
     // Returns the window's contents as an XRender picture.
-    inline XRenderPicturePtr XRenderWindow::contentPicture() const throw() {
+    inline XRenderPictureWrapperPtr XRenderWindow::contentPicture() const throw() {
         return m_contentPicture;
     }
 
     // Returns the window's mask picture.
-    inline XRenderPicturePtr XRenderWindow::maskPicture() const throw() {
+    inline XRenderPictureWrapperPtr XRenderWindow::maskPicture() const throw() {
         return m_maskPicture;
     }
 
 
     // Returns the window's contents as an XRender picture.
     inline Picture XRenderWindow::direct_contentPicture() const throw() {
-        return m_contentPicture->picture();
+        return m_contentPicture->unwrap();
     }
 
     // Returns the window's mask picture.
     inline Picture XRenderWindow::direct_maskPicture() const throw() {
-        return m_maskPicture->picture();
+        return m_maskPicture->unwrap();
     }
 }
 

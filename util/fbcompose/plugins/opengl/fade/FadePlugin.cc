@@ -127,11 +127,11 @@ void FadePlugin::windowUnmapped(const BaseCompWindow &window) throw() {
     }
 
     // Initialize the remaining fields.
-    fade.contentTextureHolder = glWindow.contentTexture();
+    fade.contentTexture = glWindow.contentTexture();
     fade.origAlpha = glWindow.alpha();
-    fade.shapeTextureHolder = glWindow.shapeTexture();
+    fade.shapeTexture = glWindow.shapeTexture();
     fade.windowId = glWindow.window();
-    fade.windowPosBufferHolder = glWindow.windowPosBuffer();
+    fade.windowPosBuffer = glWindow.windowPosBuffer();
 
     fade.timer.setTickSize(250000 / 255);
     fade.timer.start();
@@ -183,11 +183,11 @@ void FadePlugin::extraRenderingJobInit(int job, GLuint &primPosBuffer_return, GL
 
     NegFadeData &curFade = m_negativeFades[job];
 
-    primPosBuffer_return = curFade.windowPosBufferHolder->buffer();
+    primPosBuffer_return = curFade.windowPosBuffer->unwrap();
     mainTexCoordBuffer_return = openGLScreen().defaultTexCoordBuffer();
-    mainTexture_return = curFade.contentTextureHolder->texture();
+    mainTexture_return = curFade.contentTexture->unwrap();
     shapeTexCoordBuffer_return = openGLScreen().defaultTexCoordBuffer();
-    shapeTexture_return = curFade.shapeTextureHolder->texture();
+    shapeTexture_return = curFade.shapeTexture->unwrap();
     alpha_return = curFade.origAlpha / 255.0;
 
     curFade.fadeAlpha -= curFade.timer.newElapsedTicks();

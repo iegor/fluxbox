@@ -35,7 +35,6 @@ if XRENDER_COMPOSITING
 fbcompose_xrender_SOURCES = \
 	util/fbcompose/XRenderPlugin.hh util/fbcompose/XRenderPlugin.cc \
 	util/fbcompose/XRenderScreen.hh util/fbcompose/XRenderScreen.cc \
-	util/fbcompose/XRenderUtility.hh util/fbcompose/XRenderUtility.cc \
 	util/fbcompose/XRenderWindow.hh util/fbcompose/XRenderWindow.cc
 else
 fbcompose_xrender_SOURCES =
@@ -64,6 +63,7 @@ fbcompose_SOURCES = \
 	util/fbcompose/Exceptions.hh \
 	util/fbcompose/Logging.hh util/fbcompose/Logging.cc \
 	util/fbcompose/PluginManager.hh util/fbcompose/PluginManager.cc \
+	util/fbcompose/ResourceWrappers.hh util/fbcompose/ResourceWrappers.cc \
 	util/fbcompose/ServerAutoApp.hh util/fbcompose/ServerAutoApp.cc \
 	util/fbcompose/TickTracker.hh util/fbcompose/TickTracker.cc \
 	util/fbcompose/Utility.hh util/fbcompose/Utility.cc \

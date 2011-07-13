@@ -1,4 +1,4 @@
-/** XRenderUtility.cc file for the fluxbox compositor. */
+/** ResourceWrappers.cc file for the fluxbox compositor. */
 
 // Copyright (c) 2011 Gediminas Liktaras (gliktaras at gmail dot com)
 //
@@ -21,32 +21,63 @@
 // THE SOFTWARE.
 
 
-#include "XRenderUtility.hh"
-
+#include "ResourceWrappers.hh"
 
 using namespace FbCompositor;
 
 
-//--- XRENDER PICTURE HOLDER ---------------------------------------------------
+#ifdef USE_OPENGL_COMPOSITING
 
-// Picture holder constructor.
-XRenderPictureHolder::XRenderPictureHolder(Display *display, const XRenderPictFormat *pictFormat,
+//--- OPENGL BUFFER WRAPPER ----------------------------------------------------
+
+// Constructor.
+OpenGLBufferWrapper::OpenGLBufferWrapper() throw() {
+    glGenBuffers(1, &m_buffer);
+}
+
+// Destructor.
+OpenGLBufferWrapper::~OpenGLBufferWrapper() throw() {
+    glDeleteBuffers(1, &m_buffer);
+}
+
+
+//--- OPENGL TEXTURE WRAPPER ---------------------------------------------------
+
+// Constructor.
+OpenGLTextureWrapper::OpenGLTextureWrapper() throw() {
+    glGenTextures(1, &m_texture);
+}
+
+// Destructor.
+OpenGLTextureWrapper::~OpenGLTextureWrapper() throw() {
+    glDeleteTextures(1, &m_texture);
+}
+
+#endif  // USE_OPENGL_COMPOSITING
+
+
+#ifdef USE_XRENDER_COMPOSITING
+
+//--- XRENDER PICTURE WRAPPER --------------------------------------------------
+
+// Constructor.
+XRenderPictureWrapper::XRenderPictureWrapper(Display *display, const XRenderPictFormat *pictFormat,
                                            const char *pictFilter) throw() :
-    m_picture(None),
     m_display(display),
+    m_picture(None),
     m_pictFilter(pictFilter),
     m_pictFormat(pictFormat) {
 }
 
-// Picture holder destructor.
-XRenderPictureHolder::~XRenderPictureHolder() throw() {
+// Destructor.
+XRenderPictureWrapper::~XRenderPictureWrapper() throw() {
     if (m_picture) {
         XRenderFreePicture(m_display, m_picture);
     }
 }
 
 // (Re)associate the picture with the given pixmap.
-void XRenderPictureHolder::setPixmap(Pixmap pixmap, XRenderPictureAttributes pa, long paMask) throw() {
+void XRenderPictureWrapper::setPixmap(Pixmap pixmap, XRenderPictureAttributes pa, long paMask) throw() {
     if (m_picture) {
         XRenderFreePicture(m_display, m_picture);
         m_picture = None;
@@ -55,3 +86,5 @@ void XRenderPictureHolder::setPixmap(Pixmap pixmap, XRenderPictureAttributes pa,
     m_picture = XRenderCreatePicture(m_display, pixmap, m_pictFormat, paMask, &pa);
     XRenderSetPictureFilter(m_display, m_picture, m_pictFilter, NULL, 0);
 }
+
+#endif  // USE_XRENDER_COMPOSITING
