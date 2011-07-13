@@ -62,7 +62,7 @@ OpenGLTextureWrapper::~OpenGLTextureWrapper() throw() {
 
 // Constructor.
 XRenderPictureWrapper::XRenderPictureWrapper(Display *display, const XRenderPictFormat *pictFormat,
-                                           const char *pictFilter) throw() :
+                                             const char *pictFilter) throw() :
     m_display(display),
     m_picture(None),
     m_pictFilter(pictFilter),

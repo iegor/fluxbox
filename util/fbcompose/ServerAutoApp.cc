@@ -30,15 +30,15 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
+#include <ctime>
 #include <sstream>
-#include <unistd.h>
 
 using namespace FbCompositor;
 
 
 //--- CONSTANTS ----------------------------------------------------------------
 
-// How many micro seconds to sleep before restarting the event loop.
+// How many microseconds to sleep before restarting the event loop.
 const int ServerAutoApp::SLEEP_TIME = 10000;
 
 
@@ -109,7 +109,8 @@ void ServerAutoApp::initScreens() throw(InitException) {
 
 // Enters the event loop.
 void ServerAutoApp::eventLoop() throw() {
+    timespec sleepTimespec = { 0, SLEEP_TIME * 1000 };
     while (!done()) {
-        usleep(SLEEP_TIME);
+        nanosleep(&sleepTimespec, NULL);
     }
 }

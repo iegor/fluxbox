@@ -47,15 +47,15 @@
 
 #include <sstream>
 
+#include <ctime>
 #include <csignal>
-#include <unistd.h>
 
 using namespace FbCompositor;
 
 
 //--- CONSTANTS ----------------------------------------------------------------
 
-// How many micro seconds to sleep before restarting the event loop.
+// How many microseconds to sleep before restarting the event loop.
 const int Compositor::SLEEP_TIME = 5000;
 
 
@@ -249,6 +249,7 @@ void Compositor::initHeads() throw() {
 void Compositor::eventLoop() throw(RuntimeException) {
     XEvent event;
     int eventScreen;
+    timespec sleepTimespec = { 0, SLEEP_TIME * 1000 };
 
     while (!done()) {
         // Handle incoming X events.
@@ -332,7 +333,7 @@ void Compositor::eventLoop() throw(RuntimeException) {
             }
             fbLog_debug << "======================================" << std::endl;
         } else {
-            usleep(SLEEP_TIME);
+            nanosleep(&sleepTimespec, NULL);
         }
     }
 }

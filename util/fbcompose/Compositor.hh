@@ -95,7 +95,7 @@ namespace FbCompositor {
     private:
         //--- CONSTANTS --------------------------------------------------------
 
-        /** How many micro seconds to sleep before restarting the event loop. */
+        /** How many microseconds to sleep before restarting the event loop. */
         static const int SLEEP_TIME;
 
 
