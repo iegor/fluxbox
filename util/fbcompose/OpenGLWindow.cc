@@ -79,7 +79,14 @@ OpenGLWindow::OpenGLWindow(const BaseScreen &screen, Window windowXID, GLXFBConf
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+#ifdef GL_ARB_texture_swizzle
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, GL_ONE);
+#else
+#ifdef GL_EXT_texture_swizzle
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A_EXT, GL_ONE);
+#endif  // GL_EXT_texture_swizzle
+#endif  // GL_ARB_texture_swizzle
 
     // Initialize the shape texture.
     glBindTexture(GL_TEXTURE_2D, direct_shapeTexture());

@@ -298,6 +298,12 @@ void OpenGLScreen::finishRenderingInit() {
 #ifndef GLXEW_EXT_texture_from_pixmap
     fbLog_warn << "GLX_EXT_texture_from_pixmap extension not found, expect a performance hit." << std::endl;
 #endif
+
+#ifndef GL_ARB_texture_swizzle
+#ifndef GL_EXT_texture_swizzle
+    fbLog_warn << "Could not find GL_ARB_texture_swizzle or GL_EXT_texture_swizzle extensions. Expect glitches." << std::endl;
+#endif
+#endif
 }
 
 // Initializes shaders.
