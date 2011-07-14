@@ -31,7 +31,7 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-XRenderWindow::XRenderWindow(const BaseScreen &screen, Window windowXID, const char *pictFilter) throw(InitException) :
+XRenderWindow::XRenderWindow(const BaseScreen &screen, Window windowXID, const char *pictFilter) :
     BaseCompWindow(screen, windowXID),
     m_pictFilter(pictFilter) {
 
@@ -45,7 +45,7 @@ XRenderWindow::XRenderWindow(const BaseScreen &screen, Window windowXID, const c
 }
 
 // Destructor.
-XRenderWindow::~XRenderWindow() throw() {
+XRenderWindow::~XRenderWindow() {
     if (m_maskPixmap) {
         XFreePixmap(display(), m_maskPixmap);
     }
@@ -55,7 +55,7 @@ XRenderWindow::~XRenderWindow() throw() {
 //--- WINDOW MANIPULATION ------------------------------------------------------
 
 // Update the window's contents.
-void XRenderWindow::updateContents() throw() {
+void XRenderWindow::updateContents() {
     if (isWindowBad()) {
         return;
     }
@@ -75,7 +75,7 @@ void XRenderWindow::updateContents() throw() {
 }
 
 // Update window's property.
-void XRenderWindow::updateProperty(Atom property, int state) throw() {
+void XRenderWindow::updateProperty(Atom property, int state) {
     BaseCompWindow::updateProperty(property, state);
 
     if (property == Atoms::opacityAtom()) {
@@ -87,7 +87,7 @@ void XRenderWindow::updateProperty(Atom property, int state) throw() {
 //--- PROTECTED WINDOW MANIPULATION --------------------------------------------
 
 // Update the window's clip shape.
-void XRenderWindow::updateShape() throw() {
+void XRenderWindow::updateShape() {
     BaseCompWindow::updateShape();
     updateMaskPicture();
 }
@@ -96,7 +96,7 @@ void XRenderWindow::updateShape() throw() {
 //--- INTERNAL FUNCTIONS -------------------------------------------------------
 
 // Update the window's mask picture.
-void XRenderWindow::updateMaskPicture() throw() {
+void XRenderWindow::updateMaskPicture() {
     if (!m_maskPicture || isResized()) {
         if (m_maskPixmap) {
             XFreePixmap(display(), m_maskPixmap);

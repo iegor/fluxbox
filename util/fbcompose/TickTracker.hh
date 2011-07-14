@@ -49,45 +49,45 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        TickTracker() throw();
+        TickTracker();
 
         /** Copy constructor. */
-        TickTracker(const TickTracker &other) throw();
+        TickTracker(const TickTracker &other);
 
         /** Assignment operator. */
-        TickTracker &operator=(const TickTracker &other) throw();
+        TickTracker &operator=(const TickTracker &other);
 
         /** Destructor. */
-        ~TickTracker() throw();
+        ~TickTracker();
 
 
         //--- TIMER MANIPULATION -----------------------------------------------
 
         /** Starts the timer. */
-        void start() throw(TimeException);
+        void start();
 
         /** Stops the timer. */
-        void stop() throw();
+        void stop();
 
 
         //--- TIMER QUERIES ----------------------------------------------------
 
         /** \returns whether the timer is running. */
-        bool isRunning() const throw();
+        bool isRunning() const;
 
         /** \returns the tick size. */
-        int tickSize() const throw();
+        int tickSize() const;
 
 
         /** \returns the new number of elapsed ticks since last call of this function. */
-        int newElapsedTicks() throw(TimeException);
+        int newElapsedTicks();
 
         /** \returns the total number of elapsed ticks. */
-        int totalElapsedTicks() throw(TimeException);
+        int totalElapsedTicks();
 
 
         /** Sets the size of a tick. */
-        void setTickSize(int usec) throw(TimeException);
+        void setTickSize(int usec);
 
 
     private:
@@ -100,10 +100,10 @@ namespace FbCompositor {
         //--- INTERNAL FUNTIONS ------------------------------------------------
 
         /** \returns the difference in time between two timevals. */
-        timeval timeDifference(timeval t1, timeval t2) throw();
+        timeval timeDifference(timeval t1, timeval t2);
 
         /** \returns the difference between two timevals in ticks. */
-        int tickDifference(const timeval &t1, const timeval &t2) throw();
+        int tickDifference(const timeval &t1, const timeval &t2);
 
 
         //--- PRIVATE VARIABLES ------------------------------------------------
@@ -130,12 +130,12 @@ namespace FbCompositor {
     //--- INLINE FUNCTIONS -----------------------------------------------------
 
     // Returns whether the timer is running.
-    inline bool TickTracker::isRunning() const throw() {
+    inline bool TickTracker::isRunning() const {
         return m_isRunning;
     }
 
     // Returns the tick size.
-    inline int TickTracker::tickSize() const throw() {
+    inline int TickTracker::tickSize() const {
         return m_tickSize;
     }
 }

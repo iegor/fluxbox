@@ -32,24 +32,24 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Costructor.
-OpenGLPlugin::OpenGLPlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args) throw(InitException) :
+OpenGLPlugin::OpenGLPlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args) :
     BasePlugin(screen, args) {
 }
 
 // Destructor.
-OpenGLPlugin::~OpenGLPlugin() throw() { }
+OpenGLPlugin::~OpenGLPlugin() { }
 
 
 //--- OTHER INITIALIZATION -----------------------------------------------------
 
 // Initialize OpenGL-specific code.
-void OpenGLPlugin::initOpenGL(GLuint /*shaderProgram*/) throw(InitException) { }
+void OpenGLPlugin::initOpenGL(GLuint /*shaderProgram*/) { }
 
 
 //--- ACCESSORS ----------------------------------------------------------------
 
 // Returns a reference screen object, cast into the correct class.
-const OpenGLScreen &OpenGLPlugin::openGLScreen() const throw() {
+const OpenGLScreen &OpenGLPlugin::openGLScreen() const {
     static const OpenGLScreen &s = dynamic_cast<const OpenGLScreen&>(BasePlugin::screen());
     return s;
 }
@@ -58,39 +58,39 @@ const OpenGLScreen &OpenGLPlugin::openGLScreen() const throw() {
 //--- PLUGIN ACTIONS -----------------------------------------------------------
 
 // Pre background rendering actions.
-void OpenGLPlugin::preBackgroundRenderActions() throw() { }
+void OpenGLPlugin::preBackgroundRenderActions() { }
 
 // Post background rendering actions.
-void OpenGLPlugin::postBackgroundRenderActions() throw() { }
+void OpenGLPlugin::postBackgroundRenderActions() { }
 
 // Pre window rendering actions.
-void OpenGLPlugin::preReconfigureRectRenderActions(XRectangle /*reconfigureRect*/) throw() { }
+void OpenGLPlugin::preReconfigureRectRenderActions(XRectangle /*reconfigureRect*/) { }
 
 // Post window rendering actions.
-void OpenGLPlugin::postReconfigureRectRenderActions(XRectangle /*reconfigureRect*/) throw() { }
+void OpenGLPlugin::postReconfigureRectRenderActions(XRectangle /*reconfigureRect*/) { }
 
 // Pre window rendering actions.
-void OpenGLPlugin::preWindowRenderActions(const OpenGLWindow &/*window*/) throw() { }
+void OpenGLPlugin::preWindowRenderActions(const OpenGLWindow &/*window*/) { }
 
 // Post window rendering actions.
-void OpenGLPlugin::postWindowRenderActions(const OpenGLWindow &/*window*/) throw() { }
+void OpenGLPlugin::postWindowRenderActions(const OpenGLWindow &/*window*/) { }
 
 
 // Called before the extra rendering jobs are executed.
-void OpenGLPlugin::preExtraRenderingActions() throw() { }
+void OpenGLPlugin::preExtraRenderingActions() { }
 
 // Returns the number of extra rendering jobs the plugin will do.
-int OpenGLPlugin::extraRenderingJobCount() throw() {
+int OpenGLPlugin::extraRenderingJobCount() {
     return 0;
 }
 
 // Initialize the specified extra rendering job.
 void OpenGLPlugin::extraRenderingJobInit(int /*job*/, GLuint &/*primPosBuffer_return*/,
         GLuint &/*mainTexCoordBuffer_return*/, GLuint &/*mainTexture_return*/, GLuint &/*shapeTexCoordBuffer_return*/,
-        GLuint &/*shapeTexture_return*/, GLfloat &/*alpha_return*/) throw() { }
+        GLuint &/*shapeTexture_return*/, GLfloat &/*alpha_return*/) { }
 
 // Clean up after an extra rendering job.
-void OpenGLPlugin::extraRenderingJobCleanup(int /*job*/) throw() { }
+void OpenGLPlugin::extraRenderingJobCleanup(int /*job*/) { }
 
 // Called after the extra rendering jobs are executed.
-void OpenGLPlugin::postExtraRenderingActions() throw() { }
+void OpenGLPlugin::postExtraRenderingActions() { }

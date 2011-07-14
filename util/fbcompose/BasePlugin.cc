@@ -32,47 +32,47 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-BasePlugin::BasePlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &/*args*/) throw(InitException) :
+BasePlugin::BasePlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &/*args*/) :
     m_screen(screen) {
 
     m_display = (Display*)(screen.display());
 }
 
 // Destructor.
-BasePlugin::~BasePlugin() throw() { }
+BasePlugin::~BasePlugin() { }
 
 
 //--- WINDOW EVENT CALLBACKS ---------------------------------------------------
 
 // Called, whenever a new window is created.
-void BasePlugin::windowCreated(const BaseCompWindow &/*window*/) throw() { }
+void BasePlugin::windowCreated(const BaseCompWindow &/*window*/) { }
 
 // Called, whenever a window is damaged.
-void BasePlugin::windowDamaged(const BaseCompWindow &/*window*/) throw() { }
+void BasePlugin::windowDamaged(const BaseCompWindow &/*window*/) { }
 
 // Called, whenever a window is destroyed.
-void BasePlugin::windowDestroyed(const BaseCompWindow &/*window*/) throw() { }
+void BasePlugin::windowDestroyed(const BaseCompWindow &/*window*/) { }
 
 // Called, whenever a window is mapped.
-void BasePlugin::windowMapped(const BaseCompWindow &/*window*/) throw() { }
+void BasePlugin::windowMapped(const BaseCompWindow &/*window*/) { }
 
 // Called, whenever window's property is changed.
-void BasePlugin::windowPropertyChanged(const BaseCompWindow &/*window*/, Atom /*property*/, int /*state*/) throw() { }
+void BasePlugin::windowPropertyChanged(const BaseCompWindow &/*window*/, Atom /*property*/, int /*state*/) { }
 
 // Called, whenever a window is reconfigured.
-void BasePlugin::windowReconfigured(const BaseCompWindow &/*window*/) throw() { }
+void BasePlugin::windowReconfigured(const BaseCompWindow &/*window*/) { }
 
 // Called, whenever window's shape changes.
-void BasePlugin::windowShapeChanged(const BaseCompWindow &/*window*/) throw() { }
+void BasePlugin::windowShapeChanged(const BaseCompWindow &/*window*/) { }
 
 // Called, whenever a window is unmapped.
-void BasePlugin::windowUnmapped(const BaseCompWindow &/*window*/) throw() { }
+void BasePlugin::windowUnmapped(const BaseCompWindow &/*window*/) { }
 
 
 //--- SCREEN CHANGES -----------------------------------------------------------
 
 // Notifies the screen of a background change.
-void BasePlugin::setRootPixmapChanged() throw() { }
+void BasePlugin::setRootPixmapChanged() { }
 
 // Notifies the screen of a root window change.
-void BasePlugin::setRootWindowSizeChanged() throw() { }
+void BasePlugin::setRootWindowSizeChanged() { }

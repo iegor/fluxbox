@@ -55,60 +55,60 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        CompositorConfig(std::vector<FbTk::FbString> args) throw(InitException);
+        CompositorConfig(std::vector<FbTk::FbString> args);
 
         /** Copy constructor. */
-        CompositorConfig(const CompositorConfig &other) throw();
+        CompositorConfig(const CompositorConfig &other);
 
         /** Assignment operator. */
-        CompositorConfig &operator=(const CompositorConfig &other) throw();
+        CompositorConfig &operator=(const CompositorConfig &other);
 
         /** Destructor. */
-        ~CompositorConfig() throw();
+        ~CompositorConfig();
 
 
         //--- ACCESSORS --------------------------------------------------------
 
         /** \returns the display name. */
-        const FbTk::FbString &displayName() const throw();
+        const FbTk::FbString &displayName() const;
 
         /** \returns the refresh rate. */
-        int framesPerSecond() const throw();
+        int framesPerSecond() const;
 
         /** \returns plugins and their arguments. */
-        const std::vector< std::pair< FbTk::FbString, std::vector<FbTk::FbString> > > &plugins() const throw();
+        const std::vector< std::pair< FbTk::FbString, std::vector<FbTk::FbString> > > &plugins() const;
 
         /** \returns the selected rendering mode. */
-        RenderingMode renderingMode() const throw();
+        RenderingMode renderingMode() const;
 
         /** \returns whether the X errors should be printed. */
-        bool showXErrors() const throw();
+        bool showXErrors() const;
 
 #ifdef USE_XRENDER_COMPOSITING
         /** \returns the XRender picture filter. */
-        const char *xRenderPictFilter() const throw();
+        const char *xRenderPictFilter() const;
 #endif  // USE_XRENDER_COMPOSITING
 
 
         //--- CONVENIENCE FUNCTIONS --------------------------------------------
 
         /** Output full help message. */
-        static void printFullHelp(std::ostream &os) throw();
+        static void printFullHelp(std::ostream &os);
 
         /** Output short help message. */
-        static void printShortHelp(std::ostream &os) throw();
+        static void printShortHelp(std::ostream &os);
 
         /** Output version information. */
-        static void printVersion(std::ostream &os) throw();
+        static void printVersion(std::ostream &os);
 
     private:
         //--- INTERNAL FUNCTIONS -----------------------------------------------
 
         /** Make the first scan of the arguments for special options. */
-        void preScanArguments() throw(ConfigException);
+        void preScanArguments();
 
         /** Properly scan the command line arguments. */
-        void processArguments() throw(ConfigException);
+        void processArguments();
 
 
         /** Fetch the value of the next command line argument, advance iterator. */
@@ -147,34 +147,34 @@ namespace FbCompositor {
     //--- INLINE FUNCTIONS -----------------------------------------------------
 
     // Returns the display name.
-    inline const FbTk::FbString &CompositorConfig::displayName() const throw() {
+    inline const FbTk::FbString &CompositorConfig::displayName() const {
         return m_displayName;
     }
 
     // Returns the refresh rate.
-    inline int CompositorConfig::framesPerSecond() const throw() {
+    inline int CompositorConfig::framesPerSecond() const {
         return m_framesPerSecond;
     }
 
     // Returns plugins and their arguments.
-    inline const std::vector< std::pair< FbTk::FbString, std::vector<FbTk::FbString> > > &CompositorConfig::plugins() const throw() {
+    inline const std::vector< std::pair< FbTk::FbString, std::vector<FbTk::FbString> > > &CompositorConfig::plugins() const {
         return m_plugins;
     }
 
     // Returns the rendering mode.
-    inline RenderingMode CompositorConfig::renderingMode() const throw() {
+    inline RenderingMode CompositorConfig::renderingMode() const {
         return m_renderingMode;
     }
 
     // Returns whether the X errors should be printed.
-    inline bool CompositorConfig::showXErrors() const throw() {
+    inline bool CompositorConfig::showXErrors() const {
         return m_showXErrors;
     }
 
 
 #ifdef USE_XRENDER_COMPOSITING
     // Returns the XRender picture filter.
-    inline const char *CompositorConfig::xRenderPictFilter() const throw() {
+    inline const char *CompositorConfig::xRenderPictFilter() const {
         return m_xRenderPictFilter.c_str();
     }
 #endif  // USE_XRENDER_COMPOSITING

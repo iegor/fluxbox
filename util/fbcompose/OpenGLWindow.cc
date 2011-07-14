@@ -56,7 +56,7 @@ namespace {
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-OpenGLWindow::OpenGLWindow(const BaseScreen &screen, Window windowXID, GLXFBConfig fbConfig) throw(InitException) :
+OpenGLWindow::OpenGLWindow(const BaseScreen &screen, Window windowXID, GLXFBConfig fbConfig) :
     BaseCompWindow(screen, windowXID) {
 
     m_glxContents = None;
@@ -91,7 +91,7 @@ OpenGLWindow::OpenGLWindow(const BaseScreen &screen, Window windowXID, GLXFBConf
 }
 
 // Destructor.
-OpenGLWindow::~OpenGLWindow() throw() {
+OpenGLWindow::~OpenGLWindow() {
     if (m_shapePixmap) {
         XFreePixmap(display(), m_shapePixmap);
     }
@@ -107,7 +107,7 @@ OpenGLWindow::~OpenGLWindow() throw() {
 //--- WINDOW UPDATE FUNCTIONS ------------------------------------------
 
 // Updates the window's contents.
-void OpenGLWindow::updateContents() throw() {
+void OpenGLWindow::updateContents() {
     if (isWindowBad()) {
         return;
     }
@@ -126,13 +126,13 @@ void OpenGLWindow::updateContents() throw() {
 }
 
 // Updates window's geometry.
-void OpenGLWindow::updateGeometry(const XConfigureEvent &event) throw() {
+void OpenGLWindow::updateGeometry(const XConfigureEvent &event) {
     BaseCompWindow::updateGeometry(event);
     updateWindowPosArray();
 }
 
 // Updates the window's shape.
-void OpenGLWindow::updateShape() throw() {
+void OpenGLWindow::updateShape() {
     BaseCompWindow::updateShape();
 
     if (m_shapePixmap) {
@@ -163,7 +163,7 @@ void OpenGLWindow::updateShape() throw() {
 }
 
 // Updates the window position vertex array.
-void OpenGLWindow::updateWindowPosArray() throw() {
+void OpenGLWindow::updateWindowPosArray() {
     GLfloat xLow, xHigh, yLow, yHigh;
     toOpenGLCoordinates(screen().rootWindow().width(), screen().rootWindow().height(),
                         x(), y(), realWidth(), realHeight(), &xLow, &xHigh, &yLow, &yHigh);

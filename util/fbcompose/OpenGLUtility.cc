@@ -34,7 +34,7 @@ using namespace FbCompositor;
 /** Converts an X pixmap to an OpenGL texture. */
 void FbCompositor::pixmapToTexture(Display *display, Pixmap pixmap, GLuint texture, GLXFBConfig fbConfig,
                                    GLXPixmap glxPixmap, unsigned int width, unsigned int height,
-                                   const int *ATTRS) throw() {
+                                   const int *ATTRS) {
 #ifdef GLXEW_EXT_texture_from_pixmap
     glBindTexture(GL_TEXTURE_2D, texture);
 
@@ -77,7 +77,7 @@ void FbCompositor::pixmapToTexture(Display *display, Pixmap pixmap, GLuint textu
 // Converts screen coordinates to OpenGL coordinates.
 void FbCompositor::toOpenGLCoordinates(int screenWidth, int screenHeight, int x, int y, int width, int height,
                                        GLfloat *xLow_gl, GLfloat *xHigh_gl, GLfloat *yLow_gl,
-                                       GLfloat *yHigh_gl) throw() {
+                                       GLfloat *yHigh_gl) {
     *xLow_gl  = ((x * 2.0) / screenWidth) - 1.0;
     *xHigh_gl = (((x + width) * 2.0) / screenWidth) - 1.0;
     *yLow_gl  = 1.0 - ((y * 2.0) / screenHeight);

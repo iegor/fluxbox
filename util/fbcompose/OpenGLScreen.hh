@@ -51,123 +51,123 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        OpenGLScreen(int screenNumber, const CompositorConfig &config) throw(InitException);
+        OpenGLScreen(int screenNumber, const CompositorConfig &config);
 
         /** Destructor. */
-        ~OpenGLScreen() throw();
+        ~OpenGLScreen();
 
 
         //--- DEFAULT OPENGL OBJECT ACCESSORS ----------------------------------
 
         /** \returns the default black texture. */
-        GLuint blackTexture() const throw();
+        GLuint blackTexture() const;
 
         /** \returns the default element buffer (rectangle, corners in order of NW, NE, SW, SE). */
-        GLuint defaultElementBuffer() const throw();
+        GLuint defaultElementBuffer() const;
 
         /** \returns the default primitive position buffer (four corners of the root window). */
-        GLuint defaultPrimPosBuffer() const throw();
+        GLuint defaultPrimPosBuffer() const;
 
         /** \returns the default texture position buffer (the whole texture). */
-        GLuint defaultTexCoordBuffer() const throw();
+        GLuint defaultTexCoordBuffer() const;
 
         /** \returns the default white texture. */
-        GLuint whiteTexture() const throw();
+        GLuint whiteTexture() const;
 
 
         //--- SCREEN MANIPULATION ----------------------------------------------
 
         /** Notifies the screen of the background change. */
-        void setRootPixmapChanged() throw();
+        void setRootPixmapChanged();
 
         /** Notifies the screen of a root window change. */
-        void setRootWindowSizeChanged() throw();
+        void setRootWindowSizeChanged();
 
 
         //--- SCREEN RENDERING -------------------------------------------------
 
         /** Renders the screen's contents. */
-        void renderScreen() throw();
+        void renderScreen();
 
 
     protected:
         //--- WINDOW MANIPULATION ----------------------------------------------
 
         /** Creates a window object from its XID. */
-        BaseCompWindow *createWindowObject(Window window) throw(InitException);
+        BaseCompWindow *createWindowObject(Window window);
 
 
     private:
         //--- INITIALIZATION FUNCTIONS -----------------------------------------
 
         /** Creates the background texture. */
-        void createBackgroundTexture() throw(InitException);
+        void createBackgroundTexture();
 
         /** Creates default texture rendering buffers. */
-        void createDefaultElements() throw(InitException);
+        void createDefaultElements();
 
         /** Creates all elements, needed to draw the reconfigure rectangle. */
-        void createReconfigureRectElements() throw(InitException);
+        void createReconfigureRectElements();
 
         /** Early initialization of GLX function pointers. */
-        void earlyInitGLXPointers() throw(InitException);
+        void earlyInitGLXPointers();
 
         /** Finishes the initialization of the rendering context and surface. */
-        void finishRenderingInit() throw(InitException);
+        void finishRenderingInit();
 
         /** Initializes GLEW. */
-        void initGlew() throw(InitException);
+        void initGlew();
 
         /** Finish plugin initialization. */
-        void initPlugins() throw(InitException);
+        void initPlugins();
 
         /** Initializes the rendering context. */
-        void initRenderingContext() throw(InitException);
+        void initRenderingContext();
 
         /** Initializes the rendering surface. */
-        void initRenderingSurface() throw(InitException);
+        void initRenderingSurface();
 
         /** Initializes shaders. */
-        void initShaders() throw(InitException);
+        void initShaders();
 
 
         //--- OTHER FUNCTIONS --------------------------------------------------
 
         /** Renews the background texture. */
-        void updateBackgroundTexture() throw();
+        void updateBackgroundTexture();
 
         /** React to the geometry change of the root window. */
-        void updateOnRootWindowResize() throw();
+        void updateOnRootWindowResize();
 
 
         //--- CONVENIENCE OPENGL WRAPPERS --------------------------------------
 
         /** Creates a shader. */
-        GLuint createShader(GLenum shaderType, GLint sourceLength, const GLchar *source) throw(InitException);
+        GLuint createShader(GLenum shaderType, GLint sourceLength, const GLchar *source);
 
         /** Creates a shader program. */
-        GLuint createShaderProgram(GLuint vertexShader, GLuint geometryShader, GLuint fragmentShader) throw(InitException);
+        GLuint createShaderProgram(GLuint vertexShader, GLuint geometryShader, GLuint fragmentShader);
 
 
         //--- RENDERING FUNCTIONS ----------------------------------------------
 
         /** Render the desktop background. */
-        void renderBackground() throw();
+        void renderBackground();
 
         /** Perform extra rendering jobs from plugins. */
-        void renderExtraJobs() throw();
+        void renderExtraJobs();
 
         /** Render the reconfigure rectangle. */
-        void renderReconfigureRect() throw();
+        void renderReconfigureRect();
 
         /** Render a particular window onto the screen. */
-        void renderWindow(OpenGLWindow &window) throw();
+        void renderWindow(OpenGLWindow &window);
 
 
         /** Render something onto the screen. */
         void render(GLenum renderingMode, GLuint primPosBuffer, GLuint mainTexPosBuffer, GLuint mainTexture,
                     GLuint shapeTexPosBuffer, GLuint shapeTexture, GLuint elementBuffer, GLuint elementCount,
-                    GLfloat alpha) throw();
+                    GLfloat alpha);
 
 
         //--- MAIN RENDERING-RELATED VARIABLES ---------------------------------
@@ -267,27 +267,27 @@ namespace FbCompositor {
     //--- INLINE FUNCTIONS -----------------------------------------------------
 
     // Returns the default black texture.
-    inline GLuint OpenGLScreen::blackTexture() const throw() {
+    inline GLuint OpenGLScreen::blackTexture() const {
         return m_blackTexture;
     }
 
     // Returns the default element buffer.
-    inline GLuint OpenGLScreen::defaultElementBuffer() const throw() {
+    inline GLuint OpenGLScreen::defaultElementBuffer() const {
         return m_defaultElementBuffer;
     }
 
     // Returns the default primitive position buffer.
-    inline GLuint OpenGLScreen::defaultPrimPosBuffer() const throw() {
+    inline GLuint OpenGLScreen::defaultPrimPosBuffer() const {
         return m_defaultPrimPosBuffer;
     }
 
     // Returns the default texture position buffer.
-    inline GLuint OpenGLScreen::defaultTexCoordBuffer() const throw() {
+    inline GLuint OpenGLScreen::defaultTexCoordBuffer() const {
         return m_defaultTexCoordBuffer;
     }
 
     // Returns the default white texture.
-    inline GLuint OpenGLScreen::whiteTexture() const throw() {
+    inline GLuint OpenGLScreen::whiteTexture() const {
         return m_whiteTexture;
     }
 }

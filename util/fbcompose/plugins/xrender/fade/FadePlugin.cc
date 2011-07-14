@@ -37,20 +37,20 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-FadePlugin::FadePlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args) throw() :
+FadePlugin::FadePlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args) :
     XRenderPlugin(screen, args) {
 
     m_maskPictFormat = XRenderFindStandardFormat(display(), PictStandardARGB32);
 }
 
 // Destructor.
-FadePlugin::~FadePlugin() throw() { }
+FadePlugin::~FadePlugin() { }
 
 
 //--- WINDOW EVENT CALLBACKS ---------------------------------------------------
 
 // Called, whenever a window is mapped.
-void FadePlugin::windowMapped(const BaseCompWindow &window) throw() {
+void FadePlugin::windowMapped(const BaseCompWindow &window) {
     PosFadeData fade;
 
     // Is the window being faded out?
@@ -81,7 +81,7 @@ void FadePlugin::windowMapped(const BaseCompWindow &window) throw() {
 }
 
 // Called, whenever a window is unmapped.
-void FadePlugin::windowUnmapped(const BaseCompWindow &window) throw() {
+void FadePlugin::windowUnmapped(const BaseCompWindow &window) {
     const XRenderWindow &xrWindow = dynamic_cast<const XRenderWindow&>(window);
     NegFadeData fade;
 
@@ -117,7 +117,7 @@ void FadePlugin::windowUnmapped(const BaseCompWindow &window) throw() {
 
 // Window rendering job initialization.
 void FadePlugin::windowRenderingJobInit(const XRenderWindow &window, int &/*op_return*/,
-                                        Picture &maskPic_return) throw() {
+                                        Picture &maskPic_return) {
     std::map<Window, PosFadeData>::iterator it = m_positiveFades.find(window.window());
     if (it != m_positiveFades.end()) {
         PosFadeData &curFade = it->second;
@@ -144,7 +144,7 @@ void FadePlugin::windowRenderingJobInit(const XRenderWindow &window, int &/*op_r
 }
 
 // Window rendering job cleanup.
-void FadePlugin::windowRenderingJobCleanup(const XRenderWindow &window) throw() {
+void FadePlugin::windowRenderingJobCleanup(const XRenderWindow &window) {
     std::map<Window, PosFadeData>::iterator it = m_positiveFades.find(window.window());
     if (it != m_positiveFades.end()) {
         if (it->second.fadeAlpha >= 255) {
@@ -161,7 +161,7 @@ void FadePlugin::windowRenderingJobCleanup(const XRenderWindow &window) throw() 
 
 
 // Returns the number of extra rendering jobs the plugin will do.
-int FadePlugin::extraRenderingJobCount() throw() {
+int FadePlugin::extraRenderingJobCount() {
     return m_negativeFades.size();
 }
 
@@ -169,7 +169,7 @@ int FadePlugin::extraRenderingJobCount() throw() {
 void FadePlugin::extraRenderingJobInit(int job, int &op_return, Picture &srcPic_return,
         int &srcX_return, int &srcY_return, Picture &maskPic_return, int &maskX_return,
         int &maskY_return, int &destX_return, int &destY_return, int &width_return,
-        int &height_return) throw() {
+        int &height_return) {
 
     NegFadeData &curFade = m_negativeFades[job];
 
@@ -207,7 +207,7 @@ void FadePlugin::extraRenderingJobInit(int job, int &op_return, Picture &srcPic_
 }
 
 // Called after the extra rendering jobs are executed.
-void FadePlugin::postExtraRenderingActions() throw() {
+void FadePlugin::postExtraRenderingActions() {
     std::vector<NegFadeData>::iterator it = m_negativeFades.begin();
     while (it != m_negativeFades.end()) {
         if (it->fadeAlpha <= 0) {
@@ -229,7 +229,7 @@ void FadePlugin::postExtraRenderingActions() throw() {
 
 // Returns the faded mask picture for the given window fade.
 void FadePlugin::createFadedMask(int alpha, XRenderPictureWrapperPtr mask, XRectangle dimensions,
-                                 Pixmap &fadePixmap_return, Picture &fadePicture_return) throw() {
+                                 Pixmap &fadePixmap_return, Picture &fadePicture_return) {
     if (fadePixmap_return) {
         XFreePixmap(display(), fadePixmap_return);
         fadePixmap_return = None;

@@ -59,24 +59,24 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        OpenGLBufferWrapper() throw();
+        OpenGLBufferWrapper();
 
         /** Destructor. */
-        ~OpenGLBufferWrapper() throw();
+        ~OpenGLBufferWrapper();
 
         //--- ACCESSORS --------------------------------------------------------
 
         /** \returns the buffer held. */
-        GLuint unwrap() const throw();
+        GLuint unwrap() const;
 
     private:
         //--- CONSTRUCTORS -----------------------------------------------------
 
         /** Constructor. */
-        OpenGLBufferWrapper(const OpenGLBufferWrapper &other) throw();
+        OpenGLBufferWrapper(const OpenGLBufferWrapper &other);
 
         /** Assignment operator. */
-        OpenGLBufferWrapper &operator=(const OpenGLBufferWrapper &other) throw();
+        OpenGLBufferWrapper &operator=(const OpenGLBufferWrapper &other);
 
         //--- INTERNALS --------------------------------------------------------
 
@@ -85,7 +85,7 @@ namespace FbCompositor {
     };
 
     // Returns the buffer held.
-    inline GLuint OpenGLBufferWrapper::unwrap() const throw() {
+    inline GLuint OpenGLBufferWrapper::unwrap() const {
         return m_buffer;
     }
 
@@ -106,24 +106,24 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        OpenGLTextureWrapper() throw();
+        OpenGLTextureWrapper();
 
         /** Destructor. */
-        ~OpenGLTextureWrapper() throw();
+        ~OpenGLTextureWrapper();
 
         //--- ACCESSORS --------------------------------------------------------
 
         /** \returns the texture held. */
-        GLuint unwrap() const throw();
+        GLuint unwrap() const;
 
     private:
         //--- CONSTRUCTORS -----------------------------------------------------
 
         /** Constructor. */
-        OpenGLTextureWrapper(const OpenGLTextureWrapper &other) throw();
+        OpenGLTextureWrapper(const OpenGLTextureWrapper &other);
 
         /** Assignment operator. */
-        OpenGLTextureWrapper &operator=(const OpenGLTextureWrapper &other) throw();
+        OpenGLTextureWrapper &operator=(const OpenGLTextureWrapper &other);
 
         //--- INTERNALS --------------------------------------------------------
 
@@ -132,7 +132,7 @@ namespace FbCompositor {
     };
 
     // Returns the texture held.
-    inline GLuint OpenGLTextureWrapper::unwrap() const throw() {
+    inline GLuint OpenGLTextureWrapper::unwrap() const {
         return m_texture;
     }
 
@@ -157,29 +157,29 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        XRenderPictureWrapper(Display *display, const XRenderPictFormat *pictFormat, const char *pictFilter) throw();
+        XRenderPictureWrapper(Display *display, const XRenderPictFormat *pictFormat, const char *pictFilter);
 
         /** Destructor. */
-        ~XRenderPictureWrapper() throw();
+        ~XRenderPictureWrapper();
 
         //--- ACCESSORS --------------------------------------------------------
 
         /** \returns the picture held. */
-        Picture unwrap() const throw();
+        Picture unwrap() const;
 
         //--- MUTATORS ---------------------------------------------------------
 
         /** (Re)associate the picture with the given pixmap. */
-        void setPixmap(Pixmap pixmap, XRenderPictureAttributes pa = XRenderPictureAttributes(), long paMask = 0) throw();
+        void setPixmap(Pixmap pixmap, XRenderPictureAttributes pa = XRenderPictureAttributes(), long paMask = 0);
 
     private:
         //--- CONSTRUCTORS -----------------------------------------------------
 
         /** Constructor. */
-        XRenderPictureWrapper(const XRenderPictureWrapper &other) throw();
+        XRenderPictureWrapper(const XRenderPictureWrapper &other);
 
         /** Assignment operator. */
-        XRenderPictureWrapper &operator=(const XRenderPictureWrapper &other) throw();
+        XRenderPictureWrapper &operator=(const XRenderPictureWrapper &other);
 
         //--- INTERNALS --------------------------------------------------------
 
@@ -197,7 +197,7 @@ namespace FbCompositor {
     };
 
     // Returns the picture held.
-    inline Picture XRenderPictureWrapper::unwrap() const throw() {
+    inline Picture XRenderPictureWrapper::unwrap() const {
         return m_picture;
     }
 

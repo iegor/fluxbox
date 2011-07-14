@@ -61,62 +61,62 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        FadePlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args) throw();
+        FadePlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args);
 
         /** Destructor. */
-        ~FadePlugin() throw();
+        ~FadePlugin();
 
 
         //--- OTHER INITIALIZATION ---------------------------------------------
 
         /** Initialize OpenGL-specific code. */
-        void initOpenGL(GLuint shaderProgram) throw();
+        void initOpenGL(GLuint shaderProgram);
 
 
         //--- ACCESSORS --------------------------------------------------------
 
         /** \returns the name of the plugin. */
-        const char *pluginName() const throw();
+        const char *pluginName() const;
 
         
         /** \returns the additional source code for the fragment shader. */
-        const char *fragmentShader() const throw();
+        const char *fragmentShader() const;
 
         /** \returns the additional source code for the vertex shader. */
-        const char *vertexShader() const throw();
+        const char *vertexShader() const;
 
 
         //--- WINDOW EVENT CALLBACKS -------------------------------------------
 
         /** Called, whenever a window is mapped. */
-        void windowMapped(const BaseCompWindow &window) throw();
+        void windowMapped(const BaseCompWindow &window);
 
         /** Called, whenever a window is unmapped. */
-        void windowUnmapped(const BaseCompWindow &window) throw();
+        void windowUnmapped(const BaseCompWindow &window);
 
 
         //--- RENDERING ACTIONS ------------------------------------------------
 
         /** Pre background rendering actions. */
-        void preBackgroundRenderActions() throw();
+        void preBackgroundRenderActions();
 
         /** Pre window rendering actions. */
-        void preReconfigureRectRenderActions(XRectangle reconfigureRect) throw();
+        void preReconfigureRectRenderActions(XRectangle reconfigureRect);
 
         /** Pre window rendering actions. */
-        void preWindowRenderActions(const OpenGLWindow &window) throw();
+        void preWindowRenderActions(const OpenGLWindow &window);
 
 
         /** \returns the number of extra rendering jobs the plugin will do. */
-        int extraRenderingJobCount() throw();
+        int extraRenderingJobCount();
 
         /** Initialize the specified extra rendering job. */
         void extraRenderingJobInit(int job, GLuint &primPosBuffer_return, GLuint &mainTexCoordBuffer_return,
                                    GLuint &mainTexture_return, GLuint &shapeTexCoordBuffer_return,
-                                   GLuint &shapeTexture_return, GLfloat &alpha_return) throw();
+                                   GLuint &shapeTexture_return, GLfloat &alpha_return);
 
         /** Called after the extra rendering jobs are executed. */
-        void postExtraRenderingActions() throw();
+        void postExtraRenderingActions();
 
 
     private :
@@ -158,7 +158,7 @@ namespace FbCompositor {
     //--- INLINE FUNCTIONS -----------------------------------------------------
 
     // Returns the name of the plugin.
-    inline const char *FadePlugin::pluginName() const throw() {
+    inline const char *FadePlugin::pluginName() const {
         return "fade";
     }
 }

@@ -31,12 +31,12 @@ using namespace FbCompositor;
 //--- OPENGL BUFFER WRAPPER ----------------------------------------------------
 
 // Constructor.
-OpenGLBufferWrapper::OpenGLBufferWrapper() throw() {
+OpenGLBufferWrapper::OpenGLBufferWrapper() {
     glGenBuffers(1, &m_buffer);
 }
 
 // Destructor.
-OpenGLBufferWrapper::~OpenGLBufferWrapper() throw() {
+OpenGLBufferWrapper::~OpenGLBufferWrapper() {
     glDeleteBuffers(1, &m_buffer);
 }
 
@@ -44,12 +44,12 @@ OpenGLBufferWrapper::~OpenGLBufferWrapper() throw() {
 //--- OPENGL TEXTURE WRAPPER ---------------------------------------------------
 
 // Constructor.
-OpenGLTextureWrapper::OpenGLTextureWrapper() throw() {
+OpenGLTextureWrapper::OpenGLTextureWrapper() {
     glGenTextures(1, &m_texture);
 }
 
 // Destructor.
-OpenGLTextureWrapper::~OpenGLTextureWrapper() throw() {
+OpenGLTextureWrapper::~OpenGLTextureWrapper() {
     glDeleteTextures(1, &m_texture);
 }
 
@@ -62,7 +62,7 @@ OpenGLTextureWrapper::~OpenGLTextureWrapper() throw() {
 
 // Constructor.
 XRenderPictureWrapper::XRenderPictureWrapper(Display *display, const XRenderPictFormat *pictFormat,
-                                             const char *pictFilter) throw() :
+                                             const char *pictFilter) :
     m_display(display),
     m_picture(None),
     m_pictFilter(pictFilter),
@@ -70,14 +70,14 @@ XRenderPictureWrapper::XRenderPictureWrapper(Display *display, const XRenderPict
 }
 
 // Destructor.
-XRenderPictureWrapper::~XRenderPictureWrapper() throw() {
+XRenderPictureWrapper::~XRenderPictureWrapper() {
     if (m_picture) {
         XRenderFreePicture(m_display, m_picture);
     }
 }
 
 // (Re)associate the picture with the given pixmap.
-void XRenderPictureWrapper::setPixmap(Pixmap pixmap, XRenderPictureAttributes pa, long paMask) throw() {
+void XRenderPictureWrapper::setPixmap(Pixmap pixmap, XRenderPictureAttributes pa, long paMask) {
     if (m_picture) {
         XRenderFreePicture(m_display, m_picture);
         m_picture = None;

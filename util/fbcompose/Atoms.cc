@@ -35,44 +35,44 @@ using namespace FbCompositor;
 //--- MAIN METHODS -------------------------------------------------------------
 
 // Returns the _NET_ACTIVE_WINDOW atom.
-Atom Atoms::activeWindowAtom() throw() {
+Atom Atoms::activeWindowAtom() {
     static Atom atom = XInternAtom(FbTk::App::instance()->display(), "_NET_ACTIVE_WINDOW", False);
     return atom;
 }
 
 // Returns the _NET_WM_CM_Sxx atoms.
-Atom Atoms::compositingSelectionAtom(int screenNumber) throw() {
+Atom Atoms::compositingSelectionAtom(int screenNumber) {
     std::stringstream ss;
     ss << "_NET_WM_CM_S" << screenNumber;
     return XInternAtom(FbTk::App::instance()->display(), ss.str().c_str(), False);
 }
 
 // Returns the _NET_WM_WINDOW_OPACITY atom.
-Atom Atoms::opacityAtom() throw() {
+Atom Atoms::opacityAtom() {
     static Atom atom = XInternAtom(FbTk::App::instance()->display(), "_NET_WM_WINDOW_OPACITY", False);
     return atom;
 }
 
 // Returns the _FLUXBOX_RECONFIGURE_RECT atom.
-Atom Atoms::reconfigureRectAtom() throw() {
+Atom Atoms::reconfigureRectAtom() {
     static Atom atom = XInternAtom(FbTk::App::instance()->display(), "_FLUXBOX_RECONFIGURE_RECT", False);
     return atom;
 }
 
 // Returns the _XROOTPMAP_ID atom.
-Atom Atoms::rootPixmapAtom() throw() {
+Atom Atoms::rootPixmapAtom() {
     static Atom atom = XInternAtom(FbTk::App::instance()->display(), "_XROOTPMAP_ID", False);
     return atom;
 }
 
 // Returns the _WIN_WORKSPACE atom.
-Atom Atoms::workspaceAtom() throw() {
+Atom Atoms::workspaceAtom() {
     static Atom atom = XInternAtom(FbTk::App::instance()->display(), "_WIN_WORKSPACE", False);
     return atom;
 }
 
 // Returns the _WIN_WORKSPACE_COUNT atom.
-Atom Atoms::workspaceCountAtom() throw() {
+Atom Atoms::workspaceCountAtom() {
     static Atom atom = XInternAtom(FbTk::App::instance()->display(), "_WIN_WORKSPACE_COUNT", False);
     return atom;
 }

@@ -85,31 +85,31 @@ namespace {
 //--- ACCESSORS ----------------------------------------------------------------
 
 // Returns the head of the fragment shader source code.
-const GLchar *OpenGLShaders::fragmentShaderHead() throw() {
+const GLchar *OpenGLShaders::fragmentShaderHead() {
     return FRAGMENT_SHADER_HEAD;
 }
 
 // Returns the middle of the fragment shader source code.
-const GLchar *OpenGLShaders::fragmentShaderMiddle() throw() {
+const GLchar *OpenGLShaders::fragmentShaderMiddle() {
     return FRAGMENT_SHADER_MIDDLE;
 }
 
 // Returns the tail of the fragment shader source code.
-const GLchar *OpenGLShaders::fragmentShaderTail() throw() {
+const GLchar *OpenGLShaders::fragmentShaderTail() {
     return FRAGMENT_SHADER_TAIL;
 }
 
 // Returns the head of the vertex shader source code.
-const GLchar *OpenGLShaders::vertexShaderHead() throw() {
+const GLchar *OpenGLShaders::vertexShaderHead() {
     return VERTEX_SHADER_HEAD;
 }
 
 // Returns the middle of the vertex shader source code.
-const GLchar *OpenGLShaders::vertexShaderMiddle() throw() {
+const GLchar *OpenGLShaders::vertexShaderMiddle() {
     return VERTEX_SHADER_MIDDLE;
 }
 
 // Returns the tail of the vertex shader source code.
-const GLchar *OpenGLShaders::vertexShaderTail() throw() {
+const GLchar *OpenGLShaders::vertexShaderTail() {
     return VERTEX_SHADER_TAIL;
 }

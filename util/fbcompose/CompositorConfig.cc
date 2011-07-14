@@ -39,7 +39,7 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-CompositorConfig::CompositorConfig(std::vector<FbTk::FbString> args) throw(InitException) :
+CompositorConfig::CompositorConfig(std::vector<FbTk::FbString> args) :
     m_args(args),
 
 #ifdef USE_OPENGL_COMPOSITING
@@ -66,7 +66,7 @@ CompositorConfig::CompositorConfig(std::vector<FbTk::FbString> args) throw(InitE
 }
 
 // Copy constructor.
-CompositorConfig::CompositorConfig(const CompositorConfig &other) throw() :
+CompositorConfig::CompositorConfig(const CompositorConfig &other) :
     m_args(other.m_args),
     m_renderingMode(other.m_renderingMode),
 #ifdef USE_XRENDER_COMPOSITING
@@ -79,7 +79,7 @@ CompositorConfig::CompositorConfig(const CompositorConfig &other) throw() :
 }
 
 // Assignment operator.
-CompositorConfig &CompositorConfig::operator=(const CompositorConfig &other) throw() {
+CompositorConfig &CompositorConfig::operator=(const CompositorConfig &other) {
     if (this != &other) {
         m_args = other.m_args;
         m_renderingMode = other.m_renderingMode;
@@ -95,13 +95,13 @@ CompositorConfig &CompositorConfig::operator=(const CompositorConfig &other) thr
 }
 
 // Destructor.
-CompositorConfig::~CompositorConfig() throw() { }
+CompositorConfig::~CompositorConfig() { }
 
 
 //--- INTERNAL FUNCTIONS -------------------------------------------------------
 
 // Make the first scan of the arguments for special options.
-void CompositorConfig::preScanArguments() throw(ConfigException) {
+void CompositorConfig::preScanArguments() {
     std::vector<FbTk::FbString>::iterator it = m_args.begin();
 
     while (it != m_args.end()) {
@@ -117,7 +117,7 @@ void CompositorConfig::preScanArguments() throw(ConfigException) {
 }
 
 // Properly scan the command line arguments.
-void CompositorConfig::processArguments() throw(ConfigException) {
+void CompositorConfig::processArguments() {
     std::vector<FbTk::FbString>::iterator it = m_args.begin();
     std::stringstream ss;
 
@@ -212,7 +212,7 @@ FbTk::FbString CompositorConfig::getNextOption(std::vector<FbTk::FbString>::iter
 //--- CONVENIENCE FUNCTIONS ----------------------------------------------------
 
 // Output full help message.
-void CompositorConfig::printFullHelp(std::ostream &os) throw() {
+void CompositorConfig::printFullHelp(std::ostream &os) {
     static const char modes[] = 
 #ifdef USE_OPENGL_COMPOSITING
         "opengl, "
@@ -241,13 +241,13 @@ void CompositorConfig::printFullHelp(std::ostream &os) throw() {
 }
 
 // Output short help message.
-void CompositorConfig::printShortHelp(std::ostream &os) throw() {
+void CompositorConfig::printShortHelp(std::ostream &os) {
     os << "Usage: fbcompose [OPTION]..." << std::endl
        << "Try `fbcompose --help` for more information." << std::endl;
 }
 
 // Output version information.
-void CompositorConfig::printVersion(std::ostream &os) throw() {
+void CompositorConfig::printVersion(std::ostream &os) {
     os << "Fluxbox compositor %VERSION%" << std::endl       // TODO: Compositor version.
        << "Copyright (c) 2011 Gediminas Liktaras" << std::endl;
 }

@@ -39,10 +39,10 @@ namespace FbCompositor {
     class CompositorException : public std::exception {
     public:
         /** The constructor. */
-        CompositorException(FbTk::FbString errorMessage) throw() :
+        CompositorException(FbTk::FbString errorMessage) :
             m_errorMessage(errorMessage) {}
 
-        /** Destructor.  */
+        /** Destructor. */
         virtual ~CompositorException() throw() {}
 
         /** \returns The main error message.  */
@@ -63,11 +63,8 @@ namespace FbCompositor {
     class InitException : public CompositorException {
     public:
         /** Public constructor. */
-        InitException(FbTk::FbString errorMessage) throw() :
+        InitException(FbTk::FbString errorMessage) :
             CompositorException(errorMessage) {}
-
-        /** Destructor. */
-        virtual ~InitException() throw() {}
     };
 
     /**
@@ -77,11 +74,8 @@ namespace FbCompositor {
     class RuntimeException : public CompositorException {
     public:
         /** Public constructor. */
-        RuntimeException(FbTk::FbString errorMessage) throw() :
+        RuntimeException(FbTk::FbString errorMessage) :
             CompositorException(errorMessage) {}
-
-        /** Destructor. */
-        virtual ~RuntimeException() throw() {}
     };
 
 
@@ -94,11 +88,8 @@ namespace FbCompositor {
     class ConfigException : public InitException {
     public:
         /** Public constructor. */
-        ConfigException(FbTk::FbString errorMessage) throw() :
+        ConfigException(FbTk::FbString errorMessage) :
             InitException(errorMessage) {}
-
-        /** Destructor. */
-        virtual ~ConfigException() throw() {}
     };
 
     /**
@@ -108,11 +99,8 @@ namespace FbCompositor {
     class PluginException : public InitException {
     public:
         /** Public constructor. */
-        PluginException(FbTk::FbString errorMessage) throw() :
+        PluginException(FbTk::FbString errorMessage) :
             InitException(errorMessage) {}
-
-        /** Destructor. */
-        virtual ~PluginException() throw() {}
     };
 
 
@@ -123,11 +111,8 @@ namespace FbCompositor {
     class TimeException : public RuntimeException {
     public:
         /** Public constructor. */
-        TimeException(FbTk::FbString errorMessage) throw() :
+        TimeException(FbTk::FbString errorMessage) :
             RuntimeException(errorMessage) {}
-
-        /** Destructor. */
-        virtual ~TimeException() throw() {}
     };
 
     /**
@@ -137,11 +122,8 @@ namespace FbCompositor {
     class WindowException : public RuntimeException {
     public:
         /** Public constructor. */
-        WindowException(FbTk::FbString errorMessage) throw() :
+        WindowException(FbTk::FbString errorMessage) :
             RuntimeException(errorMessage) {}
-
-        /** Destructor. */
-        virtual ~WindowException() throw() {}
     };
 }
 

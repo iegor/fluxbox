@@ -37,25 +37,25 @@ namespace FbCompositor {
         //--- MAIN METHODS -----------------------------------------------------
 
         /** \returns the _NET_ACTIVE_WINDOW atom. */
-        static Atom activeWindowAtom() throw();
+        static Atom activeWindowAtom();
 
         /** \returns the _NET_WM_CM_Sxx atoms. */
-        static Atom compositingSelectionAtom(int screenNumber) throw();
+        static Atom compositingSelectionAtom(int screenNumber);
 
         /** \returns the _NET_WM_WINDOW_OPACITY atom. */
-        static Atom opacityAtom() throw();
+        static Atom opacityAtom();
 
         /** \returns the _FLUXBOX_RECONFIGURE_RECT atom. */
-        static Atom reconfigureRectAtom() throw();
+        static Atom reconfigureRectAtom();
 
         /** \returns the _XROOTPMAP_ID atom. */
-        static Atom rootPixmapAtom() throw();
+        static Atom rootPixmapAtom();
 
         /** \returns the _WIN_WORKSPACE atom. */
-        static Atom workspaceAtom() throw();
+        static Atom workspaceAtom();
 
         /** \returns the _WIN_WORKSPACE_COUNT atom. */
-        static Atom workspaceCountAtom() throw();
+        static Atom workspaceCountAtom();
 
 
     private :

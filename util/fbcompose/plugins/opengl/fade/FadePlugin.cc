@@ -54,18 +54,18 @@ namespace {
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-FadePlugin::FadePlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args) throw() :
+FadePlugin::FadePlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args) :
     OpenGLPlugin(screen, args) {
 }
 
 // Destructor.
-FadePlugin::~FadePlugin() throw() { }
+FadePlugin::~FadePlugin() { }
 
 
 //--- OTHER INITIALIZATION -----------------------------------------------------
 
 // Initialize OpenGL-specific code.
-void FadePlugin::initOpenGL(GLuint shaderProgram) throw() {
+void FadePlugin::initOpenGL(GLuint shaderProgram) {
     alphaUniformPos = glGetUniformLocation(shaderProgram, "fade_Alpha");
 }
 
@@ -73,12 +73,12 @@ void FadePlugin::initOpenGL(GLuint shaderProgram) throw() {
 //--- ACCESSORS ----------------------------------------------------------------
 
 // Returns the additional source code for the fragment shader.
-const char *FadePlugin::fragmentShader() const throw() {
+const char *FadePlugin::fragmentShader() const {
     return FRAGMENT_SHADER;
 }
 
 // Returns the additional source code for the vertex shader.
-const char *FadePlugin::vertexShader() const throw() {
+const char *FadePlugin::vertexShader() const {
     return VERTEX_SHADER;
 }
 
@@ -86,7 +86,7 @@ const char *FadePlugin::vertexShader() const throw() {
 //--- WINDOW EVENT CALLBACKS ---------------------------------------------------
 
 // Called, whenever a window is mapped.
-void FadePlugin::windowMapped(const BaseCompWindow &window) throw() {
+void FadePlugin::windowMapped(const BaseCompWindow &window) {
     PosFadeData fade;
 
     // Is the window being faded out?
@@ -113,7 +113,7 @@ void FadePlugin::windowMapped(const BaseCompWindow &window) throw() {
 }
 
 // Called, whenever a window is unmapped.
-void FadePlugin::windowUnmapped(const BaseCompWindow &window) throw() {
+void FadePlugin::windowUnmapped(const BaseCompWindow &window) {
     const OpenGLWindow &glWindow = dynamic_cast<const OpenGLWindow&>(window);
     NegFadeData fade;
 
@@ -144,17 +144,17 @@ void FadePlugin::windowUnmapped(const BaseCompWindow &window) throw() {
 //--- RENDERING ACTIONS --------------------------------------------------------
 
 // Pre background rendering actions.
-void FadePlugin::preBackgroundRenderActions() throw() {
+void FadePlugin::preBackgroundRenderActions() {
     glUniform1f(alphaUniformPos, 1.0);
 }
 
 // Pre window rendering actions.
-void FadePlugin::preReconfigureRectRenderActions(XRectangle /*reconfigureRect*/) throw() {
+void FadePlugin::preReconfigureRectRenderActions(XRectangle /*reconfigureRect*/) {
     glUniform1f(alphaUniformPos, 1.0);
 }
 
 // Pre window rendering actions.
-void FadePlugin::preWindowRenderActions(const OpenGLWindow &window) throw() {
+void FadePlugin::preWindowRenderActions(const OpenGLWindow &window) {
     std::map<Window, PosFadeData>::iterator it = m_positiveFades.find(window.window());
     if (it != m_positiveFades.end()) {
         try {
@@ -176,14 +176,14 @@ void FadePlugin::preWindowRenderActions(const OpenGLWindow &window) throw() {
 
 
 // Returns the number of extra rendering jobs the plugin will do.
-int FadePlugin::extraRenderingJobCount() throw() {
+int FadePlugin::extraRenderingJobCount() {
     return m_negativeFades.size();
 }
 
 // Initialize the specified extra rendering job.
 void FadePlugin::extraRenderingJobInit(int job, GLuint &primPosBuffer_return, GLuint &mainTexCoordBuffer_return,
         GLuint &mainTexture_return, GLuint &shapeTexCoordBuffer_return, GLuint &shapeTexture_return,
-        GLfloat &alpha_return) throw() {
+        GLfloat &alpha_return) {
 
     NegFadeData &curFade = m_negativeFades[job];
 
@@ -208,7 +208,7 @@ void FadePlugin::extraRenderingJobInit(int job, GLuint &primPosBuffer_return, GL
 }
 
 // Called after the extra rendering jobs are executed.
-void FadePlugin::postExtraRenderingActions() throw() {
+void FadePlugin::postExtraRenderingActions() {
     std::vector<NegFadeData>::iterator it = m_negativeFades.begin();
     while (it != m_negativeFades.end()) {
         if (it->fadeAlpha <= 0) {

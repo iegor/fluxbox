@@ -39,22 +39,22 @@ namespace FbCompositor {
         //--- ACCESSORS --------------------------------------------------------
 
         /** \returns the head of the fragment shader source code. */
-        static const GLchar *fragmentShaderHead() throw();
+        static const GLchar *fragmentShaderHead();
 
         /** \returns the middle of the fragment shader source code. */
-        static const GLchar *fragmentShaderMiddle() throw();
+        static const GLchar *fragmentShaderMiddle();
 
         /** \returns the tail of the fragment shader source code. */
-        static const GLchar *fragmentShaderTail() throw();
+        static const GLchar *fragmentShaderTail();
 
         /** \returns the head of the vertex shader source code. */
-        static const GLchar *vertexShaderHead() throw();
+        static const GLchar *vertexShaderHead();
 
         /** \returns the middle of the vertex shader source code. */
-        static const GLchar *vertexShaderMiddle() throw();
+        static const GLchar *vertexShaderMiddle();
 
         /** \returns the tail of the vertex shader source code. */
-        static const GLchar *vertexShaderTail() throw();
+        static const GLchar *vertexShaderTail();
     };
 
 }

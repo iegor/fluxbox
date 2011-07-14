@@ -39,11 +39,11 @@ namespace FbCompositor {
 
     /** Converts an X pixmap to an OpenGL texture. */
     void pixmapToTexture(Display *display, Pixmap pixmap, GLuint texture, GLXFBConfig fbConfig,
-                         GLXPixmap glxPixmap, unsigned int width, unsigned int height, const int *ATTRS) throw();
+                         GLXPixmap glxPixmap, unsigned int width, unsigned int height, const int *ATTRS);
 
     /** Converts screen coordinates to OpenGL coordinates. */
     void toOpenGLCoordinates(int screenWidth, int screenHeight, int x, int y, int width, int height,
-                             GLfloat *xLow_gl, GLfloat *xHigh_gl, GLfloat *yLow_gl, GLfloat *yHigh_gl) throw();
+                             GLfloat *xLow_gl, GLfloat *xHigh_gl, GLfloat *yLow_gl, GLfloat *yHigh_gl);
 
 }
 

@@ -39,7 +39,7 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-BaseCompWindow::BaseCompWindow(const BaseScreen &screen, Window windowXID) throw(InitException) :
+BaseCompWindow::BaseCompWindow(const BaseScreen &screen, Window windowXID) :
     FbTk::FbWindow(windowXID),
     m_screen(screen) {
 
@@ -71,7 +71,7 @@ BaseCompWindow::BaseCompWindow(const BaseScreen &screen, Window windowXID) throw
 }
 
 // Destructor.
-BaseCompWindow::~BaseCompWindow() throw() {
+BaseCompWindow::~BaseCompWindow() {
     if (m_clipShapeRects) {
         XFree(m_clipShapeRects);
     }
@@ -85,22 +85,22 @@ BaseCompWindow::~BaseCompWindow() throw() {
 //--- WINDOW MANIPULATION ------------------------------------------------------
 
 // Add damage to a window.
-void BaseCompWindow::addDamage() throw() {
+void BaseCompWindow::addDamage() {
     m_isDamaged = true;
 }
 
 // Mark the window as mapped.
-void BaseCompWindow::setMapped() throw() {
+void BaseCompWindow::setMapped() {
     m_isMapped = true;
 }
 
 // Mark the window as unmapped.
-void BaseCompWindow::setUnmapped() throw() {
+void BaseCompWindow::setUnmapped() {
     m_isMapped = false;
 }
 
 // Update the window's contents.
-void BaseCompWindow::updateContents() throw() {
+void BaseCompWindow::updateContents() {
     if (isWindowBad()) {
         return;
     }
@@ -114,7 +114,7 @@ void BaseCompWindow::updateContents() throw() {
 }
 
 // Update window's geometry.
-void BaseCompWindow::updateGeometry(const XConfigureEvent &/*event*/) throw() {
+void BaseCompWindow::updateGeometry(const XConfigureEvent &/*event*/) {
     unsigned int oldBorderWidth = borderWidth();
     unsigned int oldHeight = height();
     unsigned int oldWidth = width();
@@ -127,7 +127,7 @@ void BaseCompWindow::updateGeometry(const XConfigureEvent &/*event*/) throw() {
 }
 
 // Update the window's clip shape.
-void BaseCompWindow::updateShape() throw() {
+void BaseCompWindow::updateShape() {
     if (m_clipShapeRects) {
         XFree(m_clipShapeRects);
         m_clipShapeRects = NULL;
@@ -141,7 +141,7 @@ void BaseCompWindow::updateShape() throw() {
 }
 
 // Update window's property.
-void BaseCompWindow::updateProperty(Atom property, int /*state*/) throw() {
+void BaseCompWindow::updateProperty(Atom property, int /*state*/) {
     if (property == Atoms::opacityAtom()) {
         m_alpha = singlePropertyValue<long>(Atoms::opacityAtom(), 0xff) & 0xff;
     }
@@ -149,7 +149,7 @@ void BaseCompWindow::updateProperty(Atom property, int /*state*/) throw() {
 
 
 // Set the clip shape as changed.
-void BaseCompWindow::setClipShapeChanged() throw() {
+void BaseCompWindow::setClipShapeChanged() {
     m_clipShapeChanged = true;
 }
 
@@ -157,14 +157,14 @@ void BaseCompWindow::setClipShapeChanged() throw() {
 //--- PROTECTED WINDOW MANIPULATION --------------------------------------------
 
 // Removes all damage from the window.
-void BaseCompWindow::clearDamage() throw() {
+void BaseCompWindow::clearDamage() {
     m_clipShapeChanged = false;
     m_isDamaged = false;
     m_isResized = false;
 }
 
 // Updates the window's content pixmap.
-void BaseCompWindow::updateContentPixmap() throw() {
+void BaseCompWindow::updateContentPixmap() {
 #ifdef HAVE_XDAMAGE
     // We must reset the damage here, otherwise we may miss damage events.
     XDamageSubtract(display(), m_damage, None, None);
@@ -204,7 +204,7 @@ void BaseCompWindow::updateContentPixmap() throw() {
 //--- OTHER FUNCTIONS --------------------------------------------------
 
 // Checks whether the current window is bad.
-bool BaseCompWindow::isWindowBad() throw() {
+bool BaseCompWindow::isWindowBad() {
     static XWindowAttributes xwa;
     return (!XGetWindowAttributes(display(), window(), &xwa));
 }
@@ -214,7 +214,7 @@ bool BaseCompWindow::isWindowBad() throw() {
 
 // Reads and returns raw property contents.
 bool BaseCompWindow::rawPropertyData(Atom propertyAtom, Atom propertyType,
-                                     unsigned long *itemCount_return, unsigned char **data_return) throw() {
+                                     unsigned long *itemCount_return, unsigned char **data_return) {
     Atom actualType;
     int actualFormat;
     unsigned long bytesLeft;

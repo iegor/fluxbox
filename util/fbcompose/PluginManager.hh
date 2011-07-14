@@ -61,22 +61,22 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        PluginManager(PluginType pluginType, const BaseScreen &screen) throw();
+        PluginManager(PluginType pluginType, const BaseScreen &screen);
 
         /** Destructor. */
-        ~PluginManager() throw();
+        ~PluginManager();
 
 
         //--- PLUGIN MANIPULATION ----------------------------------------------
 
         /** Create a plugin object, load the appropriate library if needed. */
-        void createPluginObject(FbTk::FbString name, std::vector<FbTk::FbString> args = std::vector<FbTk::FbString>()) throw(InitException);
+        void createPluginObject(FbTk::FbString name, std::vector<FbTk::FbString> args = std::vector<FbTk::FbString>());
 
         /** \returns a reference to a vector with plugin objects. */
-        std::vector<BasePlugin*> &plugins() throw();
+        std::vector<BasePlugin*> &plugins();
 
         /** \returns a reference to a vector with plugin objects (const version). */
-        const std::vector<BasePlugin*> &plugins() const throw();
+        const std::vector<BasePlugin*> &plugins() const;
 
 
     private :
@@ -92,23 +92,23 @@ namespace FbCompositor {
         //--- INTERNAL PLUGIN MANIPULATION -------------------------------------
 
         /** Load a plugin. */
-        void loadPlugin(FbTk::FbString name) throw(PluginException);
+        void loadPlugin(FbTk::FbString name);
 
         /** Unload a plugin. */
-        void unloadPlugin(FbTk::FbString name) throw(PluginException);
+        void unloadPlugin(FbTk::FbString name);
 
         /** Unload a plugin (actual worker function). */
-        void unloadPlugin(std::map<FbTk::FbString, PluginLibData>::iterator it) throw();
+        void unloadPlugin(std::map<FbTk::FbString, PluginLibData>::iterator it);
 
 
         //--- CONVENIENCE FUNCTIONS --------------------------------------------
 
         /** Build a vector of search paths for a given plugin. */
-        std::vector<FbTk::FbString> buildPluginPaths(const FbTk::FbString &name) throw();
+        std::vector<FbTk::FbString> buildPluginPaths(const FbTk::FbString &name);
 
         /** \returns some object from the given library handle. */
         void *getLibraryObject(void *handle, const char *objectName, const char *pluginName,
-                               const char *verboseObjectName) throw(PluginException);
+                               const char *verboseObjectName);
 
 
         //--- PLUGINS AND METADATA ---------------------------------------------
@@ -136,12 +136,12 @@ namespace FbCompositor {
     //--- INLINE FUNCTIONS -----------------------------------------------------
 
     // Returns a reference to a vector with plugin objects.
-    inline std::vector<BasePlugin*> &PluginManager::plugins() throw() {
+    inline std::vector<BasePlugin*> &PluginManager::plugins() {
         return m_pluginObjects;
     }
 
     // Returns a reference to a vector with plugin objects (const version).
-    inline const std::vector<BasePlugin*> &PluginManager::plugins() const throw() {
+    inline const std::vector<BasePlugin*> &PluginManager::plugins() const {
         return m_pluginObjects;
     }
 }

@@ -59,49 +59,49 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        FadePlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args) throw();
+        FadePlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args);
 
         /** Destructor. */
-        ~FadePlugin() throw();
+        ~FadePlugin();
 
 
         //--- ACCESSORS --------------------------------------------------------
 
         /** \returns the name of the plugin. */
-        const char *pluginName() const throw();
+        const char *pluginName() const;
 
 
         //--- WINDOW EVENT CALLBACKS -------------------------------------------
 
         /** Called, whenever a window is mapped. */
-        void windowMapped(const BaseCompWindow &window) throw();
+        void windowMapped(const BaseCompWindow &window);
 
         /** Called, whenever a window is unmapped. */
-        void windowUnmapped(const BaseCompWindow &window) throw();
+        void windowUnmapped(const BaseCompWindow &window);
 
 
         //--- RENDERING ACTIONS ------------------------------------------------
 
         /** Window rendering job initialization. */
         virtual void windowRenderingJobInit(const XRenderWindow &window, int &op_return,
-                                            Picture &maskPic_return) throw();
+                                            Picture &maskPic_return);
 
         /** Window rendering job cleanup. */
-        virtual void windowRenderingJobCleanup(const XRenderWindow &window) throw();
+        virtual void windowRenderingJobCleanup(const XRenderWindow &window);
 
 
         /** \returns the number of extra rendering jobs the plugin will do. */
-        virtual int extraRenderingJobCount() throw();
+        virtual int extraRenderingJobCount();
 
         /** Initialize the specified extra rendering job. */
         virtual void extraRenderingJobInit(int job, int &op_return,
                                            Picture &srcPic_return, int &srcX_return, int &srcY_return,
                                            Picture &maskPic_return, int &maskX_return, int &maskY_return,
                                            int &destX_return, int &destY_return,
-                                           int &width_return, int &height_return) throw();
+                                           int &width_return, int &height_return);
 
         /** Called after the extra rendering jobs are executed. */
-        virtual void postExtraRenderingActions() throw();
+        virtual void postExtraRenderingActions();
 
 
     private :
@@ -109,7 +109,7 @@ namespace FbCompositor {
 
         /** \returns the faded mask picture for the given window fade. */
         void createFadedMask(int alpha, XRenderPictureWrapperPtr mask, XRectangle dimensions,
-                             Pixmap &fadePixmap_return, Picture &fadePicture_return) throw();
+                             Pixmap &fadePixmap_return, Picture &fadePicture_return);
 
 
         //--- GENERAL RENDERING VARIABLES --------------------------------------
@@ -154,7 +154,7 @@ namespace FbCompositor {
     //--- INLINE FUNCTIONS -----------------------------------------------------
 
     // Returns the name of the plugin.
-    inline const char *FadePlugin::pluginName() const throw() {
+    inline const char *FadePlugin::pluginName() const {
         return "fade";
     }
 }

@@ -51,50 +51,50 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        OpenGLWindow(const BaseScreen &screen, Window windowXID, GLXFBConfig fbConfig) throw(InitException);
+        OpenGLWindow(const BaseScreen &screen, Window windowXID, GLXFBConfig fbConfig);
 
         /** Destructor. */
-        virtual ~OpenGLWindow() throw();
+        virtual ~OpenGLWindow();
 
 
         //--- ACCESSORS --------------------------------------------------------
 
         /** \returns an object, holding the window's contents as an OpenGL texture. */
-        OpenGLTextureWrapperPtr contentTexture() const throw();
+        OpenGLTextureWrapperPtr contentTexture() const;
 
         /** \returns an object, holding the window's shape as an OpenGL texture. */
-        OpenGLTextureWrapperPtr shapeTexture() const throw();
+        OpenGLTextureWrapperPtr shapeTexture() const;
 
         /** \returns an object, holding the window position buffer. */
-        OpenGLBufferWrapperPtr windowPosBuffer() const throw();
+        OpenGLBufferWrapperPtr windowPosBuffer() const;
 
 
         //--- WINDOW UPDATE FUNCTIONS ------------------------------------------
 
         /** Updates the window's contents. */
-        void updateContents() throw();
+        void updateContents();
 
         /** Updates window's geometry. */
-        void updateGeometry(const XConfigureEvent &event) throw();
+        void updateGeometry(const XConfigureEvent &event);
 
         /** Updates the window's shape. */
-        void updateShape() throw();
+        void updateShape();
 
         /** Updates the window position vertex array. */
-        void updateWindowPosArray() throw();
+        void updateWindowPosArray();
 
 
     private :
         //--- CONVENIENCE ACCESSORS --------------------------------------------
 
         /** \returns the window's contents as a OpenGL texture. */
-        GLuint direct_contentTexture() const throw();
+        GLuint direct_contentTexture() const;
 
         /** \returns the window's shape as an OpenGL texture. */
-        GLuint direct_shapeTexture() const throw();
+        GLuint direct_shapeTexture() const;
 
         /** \returns the window position buffer. */
-        GLuint direct_windowPosBuffer() const throw();
+        GLuint direct_windowPosBuffer() const;
 
 
         //--- RENDERING-RELATED VARIABLES --------------------------------------
@@ -133,33 +133,33 @@ namespace FbCompositor {
     //--- INLINE FUNCTIONS -------------------------------------------------
 
     // Returns the window's contents as an OpenGL texture.
-    inline OpenGLTextureWrapperPtr OpenGLWindow::contentTexture() const throw() {
+    inline OpenGLTextureWrapperPtr OpenGLWindow::contentTexture() const {
         return m_contentTexturePtr;
     }
 
     // Returns an object, holding the window's shape as an OpenGL texture.
-    inline OpenGLTextureWrapperPtr OpenGLWindow::shapeTexture() const throw() {
+    inline OpenGLTextureWrapperPtr OpenGLWindow::shapeTexture() const {
         return m_shapeTexturePtr;
     }
 
     // Returns the window position buffer.
-    inline OpenGLBufferWrapperPtr OpenGLWindow::windowPosBuffer() const throw() {
+    inline OpenGLBufferWrapperPtr OpenGLWindow::windowPosBuffer() const {
         return m_windowPosBufferPtr;
     }
 
 
     // Returns the window's contents as an OpenGL texture.
-    inline GLuint OpenGLWindow::direct_contentTexture() const throw() {
+    inline GLuint OpenGLWindow::direct_contentTexture() const {
         return m_contentTexturePtr->unwrap();
     }
 
     // Returns the window's shape as an OpenGL texture.
-    inline GLuint OpenGLWindow::direct_shapeTexture() const throw() {
+    inline GLuint OpenGLWindow::direct_shapeTexture() const {
         return m_shapeTexturePtr->unwrap();
     }
 
     // Returns the window position buffer.
-    inline GLuint OpenGLWindow::direct_windowPosBuffer() const throw() {
+    inline GLuint OpenGLWindow::direct_windowPosBuffer() const {
         return m_windowPosBufferPtr->unwrap();
     }
 }

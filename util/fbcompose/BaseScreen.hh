@@ -65,123 +65,123 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        BaseScreen(int screenNumber, PluginType pluginType, const CompositorConfig &config) throw(InitException, PluginException);
+        BaseScreen(int screenNumber, PluginType pluginType, const CompositorConfig &config);
 
         /** Destructor. */
-        virtual ~BaseScreen() throw();
+        virtual ~BaseScreen();
 
 
         //--- OTHER INITIALIZATION ---------------------------------------------
 
         /** Initializes heads on the current screen. */
-        void initHeads(HeadMode headMode) throw(InitException);
+        void initHeads(HeadMode headMode);
 
         /** Initializes all of the windows on the screen. */
-        void initWindows() throw();
+        void initWindows();
 
 
         //--- ACCESSORS --------------------------------------------------------
 
         /** \returns the active window XID. */
-        Window activeWindow() const throw();
+        Window activeWindow() const;
 
         /** \returns the index of the current workspace. */
-        int currentWorkspace() const throw();
+        int currentWorkspace() const;
 
         /** \returns the current connection to the X server. */
-        Display *display() throw();
+        Display *display();
 
         /** \returns the current connection to the X server (const version). */
-        const Display *display() const throw();
+        const Display *display() const;
 
         /** \returns the vector with the output heads on this screen. */
-        const std::vector<XRectangle> &heads() const throw();
+        const std::vector<XRectangle> &heads() const;
 
         /** \returns screen's root window. */
-        BaseCompWindow &rootWindow() throw();
+        BaseCompWindow &rootWindow();
 
         /** \returns screen's root window (const version). */
-        const BaseCompWindow &rootWindow() const throw();
+        const BaseCompWindow &rootWindow() const;
 
         /** \returns screen's number. */
-        int screenNumber() const throw();
+        int screenNumber() const;
 
         /** \returns the index of the currently active workspace. */
-        int workspaceCount() const throw();
+        int workspaceCount() const;
 
 
         //--- WINDOW MANIPULATION ----------------------------------------------
 
         /** Creates a new window on this screen. */
-        void createWindow(Window window) throw(WindowException);
+        void createWindow(Window window);
 
         /** Damages a window on this screen. */
-        void damageWindow(Window window) throw();
+        void damageWindow(Window window);
 
         /** Destroys a window on this screen. */
-        void destroyWindow(Window window) throw();
+        void destroyWindow(Window window);
 
         /** Maps a window on this screen. */
-        void mapWindow(Window window) throw();
+        void mapWindow(Window window);
 
         /** Updates window's configuration. */
-        void reconfigureWindow(const XConfigureEvent &event) throw();
+        void reconfigureWindow(const XConfigureEvent &event);
 
         /** Reparents a window. */
-        void reparentWindow(Window window, Window parent) throw();
+        void reparentWindow(Window window, Window parent);
 
         /** Updates window's shape. */
-        void updateShape(Window window) throw();
+        void updateShape(Window window);
 
         /** Unmaps a window on this screen. */
-        void unmapWindow(Window window) throw();
+        void unmapWindow(Window window);
 
         /** Updates the value of some window's property. */
-        void updateWindowProperty(Window window, Atom property, int state) throw();
+        void updateWindowProperty(Window window, Atom property, int state);
 
 
         /** Adds a window to ignore list, stops tracking it if it is being tracked. */
-        void addWindowToIgnoreList(Window window) throw();
+        void addWindowToIgnoreList(Window window);
 
         /** Checks whether a given window is managed by the current screen. */
-        bool isWindowManaged(Window window) throw();
+        bool isWindowManaged(Window window);
 
 
         //--- SCREEN MANIPULATION ----------------------------------------------
 
         /** Notifies the screen of a background change. */
-        virtual void setRootPixmapChanged() throw();
+        virtual void setRootPixmapChanged();
 
         /** Notifies the screen of a root window change. */
-        virtual void setRootWindowSizeChanged() throw();
+        virtual void setRootWindowSizeChanged();
 
 
         //--- SCREEN RENDERING -------------------------------------------------
 
         /** Renders the screen's contents. */
-        virtual void renderScreen() throw() = 0;
+        virtual void renderScreen() = 0;
 
 
     protected:
         //--- PROTECTED ACCESSORS ----------------------------------------------
 
         /** \returns the list of windows on the screen. */
-        const std::list<BaseCompWindow*> &allWindows() const throw();
+        const std::list<BaseCompWindow*> &allWindows() const;
 
         /** \returns the plugin manager. */
-        const PluginManager &pluginManager() const throw();
+        const PluginManager &pluginManager() const;
         
         /** \returns the reconfigure rectangle. */
-        XRectangle reconfigureRectangle() const throw();
+        XRectangle reconfigureRectangle() const;
 
         /** \returns the root window pixmap. */
-        Pixmap rootWindowPixmap() throw();
+        Pixmap rootWindowPixmap();
 
 
         //--- SPECIALIZED WINDOW MANIPULATION FUNCTIONS ------------------------
 
         /** Creates a window object from its XID. */
-        virtual BaseCompWindow *createWindowObject(Window window) throw(InitException) = 0;
+        virtual BaseCompWindow *createWindowObject(Window window) = 0;
 
 
     private:
@@ -194,16 +194,16 @@ namespace FbCompositor {
         //--- CONVENIENCE FUNCTIONS --------------------------------------------
 
         /** \returns the first managed ancestor of a window. */
-        std::list<BaseCompWindow*>::iterator getFirstManagedAncestorIterator(Window window) throw();
+        std::list<BaseCompWindow*>::iterator getFirstManagedAncestorIterator(Window window);
 
         /** \returns the parent of a given window. */
-        Window getParentWindow(Window window) throw();
+        Window getParentWindow(Window window);
 
         /** \returns an iterator of m_windows that points to the given window. */
-        std::list<BaseCompWindow*>::iterator getWindowIterator(Window windowXID) throw();
+        std::list<BaseCompWindow*>::iterator getWindowIterator(Window windowXID);
         
         /** \returns whether the given window is in the ignore list. */
-        bool isWindowIgnored(Window window) throw();
+        bool isWindowIgnored(Window window);
 
 
         //--- PRIVATE VARIABLES ------------------------------------------------
@@ -247,67 +247,67 @@ namespace FbCompositor {
     //--- INLINE FUNCTIONS -----------------------------------------------------
 
     // Returns the active window XID.
-    inline Window BaseScreen::activeWindow() const throw() {
+    inline Window BaseScreen::activeWindow() const {
         return m_activeWindowXID;
     }
 
     // Returns all of screen's windows.
-    inline const std::list<BaseCompWindow*> &BaseScreen::allWindows() const throw() {
+    inline const std::list<BaseCompWindow*> &BaseScreen::allWindows() const {
         return m_windows;
     }
 
     // Returns the index of the current workspace.
-    inline int BaseScreen::currentWorkspace() const throw() {
+    inline int BaseScreen::currentWorkspace() const {
         return m_currentWorkspace;
     }
 
     // Returns the current connection to the X server.
-    inline Display *BaseScreen::display() throw() {
+    inline Display *BaseScreen::display() {
         return m_display;
     }
 
     // Returns the current connection to the X server (const version).
-    inline const Display *BaseScreen::display() const throw() {
+    inline const Display *BaseScreen::display() const {
         return m_display;
     }
 
     // Returns the vector with the output heads on this screen.
-    inline const std::vector<XRectangle> &BaseScreen::heads() const throw() {
+    inline const std::vector<XRectangle> &BaseScreen::heads() const {
         return m_heads;
     }
 
     // Returns the plugin manager.
-    inline const PluginManager &BaseScreen::pluginManager() const throw() {
+    inline const PluginManager &BaseScreen::pluginManager() const {
         return m_pluginManager;
     }
 
     // Returns the reconfigure rectangle.
-    inline XRectangle BaseScreen::reconfigureRectangle() const throw() {
+    inline XRectangle BaseScreen::reconfigureRectangle() const {
         return m_reconfigureRect;
     }
 
     // Returns screen's root window.
-    inline BaseCompWindow &BaseScreen::rootWindow() throw() {
+    inline BaseCompWindow &BaseScreen::rootWindow() {
         return m_rootWindow;
     }
 
     // Returns screen's root window (const version).
-    inline const BaseCompWindow &BaseScreen::rootWindow() const throw() {
+    inline const BaseCompWindow &BaseScreen::rootWindow() const {
         return m_rootWindow;
     }
 
     // Returns the root window pixmap.
-    inline Pixmap BaseScreen::rootWindowPixmap() throw() {
+    inline Pixmap BaseScreen::rootWindowPixmap() {
         return rootWindow().singlePropertyValue<Pixmap>(Atoms::rootPixmapAtom(), None);
     }
 
     // Returns the screen's number.
-    inline int BaseScreen::screenNumber() const throw() {
+    inline int BaseScreen::screenNumber() const {
         return m_screenNumber;
     }
 
     // Returns the index of the currently active workspace.
-    inline int BaseScreen::workspaceCount() const throw() {
+    inline int BaseScreen::workspaceCount() const {
         return m_workspaceCount;
     }
 }

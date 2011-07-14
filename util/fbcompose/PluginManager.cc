@@ -35,14 +35,14 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Costructor.
-PluginManager::PluginManager(PluginType pluginType, const BaseScreen &screen) throw() :
+PluginManager::PluginManager(PluginType pluginType, const BaseScreen &screen) :
     m_screen(screen) {
 
     m_pluginType = pluginType;
 }
 
 // Destructor.
-PluginManager::~PluginManager() throw() {
+PluginManager::~PluginManager() {
     for (size_t i = 0; i < m_pluginObjects.size(); i++) {
         delete m_pluginObjects[i];      // Let's hope delete is not overriden. TODO: Fix.
     }
@@ -58,7 +58,7 @@ PluginManager::~PluginManager() throw() {
 //--- PLUGIN MANIPULATION ------------------------------------------------------
 
 // Create a plugin object, load the appropriate library if needed.
-void PluginManager::createPluginObject(FbTk::FbString name, std::vector<FbTk::FbString> args) throw(InitException) {
+void PluginManager::createPluginObject(FbTk::FbString name, std::vector<FbTk::FbString> args) {
     if (m_pluginLibs.find(name) == m_pluginLibs.end()) {
         loadPlugin(name);
     }
@@ -72,7 +72,7 @@ void PluginManager::createPluginObject(FbTk::FbString name, std::vector<FbTk::Fb
 //--- INTERNAL PLUGIN MANIPULATION ---------------------------------------------
 
 // Load a plugin.
-void PluginManager::loadPlugin(FbTk::FbString name) throw(PluginException) {
+void PluginManager::loadPlugin(FbTk::FbString name) {
     std::vector<FbTk::FbString> paths = buildPluginPaths(name);
 
     // Get the handle to the plugin so object.
@@ -99,7 +99,7 @@ void PluginManager::loadPlugin(FbTk::FbString name) throw(PluginException) {
 }
 
 // Unload a plugin.
-void PluginManager::unloadPlugin(FbTk::FbString name) throw(PluginException) {
+void PluginManager::unloadPlugin(FbTk::FbString name) {
     std::map<FbTk::FbString, PluginLibData>::iterator it = m_pluginLibs.find(name);
 
     if (it == m_pluginLibs.end()) {
@@ -112,7 +112,7 @@ void PluginManager::unloadPlugin(FbTk::FbString name) throw(PluginException) {
 }
 
 // Unload a plugin (actual worker function).
-void PluginManager::unloadPlugin(std::map<FbTk::FbString, PluginLibData>::iterator it) throw() {
+void PluginManager::unloadPlugin(std::map<FbTk::FbString, PluginLibData>::iterator it) {
     dlclose(it->second.handle);
 
     it->second.handle = NULL;
@@ -123,7 +123,7 @@ void PluginManager::unloadPlugin(std::map<FbTk::FbString, PluginLibData>::iterat
 //--- CONVENIENCE FUNCTIONS ----------------------------------------------------
 
 // Build a vector of search paths for a given plugin.
-std::vector<FbTk::FbString> PluginManager::buildPluginPaths(const FbTk::FbString &name) throw() {
+std::vector<FbTk::FbString> PluginManager::buildPluginPaths(const FbTk::FbString &name) {
     std::stringstream ss;
     std::vector<FbTk::FbString> paths;
 
@@ -149,7 +149,7 @@ std::vector<FbTk::FbString> PluginManager::buildPluginPaths(const FbTk::FbString
 
 // Returns some object from the given library handle.
 void *PluginManager::getLibraryObject(void *handle, const char *objectName, const char *pluginName,
-                                      const char *verboseObjectName) throw(PluginException) {
+                                      const char *verboseObjectName) {
     dlerror();
     void *rawObject = dlsym(handle, objectName);
     const char *error = dlerror();

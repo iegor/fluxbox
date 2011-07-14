@@ -61,121 +61,121 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        BaseCompWindow(const BaseScreen &screen, Window windowXID) throw(InitException);
+        BaseCompWindow(const BaseScreen &screen, Window windowXID);
 
         /** Destructor. */
-        virtual ~BaseCompWindow() throw();
+        virtual ~BaseCompWindow();
 
 
         //--- ACCESSORS --------------------------------------------------------
 
         /** \returns the window's opacity. */
-        int alpha() const throw();
+        int alpha() const;
 
         /** \returns the window's contents as a pixmap. */
-        Pixmap contentPixmap() const throw();
+        Pixmap contentPixmap() const;
 
         /** \returns whether the window is damaged or not. */
-        bool isDamaged() const throw();
+        bool isDamaged() const;
 
         /** \returns whether the screen is mapped or not. */
-        bool isMapped() const throw();
+        bool isMapped() const;
 
         /** \returns the window's screen. */
-        const BaseScreen &screen() const throw();
+        const BaseScreen &screen() const;
         
         /** \returns the window's visual. */
-        Visual *visual() throw();
+        Visual *visual();
 
         /** \returns the window's visual (const version). */
-        const Visual *visual() const throw();
+        const Visual *visual() const;
 
         /** \returns the window's class. */
-        int windowClass() const throw();
+        int windowClass() const;
 
 
         /** \returns the window's dimensions as an XRectangle. */
-        XRectangle dimensions() const throw();
+        XRectangle dimensions() const;
 
         /** \returns the window's height with borders factored in. */
-        unsigned int realHeight() const throw();
+        unsigned int realHeight() const;
 
         /** \returns the window's width with borders factored in. */
-        unsigned int realWidth() const throw();
+        unsigned int realWidth() const;
 
 
         //--- PROPERTY ACCESS --------------------------------------------------
 
         /** \returns the value of the specified property. */
         template<class T>
-        std::vector<T> propertyValue(Atom propertyAtom) throw();
+        std::vector<T> propertyValue(Atom propertyAtom);
 
         /** Convenience function for accessing properties with a single value. */
         template<class T>
-        T singlePropertyValue(Atom propertyAtom, T defaultValue) throw();
+        T singlePropertyValue(Atom propertyAtom, T defaultValue);
 
 
         //--- WINDOW MANIPULATION ----------------------------------------------
 
         /** Add damage to a window. */
-        virtual void addDamage() throw();
+        virtual void addDamage();
 
         /** Mark the window as mapped. */
-        virtual void setMapped() throw();
+        virtual void setMapped();
 
         /** Mark the window as unmapped. */
-        virtual void setUnmapped() throw();
+        virtual void setUnmapped();
 
         /** Update the window's contents. */
-        virtual void updateContents() throw();
+        virtual void updateContents();
 
         /** Update window's geometry. */
-        virtual void updateGeometry(const XConfigureEvent &event) throw();
+        virtual void updateGeometry(const XConfigureEvent &event);
 
         /** Update window's property. */
-        virtual void updateProperty(Atom property, int state) throw();
+        virtual void updateProperty(Atom property, int state);
 
 
         /** Set the clip shape as changed. */
-        void setClipShapeChanged() throw();
+        void setClipShapeChanged();
 
 
     protected:
         //--- PROTECTED ACCESSORS ----------------------------------------------
 
         /** \returns whether the chip shape changed since the last update. */
-        int clipShapeChanged() const throw();
+        int clipShapeChanged() const;
 
         /** \returns the number of rectangles that make up the clip shape. */
-        int clipShapeRectCount() const throw();
+        int clipShapeRectCount() const;
 
         /** \returns the ordering of rectangles that make up the clip shape. */
-        int clipShapeRectOrder() const throw();
+        int clipShapeRectOrder() const;
 
         /** \returns the rectangles that make up the clip shape. */
-        XRectangle *clipShapeRects() const throw();
+        XRectangle *clipShapeRects() const;
 
 
         /** \returns whether the window has been resized since the last update. */
-        bool isResized() const throw();
+        bool isResized() const;
 
 
         //--- PROTECTED WINDOW MANIPULATION ------------------------------------
 
         /** Removes all damage from the window. */
-        void clearDamage() throw();
+        void clearDamage();
 
         /** Updates the window's content pixmap. */
-        void updateContentPixmap() throw();
+        void updateContentPixmap();
 
         /** Update the window's clip shape. */
-        virtual void updateShape() throw();
+        virtual void updateShape();
 
 
         //--- OTHER FUNCTIONS --------------------------------------------------
 
         /** Checks whether the current window is bad. */
-        bool isWindowBad() throw();
+        bool isWindowBad();
 
 
     private:
@@ -192,7 +192,7 @@ namespace FbCompositor {
 
         /** Returns the raw contents of a property. */
         bool rawPropertyData(Atom propertyAtom, Atom propertyType,
-                             unsigned long *itemCount_return, unsigned char **data_return) throw();
+                             unsigned long *itemCount_return, unsigned char **data_return);
 
 
         //--- WINDOW ATTRIBUTES ------------------------------------------------
@@ -246,83 +246,83 @@ namespace FbCompositor {
     //--- INLINE FUNCTIONS -----------------------------------------------------
 
     // Returns the window's opacity.
-    inline int BaseCompWindow::alpha() const throw() {
+    inline int BaseCompWindow::alpha() const {
         return m_alpha;
     }
 
     // Returns whether the chip shape changed since the last update.
-    inline int BaseCompWindow::clipShapeChanged() const throw() {
+    inline int BaseCompWindow::clipShapeChanged() const {
         return m_clipShapeChanged;
     }
 
     // Returns the number of rectangles that make up the clip shape.
-    inline int BaseCompWindow::clipShapeRectCount() const throw() {
+    inline int BaseCompWindow::clipShapeRectCount() const {
         return m_clipShapeRectCount;
     }
 
     // Returns the ordering of rectangles that make up the clip shape.
-    inline int BaseCompWindow::clipShapeRectOrder() const throw() {
+    inline int BaseCompWindow::clipShapeRectOrder() const {
         return m_clipShapeRectOrder;
     }
 
     // Returns the rectangles that make up the clip shape.
-    inline XRectangle *BaseCompWindow::clipShapeRects() const throw() {
+    inline XRectangle *BaseCompWindow::clipShapeRects() const {
         return m_clipShapeRects;
     }
 
     // Returns the window's contents as a pixmap.
-    inline Pixmap BaseCompWindow::contentPixmap() const throw() {
+    inline Pixmap BaseCompWindow::contentPixmap() const {
         return m_contentPixmap;
     }
 
     // Returns the window's dimensions as an XRectangle.
-    inline XRectangle BaseCompWindow::dimensions() const throw() {
+    inline XRectangle BaseCompWindow::dimensions() const {
         XRectangle dim = { x(), y(), realWidth(), realHeight() };
         return dim;
     }
 
     // Returns whether the window is damaged or not.
-    inline bool BaseCompWindow::isDamaged() const throw() {
+    inline bool BaseCompWindow::isDamaged() const {
         return m_isDamaged;
     }
 
     // Returns whether the window is mapped or not.
-    inline bool BaseCompWindow::isMapped() const throw() {
+    inline bool BaseCompWindow::isMapped() const {
         return m_isMapped;
     }
 
     // Returns whether the window has been resized since the last update.
-    inline bool BaseCompWindow::isResized() const throw() {
+    inline bool BaseCompWindow::isResized() const {
         return m_isResized;
     }
 
     // Returns the window's screen.
-    inline const BaseScreen &BaseCompWindow::screen() const throw() {
+    inline const BaseScreen &BaseCompWindow::screen() const {
         return m_screen;
     }
 
     // Returns the window's height with borders factored in.
-    inline unsigned int BaseCompWindow::realHeight() const throw() {
+    inline unsigned int BaseCompWindow::realHeight() const {
         return height() + 2 * borderWidth();
     }
 
     // Returns the window's width with borders factored in.
-    inline unsigned int BaseCompWindow::realWidth() const throw() {
+    inline unsigned int BaseCompWindow::realWidth() const {
         return width() + 2 * borderWidth();
     }
 
     // Returns the window's visual.
-    inline Visual *BaseCompWindow::visual() throw() {
+    inline Visual *BaseCompWindow::visual() {
         return m_visual;
     }
 
     // Returns the window's visual (const version).
-    inline const Visual *BaseCompWindow::visual() const throw() {
+    inline const Visual *BaseCompWindow::visual() const {
         return m_visual;
     }
 
     // Returns the window's class.
-    inline int BaseCompWindow::windowClass() const throw() {
+    inline int BaseCompWindow::windowClass() const {
         return m_class;
     }
 
@@ -331,7 +331,7 @@ namespace FbCompositor {
 
     // Returns the value of the specified property.
     template<class T>
-    std::vector<T> BaseCompWindow::propertyValue(Atom propertyAtom) throw() {
+    std::vector<T> BaseCompWindow::propertyValue(Atom propertyAtom) {
         unsigned long nItems;
         T *data;
 
@@ -346,7 +346,7 @@ namespace FbCompositor {
 
     // Convenience function for accessing properties with a single value.
     template<class T>
-    T BaseCompWindow::singlePropertyValue(Atom propertyAtom, T defaultValue) throw() {
+    T BaseCompWindow::singlePropertyValue(Atom propertyAtom, T defaultValue) {
         if (!propertyAtom) {
             return defaultValue;
         }

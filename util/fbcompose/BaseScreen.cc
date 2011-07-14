@@ -59,7 +59,7 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-BaseScreen::BaseScreen(int screenNumber, PluginType pluginType, const CompositorConfig &config) throw(InitException, PluginException) :
+BaseScreen::BaseScreen(int screenNumber, PluginType pluginType, const CompositorConfig &config) :
     m_display(FbTk::App::instance()->display()),
     m_pluginManager(pluginType, *this),
     m_screenNumber(screenNumber),
@@ -87,7 +87,7 @@ BaseScreen::BaseScreen(int screenNumber, PluginType pluginType, const Compositor
 }
 
 // Destructor.
-BaseScreen::~BaseScreen() throw() {
+BaseScreen::~BaseScreen() {
     std::list<BaseCompWindow*>::iterator it = m_windows.begin();
     while (it != m_windows.end()) {
         delete *it;
@@ -99,7 +99,7 @@ BaseScreen::~BaseScreen() throw() {
 //--- OTHER INITIALIZATION -----------------------------------------------------
 
 // Initializes heads on the current screen.
-void BaseScreen::initHeads(HeadMode headMode) throw(InitException) {
+void BaseScreen::initHeads(HeadMode headMode) {
     m_heads.clear();
 
 #ifdef XINERAMA
@@ -128,7 +128,7 @@ void BaseScreen::initHeads(HeadMode headMode) throw(InitException) {
 }
 
 // Initializes all of the windows on the screen.
-void BaseScreen::initWindows() throw() {
+void BaseScreen::initWindows() {
     Window root;
     Window parent;
     Window *children = 0;
@@ -148,7 +148,7 @@ void BaseScreen::initWindows() throw() {
 //--- WINDOW MANIPULATION ------------------------------------------------------
 
 // Creates a new window and inserts it into the list of windows.
-void BaseScreen::createWindow(Window window) throw(WindowException) {
+void BaseScreen::createWindow(Window window) {
     if (isWindowIgnored(window)) {
         return;
     }
@@ -182,7 +182,7 @@ void BaseScreen::createWindow(Window window) throw(WindowException) {
 }
 
 // Damages a window on this screen.
-void BaseScreen::damageWindow(Window window) throw() {
+void BaseScreen::damageWindow(Window window) {
     if (isWindowIgnored(window)) {
         return;
     }
@@ -203,7 +203,7 @@ void BaseScreen::damageWindow(Window window) throw() {
 }
 
 // Destroys a window on this screen.
-void BaseScreen::destroyWindow(Window window) throw() {
+void BaseScreen::destroyWindow(Window window) {
     if (isWindowIgnored(window)) {
         return;
     }
@@ -223,7 +223,7 @@ void BaseScreen::destroyWindow(Window window) throw() {
 }
 
 // Maps a window on this screen.
-void BaseScreen::mapWindow(Window window) throw() {
+void BaseScreen::mapWindow(Window window) {
     if (isWindowIgnored(window)) {
         return;
     }
@@ -242,7 +242,7 @@ void BaseScreen::mapWindow(Window window) throw() {
 }
 
 // Updates window's configuration.
-void BaseScreen::reconfigureWindow(const XConfigureEvent &event) throw() {
+void BaseScreen::reconfigureWindow(const XConfigureEvent &event) {
     if (isWindowIgnored(event.window)) {
         return;
     }
@@ -292,7 +292,7 @@ void BaseScreen::reconfigureWindow(const XConfigureEvent &event) throw() {
 }
 
 // Reparents a window.
-void BaseScreen::reparentWindow(Window window, Window parent) throw() {
+void BaseScreen::reparentWindow(Window window, Window parent) {
     if (parent == rootWindow().window()) {
         createWindow(window);
     } else {
@@ -301,7 +301,7 @@ void BaseScreen::reparentWindow(Window window, Window parent) throw() {
 }
 
 // Updates window's shape.
-void BaseScreen::updateShape(Window window) throw() {
+void BaseScreen::updateShape(Window window) {
     if (isWindowIgnored(window)) {
         return;
     }
@@ -320,7 +320,7 @@ void BaseScreen::updateShape(Window window) throw() {
 }
 
 // Unmaps a window on this screen.
-void BaseScreen::unmapWindow(Window window) throw() {
+void BaseScreen::unmapWindow(Window window) {
     if (isWindowIgnored(window)) {
         return;
     }
@@ -339,7 +339,7 @@ void BaseScreen::unmapWindow(Window window) throw() {
 }
 
 // Updates the value of some window's property.
-void BaseScreen::updateWindowProperty(Window window, Atom property, int state) throw() {
+void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
     if (isWindowIgnored(window)) {
         return;
     }
@@ -395,7 +395,7 @@ void BaseScreen::updateWindowProperty(Window window, Atom property, int state) t
 
 
 // Adds a window to ignore list, stops tracking it if it is being tracked.
-void BaseScreen::addWindowToIgnoreList(Window window) throw() {
+void BaseScreen::addWindowToIgnoreList(Window window) {
     if (!isWindowIgnored(window)) {
         m_ignoreList.push_back(window);
 
@@ -408,7 +408,7 @@ void BaseScreen::addWindowToIgnoreList(Window window) throw() {
 }
 
 // Checks whether a given window is managed by the current screen.
-bool BaseScreen::isWindowManaged(Window window) throw() {
+bool BaseScreen::isWindowManaged(Window window) {
     return (getWindowIterator(window) != m_windows.end());
 }
 
@@ -416,7 +416,7 @@ bool BaseScreen::isWindowManaged(Window window) throw() {
 //--- SCREEN MANIPULATION ----------------------------------------------
 
 // Notifies the screen of the background change.
-void BaseScreen::setRootPixmapChanged() throw() {
+void BaseScreen::setRootPixmapChanged() {
     BasePlugin *plugin = NULL;
     forEachPlugin(i, plugin) {
         plugin->setRootPixmapChanged();
@@ -424,7 +424,7 @@ void BaseScreen::setRootPixmapChanged() throw() {
 }
 
 // Notifies the screen of a root window change.
-void BaseScreen::setRootWindowSizeChanged() throw() {
+void BaseScreen::setRootWindowSizeChanged() {
     BasePlugin *plugin = NULL;
     forEachPlugin(i, plugin) {
         plugin->setRootWindowSizeChanged();
@@ -435,7 +435,7 @@ void BaseScreen::setRootWindowSizeChanged() throw() {
 //--- CONVENIENCE FUNCTIONS ----------------------------------------------------
 
 // Returns the parent of a given window.
-Window BaseScreen::getParentWindow(Window window) throw() {
+Window BaseScreen::getParentWindow(Window window) {
     Window root;
     Window parent;
     Window *children = 0;
@@ -450,7 +450,7 @@ Window BaseScreen::getParentWindow(Window window) throw() {
 }
 
 // Returns an iterator of m_windows that points to the given window.
-std::list<BaseCompWindow*>::iterator BaseScreen::getWindowIterator(Window window) throw() {
+std::list<BaseCompWindow*>::iterator BaseScreen::getWindowIterator(Window window) {
     std::list<BaseCompWindow*>::iterator it = m_windows.begin();
     while (it != m_windows.end()) {
         if (window == (*it)->window()) {
@@ -462,7 +462,7 @@ std::list<BaseCompWindow*>::iterator BaseScreen::getWindowIterator(Window window
 }
 
 // Returns the first managed ancestor of a window.
-std::list<BaseCompWindow*>::iterator BaseScreen::getFirstManagedAncestorIterator(Window window) throw() {
+std::list<BaseCompWindow*>::iterator BaseScreen::getFirstManagedAncestorIterator(Window window) {
     if (window == None) {
         return m_windows.end();
     }
@@ -481,7 +481,7 @@ std::list<BaseCompWindow*>::iterator BaseScreen::getFirstManagedAncestorIterator
 }
 
 // Returns whether the given window is in the ignore list.
-bool BaseScreen::isWindowIgnored(Window window) throw() {
+bool BaseScreen::isWindowIgnored(Window window) {
     return (find(m_ignoreList.begin(), m_ignoreList.end(), window) != m_ignoreList.end());
 }
 

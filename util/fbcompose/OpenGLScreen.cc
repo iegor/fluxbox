@@ -117,7 +117,7 @@ namespace {
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-OpenGLScreen::OpenGLScreen(int screenNumber, const CompositorConfig &config) throw(InitException) :
+OpenGLScreen::OpenGLScreen(int screenNumber, const CompositorConfig &config) :
     BaseScreen(screenNumber, Plugin_OpenGL, config) {
 
     m_backgroundChanged = true;
@@ -137,7 +137,7 @@ OpenGLScreen::OpenGLScreen(int screenNumber, const CompositorConfig &config) thr
 }
 
 // Destructor.
-OpenGLScreen::~OpenGLScreen() throw() {
+OpenGLScreen::~OpenGLScreen() {
     XUnmapWindow(display(), m_renderingWindow);
 
     glDetachShader(m_shaderProgram, m_vertexShader);
@@ -166,13 +166,13 @@ OpenGLScreen::~OpenGLScreen() throw() {
 //--- SCREEN MANIPULATION ----------------------------------------------
 
 // Notifies the screen of the background change.
-void OpenGLScreen::setRootPixmapChanged() throw() {
+void OpenGLScreen::setRootPixmapChanged() {
     BaseScreen::setRootPixmapChanged();
     m_backgroundChanged = true;
 }
 
 // Notifies the screen of a root window change.
-void OpenGLScreen::setRootWindowSizeChanged() throw() {
+void OpenGLScreen::setRootWindowSizeChanged() {
     BaseScreen::setRootWindowSizeChanged();
     m_rootWindowChanged = true;
 }
@@ -185,7 +185,7 @@ void OpenGLScreen::setRootWindowSizeChanged() throw() {
 // using GLXEW zeroes the pointers, since glewInit() initializes them. And we
 // have to use GLXEW to have easy access to GLX's extensions. So, this function
 // performs minimal function initialization - just enough to create a context.
-void OpenGLScreen::earlyInitGLXPointers() throw(InitException) {
+void OpenGLScreen::earlyInitGLXPointers() {
     glXCreateNewContext = (PFNGLXCREATENEWCONTEXTPROC)glXGetProcAddress((GLubyte*)"glXCreateNewContext");
     if (!glXCreateNewContext) {
         throw InitException("Cannot initialize glXCreateNewContext function.");
@@ -208,7 +208,7 @@ void OpenGLScreen::earlyInitGLXPointers() throw(InitException) {
 }
 
 // Initializes the rendering context.
-void OpenGLScreen::initRenderingContext() throw(InitException) {
+void OpenGLScreen::initRenderingContext() {
     int nConfigs;
 
     GLXFBConfig *fbConfigs = glXChooseFBConfig(display(), screenNumber(), PREFERRED_FBCONFIG_ATTRIBUTES, &nConfigs);
@@ -236,7 +236,7 @@ void OpenGLScreen::initRenderingContext() throw(InitException) {
 }
 
 // Initializes the rendering surface.
-void OpenGLScreen::initRenderingSurface() throw(InitException) {
+void OpenGLScreen::initRenderingSurface() {
     // Creating an X window for rendering.
     Window compOverlay = XCompositeGetOverlayWindow(display(), rootWindow().window());
 
@@ -271,7 +271,7 @@ void OpenGLScreen::initRenderingSurface() throw(InitException) {
 }
 
 // Initializes GLEW.
-void OpenGLScreen::initGlew() throw(InitException) {
+void OpenGLScreen::initGlew() {
     glXMakeCurrent(display(), m_glxRenderingWindow, m_glxContext);
 
     // Initialize GLEW.
@@ -289,7 +289,7 @@ void OpenGLScreen::initGlew() throw(InitException) {
 }
 
 // Finishes the initialization of the rendering context and surface.
-void OpenGLScreen::finishRenderingInit() throw(InitException) {
+void OpenGLScreen::finishRenderingInit() {
     glXMakeCurrent(display(), m_glxRenderingWindow, m_glxContext);
 
     glEnable(GL_BLEND);
@@ -301,7 +301,7 @@ void OpenGLScreen::finishRenderingInit() throw(InitException) {
 }
 
 // Initializes shaders.
-void OpenGLScreen::initShaders() throw(InitException) {
+void OpenGLScreen::initShaders() {
     std::stringstream ss;
     OpenGLPlugin *plugin;
 
@@ -347,7 +347,7 @@ void OpenGLScreen::initShaders() throw(InitException) {
 
 
 // Creates default texture rendering buffers.
-void OpenGLScreen::createDefaultElements() throw(InitException) {
+void OpenGLScreen::createDefaultElements() {
     int textureData[1][1];
 
     // Default black texture.
@@ -394,7 +394,7 @@ void OpenGLScreen::createDefaultElements() throw(InitException) {
 }
 
 // Creates the background texture.
-void OpenGLScreen::createBackgroundTexture() throw(InitException) {
+void OpenGLScreen::createBackgroundTexture() {
     glGenTextures(1, &m_backgroundTexture);
     glBindTexture(GL_TEXTURE_2D, m_backgroundTexture);
 
@@ -405,7 +405,7 @@ void OpenGLScreen::createBackgroundTexture() throw(InitException) {
 }
 
 // Creates all elements, needed to draw the reconfigure rectangle.
-void OpenGLScreen::createReconfigureRectElements() throw(InitException) {
+void OpenGLScreen::createReconfigureRectElements() {
     // Buffers.
     glGenBuffers(1, &m_reconfigureRectLinePosBuffer);
 
@@ -416,7 +416,7 @@ void OpenGLScreen::createReconfigureRectElements() throw(InitException) {
 }
 
 // Finish plugin initialization.
-void OpenGLScreen::initPlugins() throw(InitException) {
+void OpenGLScreen::initPlugins() {
     OpenGLPlugin *plugin = NULL;
     forEachPlugin(i, plugin) {
         plugin->initOpenGL(m_shaderProgram);
@@ -427,7 +427,7 @@ void OpenGLScreen::initPlugins() throw(InitException) {
 //--- OTHER FUNCTIONS --------------------------------------------------
 
 // Renews the background texture.
-void OpenGLScreen::updateBackgroundTexture() throw() {
+void OpenGLScreen::updateBackgroundTexture() {
     Pixmap bgPixmap = rootWindowPixmap();
 
     if (bgPixmap) {
@@ -449,7 +449,7 @@ void OpenGLScreen::updateBackgroundTexture() throw() {
 }
 
 // React to the geometry change of the root window.
-void OpenGLScreen::updateOnRootWindowResize() throw() {
+void OpenGLScreen::updateOnRootWindowResize() {
     XResizeWindow(display(), m_renderingWindow, rootWindow().width(), rootWindow().height());
 
     std::list<BaseCompWindow*>::const_iterator it = allWindows().begin();
@@ -465,7 +465,7 @@ void OpenGLScreen::updateOnRootWindowResize() throw() {
 //--- CONVENIENCE OPENGL WRAPPERS ----------------------------------------------
 
 // Creates a shader.
-GLuint OpenGLScreen::createShader(GLenum shaderType, GLint sourceLength, const GLchar *source) throw(InitException) {
+GLuint OpenGLScreen::createShader(GLenum shaderType, GLint sourceLength, const GLchar *source) {
     FbTk::FbString shaderName;
     if (shaderType == GL_VERTEX_SHADER) {
         shaderName = "vertex";
@@ -505,7 +505,7 @@ GLuint OpenGLScreen::createShader(GLenum shaderType, GLint sourceLength, const G
 }
 
 // Creates a shader program.
-GLuint OpenGLScreen::createShaderProgram(GLuint vertexShader, GLuint geometryShader, GLuint fragmentShader) throw(InitException) {
+GLuint OpenGLScreen::createShaderProgram(GLuint vertexShader, GLuint geometryShader, GLuint fragmentShader) {
     GLuint program = glCreateProgram();
     if (!program) {
         throw InitException("Cannot create a shader program.");
@@ -542,7 +542,7 @@ GLuint OpenGLScreen::createShaderProgram(GLuint vertexShader, GLuint geometrySha
 //--- WINDOW MANIPULATION ------------------------------------------------------
 
 // Creates a window object from its XID.
-BaseCompWindow *OpenGLScreen::createWindowObject(Window window) throw(InitException) {
+BaseCompWindow *OpenGLScreen::createWindowObject(Window window) {
     OpenGLWindow *newWindow = new OpenGLWindow(*this, window, m_fbConfig);
     return newWindow;
 }
@@ -551,7 +551,7 @@ BaseCompWindow *OpenGLScreen::createWindowObject(Window window) throw(InitExcept
 //--- SCREEN RENDERING ---------------------------------------------------------
 
 // Renders the screen's contents.
-void OpenGLScreen::renderScreen() throw() {
+void OpenGLScreen::renderScreen() {
     // React to root window changes.
     if (m_rootWindowChanged) {
         updateOnRootWindowResize();
@@ -590,7 +590,7 @@ void OpenGLScreen::renderScreen() throw() {
 
 
 // A function to render the desktop background.
-void OpenGLScreen::renderBackground() throw() {
+void OpenGLScreen::renderBackground() {
     OpenGLPlugin *plugin = NULL;
 
     // Update desktop background texture.
@@ -610,7 +610,7 @@ void OpenGLScreen::renderBackground() throw() {
 }
 
 // Perform extra rendering jobs from plugins.
-void OpenGLScreen::renderExtraJobs() throw() {
+void OpenGLScreen::renderExtraJobs() {
     OpenGLPlugin *plugin = NULL;
 
     GLfloat alpha;
@@ -636,7 +636,7 @@ void OpenGLScreen::renderExtraJobs() throw() {
 }
 
 // Render the reconfigure rectangle.
-void OpenGLScreen::renderReconfigureRect() throw() {
+void OpenGLScreen::renderReconfigureRect() {
     OpenGLPlugin *plugin = NULL;
 
     // Convert reconfigure rectangle to OpenGL coordinates.
@@ -666,7 +666,7 @@ void OpenGLScreen::renderReconfigureRect() throw() {
 }
 
 // A function to render a particular window onto the screen.
-void OpenGLScreen::renderWindow(OpenGLWindow &window) throw() {
+void OpenGLScreen::renderWindow(OpenGLWindow &window) {
     OpenGLPlugin *plugin = NULL;
 
     // Update window's contents.
@@ -691,7 +691,7 @@ void OpenGLScreen::renderWindow(OpenGLWindow &window) throw() {
 // A function to render something onto the screen.
 void OpenGLScreen::render(GLenum renderingMode, GLuint primPosBuffer, GLuint mainTexCoordBuffer, GLuint mainTexture,
                           GLuint shapeTexCoordBuffer, GLuint shapeTexture, GLuint elementBuffer, GLuint elementCount,
-                          GLfloat alpha) throw() {
+                          GLfloat alpha) {
     // Load primitive position vertex array.
     glBindBuffer(GL_ARRAY_BUFFER, primPosBuffer);
     glVertexAttribPointer(m_primPosAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));

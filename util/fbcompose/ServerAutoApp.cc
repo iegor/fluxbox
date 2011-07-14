@@ -45,7 +45,7 @@ const int ServerAutoApp::SLEEP_TIME = 10000;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-ServerAutoApp::ServerAutoApp(const CompositorConfig &config) throw(InitException) :
+ServerAutoApp::ServerAutoApp(const CompositorConfig &config) :
     App(config.displayName().c_str()) {
 
     if (config.renderingMode() != RM_ServerAuto) {
@@ -58,13 +58,13 @@ ServerAutoApp::ServerAutoApp(const CompositorConfig &config) throw(InitException
 }
 
 // Destructor.
-ServerAutoApp::~ServerAutoApp() throw() { }
+ServerAutoApp::~ServerAutoApp() { }
 
 
 //--- INITIALIZATION FUNCTIONS -------------------------------------------------
 
 // Initialize Composite extension.
-void ServerAutoApp::initComposite() throw(InitException) {
+void ServerAutoApp::initComposite() {
     int eventBase;
     int errorBase;
     int majorVer;
@@ -85,7 +85,7 @@ void ServerAutoApp::initComposite() throw(InitException) {
 }
 
 // Prepare screens.
-void ServerAutoApp::initScreens() throw(InitException) {
+void ServerAutoApp::initScreens() {
     int screenCount = XScreenCount(display());
     for (int i = 0; i < screenCount; i++) {
         XCompositeRedirectSubwindows(display(), XRootWindow(display(), i), CompositeRedirectAutomatic);
@@ -108,7 +108,7 @@ void ServerAutoApp::initScreens() throw(InitException) {
 //--- EVENT LOOP ---------------------------------------------------------------
 
 // Enters the event loop.
-void ServerAutoApp::eventLoop() throw() {
+void ServerAutoApp::eventLoop() {
     timespec sleepTimespec = { 0, SLEEP_TIME * 1000 };
     while (!done()) {
         nanosleep(&sleepTimespec, NULL);

@@ -62,7 +62,7 @@ const int Compositor::SLEEP_TIME = 5000;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // The constructor.
-Compositor::Compositor(const CompositorConfig &config) throw(InitException) :
+Compositor::Compositor(const CompositorConfig &config) :
     App(config.displayName().c_str()) {
 
     XSynchronize(display(), True);
@@ -129,7 +129,7 @@ Compositor::Compositor(const CompositorConfig &config) throw(InitException) :
 }
 
 // Destructor.
-Compositor::~Compositor() throw() {
+Compositor::~Compositor() {
     std::vector<BaseScreen*>::iterator it = m_screens.begin();
     while (it != m_screens.end()) {
         delete *it;
@@ -141,7 +141,7 @@ Compositor::~Compositor() throw() {
 //--- INITIALIZATION FUNCTIONS -----------------------------------------
 
 // Acquires the ownership of compositing manager selections.
-Window Compositor::getCMSelectionOwnership(int screenNumber) throw(InitException) {
+Window Compositor::getCMSelectionOwnership(int screenNumber) {
     Atom cmAtom = Atoms::compositingSelectionAtom(screenNumber);
 
     Window curOwner = XGetSelectionOwner(display(), cmAtom);
@@ -159,7 +159,7 @@ Window Compositor::getCMSelectionOwnership(int screenNumber) throw(InitException
 }
 
 // Initializes X's extensions.
-void Compositor::initAllExtensions() throw(InitException) {
+void Compositor::initAllExtensions() {
 #ifdef USE_OPENGL_COMPOSITING
     if (m_renderingMode == RM_OpenGL) {
         initExtension("GLX", &glXQueryExtension, &glXQueryVersion, 1, 4, &m_glxEventBase, &m_glxErrorBase);
@@ -186,7 +186,7 @@ void Compositor::initAllExtensions() throw(InitException) {
 // Initializes a particular X server extension.
 void Compositor::initExtension(const char *extensionName, QueryExtensionFunction extensionFunc,
                                QueryVersionFunction versionFunc, const int minMajorVer, const int minMinorVer,
-                               int *eventBase, int *errorBase) throw(InitException) {
+                               int *eventBase, int *errorBase) {
     int majorVer;
     int minorVer;
 
@@ -223,7 +223,7 @@ void Compositor::initExtension(const char *extensionName, QueryExtensionFunction
 }
 
 // Initializes monitor heads on every screen.
-void Compositor::initHeads() throw() {
+void Compositor::initHeads() {
     HeadMode headMode = Heads_One;
 
 #ifdef XINERAMA
@@ -248,7 +248,7 @@ void Compositor::initHeads() throw() {
 //--- EVENT LOOP ---------------------------------------------------------------
 
 // The event loop.
-void Compositor::eventLoop() throw(RuntimeException) {
+void Compositor::eventLoop() {
     XEvent event;
     int eventScreen;
     timespec sleepTimespec = { 0, SLEEP_TIME * 1000 };
@@ -344,7 +344,7 @@ void Compositor::eventLoop() throw(RuntimeException) {
 //--- INTERNAL FUNCTIONS -----------------------------------------------
 
 // Locates the screen an event affects. Returns -1 on failure.
-int Compositor::screenOfEvent(const XEvent &event) throw() {
+int Compositor::screenOfEvent(const XEvent &event) {
     for (size_t i = 0; i < m_screens.size(); i++) {
         if (event.xany.window == m_screens[i]->rootWindow().window()) {
             return i;
@@ -364,7 +364,7 @@ int Compositor::screenOfEvent(const XEvent &event) throw() {
 //--- VARIOUS HANDLERS ---------------------------------------------------------
 
 // Custom signal handler.
-void FbCompositor::handleSignal(int sig) throw() {
+void FbCompositor::handleSignal(int sig) {
     if ((sig == SIGINT) || (sig == SIGTERM)) {
         FbTk::App::instance()->end();
     }

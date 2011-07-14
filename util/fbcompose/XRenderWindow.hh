@@ -48,51 +48,51 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        XRenderWindow(const BaseScreen &screen, Window windowXID, const char *pictFilter) throw(InitException);
+        XRenderWindow(const BaseScreen &screen, Window windowXID, const char *pictFilter);
 
         /** Destructor. */
-        ~XRenderWindow() throw();
+        ~XRenderWindow();
 
 
         //--- ACCESSORS --------------------------------------------------------
 
         /** \returns an object, holding the window's contents as an XRender picture. */
-        XRenderPictureWrapperPtr contentPicture() const throw();
+        XRenderPictureWrapperPtr contentPicture() const;
         
         /** \returns an object, the window's mask picture. */
-        XRenderPictureWrapperPtr maskPicture() const throw();
+        XRenderPictureWrapperPtr maskPicture() const;
 
 
         //--- WINDOW MANIPULATION ----------------------------------------------
 
         /** Update the window's contents. */
-        void updateContents() throw();
+        void updateContents();
 
         /** Update window's property. */
-        void updateProperty(Atom property, int state) throw();
+        void updateProperty(Atom property, int state);
 
 
     protected:
         //--- PROTECTED WINDOW MANIPULATION ------------------------------------
 
         /** Update the window's clip shape. */
-        void updateShape() throw();
+        void updateShape();
 
 
     private:
         //--- CONVENIENCE ACCESSORS --------------------------------------------
 
         /** \returns the window's contents as an XRender picture. */
-        Picture direct_contentPicture() const throw();
+        Picture direct_contentPicture() const;
 
         /** \returns the window's mask picture. */
-        Picture direct_maskPicture() const throw();
+        Picture direct_maskPicture() const;
 
 
         //--- INTERNAL FUNCTIONS -----------------------------------------------
 
         /** Update the window's mask picture. */
-        void updateMaskPicture() throw();
+        void updateMaskPicture();
 
 
         //--- RENDERING RELATED ------------------------------------------------
@@ -116,23 +116,23 @@ namespace FbCompositor {
     //--- INLINE FUNCTIONS -----------------------------------------------------
 
     // Returns the window's contents as an XRender picture.
-    inline XRenderPictureWrapperPtr XRenderWindow::contentPicture() const throw() {
+    inline XRenderPictureWrapperPtr XRenderWindow::contentPicture() const {
         return m_contentPicture;
     }
 
     // Returns the window's mask picture.
-    inline XRenderPictureWrapperPtr XRenderWindow::maskPicture() const throw() {
+    inline XRenderPictureWrapperPtr XRenderWindow::maskPicture() const {
         return m_maskPicture;
     }
 
 
     // Returns the window's contents as an XRender picture.
-    inline Picture XRenderWindow::direct_contentPicture() const throw() {
+    inline Picture XRenderWindow::direct_contentPicture() const {
         return m_contentPicture->unwrap();
     }
 
     // Returns the window's mask picture.
-    inline Picture XRenderWindow::direct_maskPicture() const throw() {
+    inline Picture XRenderWindow::direct_maskPicture() const {
         return m_maskPicture->unwrap();
     }
 }

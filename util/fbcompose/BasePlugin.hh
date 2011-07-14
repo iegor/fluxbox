@@ -52,58 +52,58 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        BasePlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args) throw(InitException);
+        BasePlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args);
 
         /** Destructor. */
-        virtual ~BasePlugin() throw();
+        virtual ~BasePlugin();
 
 
         //--- ACCESSORS --------------------------------------------------------
 
         /** \returns the current connection to the X server. */
-        Display *display() const throw();
+        Display *display() const;
 
         /** \returns the name of the plugin. */
-        virtual const char *pluginName() const throw() = 0;
+        virtual const char *pluginName() const = 0;
 
         /** \returns the screen this plugin operates on. */
-        const BaseScreen &screen() const throw();
+        const BaseScreen &screen() const;
 
 
         //--- WINDOW EVENT CALLBACKS -------------------------------------------
 
         /** Called, whenever a new window is created. */
-        virtual void windowCreated(const BaseCompWindow &window) throw();
+        virtual void windowCreated(const BaseCompWindow &window);
 
         /** Called, whenever a window is damaged. */
-        virtual void windowDamaged(const BaseCompWindow &window) throw();
+        virtual void windowDamaged(const BaseCompWindow &window);
 
         /** Called, whenever a window is destroyed. */
-        virtual void windowDestroyed(const BaseCompWindow &window) throw();
+        virtual void windowDestroyed(const BaseCompWindow &window);
 
         /** Called, whenever a window is mapped. */
-        virtual void windowMapped(const BaseCompWindow &window) throw();
+        virtual void windowMapped(const BaseCompWindow &window);
 
         /** Called, whenever window's property is changed. */
-        virtual void windowPropertyChanged(const BaseCompWindow &window, Atom property, int state) throw();
+        virtual void windowPropertyChanged(const BaseCompWindow &window, Atom property, int state);
 
         /** Called, whenever a window is reconfigured. */
-        virtual void windowReconfigured(const BaseCompWindow &window) throw();
+        virtual void windowReconfigured(const BaseCompWindow &window);
 
         /** Called, whenever window's shape changes. */
-        virtual void windowShapeChanged(const BaseCompWindow &window) throw();
+        virtual void windowShapeChanged(const BaseCompWindow &window);
 
         /** Called, whenever a window is unmapped. */
-        virtual void windowUnmapped(const BaseCompWindow &window) throw();
+        virtual void windowUnmapped(const BaseCompWindow &window);
 
 
         //--- SCREEN CHANGES ---------------------------------------------------
 
         /** Notifies the screen of a background change. */
-        virtual void setRootPixmapChanged() throw();
+        virtual void setRootPixmapChanged();
 
         /** Notifies the screen of a root window change. */
-        virtual void setRootWindowSizeChanged() throw();
+        virtual void setRootWindowSizeChanged();
 
 
     private :
@@ -126,12 +126,12 @@ namespace FbCompositor {
     //--- INLINE FUNCTIONS -----------------------------------------------------
 
     /** \returns the current connection to the X server. */
-    inline Display *BasePlugin::display() const throw() {
+    inline Display *BasePlugin::display() const {
         return m_display;
     }
 
     // Returns the screen this plugin operates on.
-    inline const BaseScreen &BasePlugin::screen() const throw() {
+    inline const BaseScreen &BasePlugin::screen() const {
         return m_screen;
     }
 }

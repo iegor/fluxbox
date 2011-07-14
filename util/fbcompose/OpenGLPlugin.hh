@@ -56,68 +56,68 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        OpenGLPlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args) throw(InitException);
+        OpenGLPlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args);
 
         /** Destructor. */
-        virtual ~OpenGLPlugin() throw();
+        virtual ~OpenGLPlugin();
 
 
         //--- OTHER INITIALIZATION ---------------------------------------------
 
         /** Initialize OpenGL-specific code. */
-        virtual void initOpenGL(GLuint shaderProgram) throw(InitException);
+        virtual void initOpenGL(GLuint shaderProgram);
 
 
         //--- ACCESSORS --------------------------------------------------------
 
         /** \returns the screen object, cast into the correct class. */
-        const OpenGLScreen &openGLScreen() const throw();
+        const OpenGLScreen &openGLScreen() const;
 
 
         /** \returns the additional source code for the fragment shader. */
-        virtual const char *fragmentShader() const throw() = 0;
+        virtual const char *fragmentShader() const = 0;
 
         /** \returns the additional source code for the vertex shader. */
-        virtual const char *vertexShader() const throw() = 0;
+        virtual const char *vertexShader() const = 0;
 
 
         //--- RENDERING ACTIONS ------------------------------------------------
 
         /** Pre background rendering actions. */
-        virtual void preBackgroundRenderActions() throw();
+        virtual void preBackgroundRenderActions();
 
         /** Post background rendering actions. */
-        virtual void postBackgroundRenderActions() throw();
+        virtual void postBackgroundRenderActions();
 
         /** Pre window rendering actions. */
-        virtual void preReconfigureRectRenderActions(XRectangle reconfigureRect) throw();
+        virtual void preReconfigureRectRenderActions(XRectangle reconfigureRect);
 
         /** Post window rendering actions. */
-        virtual void postReconfigureRectRenderActions(XRectangle reconfigureRect) throw();
+        virtual void postReconfigureRectRenderActions(XRectangle reconfigureRect);
 
         /** Pre window rendering actions. */
-        virtual void preWindowRenderActions(const OpenGLWindow &window) throw();
+        virtual void preWindowRenderActions(const OpenGLWindow &window);
 
         /** Post window rendering actions. */
-        virtual void postWindowRenderActions(const OpenGLWindow &window) throw();
+        virtual void postWindowRenderActions(const OpenGLWindow &window);
 
 
         /** Called before the extra rendering jobs are executed. */
-        virtual void preExtraRenderingActions() throw();
+        virtual void preExtraRenderingActions();
 
         /** \returns the number of extra rendering jobs the plugin will do. */
-        virtual int extraRenderingJobCount() throw();
+        virtual int extraRenderingJobCount();
 
         /** Initialize the specified extra rendering job. */
         virtual void extraRenderingJobInit(int job, GLuint &primPosBuffer_return, GLuint &mainTexCoordBuffer_return,
                                            GLuint &mainTexture_return, GLuint &shapeTexCoordBuffer_return,
-                                           GLuint &shapeTexture_return, GLfloat &alpha_return) throw();
+                                           GLuint &shapeTexture_return, GLfloat &alpha_return);
 
         /** Clean up after an extra rendering job. */
-        virtual void extraRenderingJobCleanup(int job) throw();
+        virtual void extraRenderingJobCleanup(int job);
 
         /** Called after the extra rendering jobs are executed. */
-        virtual void postExtraRenderingActions() throw();
+        virtual void postExtraRenderingActions();
     };
 }
 

@@ -47,66 +47,66 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        XRenderScreen(int screenNumber, const CompositorConfig &config) throw(InitException);
+        XRenderScreen(int screenNumber, const CompositorConfig &config);
 
         /** Destructor. */
-        ~XRenderScreen() throw();
+        ~XRenderScreen();
 
 
         //--- SCREEN MANIPULATION ----------------------------------------------
 
         /** Notifies the screen of a background change. */
-        void setRootPixmapChanged() throw();
+        void setRootPixmapChanged();
 
         /** Notifies the screen of a root window change. */
-        void setRootWindowSizeChanged() throw();
+        void setRootWindowSizeChanged();
 
 
         //--- SCREEN RENDERING -------------------------------------------------
 
         /** Renders the screen's contents. */
-        void renderScreen() throw();
+        void renderScreen();
 
 
     protected:
         //--- SPECIALIZED WINDOW MANIPULATION FUNCTIONS ------------------------
 
         /** Creates a window object from its XID. */
-        BaseCompWindow *createWindowObject(Window window) throw(InitException);
+        BaseCompWindow *createWindowObject(Window window);
 
 
     private:
         //--- INITIALIZATION FUNCTIONS -----------------------------------------
 
         /** Initializes the rendering surface. */
-        void initRenderingSurface() throw(InitException);
+        void initRenderingSurface();
 
         /** Initializes background picture. */
-        void initBackgroundPicture() throw();
+        void initBackgroundPicture();
 
 
         //--- SCREEN MANIPULATION ----------------------------------------------
 
         /** Update the background picture. */
-        void updateBackgroundPicture() throw();
+        void updateBackgroundPicture();
 
 
         //--- RENDERING FUNCTIONS ----------------------------------------------
 
         /** Render the desktop wallpaper. */
-        void renderBackground() throw();
+        void renderBackground();
 
         /** Perform extra rendering jobs from plugins. */
-        void renderExtraJobs() throw();
+        void renderExtraJobs();
 
         /** Render the reconfigure rectangle. */
-        void renderReconfigureRect() throw();
+        void renderReconfigureRect();
 
         /** Render a particular window onto the screen. */
-        void renderWindow(XRenderWindow &window) throw();
+        void renderWindow(XRenderWindow &window);
 
         /** Swap back and front buffers. */
-        void swapBuffers() throw();
+        void swapBuffers();
 
 
         //--- MAIN RENDERING-RELATED VARIABLES ---------------------------------

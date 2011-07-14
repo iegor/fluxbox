@@ -68,28 +68,28 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        Compositor(const CompositorConfig &configuration) throw(InitException);
+        Compositor(const CompositorConfig &configuration);
 
         /** Destructor. */
-        ~Compositor() throw();
+        ~Compositor();
 
 
         //--- ACCESSORS --------------------------------------------------------
 
         /** \returns The number of available screens. */
-        int screenCount() const throw();
+        int screenCount() const;
 
         /** \returns the reference to a particular screen. */
-        BaseScreen &getScreen(int screenNumber) throw(RuntimeException);
+        BaseScreen &getScreen(int screenNumber);
 
         /** \returns the application's rendering mode. */
-        RenderingMode renderingMode() const throw();
+        RenderingMode renderingMode() const;
 
 
         //--- EVENT LOOP -------------------------------------------------------
 
         /** Enters the event loop. */
-        void eventLoop() throw(RuntimeException);
+        void eventLoop();
 
 
     private:
@@ -111,24 +111,24 @@ namespace FbCompositor {
         //--- INITIALIZATION FUNCTIONS -----------------------------------------
 
         /** Acquire the ownership of compositing manager selections. */
-        Window getCMSelectionOwnership(int screenNumber) throw(InitException);
+        Window getCMSelectionOwnership(int screenNumber);
 
         /** Initializes all relevant X's extensions. */
-        void initAllExtensions() throw(InitException);
+        void initAllExtensions();
 
         /** Initializes a particular X server extension. */
         void initExtension(const char *extensionName, QueryExtensionFunction extensionFunc,
                            QueryVersionFunction versionFunc, const int minMajorVer, const int minMinorVer,
-                           int *eventBase, int *errorBase) throw(InitException);
+                           int *eventBase, int *errorBase);
 
         /** Initializes monitor heads on every screen. */
-        void initHeads() throw();
+        void initHeads();
 
 
         //--- INTERNAL FUNCTIONS -----------------------------------------------
 
         /** Locates the screen an event affects. Returns -1 on failure. */
-        int screenOfEvent(const XEvent &event) throw();
+        int screenOfEvent(const XEvent &event);
 
 
         //--- COMPOSITOR VARIABLES ---------------------------------------------
@@ -192,7 +192,7 @@ namespace FbCompositor {
     //--- VARIOUS HANDLERS -----------------------------------------------------
 
     /** Custom signal handler. */
-    void handleSignal(int signal) throw();
+    void handleSignal(int signal);
 
 
     /** Custom X error handler (ignore). */
@@ -205,18 +205,18 @@ namespace FbCompositor {
     //--- OTHER FUNCTIONS ------------------------------------------------------
 
     /** \returns a properly type cast pointer to the app object. */
-    Compositor *compositorInstance() throw();
+    Compositor *compositorInstance();
 
 
     //--- INLINE FUNCTIONS -----------------------------------------------------
 
     // Returns a properly type cast pointer to the app object.
-    inline Compositor *compositorInstance() throw() {
+    inline Compositor *compositorInstance() {
         return dynamic_cast<Compositor*>(FbTk::App::instance());
     }
 
     // Returns a particular screen.
-    inline BaseScreen &Compositor::getScreen(int screenNumber) throw(RuntimeException) {
+    inline BaseScreen &Compositor::getScreen(int screenNumber) {
         if ((screenNumber < 0) || (screenNumber >= screenCount())) {
             throw RuntimeException("getScreen(int) was given an out of bounds index.");
         }
@@ -224,12 +224,12 @@ namespace FbCompositor {
     }
 
     // Returns the rendering mode.
-    inline RenderingMode Compositor::renderingMode() const throw() {
+    inline RenderingMode Compositor::renderingMode() const {
         return m_renderingMode;
     }
 
     // Returns the number of screens.
-    inline int Compositor::screenCount() const throw() {
+    inline int Compositor::screenCount() const {
         return m_screens.size();
     }
 }

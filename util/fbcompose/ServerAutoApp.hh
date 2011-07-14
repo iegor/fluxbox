@@ -45,16 +45,16 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        ServerAutoApp(const CompositorConfig &config) throw(InitException);
+        ServerAutoApp(const CompositorConfig &config);
 
         /** Destructor. */
-        ~ServerAutoApp() throw();
+        ~ServerAutoApp();
 
 
         //--- EVENT LOOP -------------------------------------------------------
 
         /** Enters the event loop. */
-        void eventLoop() throw();
+        void eventLoop();
 
 
     private:
@@ -76,10 +76,10 @@ namespace FbCompositor {
         //--- INITIALIZATION FUNCTIONS -----------------------------------------
 
         /** Initialize Composite extension. */
-        void initComposite() throw(InitException);
+        void initComposite();
 
         /** Prepare screens. */
-        void initScreens() throw(InitException);
+        void initScreens();
     };
 }
 
