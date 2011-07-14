@@ -174,8 +174,12 @@ namespace FbCompositor {
         /** \returns the reconfigure rectangle. */
         XRectangle reconfigureRectangle() const;
 
+
         /** \returns the root window pixmap. */
-        Pixmap rootWindowPixmap();
+        Pixmap rootWindowPixmap() const;
+
+        /** \returns whether the root window pixmap was set by the WM. */
+        bool wmSetRootWindowPixmap() const;
 
 
         //--- SPECIALIZED WINDOW MANIPULATION FUNCTIONS ------------------------
@@ -189,6 +193,18 @@ namespace FbCompositor {
 
         /** Copy constructor. */
         BaseScreen(const BaseScreen&);
+
+
+        //--- CONVENIENCE PROPERTY UPDATE FUNCTIONS ----------------------------
+
+        /** Update stored active window. */
+        void updateActiveWindow();
+
+        /** Update stored reconfigure rectangle. */
+        void updateReconfigureRect();
+
+        /** Update stored root window pixmap. */
+        void updateRootWindowPixmap();
 
 
         //--- CONVENIENCE FUNCTIONS --------------------------------------------
@@ -206,7 +222,7 @@ namespace FbCompositor {
         bool isWindowIgnored(Window window);
 
 
-        //--- PRIVATE VARIABLES ------------------------------------------------
+        //--- MAIN SCREEN DATA -------------------------------------------------
 
         /** Current connection to the X server. */
         Display *m_display;
@@ -241,6 +257,15 @@ namespace FbCompositor {
 
         /** The total number of workspaces. */
         int m_workspaceCount;
+
+
+        //--- DESKTOP BACKGROUND-RELATED ---------------------------------------
+
+        /** Pixmap, containing the desktop background. */
+        Pixmap m_rootWindowPixmap;
+
+        /** Whether the background pixmap is set by the window manager. */
+        bool m_wmSetRootWindowPixmap;
     };
 
 
@@ -297,13 +322,18 @@ namespace FbCompositor {
     }
 
     // Returns the root window pixmap.
-    inline Pixmap BaseScreen::rootWindowPixmap() {
-        return rootWindow().singlePropertyValue<Pixmap>(Atoms::rootPixmapAtom(), None);
+    inline Pixmap BaseScreen::rootWindowPixmap() const {
+        return m_rootWindowPixmap;
     }
 
     // Returns the screen's number.
     inline int BaseScreen::screenNumber() const {
         return m_screenNumber;
+    }
+
+    // Returns whether the root window pixmap was set by the WM.
+    inline bool BaseScreen::wmSetRootWindowPixmap() const {
+        return m_wmSetRootWindowPixmap;
     }
 
     // Returns the index of the currently active workspace.

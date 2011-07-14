@@ -434,24 +434,22 @@ void OpenGLScreen::initPlugins() {
 
 // Renews the background texture.
 void OpenGLScreen::updateBackgroundTexture() {
-    Pixmap bgPixmap = rootWindowPixmap();
+    // TODO: Use pixmapToTexture.
 
-    if (bgPixmap) {
-        XImage *image = XGetImage(display(), bgPixmap, 0, 0, rootWindow().width(), rootWindow().height(), AllPlanes, ZPixmap);
-        if (!image) {
-            fbLog_warn << "Cannot create background texture (reason: cannot create XImage)." << std::endl;
-            return;
-        }
+    XImage *image = XGetImage(display(), rootWindowPixmap(), 0, 0, rootWindow().width(), rootWindow().height(), AllPlanes, ZPixmap);
 
+    if (!image) {
+        fbLog_warn << "Cannot create background texture (cannot create XImage), using default black." << std::endl;
+        m_backgroundTexture = m_blackTexture;
+    } else {
         glBindTexture(GL_TEXTURE_2D, m_backgroundTexture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, rootWindow().width(), rootWindow().height(),
                      0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)(&(image->data[0])));
 
         XDestroyImage(image);
-        m_backgroundChanged = false;
-    } else {
-        fbLog_warn << "Cannot create background texture (reason: cannot find bg pixmap atom)." << std::endl;
     }
+
+    m_backgroundChanged = false;
 }
 
 // React to the geometry change of the root window.

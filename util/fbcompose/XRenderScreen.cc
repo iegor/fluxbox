@@ -24,6 +24,7 @@
 
 #include "CompositorConfig.hh"
 #include "Logging.hh"
+#include "Utility.hh"
 #include "XRenderPlugin.hh"
 #include "XRenderWindow.hh"
 
@@ -196,23 +197,22 @@ void XRenderScreen::setRootWindowSizeChanged() {
 
 // Update the background picture.
 void XRenderScreen::updateBackgroundPicture() {
-    Pixmap bgPixmap = rootWindowPixmap();
-
-    if (bgPixmap) {
-        if (m_rootPicture) {
-            XRenderFreePicture(display(), m_rootPicture);
-            m_rootPicture = None;
-        }
-
-        XRenderPictureAttributes pa;
-        pa.subwindow_mode = IncludeInferiors;
-        long paMask = CPSubwindowMode;
-
-        m_rootPicture = XRenderCreatePicture(display(), bgPixmap, m_rootPictFormat, paMask, &pa);
-        m_rootChanged = false;
-    } else {
-        fbLog_warn << "Cannot create background texture (cannot find background pixmap)." << std::endl;
+    XRenderPictFormat *pictFormat = m_rootPictFormat;
+    if (!wmSetRootWindowPixmap()) {
+        pictFormat = XRenderFindStandardFormat(display(), PictStandardARGB32);
     }
+
+    if (m_rootPicture) {
+        XRenderFreePicture(display(), m_rootPicture);
+        m_rootPicture = None;
+    }
+
+    XRenderPictureAttributes pa;
+    pa.subwindow_mode = IncludeInferiors;
+    long paMask = CPSubwindowMode;
+
+    m_rootPicture = XRenderCreatePicture(display(), rootWindowPixmap(), pictFormat, paMask, &pa);
+    m_rootChanged = false;
 }
 
 

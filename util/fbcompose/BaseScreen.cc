@@ -25,6 +25,7 @@
 
 #include "CompositorConfig.hh"
 #include "Logging.hh"
+#include "Utility.hh"
 
 #include "FbTk/App.hh"
 
@@ -63,13 +64,17 @@ BaseScreen::BaseScreen(int screenNumber, PluginType pluginType, const Compositor
     m_display(FbTk::App::instance()->display()),
     m_pluginManager(pluginType, *this),
     m_screenNumber(screenNumber),
-    m_rootWindow(*this, XRootWindow(m_display, m_screenNumber)) {   // TODO: Is passing half-initialized *this safe here?
+    m_rootWindow(*this, XRootWindow(m_display, m_screenNumber)) {
 
     // Set up properties.
-    m_activeWindowXID = m_rootWindow.singlePropertyValue<Window>(Atoms::activeWindowAtom(), 0);
+    m_activeWindowXID = None;
     m_currentWorkspace = m_rootWindow.singlePropertyValue<long>(Atoms::workspaceAtom(), 0);
-    m_reconfigureRect.x = m_reconfigureRect.y = m_reconfigureRect.width = m_reconfigureRect.height = 0;
     m_workspaceCount = m_rootWindow.singlePropertyValue<long>(Atoms::workspaceCountAtom(), 1);
+    updateReconfigureRect();
+
+    m_rootWindowPixmap = None;
+    m_wmSetRootWindowPixmap = true;
+    updateRootWindowPixmap();
 
     // Set up plugins.
     for(size_t i = 0; i < config.plugins().size(); i++) {
@@ -346,26 +351,12 @@ void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
     
     if ((window == m_rootWindow.window()) && (property != None) && (state == PropertyNewValue)) {
         if (property == Atoms::activeWindowAtom()) {
-            Window activeWindow = m_rootWindow.singlePropertyValue<Window>(Atoms::activeWindowAtom(), None);
-            std::list<BaseCompWindow*>::iterator it = getFirstManagedAncestorIterator(activeWindow);
-
-            if (it != m_windows.end()) {
-                m_activeWindowXID = (*it)->window();
-            } else {
-                m_activeWindowXID = None;
-            }
+            updateActiveWindow();
         } else if (property == Atoms::reconfigureRectAtom()) {
-            std::vector<long> data = m_rootWindow.propertyValue<long>(Atoms::reconfigureRectAtom());
-            if (data.size() != 4) {
-                m_reconfigureRect.x = m_reconfigureRect.y = m_reconfigureRect.width = m_reconfigureRect.height = 0;
-            } else {
-                m_reconfigureRect.x = data[0];
-                m_reconfigureRect.y = data[1];
-                m_reconfigureRect.width = data[2];
-                m_reconfigureRect.height = data[3];
-            }
+            updateReconfigureRect();
         } else if (property == Atoms::rootPixmapAtom()) {
-            setRootPixmapChanged();
+            updateRootWindowPixmap();
+            setRootPixmapChanged();     // We don't want this called in the constructor, keep it here.
         } else if (property == Atoms::workspaceAtom()) {
             m_currentWorkspace = m_rootWindow.singlePropertyValue<long>(Atoms::workspaceAtom(), 0);
         } else if (property == Atoms::workspaceCountAtom()) {
@@ -413,7 +404,7 @@ bool BaseScreen::isWindowManaged(Window window) {
 }
 
 
-//--- SCREEN MANIPULATION ----------------------------------------------
+//--- SCREEN MANIPULATION ------------------------------------------------------
 
 // Notifies the screen of the background change.
 void BaseScreen::setRootPixmapChanged() {
@@ -428,6 +419,58 @@ void BaseScreen::setRootWindowSizeChanged() {
     BasePlugin *plugin = NULL;
     forEachPlugin(i, plugin) {
         plugin->setRootWindowSizeChanged();
+    }
+}
+
+
+//--- CONVENIENCE PROPERTY UPDATE FUNCTIONS ------------------------------------
+
+// Update stored active window.
+void BaseScreen::updateActiveWindow() {
+    Window activeWindow = m_rootWindow.singlePropertyValue<Window>(Atoms::activeWindowAtom(), None);
+
+    if (!activeWindow) {
+        m_activeWindowXID = None;
+    } else {
+        std::list<BaseCompWindow*>::iterator it = getFirstManagedAncestorIterator(activeWindow);
+
+        if (it != m_windows.end()) {
+            m_activeWindowXID = (*it)->window();
+        } else {
+            m_activeWindowXID = None;
+        }
+    }
+}
+
+// Update stored reconfigure rectangle.
+void BaseScreen::updateReconfigureRect() {
+    std::vector<long> data = m_rootWindow.propertyValue<long>(Atoms::reconfigureRectAtom());
+
+    if (data.size() != 4) {
+        m_reconfigureRect.x = m_reconfigureRect.y = m_reconfigureRect.width = m_reconfigureRect.height = 0;
+    } else {
+        m_reconfigureRect.x = data[0];
+        m_reconfigureRect.y = data[1];
+        m_reconfigureRect.width = data[2];
+        m_reconfigureRect.height = data[3];
+    }
+}
+
+// Update stored root window pixmap.
+void BaseScreen::updateRootWindowPixmap() {
+    if (m_rootWindowPixmap && !m_wmSetRootWindowPixmap) {
+        XFreePixmap(display(), m_rootWindowPixmap);
+        m_rootWindowPixmap = None;
+    }
+
+    m_rootWindowPixmap = rootWindow().singlePropertyValue<Pixmap>(Atoms::rootPixmapAtom(), None);
+    m_wmSetRootWindowPixmap = true;
+
+    if (!m_rootWindowPixmap) {
+        fbLog_warn << "Cannot find background pixmap, using plain black." << std::endl;
+        m_rootWindowPixmap = createSolidPixmap(display(), rootWindow().window(), rootWindow().width(),
+                                               rootWindow().height(), 0x00000000);
+        m_wmSetRootWindowPixmap = false;
     }
 }
 
