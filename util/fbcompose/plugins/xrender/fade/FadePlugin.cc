@@ -254,3 +254,8 @@ void FadePlugin::createFadedMask(int alpha, XRenderPictureWrapperPtr mask, XRect
 extern "C" BasePlugin *createPlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args) {
     return new FadePlugin(screen, args);
 }
+
+// Returns the type of the plugin.
+extern "C" FbCompositor::PluginType pluginType() {
+    return Plugin_XRender;
+}

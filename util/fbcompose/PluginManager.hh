@@ -50,6 +50,9 @@ namespace FbCompositor {
     /** A pointer to a function that creates a plugin class instance. */
     typedef BasePlugin* (*CreatePluginFunction)(const BaseScreen&, const std::vector<FbTk::FbString>&);
 
+    /** A pointer to a function that returns the rendering mode the plugin operates in. */
+    typedef PluginType (*PluginTypeFunction)();
+
 
     /**
      * Responsible for plugin loading, unloading and availibility.

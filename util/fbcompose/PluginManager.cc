@@ -89,6 +89,16 @@ void PluginManager::loadPlugin(FbTk::FbString name) {
         throw PluginException(ss.str());
     }
 
+    // Check for the correct plugin type
+    void *rawTypeFunc = getLibraryObject(handle, "pluginType", name.c_str(), "type function");
+    PluginTypeFunction typeFunc = reinterpret_cast<PluginTypeFunction>(rawTypeFunc);
+
+    if ((*(typeFunc))() != m_pluginType) {
+        std::stringstream ss;
+        ss << "Plugin " << name << " is of the wrong type.";
+        throw PluginException(ss.str());
+    }
+
     // Get the plugin creation function.
     void *rawCreateFunc = getLibraryObject(handle, "createPlugin", name.c_str(), "creation function");
 
