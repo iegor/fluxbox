@@ -87,6 +87,8 @@ Compositor::Compositor(const CompositorConfig &config) throw(InitException) :
     int screenCount = XScreenCount(display());
     m_screens.reserve(screenCount);
     for (int i = 0; i < screenCount; i++) {
+        Window cmSelectionOwner = getCMSelectionOwnership(i);
+
         switch (m_renderingMode) {
 
 #ifdef USE_OPENGL_COMPOSITING
@@ -106,7 +108,7 @@ Compositor::Compositor(const CompositorConfig &config) throw(InitException) :
             break;
         }
 
-        getCMSelectionOwnership(i);
+        m_screens[i]->addWindowToIgnoreList(cmSelectionOwner);
     }
 
     initHeads();
@@ -139,7 +141,7 @@ Compositor::~Compositor() throw() {
 //--- INITIALIZATION FUNCTIONS -----------------------------------------
 
 // Acquires the ownership of compositing manager selections.
-void Compositor::getCMSelectionOwnership(int screenNumber) throw(InitException) {
+Window Compositor::getCMSelectionOwnership(int screenNumber) throw(InitException) {
     Atom cmAtom = Atoms::compositingSelectionAtom(screenNumber);
 
     Window curOwner = XGetSelectionOwner(display(), cmAtom);
@@ -153,7 +155,7 @@ void Compositor::getCMSelectionOwnership(int screenNumber) throw(InitException) 
     XmbSetWMProperties(display(), curOwner, "fbcompose", "fbcompose", NULL, 0, NULL, NULL, NULL);
     XSetSelectionOwner(display(), cmAtom, curOwner, CurrentTime);
 
-    m_screens[screenNumber]->addWindowToIgnoreList(curOwner);
+    return curOwner;
 }
 
 // Initializes X's extensions.
