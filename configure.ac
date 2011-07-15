@@ -205,6 +205,9 @@ AM_CONDITIONAL(BUILD_FBCOMPOSE, test x$BUILD_FBCOMPOSE = xtrue)
 if test "x$BUILD_FBCOMPOSE" = "xtrue"; then
     AC_CHECK_LIB([Xcomposite],[XCompositeRedirectSubwindows])
     LDFLAGS="$LDFLAGS -export-dynamic"
+
+    AC_CHECK_HEADERS([ctime time.h],[break;],[AC_MSG_ERROR([Could not find neither ctime nor time.h header.])])
+    AC_CHECK_HEADERS([sys/time.h], , [AC_MSG_ERROR([Could not find sys/time.h header.])])
 fi
 
 enableval="yes"

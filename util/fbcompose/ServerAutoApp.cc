@@ -30,8 +30,15 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
-#include <ctime>
 #include <sstream>
+
+#ifdef HAVE_CTIME
+    #include <ctime>
+#else
+#ifdef HAVE_TIME_H
+    #include <time.h>
+#endif
+#endif
 
 using namespace FbCompositor;
 

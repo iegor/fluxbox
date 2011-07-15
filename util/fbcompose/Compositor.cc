@@ -47,7 +47,14 @@
 
 #include <sstream>
 
-#include <ctime>
+#ifdef HAVE_CTIME
+    #include <ctime>
+#else
+#ifdef HAVE_TIME_H
+    #include <time.h>
+#endif
+#endif
+
 #include <csignal>
 
 using namespace FbCompositor;
