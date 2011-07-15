@@ -187,16 +187,33 @@ AC_COMPILE_IFELSE([
 ])
 
 dnl Check for compositor features
-AC_CHECK_LIB([Xcomposite],[XCompositeRedirectSubwindows])
-LDFLAGS="$LDFLAGS -export-dynamic"
+enableval="yes"
+AC_MSG_CHECKING([whether fbcompose should be built])
+AC_ARG_ENABLE(fbcompose,
+              AC_HELP_STRING([--enable-fbcompose],
+                             [build th fluxbox compositor [default=yes]]), ,
+                             [enableval=yes])
+if test "x$enableval" = "xyes"; then
+    AC_MSG_RESULT([yes])
+    BUILD_FBCOMPOSE=true
+else
+    AC_MSG_RESULT([no])
+    BUILD_FBCOMPOSE=false
+fi
+AM_CONDITIONAL(BUILD_FBCOMPOSE, test x$BUILD_FBCOMPOSE = xtrue)
+
+if test "x$BUILD_FBCOMPOSE" = "xtrue"; then
+    AC_CHECK_LIB([Xcomposite],[XCompositeRedirectSubwindows])
+    LDFLAGS="$LDFLAGS -export-dynamic"
+fi
 
 enableval="yes"
 AC_MSG_CHECKING([whether to have XRender compositing support])
 AC_ARG_ENABLE(xrender-compositing,
               AC_HELP_STRING([--enable-xrender-compositing],
-                             [XRender compositing support [default=yes]]), ,
+                             [XRender support for fbcompose [default=yes]]), ,
               [enableval=yes])
-if test "x$enableval" = "xyes"; then
+if test "x$enableval" = "xyes" -a "x$BUILD_FBCOMPOSE" = "xtrue"; then
     AC_MSG_RESULT([yes])
     AC_CHECK_LIB([dl],[dlopen],
                  [AC_DEFINE(HAVE_DL,[1],[Define to 1 if you have DL.])],
@@ -225,7 +242,7 @@ AC_ARG_ENABLE(opengl-compositing,
               AC_HELP_STRING([--enable-opengl-compositing],
                              [OpenGL compositing support [default=yes]]), ,
               [enableval=yes])
-if test "x$enableval" = "xyes"; then
+if test "x$enableval" = "xyes" -a "x$BUILD_FBCOMPOSE" = "xtrue"; then
     AC_MSG_RESULT([yes])
     AC_CHECK_LIB([dl],[dlopen],
                  [AC_DEFINE(HAVE_DL,[1],[Define to 1 if you have DL.])],
