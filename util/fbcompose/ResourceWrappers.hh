@@ -157,7 +157,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        XRenderPictureWrapper(Display *display, const XRenderPictFormat *pictFormat, const char *pictFilter);
+        XRenderPictureWrapper(Display *display, XRenderPictFormat *pictFormat, const char *pictFilter);
 
         /** Destructor. */
         ~XRenderPictureWrapper();
@@ -168,6 +168,9 @@ namespace FbCompositor {
         Picture unwrap() const;
 
         //--- MUTATORS ---------------------------------------------------------
+
+        /** Set a new PictFormat. */
+        void setPictFormat(XRenderPictFormat *pictFormat);
 
         /** (Re)associate the picture with the given pixmap. */
         void setPixmap(Pixmap pixmap, XRenderPictureAttributes pa = XRenderPictureAttributes(), long paMask = 0);
@@ -193,8 +196,13 @@ namespace FbCompositor {
         const char *m_pictFilter;
 
         /** Picture format to use. */
-        const XRenderPictFormat *m_pictFormat;
+        XRenderPictFormat *m_pictFormat;
     };
+
+    // Set a new PictFormat.
+    inline void XRenderPictureWrapper::setPictFormat(XRenderPictFormat *pictFormat) {
+        m_pictFormat = pictFormat;
+    }
 
     // Returns the picture held.
     inline Picture XRenderPictureWrapper::unwrap() const {

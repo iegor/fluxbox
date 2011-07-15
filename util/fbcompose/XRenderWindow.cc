@@ -80,6 +80,7 @@ void XRenderWindow::updateContents() {
     pa.subwindow_mode = IncludeInferiors;
     long paMask = CPSubwindowMode;
 
+    m_contentPicture->setPictFormat(XRenderFindVisualFormat(display(), visual()));
     m_contentPicture->setPixmap(contentPixmap(), pa, paMask);
 
     clearDamage();

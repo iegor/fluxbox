@@ -61,7 +61,7 @@ OpenGLTextureWrapper::~OpenGLTextureWrapper() {
 //--- XRENDER PICTURE WRAPPER --------------------------------------------------
 
 // Constructor.
-XRenderPictureWrapper::XRenderPictureWrapper(Display *display, const XRenderPictFormat *pictFormat,
+XRenderPictureWrapper::XRenderPictureWrapper(Display *display, XRenderPictFormat *pictFormat,
                                              const char *pictFilter) :
     m_display(display),
     m_picture(None),
