@@ -49,17 +49,18 @@ CompositorConfig::CompositorConfig(std::vector<FbTk::FbString> args) :
     m_renderingMode(RM_XRender),
 #else
     m_renderingMode(RM_ServerAuto),
-#endif
-#endif
+#endif  // USE_XRENDER_COMPOSITING
+#endif  // USE_OPENGL_COMPOSITING
 
 #ifdef USE_XRENDER_COMPOSITING
     m_xRenderPictFilter(FilterFast),
-#endif
+#endif  // USE_XRENDER_COMPOSITING
 
     m_displayName(""),
     m_framesPerSecond(60),
     m_plugins(),
-    m_showXErrors(true) {
+    m_showXErrors(true),
+    m_synchronize(false) {
 
     preScanArguments();
     processArguments();
@@ -68,28 +69,34 @@ CompositorConfig::CompositorConfig(std::vector<FbTk::FbString> args) :
 // Copy constructor.
 CompositorConfig::CompositorConfig(const CompositorConfig &other) :
     m_args(other.m_args),
+
     m_renderingMode(other.m_renderingMode),
 #ifdef USE_XRENDER_COMPOSITING
     m_xRenderPictFilter(other.m_xRenderPictFilter),
 #endif  // USE_XRENDER_COMPOSITING
+
     m_displayName(other.m_displayName),
     m_framesPerSecond(other.m_framesPerSecond),
     m_plugins(other.m_plugins),
-    m_showXErrors(other.m_showXErrors) {
+    m_showXErrors(other.m_showXErrors),
+    m_synchronize(other.m_synchronize) {
 }
 
 // Assignment operator.
 CompositorConfig &CompositorConfig::operator=(const CompositorConfig &other) {
     if (this != &other) {
         m_args = other.m_args;
+
         m_renderingMode = other.m_renderingMode;
 #ifdef USE_XRENDER_COMPOSITING
         m_xRenderPictFilter = other.m_xRenderPictFilter;
 #endif  // USE_XRENDER_COMPOSITING
+
         m_displayName = other.m_displayName;
         m_framesPerSecond = other.m_framesPerSecond;
         m_plugins = other.m_plugins;
         m_showXErrors = other.m_showXErrors;
+        m_synchronize = other.m_synchronize;
     }
     return *this;
 }
@@ -151,6 +158,9 @@ void CompositorConfig::processArguments() {
                 throw ConfigException(ss.str());
             }
 
+        } else if (*it == "--no-x-errors") {
+            m_showXErrors = false;
+
         } else if ((*it == "-p") || (*it == "--plugin")) {
             FbTk::FbString pluginName = getNextOption(it, "No plugin name specified.");
             m_plugins.push_back(make_pair(pluginName, std::vector<FbTk::FbString>()));
@@ -168,8 +178,8 @@ void CompositorConfig::processArguments() {
                 throw ConfigException(ss.str());
             }
 
-        } else if (*it == "--no-x-errors") {
-            m_showXErrors = false;
+        } else if (*it == "--sync") {
+            m_synchronize = true;
 
         } else if ((*it == "-v") || (*it == "--verbose")) {
             loggingLevel += 1;
@@ -236,6 +246,7 @@ void CompositorConfig::printFullHelp(std::ostream &os) {
        << "  -r RATE, --refresh-rate RATE" << std::endl
        << "                         Specify the compositor's refresh rate in Hz" << std::endl
        << "                         (aka frames per second)." << std::endl
+       << "  --sync                 Synchronize with the X server (for debugging)." << std::endl
        << "  -v, --verbose          Print more information. Pass twice for debug output." << std::endl
        << "  -V, --version          Print version and exit." << std::endl;
 }

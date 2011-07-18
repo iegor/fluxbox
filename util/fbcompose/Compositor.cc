@@ -72,7 +72,9 @@ const int Compositor::SLEEP_TIME = 5000;
 Compositor::Compositor(const CompositorConfig &config) :
     App(config.displayName().c_str()) {
 
-    XSynchronize(display(), True);
+    if (config.synchronize()) {
+        XSynchronize(display(), True);
+    }
 
     // Set rendering mode.
     if (config.renderingMode() == RM_ServerAuto) {

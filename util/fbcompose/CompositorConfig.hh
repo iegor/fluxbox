@@ -84,6 +84,9 @@ namespace FbCompositor {
         /** \returns whether the X errors should be printed. */
         bool showXErrors() const;
 
+        /** \returns whether the compositor should synchronize with the X server. */
+        bool synchronize() const;
+
 #ifdef USE_XRENDER_COMPOSITING
         /** \returns the XRender picture filter. */
         const char *xRenderPictFilter() const;
@@ -141,6 +144,9 @@ namespace FbCompositor {
 
         /** Whether the X errors should be printed. */
         bool m_showXErrors;
+
+        /* Whether the compositor should synchronize with the X server. */
+        bool m_synchronize;
     };
 
 
@@ -171,6 +177,10 @@ namespace FbCompositor {
         return m_showXErrors;
     }
 
+    // Returns whether the compositor should synchronize with the X server.
+    inline bool CompositorConfig::synchronize() const {
+        return m_synchronize;
+    }
 
 #ifdef USE_XRENDER_COMPOSITING
     // Returns the XRender picture filter.
