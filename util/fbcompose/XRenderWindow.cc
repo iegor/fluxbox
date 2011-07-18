@@ -72,16 +72,18 @@ void XRenderWindow::updateContents() {
     }
 
     updateContentPixmap();
-    if (!m_maskPicture || clipShapeChanged()) {
-        updateShape();
+    if (contentPixmap()) {
+        XRenderPictureAttributes pa;
+        pa.subwindow_mode = IncludeInferiors;
+        long paMask = CPSubwindowMode;
+
+        m_contentPicture->setPictFormat(XRenderFindVisualFormat(display(), visual()));
+        m_contentPicture->setPixmap(contentPixmap(), pa, paMask);
     }
 
-    XRenderPictureAttributes pa;
-    pa.subwindow_mode = IncludeInferiors;
-    long paMask = CPSubwindowMode;
-
-    m_contentPicture->setPictFormat(XRenderFindVisualFormat(display(), visual()));
-    m_contentPicture->setPixmap(contentPixmap(), pa, paMask);
+    if (clipShapeChanged()) {
+        updateShape();
+    }
 
     clearDamage();
 }

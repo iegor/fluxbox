@@ -169,7 +169,7 @@ Window Compositor::getCMSelectionOwnership(int screenNumber) {
 void Compositor::initAllExtensions() {
 #ifdef USE_OPENGL_COMPOSITING
     if (m_renderingMode == RM_OpenGL) {
-        initExtension("GLX", &glXQueryExtension, &glXQueryVersion, 1, 4, &m_glxEventBase, &m_glxErrorBase);
+        initExtension("GLX", &glXQueryExtension, &glXQueryVersion, 1, 3, &m_glxEventBase, &m_glxErrorBase);
         initExtension("XComposite", &XCompositeQueryExtension, &XCompositeQueryVersion, 0, 4, &m_compositeEventBase, &m_compositeErrorBase);
         initExtension("XDamage", &XDamageQueryExtension, &XDamageQueryVersion, 1, 0, &m_damageEventBase, &m_damageErrorBase);
         initExtension("XFixes", &XFixesQueryExtension, &XFixesQueryVersion, 2, 0, &m_fixesEventBase, &m_fixesErrorBase);

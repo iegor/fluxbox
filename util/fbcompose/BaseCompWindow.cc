@@ -193,10 +193,7 @@ void BaseCompWindow::updateContentPixmap() {
     //
     // TODO: Fix this.
 
-    if (m_contentPixmap) {
-        XFreePixmap(display(), m_contentPixmap);
-        m_contentPixmap = None;
-    }
+    m_contentPixmap = None;
     m_contentPixmap = XCompositeNameWindowPixmap(display(), window());
 }
 

@@ -120,13 +120,13 @@ void OpenGLWindow::updateContents() {
     }
 
     updateContentPixmap();
-    if (clipShapeChanged()) {
-        updateShape();
-    }
-
     if (contentPixmap()) {
         pixmapToTexture(display(), contentPixmap(), direct_contentTexture(), m_fbConfig,
                         m_glxContents, realWidth(), realHeight(), TEX_PIXMAP_ATTRIBUTES);
+    }
+
+    if (clipShapeChanged()) {
+        updateShape();
     }
 
     clearDamage();
