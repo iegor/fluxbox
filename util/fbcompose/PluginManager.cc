@@ -24,6 +24,7 @@
 #include "PluginManager.hh"
 
 #include "Logging.hh"
+#include "Utility.hh"
 
 #include <algorithm>
 #include <dlfcn.h>
@@ -91,7 +92,9 @@ void PluginManager::loadPlugin(FbTk::FbString name) {
 
     // Check for the correct plugin type
     void *rawTypeFunc = getLibraryObject(handle, "pluginType", name.c_str(), "type function");
-    PluginTypeFunction typeFunc = reinterpret_cast<PluginTypeFunction>(rawTypeFunc);
+    PluginTypeFunction typeFunc;
+
+    UNION_CAST(void*, rawTypeFunc, PluginTypeFunction, typeFunc, typeFuncUnion)
 
     if ((*(typeFunc))() != m_pluginType) {
         std::stringstream ss;
@@ -101,10 +104,13 @@ void PluginManager::loadPlugin(FbTk::FbString name) {
 
     // Get the plugin creation function.
     void *rawCreateFunc = getLibraryObject(handle, "createPlugin", name.c_str(), "creation function");
+    CreatePluginFunction createFunc;
+
+    UNION_CAST(void*, rawCreateFunc, CreatePluginFunction, createFunc, createFuncUnion)
 
     // Track the loaded plugin.
     // I don't like that cast either, but there does not seem to be a different way.
-    PluginLibData pluginData = { handle, reinterpret_cast<CreatePluginFunction>(rawCreateFunc) };
+    PluginLibData pluginData = { handle, createFunc };
     m_pluginLibs.insert(make_pair(name, pluginData));
 }
 
