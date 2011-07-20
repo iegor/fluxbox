@@ -34,12 +34,6 @@ namespace FbCompositor {
     /** Suppress compiler warning for unused parameters. */
     #define MARK_PARAMETER_UNUSED(x) (void)(x)
 
-    /** A workaround to silence the compiler's warnings about type casting. Use very sparingly. */
-    #define UNION_CAST(fromType, fromVar, toType, toVar, unionName) \
-                union { fromType a; toType b; } (unionName);        \
-                (unionName).a = (fromVar);                          \
-                (toVar) = (unionName).b;
-
 
     //--- FUNCTIONS ------------------------------------------------------------
 

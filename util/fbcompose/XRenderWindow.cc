@@ -39,16 +39,6 @@ XRenderWindow::XRenderWindow(const BaseScreen &screen, Window windowXID, const c
     m_maskPixmap = None;
 
     XRenderPictFormat *contentPictFormat = XRenderFindVisualFormat(display(), visual());
-    if (!contentPictFormat) {
-        fbLog_warn << "Could not find PictFormat for window " << std::hex << windowXID
-                   << ", trying standart format." << std::endl;
-
-        if (depth() == 32) {
-            contentPictFormat = XRenderFindStandardFormat(display(), PictStandardARGB32);
-        } else {
-            contentPictFormat = XRenderFindStandardFormat(display(), PictStandardRGB24);
-        }
-    }
     m_contentPicture = new XRenderPictureWrapper(display(), contentPictFormat, m_pictFilter);
 
     XRenderPictFormat *maskPictFormat = XRenderFindStandardFormat(display(), PictStandardARGB32);

@@ -227,11 +227,14 @@ if test "x$enableval" = "xyes" -a "x$BUILD_FBCOMPOSE" = "xtrue"; then
     AC_CHECK_LIB([Xrender],[XRenderCreatePicture],
                  [AC_DEFINE(HAVE_XRENDER,[1],[Define to 1 if you have XRender.])],
                  [AC_MSG_ERROR([Could not find X render extension.])])
+    AC_CHECK_LIB([Xfixes],[XFixesCreateRegion],
+                 [AC_DEFINE(SHAPE,[1],[Define to 1 if you have XFixes.])],
+                 [AC_MSG_ERROR([Could not find X fixes extension.])])
     AC_CHECK_LIB([Xext],[XShapeCombineShape],
                  [AC_DEFINE(SHAPE,[1],[Define to 1 if you have SHAPE.])],
                  [AC_MSG_ERROR([Could not find X shape extension.])])
     AC_DEFINE(USE_XRENDER_COMPOSITING,[1],[Define to 1 if you want XRender compositing.])
-    LIBS="$LIBS -ldl -lXext -lXdamage -lXrender"
+    LIBS="$LIBS -ldl -lXext -lXdamage -lXrender -lXfixes"
     XRENDER_COMPOSITING=true
 else
     AC_MSG_RESULT([no])
@@ -262,11 +265,14 @@ if test "x$enableval" = "xyes" -a "x$BUILD_FBCOMPOSE" = "xtrue"; then
     AC_CHECK_LIB([Xrender],[XRenderCreatePicture],
                  [AC_DEFINE(HAVE_XRENDER,[1],[Define to 1 if you have XRender.])],
                  [AC_MSG_ERROR([Could not find X render extension.])])
+    AC_CHECK_LIB([Xfixes],[XFixesCreateRegion],
+                 [AC_DEFINE(SHAPE,[1],[Define to 1 if you have XFixes.])],
+                 [AC_MSG_ERROR([Could not find X fixes extension.])])
     AC_CHECK_LIB([Xext],[XShapeCombineShape],
                  [AC_DEFINE(SHAPE,[1],[Define to 1 if you have SHAPE.])],
                  [AC_MSG_ERROR([Could not find X shape extension.])])
     AC_DEFINE(USE_OPENGL_COMPOSITE,[1],[Define to 1 if you want OpenGL compositing.])
-    LIBS="$LIBS -ldl -lXext -lXdamage -lGL -lGLEW"
+    LIBS="$LIBS -ldl -lXext -lXdamage -lGL -lGLEW -lXfixes"
     OPENGL_COMPOSITING=true
 else
     AC_MSG_RESULT([no])

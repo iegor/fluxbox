@@ -24,7 +24,6 @@
 #include "PluginManager.hh"
 
 #include "Logging.hh"
-#include "Utility.hh"
 
 #include <algorithm>
 #include <dlfcn.h>
@@ -74,6 +73,12 @@ void PluginManager::createPluginObject(FbTk::FbString name, std::vector<FbTk::Fb
 
 // Load a plugin.
 void PluginManager::loadPlugin(FbTk::FbString name) {
+    static union {
+        void *voidPtr;
+        PluginTypeFunction pluginTypeFunc;
+        CreatePluginFunction createPluginFunc;
+    } objUnion;
+
     std::vector<FbTk::FbString> paths = buildPluginPaths(name);
 
     // Get the handle to the plugin so object.
@@ -91,10 +96,8 @@ void PluginManager::loadPlugin(FbTk::FbString name) {
     }
 
     // Check for the correct plugin type
-    void *rawTypeFunc = getLibraryObject(handle, "pluginType", name.c_str(), "type function");
-    PluginTypeFunction typeFunc;
-
-    UNION_CAST(void*, rawTypeFunc, PluginTypeFunction, typeFunc, typeFuncUnion)
+    objUnion.voidPtr = getLibraryObject(handle, "pluginType", name.c_str(), "type function");
+    PluginTypeFunction typeFunc = objUnion.pluginTypeFunc;
 
     if ((*(typeFunc))() != m_pluginType) {
         std::stringstream ss;
@@ -103,13 +106,10 @@ void PluginManager::loadPlugin(FbTk::FbString name) {
     }
 
     // Get the plugin creation function.
-    void *rawCreateFunc = getLibraryObject(handle, "createPlugin", name.c_str(), "creation function");
-    CreatePluginFunction createFunc;
-
-    UNION_CAST(void*, rawCreateFunc, CreatePluginFunction, createFunc, createFuncUnion)
+    objUnion.voidPtr = getLibraryObject(handle, "createPlugin", name.c_str(), "creation function");
+    CreatePluginFunction createFunc = objUnion.createPluginFunc;
 
     // Track the loaded plugin.
-    // I don't like that cast either, but there does not seem to be a different way.
     PluginLibData pluginData = { handle, createFunc };
     m_pluginLibs.insert(make_pair(name, pluginData));
 }

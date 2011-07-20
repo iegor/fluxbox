@@ -258,7 +258,13 @@ void Compositor::initHeads() {
 
 // The event loop.
 void Compositor::eventLoop() {
-    XEvent event;
+    union {
+        XEvent eventX;
+        XDamageNotifyEvent eventXDamageNotify;
+        XShapeEvent eventXShape;
+    } eventUnion;
+    XEvent &event = eventUnion.eventX;
+
     int eventScreen;
     timespec sleepTimespec = { 0, SLEEP_TIME * 1000 };
 
@@ -315,14 +321,14 @@ void Compositor::eventLoop() {
 
             default :
                 if (event.type == (m_damageEventBase + XDamageNotify)) {
-                    XDamageNotifyEvent *damageEvent = (XDamageNotifyEvent*) &event;
-                    m_screens[eventScreen]->damageWindow(damageEvent->drawable);
-                    fbLog_info << "DamageNotify on " << std::hex << damageEvent->drawable << std::endl;
+                    XDamageNotifyEvent damageEvent = eventUnion.eventXDamageNotify;
+                    m_screens[eventScreen]->damageWindow(damageEvent.drawable);
+                    fbLog_info << "DamageNotify on " << std::hex << damageEvent.drawable << std::endl;
 
                 } else if (event.type == (m_shapeEventBase + ShapeNotify)) {
-                    XShapeEvent *shapeEvent = (XShapeEvent*) &event;
-                    m_screens[eventScreen]->updateShape(shapeEvent->window);
-                    fbLog_info << "ShapeNotify on " << std::hex << shapeEvent->window << std::endl;
+                    XShapeEvent shapeEvent = eventUnion.eventXShape;
+                    m_screens[eventScreen]->updateShape(shapeEvent.window);
+                    fbLog_info << "ShapeNotify on " << std::hex << shapeEvent.window << std::endl;
 
                 } else {
                     fbLog_info << "Event " << std::dec << event.xany.type << " on screen " << eventScreen

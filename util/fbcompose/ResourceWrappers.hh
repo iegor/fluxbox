@@ -201,7 +201,9 @@ namespace FbCompositor {
 
     // Set a new PictFormat.
     inline void XRenderPictureWrapper::setPictFormat(XRenderPictFormat *pictFormat) {
-        m_pictFormat = pictFormat;
+        if (pictFormat) {
+            m_pictFormat = pictFormat;
+        }
     }
 
     // Returns the picture held.
