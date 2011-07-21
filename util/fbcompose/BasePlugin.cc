@@ -44,6 +44,9 @@ BasePlugin::~BasePlugin() { }
 
 //--- WINDOW EVENT CALLBACKS ---------------------------------------------------
 
+// Called, whenever a window becomes ignored.
+void BasePlugin::windowBecameIgnored(const BaseCompWindow &/*window*/) { }
+
 // Called, whenever a new window is created.
 void BasePlugin::windowCreated(const BaseCompWindow &/*window*/) { }
 

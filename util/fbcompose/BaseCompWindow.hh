@@ -78,6 +78,9 @@ namespace FbCompositor {
         /** \returns whether the window is damaged or not. */
         bool isDamaged() const;
 
+        /** \returns whether the window should be ignored by the renderers or not. */
+        bool isRenderable() const;
+
         /** \returns whether the screen is mapped or not. */
         bool isMapped() const;
 
@@ -138,6 +141,9 @@ namespace FbCompositor {
 
         /** Set the clip shape as changed. */
         void setClipShapeChanged();
+
+        /** Sets window's renderable flag. */
+        void setRenderable(bool renderable);
 
 
     protected:
@@ -225,6 +231,9 @@ namespace FbCompositor {
         /** Shows whether the window is damaged. */
         bool m_isDamaged;
 
+        /** Shows whether the window should be ignored by the renderers or not. */
+        bool m_isRenderable;
+
         /** Shows whether the window has been resized since the last update. */
         bool m_isResized;
 
@@ -286,6 +295,11 @@ namespace FbCompositor {
         return m_isDamaged;
     }
 
+    // Returns whether the window should be ignored by the renderers or not.
+    inline bool BaseCompWindow::isRenderable() const {
+        return m_isRenderable;
+    }
+
     // Returns whether the window is mapped or not.
     inline bool BaseCompWindow::isMapped() const {
         return m_isMapped;
@@ -299,6 +313,11 @@ namespace FbCompositor {
     // Returns the window's screen.
     inline const BaseScreen &BaseCompWindow::screen() const {
         return m_screen;
+    }
+
+    // Sets the window's renderable flag.
+    inline void BaseCompWindow::setRenderable(bool renderable) {
+        m_isRenderable = renderable;
     }
 
     // Returns the window's height with borders factored in.

@@ -72,6 +72,9 @@ namespace FbCompositor {
 
         //--- WINDOW EVENT CALLBACKS -------------------------------------------
 
+        /** Called, whenever a window becomes ignored. */
+        virtual void windowBecameIgnored(const BaseCompWindow &window);
+
         /** Called, whenever a new window is created. */
         virtual void windowCreated(const BaseCompWindow &window);
 

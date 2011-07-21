@@ -226,7 +226,7 @@ void XRenderScreen::renderScreen() {
     // Render windows.
     std::list<BaseCompWindow*>::const_iterator it = allWindows().begin();
     while (it != allWindows().end()) {
-        if ((*it)->isMapped()) {
+        if ((*it)->isRenderable() && (*it)->isMapped()) {
             renderWindow(*(dynamic_cast<XRenderWindow*>(*it)));
         }
         ++it;

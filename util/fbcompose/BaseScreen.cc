@@ -154,10 +154,6 @@ void BaseScreen::initWindows() {
 
 // Creates a new window and inserts it into the list of windows.
 void BaseScreen::createWindow(Window window) {
-    if (isWindowIgnored(window)) {
-        return;
-    }
-
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
     if (it == m_windows.end()) {
         BaseCompWindow *newWindow = NULL;
@@ -177,9 +173,13 @@ void BaseScreen::createWindow(Window window) {
         newWindow->setEventMask(PropertyChangeMask);
         m_windows.push_back(newWindow);
 
-        BasePlugin *plugin = NULL;
-        forEachPlugin(i, plugin) {
-            plugin->windowCreated(*newWindow);
+        if (isWindowIgnored(window)) {
+            newWindow->setRenderable(false);
+        } else {
+            BasePlugin *plugin = NULL;
+            forEachPlugin(i, plugin) {
+                plugin->windowCreated(*newWindow);
+            }
         }
     } else {
         fbLog_warn << "Attempted to create a window twice (" << std::hex << window << ")" << std::endl;
@@ -188,17 +188,15 @@ void BaseScreen::createWindow(Window window) {
 
 // Damages a window on this screen.
 void BaseScreen::damageWindow(Window window) {
-    if (isWindowIgnored(window)) {
-        return;
-    }
-
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
     if (it != m_windows.end()) {
         (*it)->addDamage();
 
-        BasePlugin *plugin = NULL;
-        forEachPlugin(i, plugin) {
-            plugin->windowDamaged(**it);
+        if ((*it)->isRenderable()) {
+            BasePlugin *plugin = NULL;
+            forEachPlugin(i, plugin) {
+                plugin->windowDamaged(**it);
+            }
         }
     } else {
         if (window != m_rootWindow.window()) {
@@ -209,15 +207,13 @@ void BaseScreen::damageWindow(Window window) {
 
 // Destroys a window on this screen.
 void BaseScreen::destroyWindow(Window window) {
-    if (isWindowIgnored(window)) {
-        return;
-    }
-
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
     if (it != m_windows.end()) {
-        BasePlugin *plugin = NULL;
-        forEachPlugin(i, plugin) {
-            plugin->windowDestroyed(**it);
+        if ((*it)->isRenderable()) {
+            BasePlugin *plugin = NULL;
+            forEachPlugin(i, plugin) {
+                plugin->windowDestroyed(**it);
+            }
         }
 
         delete *it;
@@ -229,17 +225,15 @@ void BaseScreen::destroyWindow(Window window) {
 
 // Maps a window on this screen.
 void BaseScreen::mapWindow(Window window) {
-    if (isWindowIgnored(window)) {
-        return;
-    }
-
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
     if (it != m_windows.end()) {
         (*it)->setMapped();
 
-        BasePlugin *plugin = NULL;
-        forEachPlugin(i, plugin) {
-            plugin->windowMapped(**it);
+        if ((*it)->isRenderable()) {
+            BasePlugin *plugin = NULL;
+            forEachPlugin(i, plugin) {
+                plugin->windowMapped(**it);
+            }
         }
     } else {
         fbLog_warn << "Attempted to map an untracked window (" << std::hex << window << ")" << std::endl;
@@ -248,10 +242,6 @@ void BaseScreen::mapWindow(Window window) {
 
 // Updates window's configuration.
 void BaseScreen::reconfigureWindow(const XConfigureEvent &event) {
-    if (isWindowIgnored(event.window)) {
-        return;
-    }
-
     if (event.window == m_rootWindow.window()) {
         m_rootWindow.updateGeometry(event);
         setRootWindowSizeChanged();
@@ -267,29 +257,13 @@ void BaseScreen::reconfigureWindow(const XConfigureEvent &event) {
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(event.window);
     if (it != m_windows.end()) {
         (*it)->updateGeometry(event);
+        restackWindow(it, event.above);
 
-        BaseCompWindow *currentWindow = *it;
-        m_windows.erase(it);
-
-        if (event.above == None) {
-            m_windows.push_front(currentWindow);
-        } else {
-            it = getWindowIterator(event.above);
-            if (it == m_windows.end()) {
-                it = getFirstManagedAncestorIterator(getParentWindow(currentWindow->window()));
+        if ((*it)->isRenderable()) {
+            BasePlugin *plugin = NULL;
+            forEachPlugin(i, plugin) {
+                plugin->windowReconfigured(**it);
             }
-
-            if (it != m_windows.end()) {
-                ++it;
-                m_windows.insert(it, currentWindow);
-            } else {
-                m_windows.push_back(currentWindow);
-            }
-        }
-
-        BasePlugin *plugin = NULL;
-        forEachPlugin(i, plugin) {
-            plugin->windowReconfigured(**it);
         }
     } else {
         fbLog_warn << "Attempted to reconfigure an untracked window (" << std::hex << event.window << ")" << std::endl;
@@ -307,17 +281,15 @@ void BaseScreen::reparentWindow(Window window, Window parent) {
 
 // Updates window's shape.
 void BaseScreen::updateShape(Window window) {
-    if (isWindowIgnored(window)) {
-        return;
-    }
-
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
     if (it != m_windows.end()) {
         (*it)->setClipShapeChanged();
 
-        BasePlugin *plugin = NULL;
-        forEachPlugin(i, plugin) {
-            plugin->windowShapeChanged(**it);
+        if ((*it)->isRenderable()) {
+            BasePlugin *plugin = NULL;
+            forEachPlugin(i, plugin) {
+                plugin->windowShapeChanged(**it);
+            }
         }
     } else {
         fbLog_warn << "Attempted to update the shape of an untracked window (" << std::hex << window << ")" << std::endl;
@@ -326,17 +298,15 @@ void BaseScreen::updateShape(Window window) {
 
 // Unmaps a window on this screen.
 void BaseScreen::unmapWindow(Window window) {
-    if (isWindowIgnored(window)) {
-        return;
-    }
-
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
     if (it != m_windows.end()) {
         (*it)->setUnmapped();
 
-        BasePlugin *plugin = NULL;
-        forEachPlugin(i, plugin) {
-            plugin->windowUnmapped(**it);
+        if ((*it)->isRenderable()) {
+            BasePlugin *plugin = NULL;
+            forEachPlugin(i, plugin) {
+                plugin->windowUnmapped(**it);
+            }
         }
     } else {
         fbLog_warn << "Attempted to unmap an untracked window (" << std::hex << window << ")" << std::endl;
@@ -345,10 +315,6 @@ void BaseScreen::unmapWindow(Window window) {
 
 // Updates the value of some window's property.
 void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
-    if (isWindowIgnored(window)) {
-        return;
-    }
-    
     if ((window == m_rootWindow.window()) && (property != None) && (state == PropertyNewValue)) {
         if (property == Atoms::activeWindowAtom()) {
             updateActiveWindow();
@@ -373,9 +339,11 @@ void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
     if (it != m_windows.end()) {
         (*it)->updateProperty(property, state);
 
-        BasePlugin *plugin = NULL;
-        forEachPlugin(i, plugin) {
-            plugin->windowPropertyChanged(**it, property, state);
+        if ((*it)->isRenderable()) {
+            BasePlugin *plugin = NULL;
+            forEachPlugin(i, plugin) {
+                plugin->windowPropertyChanged(**it, property, state);
+            }
         }
     } else {
         if (window != rootWindow().window()) {
@@ -385,17 +353,23 @@ void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
 }
 
 
-// Adds a window to ignore list, stops tracking it if it is being tracked.
+// Marks a particular window as ignored.
 void BaseScreen::addWindowToIgnoreList(Window window) {
-    if (!isWindowIgnored(window)) {
-        m_ignoreList.push_back(window);
+    if (isWindowIgnored(window)) {
+        return;
+    }
 
-        std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
-        if (it != m_windows.end()) {
-            delete *it;
-            m_windows.erase(it);
+    std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
+    if (it != m_windows.end()) {
+        (*it)->setRenderable(true);
+
+        BasePlugin *plugin = NULL;
+        forEachPlugin(i, plugin) {
+            plugin->windowBecameIgnored(**it);
         }
     }
+
+    m_ignoreList.push_back(window);
 }
 
 // Checks whether a given window is managed by the current screen.
@@ -528,6 +502,22 @@ bool BaseScreen::isWindowIgnored(Window window) {
     return (find(m_ignoreList.begin(), m_ignoreList.end(), window) != m_ignoreList.end());
 }
 
+// Puts a window to a new location on the stack.
+void BaseScreen::restackWindow(std::list<BaseCompWindow*>::iterator &windowIt, Window above) {
+    BaseCompWindow* window = *windowIt;
+    m_windows.erase(windowIt);
+
+    std::list<BaseCompWindow*>::iterator it = getFirstManagedAncestorIterator(above);
+    if (it != m_windows.end()) {
+        ++it;
+        m_windows.insert(it, window);
+        windowIt = it;
+    } else {    // Window is just above root.
+        m_windows.push_front(window);
+        windowIt = m_windows.begin();
+    }
+}
+
 
 //--- FRIEND OPERATORS -------------------------------------------------
 
@@ -542,9 +532,7 @@ std::ostream &FbCompositor::operator<<(std::ostream& out, const BaseScreen& s) {
 
     std::list<BaseCompWindow*>::const_iterator it = s.m_windows.begin();
     while (it != s.m_windows.end()) {
-        if ((*it)->isMapped()) {
-            out << "    " << **it << std::endl;
-        }
+        out << "    " << **it << std::endl;
         ++it;
     }
 

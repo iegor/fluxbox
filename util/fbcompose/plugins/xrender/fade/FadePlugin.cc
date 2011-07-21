@@ -49,6 +49,40 @@ FadePlugin::~FadePlugin() { }
 
 //--- WINDOW EVENT CALLBACKS ---------------------------------------------------
 
+// Called, whenever a window becomes ignored.
+void FadePlugin::windowBecameIgnored(const BaseCompWindow &window) {
+    // Remove the window's positive fade, if any.
+    std::map<Window, PosFadeData>::iterator posIt = m_positiveFades.find(window.window());
+    if (posIt != m_positiveFades.end()) {
+        PosFadeData &curFade = posIt->second;
+        if (curFade.fadePicture) {
+            XRenderFreePicture(display(), curFade.fadePicture);
+        }
+        if (curFade.fadePixmap) {
+            XFreePixmap(display(), curFade.fadePixmap);
+        }
+
+        m_positiveFades.erase(posIt);
+    } 
+
+    // Remove the window's negative fade, if any.
+    std::vector<NegFadeData>::iterator negIt = m_negativeFades.begin();
+    while (negIt != m_negativeFades.end()) {
+        if (negIt->windowId == window.window()) {
+            if (negIt->fadePicture) {
+                XRenderFreePicture(display(), negIt->fadePicture);
+            }
+            if (negIt->fadePixmap) {
+                XFreePixmap(display(), negIt->fadePixmap);
+            }
+
+            m_negativeFades.erase(negIt);
+            break;
+        } 
+        ++negIt;
+    }
+}
+
 // Called, whenever a window is mapped.
 void FadePlugin::windowMapped(const BaseCompWindow &window) {
     PosFadeData fade;

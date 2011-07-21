@@ -140,7 +140,7 @@ namespace FbCompositor {
         void updateWindowProperty(Window window, Atom property, int state);
 
 
-        /** Adds a window to ignore list, stops tracking it if it is being tracked. */
+        /** Marks a particular window as ignored. */
         void addWindowToIgnoreList(Window window);
 
         /** Checks whether a given window is managed by the current screen. */
@@ -220,6 +220,9 @@ namespace FbCompositor {
         
         /** \returns whether the given window is in the ignore list. */
         bool isWindowIgnored(Window window);
+
+        /** Puts a window to a new location on the stack. */
+        void restackWindow(std::list<BaseCompWindow*>::iterator &windowIt, Window above);
 
 
         //--- MAIN SCREEN DATA -------------------------------------------------

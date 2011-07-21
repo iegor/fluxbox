@@ -44,8 +44,8 @@ BaseCompWindow::BaseCompWindow(const BaseScreen &screen, Window windowXID) :
     m_screen(screen) {
 
     m_alpha = singlePropertyValue<long>(Atoms::opacityAtom(), 0xff) & 0xff;
+    m_isRenderable = true;
 
-    // Set up other window attributes.
     XWindowAttributes xwa;
     XGetWindowAttributes(display(), window(), &xwa);
 
@@ -231,8 +231,9 @@ bool BaseCompWindow::rawPropertyData(Atom propertyAtom, Atom propertyType,
 
 // << output stream operator for the window class.
 std::ostream &FbCompositor::operator<<(std::ostream& out, const BaseCompWindow& w) {
-    out << "Window " << w.window() << ": Geometry[" << w.x() << "," << w.y()
-        << "," << w.width() << "," << w.height() << " " << w.borderWidth()
-        << "] Depth[" << w.depth() << "] " << w.isMapped() << " " << w.isDamaged();
+    out << "Window " << std::hex << w.window() << ": Geometry[" << std::dec << w.x()
+        << "," << w.y() << "," << w.width() << "," << w.height() << " " << w.borderWidth()
+        << "] Depth=" << w.depth() << " Map=" << w.isMapped() << " Dmg="
+        << w.isDamaged() << " Show=" << w.isRenderable();
     return out;
 }
