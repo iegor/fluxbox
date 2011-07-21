@@ -24,8 +24,11 @@
 #ifndef FBCOMPOSITOR_ATOMS_HH
 #define FBCOMPOSITOR_ATOMS_HH
 
+#include "Constants.hh"
+
 #include <X11/Xlib.h>
 
+#include <algorithm>
 #include <vector>
 
 
@@ -52,6 +55,12 @@ namespace FbCompositor {
 
         /** \returns the atoms that (might) correspond to background pixmap (i.e. wallpapers). */
         static std::vector<Atom> rootPixmapAtoms();
+
+        /** \returns the _NET_WM_WINDOW_TYPE atom. */
+        static Atom windowTypeAtom();
+
+        /** \returns a vector with atoms and the correspoding WindowType enum members. */
+        static std::vector< std::pair<Atom, WindowType> > windowTypeAtomList();
 
         /** \returns the _WIN_WORKSPACE atom. */
         static Atom workspaceAtom();

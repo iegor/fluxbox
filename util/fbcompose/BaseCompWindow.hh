@@ -26,6 +26,7 @@
 
 #include "config.h"
 
+#include "Constants.hh"
 #include "Exceptions.hh"
 
 #include "FbTk/FbWindow.hh"
@@ -86,6 +87,9 @@ namespace FbCompositor {
 
         /** \returns the window's screen. */
         const BaseScreen &screen() const;
+
+        /** \returns the type of the window. */
+        WindowType type() const;
         
         /** \returns the window's visual. */
         Visual *visual();
@@ -204,6 +208,9 @@ namespace FbCompositor {
         bool rawPropertyData(Atom propertyAtom, Atom propertyType,
                              unsigned long *itemCount_return, unsigned char **data_return);
 
+        /** Updates the type of the window. */
+        void updateWindowType();
+
 
         //--- WINDOW ATTRIBUTES ------------------------------------------------
 
@@ -219,6 +226,9 @@ namespace FbCompositor {
 
         /** Window's map state. */
         bool m_isMapped;
+
+        /** Window's type. */
+        WindowType m_type;
 
         /** Window's visual. */
         Visual *m_visual;
@@ -332,6 +342,11 @@ namespace FbCompositor {
     // Returns the window's width with borders factored in.
     inline unsigned int BaseCompWindow::realWidth() const {
         return width() + 2 * borderWidth();
+    }
+
+    // Returns the type of the window.
+    inline WindowType BaseCompWindow::type() const {
+        return m_type;
     }
 
     // Returns the window's visual.

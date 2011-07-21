@@ -24,6 +24,8 @@
 #ifndef FBCOMPOSITOR_CONSTANTS_HH
 #define FBCOMPOSITOR_CONSTANTS_HH
 
+#include <ostream>
+
 
 namespace FbCompositor {
 
@@ -37,6 +39,39 @@ namespace FbCompositor {
 
     /** Rendering mode enumeration. */
     enum RenderingMode { RM_OpenGL, RM_XRender, RM_ServerAuto };
+
+    /** Window type enumeration. */
+    enum WindowType { WinType_Desktop, WinType_Dialog, WinType_Dock, WinType_Menu,
+                      WinType_Normal, WinType_Splash, WinType_Toolbar, WinType_Utility };
+
+
+    //--- OSTREAM OUTPUT OPERATORS ---------------------------------------------
+
+    // << operator for WindowType.
+    std::ostream &operator<<(std::ostream &os, WindowType winType);
+    inline std::ostream &operator<<(std::ostream &os, WindowType winType) {
+        if (winType == WinType_Desktop) {
+            os << "Desktop";
+        } else if (winType == WinType_Dialog) {
+            os << "Dialog";
+        } else if (winType == WinType_Dock) {
+            os << "Dock";
+        } else if (winType == WinType_Menu) {
+            os << "Menu";
+        } else if (winType == WinType_Normal) {
+            os << "Normal";
+        } else if (winType == WinType_Splash) {
+            os << "Splash";
+        } else if (winType == WinType_Toolbar) {
+            os << "Toolbar";
+        } else if (winType == WinType_Utility) {
+            os << "Utility";
+        } else {
+            os << "Unknown";
+        }
+
+        return os;
+    }
 
 }
 

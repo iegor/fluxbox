@@ -68,6 +68,8 @@ BaseCompWindow::BaseCompWindow(const BaseScreen &screen, Window windowXID) :
 #endif  // HAVE_XDAMAGE
 
     m_contentPixmap = None;
+
+    updateWindowType();
 }
 
 // Destructor.
@@ -144,6 +146,8 @@ void BaseCompWindow::updateShape() {
 void BaseCompWindow::updateProperty(Atom property, int /*state*/) {
     if (property == Atoms::opacityAtom()) {
         m_alpha = singlePropertyValue<long>(Atoms::opacityAtom(), 0xff) & 0xff;
+    } else if (property == Atoms::windowTypeAtom()) {
+        updateWindowType();
     }
 }
 
@@ -226,6 +230,20 @@ bool BaseCompWindow::rawPropertyData(Atom propertyAtom, Atom propertyType,
     return false;
 }
 
+// Updates the type of the window.
+void BaseCompWindow::updateWindowType() {
+    static std::vector< std::pair<Atom, WindowType> > typeList = Atoms::windowTypeAtomList();
+    Atom rawType = singlePropertyValue<Atom>(Atoms::windowTypeAtom(), None);
+
+    m_type = WinType_Normal;
+    for (size_t i = 0; i < typeList.size(); i++) {
+        if (rawType == typeList[i].first) {
+            m_type = typeList[i].second;
+            break;
+        }
+    }
+}
+
 
 //--- OPERATORS ----------------------------------------------------------------
 
@@ -233,7 +251,7 @@ bool BaseCompWindow::rawPropertyData(Atom propertyAtom, Atom propertyType,
 std::ostream &FbCompositor::operator<<(std::ostream& out, const BaseCompWindow& w) {
     out << "Window " << std::hex << w.window() << ": Geometry[" << std::dec << w.x()
         << "," << w.y() << "," << w.width() << "," << w.height() << " " << w.borderWidth()
-        << "] Depth=" << w.depth() << " Map=" << w.isMapped() << " Dmg="
-        << w.isDamaged() << " Show=" << w.isRenderable();
+        << "] Depth=" << w.depth() << " Type=" << w.type() << " Map=" << w.isMapped()
+        << " Dmg=" << w.isDamaged() << " Show=" << w.isRenderable();
     return out;
 }
