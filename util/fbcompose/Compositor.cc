@@ -284,55 +284,55 @@ void Compositor::eventLoop() {
             switch (event.type) {
             case ConfigureNotify :
                 m_screens[eventScreen]->reconfigureWindow(event.xconfigure);
-                fbLog_info << "ConfigureNotify on " << std::hex << event.xconfigure.window << std::endl;
+                fbLog_debug << "ConfigureNotify on " << std::hex << event.xconfigure.window << std::endl;
                 break;
 
             case CreateNotify :
                 m_screens[eventScreen]->createWindow(event.xcreatewindow.window);
-                fbLog_info << "CreateNotify on " << std::hex << event.xcreatewindow.window << std::endl;
+                fbLog_debug << "CreateNotify on " << std::hex << event.xcreatewindow.window << std::endl;
                 break;
 
             case DestroyNotify :
                 m_screens[eventScreen]->destroyWindow(event.xdestroywindow.window);
-                fbLog_info << "DestroyNotify on " << std::hex << event.xdestroywindow.window << std::endl;
+                fbLog_debug << "DestroyNotify on " << std::hex << event.xdestroywindow.window << std::endl;
                 break;
 
             case MapNotify :
                 m_screens[eventScreen]->mapWindow(event.xmap.window);
-                fbLog_info << "MapNotify on " << std::hex << event.xmap.window << std::endl;
+                fbLog_debug << "MapNotify on " << std::hex << event.xmap.window << std::endl;
                 break;
 
             case PropertyNotify :
                 m_screens[eventScreen]->updateWindowProperty(event.xproperty.window, event.xproperty.atom, event.xproperty.state);
-                fbLog_info << "PropertyNotify on " << std::hex << event.xproperty.window << " ("
+                fbLog_debug << "PropertyNotify on " << std::hex << event.xproperty.window << " ("
                            << XGetAtomName(display(), event.xproperty.atom) << ")" << std::endl;
                 break;
 
             case ReparentNotify :
                 m_screens[eventScreen]->reparentWindow(event.xreparent.window, event.xreparent.parent);
-                fbLog_info << "ReparentNotify on " << std::hex << event.xreparent.window << " (parent "
+                fbLog_debug << "ReparentNotify on " << std::hex << event.xreparent.window << " (parent "
                            << event.xreparent.parent << ")" << std::endl;
                 break;
 
             case UnmapNotify :
                 m_screens[eventScreen]->unmapWindow(event.xunmap.window);
-                fbLog_info << "UnmapNotify on " << std::hex << event.xunmap.window << std::endl;
+                fbLog_debug << "UnmapNotify on " << std::hex << event.xunmap.window << std::endl;
                 break;
 
             default :
                 if (event.type == (m_damageEventBase + XDamageNotify)) {
                     XDamageNotifyEvent damageEvent = eventUnion.eventXDamageNotify;
                     m_screens[eventScreen]->damageWindow(damageEvent.drawable);
-                    fbLog_info << "DamageNotify on " << std::hex << damageEvent.drawable << std::endl;
+                    fbLog_debug << "DamageNotify on " << std::hex << damageEvent.drawable << std::endl;
 
                 } else if (event.type == (m_shapeEventBase + ShapeNotify)) {
                     XShapeEvent shapeEvent = eventUnion.eventXShape;
                     m_screens[eventScreen]->updateShape(shapeEvent.window);
-                    fbLog_info << "ShapeNotify on " << std::hex << shapeEvent.window << std::endl;
+                    fbLog_debug << "ShapeNotify on " << std::hex << shapeEvent.window << std::endl;
 
                 } else {
-                    fbLog_info << "Event " << std::dec << event.xany.type << " on screen " << eventScreen
-                               << " and window " << std::hex << event.xany.window << std::endl;
+                    fbLog_info << "Other event " << std::dec << event.xany.type << " received on screen "
+                               << eventScreen << " and window " << std::hex << event.xany.window << std::endl;
                 }
                 break;
             }
@@ -344,11 +344,11 @@ void Compositor::eventLoop() {
                 m_screens[i]->renderScreen();
             }
 
-            fbLog_debug << m_screens.size() << " screen(s) available." << std::endl;
+            fbLog_vDebug << m_screens.size() << " screen(s) available." << std::endl;
             for (size_t i = 0; i < m_screens.size(); i++) {
-                fbLog_debug << *m_screens[i];
+                fbLog_vDebug << *m_screens[i];
             }
-            fbLog_debug << "======================================" << std::endl;
+            fbLog_vDebug << "======================================" << std::endl;
         } else {
             nanosleep(&sleepTimespec, NULL);
         }

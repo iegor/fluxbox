@@ -439,7 +439,7 @@ void OpenGLScreen::updateBackgroundTexture() {
     XImage *image = XGetImage(display(), rootWindowPixmap(), 0, 0, rootWindow().width(), rootWindow().height(), AllPlanes, ZPixmap);
 
     if (!image) {
-        fbLog_warn << "Cannot create background texture (cannot create XImage), using default black." << std::endl;
+        fbLog_info << "Cannot create background texture (cannot create XImage), using default black." << std::endl;
         m_backgroundTexture = m_blackTexture;
     } else {
         glBindTexture(GL_TEXTURE_2D, m_backgroundTexture);

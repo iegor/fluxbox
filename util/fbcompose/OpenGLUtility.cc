@@ -46,7 +46,7 @@ void FbCompositor::pixmapToTexture(Display *display, Pixmap pixmap, GLuint textu
     glxPixmap = glXCreatePixmap(display, fbConfig, pixmap, ATTRS);
 
     if (!glxPixmap) {
-        fbLog_warn << "Could not create GLX pixmap for pixmap to texture conversion." << std::endl;
+        fbLog_info << "Could not create GLX pixmap for pixmap to texture conversion." << std::endl;
         return;
     } else {
         glXBindTexImageEXT(display, glxPixmap, GLX_BACK_LEFT_EXT, NULL);
@@ -58,7 +58,7 @@ void FbCompositor::pixmapToTexture(Display *display, Pixmap pixmap, GLuint textu
 #else
     XImage *image = XGetImage(display, pixmap, 0, 0, width, height, AllPlanes, ZPixmap);
     if (!image) {
-        fbLog_warn << "Could not create XImage for pixmap to texture conversion." << std::endl;
+        fbLog_info << "Could not create XImage for pixmap to texture conversion." << std::endl;
         return;
     }
 

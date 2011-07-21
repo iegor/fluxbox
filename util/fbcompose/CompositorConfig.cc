@@ -187,6 +187,9 @@ void CompositorConfig::processArguments() {
         } else if (*it == "-vv") {
             loggingLevel += 2;
 
+        } else if (*it == "-vvv") {
+            loggingLevel += 3;
+
         } else {
             ss.str("");
             ss << "Unknown option \"" << *it << "\".";
@@ -202,8 +205,10 @@ void CompositorConfig::processArguments() {
             Logger::setLoggingLevel(LOG_LEVEL_WARN);
         } else if (loggingLevel == 1) {
             Logger::setLoggingLevel(LOG_LEVEL_INFO);
-        } else if (loggingLevel >= 2) {
+        } else if (loggingLevel == 2) {
             Logger::setLoggingLevel(LOG_LEVEL_DEBUG);
+        } else if (loggingLevel >= 3) {
+            Logger::setLoggingLevel(LOG_LEVEL_VERBOSE_DEBUG);
         }
     }
 }
@@ -246,8 +251,9 @@ void CompositorConfig::printFullHelp(std::ostream &os) {
        << "  -r RATE, --refresh-rate RATE" << std::endl
        << "                         Specify the compositor's refresh rate in Hz" << std::endl
        << "                         (aka frames per second)." << std::endl
-       << "  --sync                 Synchronize with the X server (for debugging)." << std::endl
-       << "  -v, --verbose          Print more information. Pass twice for debug output." << std::endl
+       << "  --sync                 Synchronize with the X server (useful for debugging)." << std::endl
+       << "  -v, --verbose          Print more information. Pass several times for more" << std::endl
+       << "                         output." << std::endl
        << "  -V, --version          Print version and exit." << std::endl;
 }
 

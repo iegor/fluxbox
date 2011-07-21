@@ -182,7 +182,7 @@ void BaseScreen::createWindow(Window window) {
             }
         }
     } else {
-        fbLog_warn << "Attempted to create a window twice (" << std::hex << window << ")" << std::endl;
+        fbLog_info << "Attempted to create a window twice (" << std::hex << window << ")" << std::endl;
     }
 }
 
@@ -200,7 +200,7 @@ void BaseScreen::damageWindow(Window window) {
         }
     } else {
         if (window != m_rootWindow.window()) {
-            fbLog_warn << "Attempted to damage an untracked window (" << std::hex << window << ")" << std::endl;
+            fbLog_info << "Attempted to damage an untracked window (" << std::hex << window << ")" << std::endl;
         }
     }
 }
@@ -219,7 +219,7 @@ void BaseScreen::destroyWindow(Window window) {
         delete *it;
         m_windows.erase(it);
     } else {
-        fbLog_warn << "Attempted to destroy an untracked window (" << std::hex << window << ")" << std::endl;
+        fbLog_info << "Attempted to destroy an untracked window (" << std::hex << window << ")" << std::endl;
     }
 }
 
@@ -236,7 +236,7 @@ void BaseScreen::mapWindow(Window window) {
             }
         }
     } else {
-        fbLog_warn << "Attempted to map an untracked window (" << std::hex << window << ")" << std::endl;
+        fbLog_info << "Attempted to map an untracked window (" << std::hex << window << ")" << std::endl;
     }
 }
 
@@ -266,7 +266,7 @@ void BaseScreen::reconfigureWindow(const XConfigureEvent &event) {
             }
         }
     } else {
-        fbLog_warn << "Attempted to reconfigure an untracked window (" << std::hex << event.window << ")" << std::endl;
+        fbLog_info << "Attempted to reconfigure an untracked window (" << std::hex << event.window << ")" << std::endl;
     }
 }
 
@@ -292,7 +292,7 @@ void BaseScreen::updateShape(Window window) {
             }
         }
     } else {
-        fbLog_warn << "Attempted to update the shape of an untracked window (" << std::hex << window << ")" << std::endl;
+        fbLog_info << "Attempted to update the shape of an untracked window (" << std::hex << window << ")" << std::endl;
     }
 }
 
@@ -309,7 +309,7 @@ void BaseScreen::unmapWindow(Window window) {
             }
         }
     } else {
-        fbLog_warn << "Attempted to unmap an untracked window (" << std::hex << window << ")" << std::endl;
+        fbLog_info << "Attempted to unmap an untracked window (" << std::hex << window << ")" << std::endl;
     }
 }
 
@@ -353,7 +353,7 @@ void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
         }
     } else {
         if (window != rootWindow().window()) {
-            fbLog_warn << "Attempted to set the property of an untracked window (" << std::hex << window << ")" << std::endl;
+            fbLog_info << "Attempted to set the property of an untracked window (" << std::hex << window << ")" << std::endl;
         }
     }
 }
@@ -451,7 +451,7 @@ void BaseScreen::updateRootWindowPixmap(Pixmap newPixmap) {
     m_wmSetRootWindowPixmap = true;
 
     if (!m_rootWindowPixmap) {
-        fbLog_warn << "Cannot find background pixmap, using plain black." << std::endl;
+        fbLog_info << "Cannot find background pixmap, using plain black." << std::endl;
         m_rootWindowPixmap = createSolidPixmap(display(), rootWindow().window(), rootWindow().width(),
                                                rootWindow().height(), 0x00000000);
         m_wmSetRootWindowPixmap = false;

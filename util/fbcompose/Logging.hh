@@ -44,6 +44,9 @@ namespace FbCompositor {
     /** Logging level 4. Level 3 and debug messages will be printed. */
     const int LOG_LEVEL_DEBUG = 4;
 
+    /** Logging level 5. Level 4 and verbose debug messages will be printed. */
+    const int LOG_LEVEL_VERBOSE_DEBUG = 5;
+
 
     /**
      * The log manager class.
@@ -84,10 +87,16 @@ namespace FbCompositor {
 #define fbLog_error fbLog_internal(FbCompositor::LOG_LEVEL_ERROR, "[Error] ")
 #define fbLog_warn fbLog_internal(FbCompositor::LOG_LEVEL_WARN, "[Warn] ")
 #define fbLog_info fbLog_internal(FbCompositor::LOG_LEVEL_INFO, "[Info] ")
-#define fbLog_debug fbLog_internal(FbCompositor::LOG_LEVEL_DEBUG, "[Debug] ")
+
+#ifdef DEBUG
+    #define fbLog_debug fbLog_internal(FbCompositor::LOG_LEVEL_DEBUG, "[Debug] ")
+    #define fbLog_vDebug fbLog_internal(FbCompositor::LOG_LEVEL_VERBOSE_DEBUG, "[Debug] ")
+#else
+    #define fbLog_debug if (0) std::cerr
+    #define fbLog_vDebug if (0) std::cerr
+#endif  // DEBUG
 
 #define fbLog_internal(minLevel, levelName) if (FbCompositor::Logger::loggingLevel() >= (minLevel)) std::cerr << (levelName)
-// #define fbLog_internal(minLevel, levelName) if (0) std::cerr
 
 
 #endif  // FBCOMPOSITOR_LOGGING_HH
