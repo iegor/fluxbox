@@ -1,4 +1,4 @@
-/** Constants.hh file for the fluxbox compositor. */
+/** Enumerations.hh file for the fluxbox compositor. */
 
 // Copyright (c) 2011 Gediminas Liktaras (gliktaras at gmail dot com)
 //

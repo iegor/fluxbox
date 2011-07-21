@@ -23,7 +23,7 @@
 
 #include "Compositor.hh"
 #include "CompositorConfig.hh"
-#include "Constants.hh"
+#include "Enumerations.hh"
 #include "Exceptions.hh"
 #include "Logging.hh"
 #include "ServerAutoApp.hh"

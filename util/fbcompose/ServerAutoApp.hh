@@ -24,7 +24,7 @@
 #ifndef FBCOMPOSITOR_SERVERAUTOAPP_HH
 #define FBCOMPOSITOR_SERVERAUTOAPP_HH
 
-#include "Constants.hh"
+#include "Enumerations.hh"
 #include "Exceptions.hh"
 
 #include "FbTk/App.hh"

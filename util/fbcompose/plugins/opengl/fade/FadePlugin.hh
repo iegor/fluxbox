@@ -25,7 +25,7 @@
 #define FBCOMPOSITOR_PLUGIN_OPENGL_FADE_FADEPLUGIN_HH
 
 
-#include "Constants.hh"
+#include "Enumerations.hh"
 #include "Exceptions.hh"
 #include "OpenGLPlugin.hh"
 #include "OpenGLUtility.hh"

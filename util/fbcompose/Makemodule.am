@@ -60,7 +60,7 @@ fbcompose_SOURCES = \
 	util/fbcompose/BaseScreen.hh util/fbcompose/BaseScreen.cc \
 	util/fbcompose/Compositor.hh util/fbcompose/Compositor.cc \
 	util/fbcompose/CompositorConfig.hh util/fbcompose/CompositorConfig.cc \
-	util/fbcompose/Constants.hh \
+	util/fbcompose/Enumerations.hh \
 	util/fbcompose/Exceptions.hh \
 	util/fbcompose/Logging.hh util/fbcompose/Logging.cc \
 	util/fbcompose/PluginManager.hh util/fbcompose/PluginManager.cc \

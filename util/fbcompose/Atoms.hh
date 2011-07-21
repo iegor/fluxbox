@@ -24,7 +24,7 @@
 #ifndef FBCOMPOSITOR_ATOMS_HH
 #define FBCOMPOSITOR_ATOMS_HH
 
-#include "Constants.hh"
+#include "Enumerations.hh"
 
 #include <X11/Xlib.h>
 

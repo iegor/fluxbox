@@ -27,7 +27,7 @@
 #include "config.h"
 
 #include "BasePlugin.hh"
-#include "Constants.hh"
+#include "Enumerations.hh"
 #include "Exceptions.hh"
 
 #include "FbTk/FbString.hh"

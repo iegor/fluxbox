@@ -25,7 +25,7 @@
 #define FBCOMPOSITOR_PLUGIN_XRENDER_FADE_FADEPLUGIN_HH
 
 
-#include "Constants.hh"
+#include "Enumerations.hh"
 #include "Exceptions.hh"
 #include "ResourceWrappers.hh"
 #include "TickTracker.hh"

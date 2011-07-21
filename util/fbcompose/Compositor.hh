@@ -26,7 +26,7 @@
 
 #include "config.h"
 
-#include "Constants.hh"
+#include "Enumerations.hh"
 #include "Exceptions.hh"
 #include "TickTracker.hh"
 

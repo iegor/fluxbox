@@ -28,7 +28,7 @@
 
 #include "Atoms.hh"
 #include "BaseCompWindow.hh"
-#include "Constants.hh"
+#include "Enumerations.hh"
 #include "Exceptions.hh"
 #include "PluginManager.hh"
 
