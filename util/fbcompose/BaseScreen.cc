@@ -320,13 +320,19 @@ void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
             updateActiveWindow();
         } else if (property == Atoms::reconfigureRectAtom()) {
             updateReconfigureRect();
-        } else if (property == Atoms::rootPixmapAtom()) {
-            updateRootWindowPixmap();
-            setRootPixmapChanged();     // We don't want this called in the constructor, keep it here.
         } else if (property == Atoms::workspaceAtom()) {
             m_currentWorkspace = m_rootWindow.singlePropertyValue<long>(Atoms::workspaceAtom(), 0);
         } else if (property == Atoms::workspaceCountAtom()) {
             m_workspaceCount = m_rootWindow.singlePropertyValue<long>(Atoms::workspaceCountAtom(), 1);
+        }
+
+        std::vector<Atom> rootPixmapAtoms = Atoms::rootPixmapAtoms();
+        for (size_t i = 0; i < rootPixmapAtoms.size(); i++) {
+            if (property == rootPixmapAtoms[i]) {
+                Pixmap newRootPixmap = m_rootWindow.singlePropertyValue<Pixmap>(rootPixmapAtoms[i], None);
+                updateRootWindowPixmap(newRootPixmap);
+                setRootPixmapChanged();     // We don't want this called in the constructor, keep it here.
+            }
         }
 
         BasePlugin *plugin = NULL;
@@ -431,13 +437,17 @@ void BaseScreen::updateReconfigureRect() {
 }
 
 // Update stored root window pixmap.
-void BaseScreen::updateRootWindowPixmap() {
+void BaseScreen::updateRootWindowPixmap(Pixmap newPixmap) {
     if (m_rootWindowPixmap && !m_wmSetRootWindowPixmap) {
         XFreePixmap(display(), m_rootWindowPixmap);
         m_rootWindowPixmap = None;
     }
 
-    m_rootWindowPixmap = rootWindow().singlePropertyValue<Pixmap>(Atoms::rootPixmapAtom(), None);
+    if (!newPixmap) {
+        m_rootWindowPixmap = rootWindow().firstSinglePropertyValue<Pixmap>(Atoms::rootPixmapAtoms(), None);
+    } else {
+        m_rootWindowPixmap = newPixmap;
+    }
     m_wmSetRootWindowPixmap = true;
 
     if (!m_rootWindowPixmap) {

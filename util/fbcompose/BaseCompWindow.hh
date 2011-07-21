@@ -117,6 +117,10 @@ namespace FbCompositor {
         template<class T>
         T singlePropertyValue(Atom propertyAtom, T defaultValue);
 
+        /** Convenience function that returns the first existing single atom value. */
+        template<class T>
+        T firstSinglePropertyValue(std::vector<Atom> propertyAtoms, T defaultValue);
+
 
         //--- WINDOW MANIPULATION ----------------------------------------------
 
@@ -351,13 +355,15 @@ namespace FbCompositor {
     // Returns the value of the specified property.
     template<class T>
     std::vector<T> BaseCompWindow::propertyValue(Atom propertyAtom) {
-        unsigned long nItems;
-        T *data;
+        if (propertyAtom) {
+            unsigned long nItems;
+            T *data;
 
-        if (rawPropertyData(propertyAtom, AnyPropertyType, &nItems, reinterpret_cast<unsigned char**>(&data))) {
-            std::vector<T> actualData(data, data + nItems);
-            XFree(data);
-            return actualData;
+            if (rawPropertyData(propertyAtom, AnyPropertyType, &nItems, reinterpret_cast<unsigned char**>(&data))) {
+                std::vector<T> actualData(data, data + nItems);
+                XFree(data);
+                return actualData;
+            }
         }
 
         return std::vector<T>();
@@ -366,16 +372,24 @@ namespace FbCompositor {
     // Convenience function for accessing properties with a single value.
     template<class T>
     T BaseCompWindow::singlePropertyValue(Atom propertyAtom, T defaultValue) {
-        if (!propertyAtom) {
-            return defaultValue;
-        }
-
         std::vector<T> values = propertyValue<T>(propertyAtom);
         if (values.size() == 0) {
             return defaultValue;
         } else {
             return values[0];
         }
+    }
+
+    // Convenience function that returns the first existing single atom value.
+    template<class T>
+    T BaseCompWindow::firstSinglePropertyValue(std::vector<Atom> propertyAtoms, T defaultValue) {
+        for (size_t i = 0; i < propertyAtoms.size(); i++) {
+            std::vector<T> values = propertyValue<T>(propertyAtoms[i]);
+            if (values.size() != 0) {
+                return values[0];
+            }
+        }
+        return defaultValue;
     }
 }
 

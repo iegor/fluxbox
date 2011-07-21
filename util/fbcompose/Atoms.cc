@@ -59,10 +59,19 @@ Atom Atoms::reconfigureRectAtom() {
     return atom;
 }
 
-// Returns the _XROOTPMAP_ID atom.
-Atom Atoms::rootPixmapAtom() {
-    static Atom atom = XInternAtom(FbTk::App::instance()->display(), "_XROOTPMAP_ID", False);
-    return atom;
+// Returns the atoms that (might) correspond to background pixmap (i.e. wallpapers).
+std::vector<Atom> Atoms::rootPixmapAtoms() {
+    static std::vector<Atom> atoms;
+
+    static bool initialized = false;
+    if (!initialized) {
+        atoms.push_back(XInternAtom(FbTk::App::instance()->display(), "_XROOTPMAP_ID", False));
+        atoms.push_back(XInternAtom(FbTk::App::instance()->display(), "_XSETROOT_ID", False));
+        atoms.push_back(XInternAtom(FbTk::App::instance()->display(), "ESETROOT_PMAP_ID", False));
+        initialized = true;
+    }
+
+    return atoms;
 }
 
 // Returns the _WIN_WORKSPACE atom.

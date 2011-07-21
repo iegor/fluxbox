@@ -26,6 +26,8 @@
 
 #include <X11/Xlib.h>
 
+#include <vector>
+
 
 namespace FbCompositor {
 
@@ -48,8 +50,8 @@ namespace FbCompositor {
         /** \returns the _FLUXBOX_RECONFIGURE_RECT atom. */
         static Atom reconfigureRectAtom();
 
-        /** \returns the _XROOTPMAP_ID atom. */
-        static Atom rootPixmapAtom();
+        /** \returns the atoms that (might) correspond to background pixmap (i.e. wallpapers). */
+        static std::vector<Atom> rootPixmapAtoms();
 
         /** \returns the _WIN_WORKSPACE atom. */
         static Atom workspaceAtom();

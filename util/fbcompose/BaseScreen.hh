@@ -204,7 +204,7 @@ namespace FbCompositor {
         void updateReconfigureRect();
 
         /** Update stored root window pixmap. */
-        void updateRootWindowPixmap();
+        void updateRootWindowPixmap(Pixmap newPixmap = None);
 
 
         //--- CONVENIENCE FUNCTIONS --------------------------------------------
