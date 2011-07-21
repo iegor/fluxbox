@@ -75,6 +75,9 @@ namespace FbCompositor {
         /** Called, whenever a window becomes ignored. */
         virtual void windowBecameIgnored(const BaseCompWindow &window);
 
+        /** Called, whenever a window is circulated. */
+        virtual void windowCirculated(const BaseCompWindow &window, int place);
+
         /** Called, whenever a new window is created. */
         virtual void windowCreated(const BaseCompWindow &window);
 

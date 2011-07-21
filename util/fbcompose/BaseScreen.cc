@@ -152,6 +152,32 @@ void BaseScreen::initWindows() {
 
 //--- WINDOW MANIPULATION ------------------------------------------------------
 
+// Circulates a window on this screen.
+void BaseScreen::circulateWindow(Window window, int place) {
+    std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
+    if (it != m_windows.end()) {
+        BaseCompWindow *curWindow = *it;
+        m_windows.erase(it);
+
+        if (place == PlaceOnTop) {
+            m_windows.push_back(curWindow);
+        } else {
+            m_windows.push_front(curWindow);
+        }
+
+        if (curWindow->isRenderable()) {
+            BasePlugin *plugin = NULL;
+            forEachPlugin(i, plugin) {
+                plugin->windowCirculated(*curWindow, place);
+            }
+        }
+    } else {
+        if (window != m_rootWindow.window()) {
+            fbLog_info << "Attempted to circulate an untracked window (" << std::hex << window << ")" << std::endl;
+        }
+    }
+}
+
 // Creates a new window and inserts it into the list of windows.
 void BaseScreen::createWindow(Window window) {
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
@@ -339,21 +365,22 @@ void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
         forEachPlugin(i, plugin) {
             plugin->windowPropertyChanged(m_rootWindow, property, state);
         }
-    }
 
-    std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
-    if (it != m_windows.end()) {
-        (*it)->updateProperty(property, state);
-
-        if ((*it)->isRenderable()) {
-            BasePlugin *plugin = NULL;
-            forEachPlugin(i, plugin) {
-                plugin->windowPropertyChanged(**it, property, state);
-            }
-        }
     } else {
-        if (window != rootWindow().window()) {
-            fbLog_info << "Attempted to set the property of an untracked window (" << std::hex << window << ")" << std::endl;
+        std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
+        if (it != m_windows.end()) {
+            (*it)->updateProperty(property, state);
+
+            if ((*it)->isRenderable()) {
+                BasePlugin *plugin = NULL;
+                forEachPlugin(i, plugin) {
+                    plugin->windowPropertyChanged(**it, property, state);
+                }
+            }
+        } else {
+            if (window != rootWindow().window()) {
+                fbLog_info << "Attempted to set the property of an untracked window (" << std::hex << window << ")" << std::endl;
+            }
         }
     }
 }

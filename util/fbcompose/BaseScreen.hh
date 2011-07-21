@@ -112,6 +112,9 @@ namespace FbCompositor {
 
         //--- WINDOW MANIPULATION ----------------------------------------------
 
+        /** Circulates a window on this screen. */
+        void circulateWindow(Window window, int place);
+
         /** Creates a new window on this screen. */
         void createWindow(Window window);
 

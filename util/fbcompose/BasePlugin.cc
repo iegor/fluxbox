@@ -47,6 +47,9 @@ BasePlugin::~BasePlugin() { }
 // Called, whenever a window becomes ignored.
 void BasePlugin::windowBecameIgnored(const BaseCompWindow &/*window*/) { }
 
+// Called, whenever a window is circulated.
+void BasePlugin::windowCirculated(const BaseCompWindow &/*window*/, int /*place*/) { }
+
 // Called, whenever a new window is created.
 void BasePlugin::windowCreated(const BaseCompWindow &/*window*/) { }
 

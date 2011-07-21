@@ -282,6 +282,11 @@ void Compositor::eventLoop() {
             }
 
             switch (event.type) {
+            case CirculateNotify :
+                m_screens[eventScreen]->circulateWindow(event.xcirculate.window, event.xcirculate.place);
+                fbLog_debug << "CirculateNotify on " << std::hex << event.xcirculate.window << std::endl;
+                break;
+
             case ConfigureNotify :
                 m_screens[eventScreen]->reconfigureWindow(event.xconfigure);
                 fbLog_debug << "ConfigureNotify on " << std::hex << event.xconfigure.window << std::endl;
@@ -295,6 +300,10 @@ void Compositor::eventLoop() {
             case DestroyNotify :
                 m_screens[eventScreen]->destroyWindow(event.xdestroywindow.window);
                 fbLog_debug << "DestroyNotify on " << std::hex << event.xdestroywindow.window << std::endl;
+                break;
+
+            case GravityNotify :
+                fbLog_debug << "GravityNotify on " << std::hex << event.xgravity.window << std::endl;
                 break;
 
             case MapNotify :
