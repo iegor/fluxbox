@@ -25,6 +25,7 @@
 
 #include "Atoms.hh"
 #include "Logging.hh"
+#include "XRenderScreen.hh"
 
 using namespace FbCompositor;
 
@@ -32,17 +33,17 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-XRenderWindow::XRenderWindow(const BaseScreen &screen, Window windowXID, const char *pictFilter) :
-    BaseCompWindow(screen, windowXID),
+XRenderWindow::XRenderWindow(const XRenderScreen &screen, Window windowXID, const char *pictFilter) :
+    BaseCompWindow((const BaseScreen&)(screen), windowXID),
     m_pictFilter(pictFilter) {
 
     m_maskPixmap = None;
 
     XRenderPictFormat *contentPictFormat = XRenderFindVisualFormat(display(), visual());
-    m_contentPicture = new XRenderPictureWrapper(display(), contentPictFormat, m_pictFilter);
+    m_contentPicture = new XRenderPicture(screen, contentPictFormat, m_pictFilter);
 
     XRenderPictFormat *maskPictFormat = XRenderFindStandardFormat(display(), PictStandardARGB32);
-    m_maskPicture = new XRenderPictureWrapper(display(), maskPictFormat, m_pictFilter);
+    m_maskPicture = new XRenderPicture(screen, maskPictFormat, m_pictFilter);
 }
 
 // Destructor.
@@ -112,8 +113,8 @@ void XRenderWindow::updateMaskPicture() {
     }
 
     XRenderColor color = { 0, 0, 0, 0 };
-    XRenderFillRectangle(display(), PictOpSrc, direct_maskPicture(), &color, 0, 0, realWidth(), realHeight());
+    XRenderFillRectangle(display(), PictOpSrc, m_maskPicture->handle(), &color, 0, 0, realWidth(), realHeight());
 
     color.alpha = (unsigned long)((alpha() * 0xffff) / 255.0);
-    XRenderFillRectangles(display(), PictOpSrc, direct_maskPicture(), &color, clipShapeRects(), clipShapeRectCount());
+    XRenderFillRectangles(display(), PictOpSrc, m_maskPicture->handle(), &color, clipShapeRects(), clipShapeRectCount());
 }

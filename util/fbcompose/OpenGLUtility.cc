@@ -23,56 +23,10 @@
 
 #include "OpenGLUtility.hh"
 
-#include "Logging.hh"
-#include "Utility.hh"
-
 using namespace FbCompositor;
 
 
 //--- FUNCTIONS ----------------------------------------------------------------
-
-/** Converts an X pixmap to an OpenGL texture. */
-void FbCompositor::pixmapToTexture(Display *display, Pixmap pixmap, GLuint texture, GLXFBConfig fbConfig,
-                                   GLXPixmap glxPixmap, unsigned int width, unsigned int height,
-                                   const int *ATTRS) {
-#ifdef GLXEW_EXT_texture_from_pixmap
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    if (glxPixmap) {
-        glXReleaseTexImageEXT(display, glxPixmap, GLX_BACK_LEFT_EXT);
-        glXDestroyPixmap(display, glxPixmap);
-        glxPixmap = 0;
-    }
-    glxPixmap = glXCreatePixmap(display, fbConfig, pixmap, ATTRS);
-
-    if (!glxPixmap) {
-        fbLog_info << "Could not create GLX pixmap for pixmap to texture conversion." << std::endl;
-        return;
-    } else {
-        glXBindTexImageEXT(display, glxPixmap, GLX_BACK_LEFT_EXT, NULL);
-    }
-
-    MARK_PARAMETER_UNUSED(height);
-    MARK_PARAMETER_UNUSED(width);
-
-#else
-    XImage *image = XGetImage(display, pixmap, 0, 0, width, height, AllPlanes, ZPixmap);
-    if (!image) {
-        fbLog_info << "Could not create XImage for pixmap to texture conversion." << std::endl;
-        return;
-    }
-
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)(&(image->data[0])));
-
-    XDestroyImage(image);
-
-    MARK_PARAMETER_UNUSED(ATTRS);
-    MARK_PARAMETER_UNUSED(fbConfig);
-    MARK_PARAMETER_UNUSED(glxPixmap);
-
-#endif  // GLXEW_EXT_texture_from_pixmap
-}
 
 // Converts screen coordinates to OpenGL coordinates.
 void FbCompositor::toOpenGLCoordinates(int screenWidth, int screenHeight, int x, int y, int width, int height,

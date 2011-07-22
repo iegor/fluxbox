@@ -334,12 +334,12 @@ void XRenderScreen::renderWindow(XRenderWindow &window) {
 
     // Render the window.
     op = PictOpOver;
-    maskPic = window.maskPicture()->unwrap();
+    maskPic = window.maskPicture()->handle();
 
     forEachPlugin(i, plugin) {
         plugin->windowRenderingJobInit(window, op, maskPic);
     }
-    XRenderComposite(display(), op, window.contentPicture()->unwrap(), maskPic, m_backBufferPicture,
+    XRenderComposite(display(), op, window.contentPicture()->handle(), maskPic, m_backBufferPicture,
                      0, 0, 0, 0, window.x(), window.y(), window.realWidth(), window.realHeight());
     forEachPlugin(i, plugin) {
         plugin->windowRenderingJobCleanup(window);

@@ -27,16 +27,15 @@
 
 #include "BaseCompWindow.hh"
 #include "Exceptions.hh"
-#include "ResourceWrappers.hh"
+#include "XRenderResources.hh"
 
 #include <X11/extensions/Xrender.h>
 
 
 namespace FbCompositor {
 
-    class BaseCompWindow;
-    class BaseScreen;
     class InitException;
+    class XRenderScreen;
     class XRenderWindow;
 
 
@@ -48,7 +47,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        XRenderWindow(const BaseScreen &screen, Window windowXID, const char *pictFilter);
+        XRenderWindow(const XRenderScreen &screen, Window windowXID, const char *pictFilter);
 
         /** Destructor. */
         ~XRenderWindow();
@@ -57,10 +56,10 @@ namespace FbCompositor {
         //--- ACCESSORS --------------------------------------------------------
 
         /** \returns an object, holding the window's contents as an XRender picture. */
-        XRenderPictureWrapperPtr contentPicture() const;
+        XRenderPicturePtr contentPicture() const;
         
         /** \returns an object, the window's mask picture. */
-        XRenderPictureWrapperPtr maskPicture() const;
+        XRenderPicturePtr maskPicture() const;
 
 
         //--- WINDOW MANIPULATION ----------------------------------------------
@@ -80,15 +79,6 @@ namespace FbCompositor {
 
 
     private:
-        //--- CONVENIENCE ACCESSORS --------------------------------------------
-
-        /** \returns the window's contents as an XRender picture. */
-        Picture direct_contentPicture() const;
-
-        /** \returns the window's mask picture. */
-        Picture direct_maskPicture() const;
-
-
         //--- INTERNAL FUNCTIONS -----------------------------------------------
 
         /** Update the window's mask picture. */
@@ -102,10 +92,10 @@ namespace FbCompositor {
 
 
         /** The window's content picture. */
-        XRenderPictureWrapperPtr m_contentPicture;
+        XRenderPicturePtr m_contentPicture;
 
         /** The window's mask picture. */
-        XRenderPictureWrapperPtr m_maskPicture;
+        XRenderPicturePtr m_maskPicture;
 
 
         /** The picture filter. */
@@ -116,24 +106,13 @@ namespace FbCompositor {
     //--- INLINE FUNCTIONS -----------------------------------------------------
 
     // Returns the window's contents as an XRender picture.
-    inline XRenderPictureWrapperPtr XRenderWindow::contentPicture() const {
+    inline XRenderPicturePtr XRenderWindow::contentPicture() const {
         return m_contentPicture;
     }
 
     // Returns the window's mask picture.
-    inline XRenderPictureWrapperPtr XRenderWindow::maskPicture() const {
+    inline XRenderPicturePtr XRenderWindow::maskPicture() const {
         return m_maskPicture;
-    }
-
-
-    // Returns the window's contents as an XRender picture.
-    inline Picture XRenderWindow::direct_contentPicture() const {
-        return m_contentPicture->unwrap();
-    }
-
-    // Returns the window's mask picture.
-    inline Picture XRenderWindow::direct_maskPicture() const {
-        return m_maskPicture->unwrap();
     }
 }
 

@@ -28,7 +28,7 @@
 #include "BaseCompWindow.hh"
 #include "Exceptions.hh"
 #include "OpenGLUtility.hh"
-#include "ResourceWrappers.hh"
+#include "OpenGLResources.hh"
 
 #include <GL/glxew.h>
 #include <GL/glx.h>
@@ -37,8 +37,6 @@
 
 namespace FbCompositor {
 
-    class BaseCompWindow;
-    class BaseScreen;
     class InitException;
     class OpenGLWindow;
 
@@ -51,7 +49,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        OpenGLWindow(const BaseScreen &screen, Window windowXID, GLXFBConfig fbConfig);
+        OpenGLWindow(const OpenGLScreen &screen, Window windowXID);
 
         /** Destructor. */
         virtual ~OpenGLWindow();
@@ -60,13 +58,13 @@ namespace FbCompositor {
         //--- ACCESSORS --------------------------------------------------------
 
         /** \returns an object, holding the window's contents as an OpenGL texture. */
-        OpenGLTextureWrapperPtr contentTexture() const;
+        OpenGLTexturePtr contentTexture() const;
 
         /** \returns an object, holding the window's shape as an OpenGL texture. */
-        OpenGLTextureWrapperPtr shapeTexture() const;
+        OpenGLTexturePtr shapeTexture() const;
 
         /** \returns an object, holding the window position buffer. */
-        OpenGLBufferWrapperPtr windowPosBuffer() const;
+        OpenGLBufferPtr windowPosBuffer() const;
 
 
         //--- WINDOW UPDATE FUNCTIONS ------------------------------------------
@@ -85,82 +83,42 @@ namespace FbCompositor {
 
 
     private :
-        //--- CONVENIENCE ACCESSORS --------------------------------------------
-
-        /** \returns the window's contents as a OpenGL texture. */
-        GLuint direct_contentTexture() const;
-
-        /** \returns the window's shape as an OpenGL texture. */
-        GLuint direct_shapeTexture() const;
-
-        /** \returns the window position buffer. */
-        GLuint direct_windowPosBuffer() const;
-
-
         //--- RENDERING-RELATED VARIABLES --------------------------------------
 
-        /** Screen's FBConfig. */
-        GLXFBConfig m_fbConfig;
-
-
         /** Window's content texture holder. */
-        OpenGLTextureWrapperPtr m_contentTexturePtr;
+        OpenGLTexturePtr m_contentTexturePtr;
 
         /** Window's shape texture holder. */
-        OpenGLTextureWrapperPtr m_shapeTexturePtr;
+        OpenGLTexturePtr m_shapeTexturePtr;
+
 
         /** Window position array. */
         GLfloat m_windowPosArray[8];
 
         /** Window position buffer holder. */
-        OpenGLBufferWrapperPtr m_windowPosBufferPtr;
+        OpenGLBufferPtr m_windowPosBufferPtr;
 
 
         /** Window's shape pixmap. */
         Pixmap m_shapePixmap;
-
-
-        //--- texture_from_pixmap EXTENSION SPECIFIC ---------------------------
-
-        /** The GLX pixmap of window's contents. */
-        GLXPixmap m_glxContents;
-
-        /** The GLX pixmap of window's shape. */
-        GLXPixmap m_glxShape;
     };
 
 
     //--- INLINE FUNCTIONS -------------------------------------------------
 
     // Returns the window's contents as an OpenGL texture.
-    inline OpenGLTextureWrapperPtr OpenGLWindow::contentTexture() const {
+    inline OpenGLTexturePtr OpenGLWindow::contentTexture() const {
         return m_contentTexturePtr;
     }
 
     // Returns an object, holding the window's shape as an OpenGL texture.
-    inline OpenGLTextureWrapperPtr OpenGLWindow::shapeTexture() const {
+    inline OpenGLTexturePtr OpenGLWindow::shapeTexture() const {
         return m_shapeTexturePtr;
     }
 
     // Returns the window position buffer.
-    inline OpenGLBufferWrapperPtr OpenGLWindow::windowPosBuffer() const {
+    inline OpenGLBufferPtr OpenGLWindow::windowPosBuffer() const {
         return m_windowPosBufferPtr;
-    }
-
-
-    // Returns the window's contents as an OpenGL texture.
-    inline GLuint OpenGLWindow::direct_contentTexture() const {
-        return m_contentTexturePtr->unwrap();
-    }
-
-    // Returns the window's shape as an OpenGL texture.
-    inline GLuint OpenGLWindow::direct_shapeTexture() const {
-        return m_shapeTexturePtr->unwrap();
-    }
-
-    // Returns the window position buffer.
-    inline GLuint OpenGLWindow::direct_windowPosBuffer() const {
-        return m_windowPosBufferPtr->unwrap();
     }
 }
 

@@ -206,11 +206,11 @@ void FadePlugin::extraRenderingJobInit(int job, GLuint &primPosBuffer_return, GL
 
     NegFadeData &curFade = m_negativeFades[job];
 
-    primPosBuffer_return = curFade.windowPosBuffer->unwrap();
+    primPosBuffer_return = curFade.windowPosBuffer->handle();
     mainTexCoordBuffer_return = openGLScreen().defaultTexCoordBuffer();
-    mainTexture_return = curFade.contentTexture->unwrap();
+    mainTexture_return = curFade.contentTexture->handle();
     shapeTexCoordBuffer_return = openGLScreen().defaultTexCoordBuffer();
-    shapeTexture_return = curFade.shapeTexture->unwrap();
+    shapeTexture_return = curFade.shapeTexture->handle();
     alpha_return = curFade.origAlpha / 255.0;
 
     try {

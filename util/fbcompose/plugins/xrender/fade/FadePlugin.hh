@@ -27,9 +27,9 @@
 
 #include "Enumerations.hh"
 #include "Exceptions.hh"
-#include "ResourceWrappers.hh"
 #include "TickTracker.hh"
 #include "XRenderPlugin.hh"
+#include "XRenderResources.hh"
 
 #include "FbTk/FbString.hh"
 
@@ -111,7 +111,7 @@ namespace FbCompositor {
         //--- INTERNAL FUNCTIONS -----------------------------------------------
 
         /** \returns the faded mask picture for the given window fade. */
-        void createFadedMask(int alpha, XRenderPictureWrapperPtr mask, XRectangle dimensions,
+        void createFadedMask(int alpha, XRenderPicturePtr mask, XRectangle dimensions,
                              Pixmap &fadePixmap_return, Picture &fadePicture_return);
 
 
@@ -137,16 +137,16 @@ namespace FbCompositor {
 
         /** Holds the data about positive fades. */
         struct NegFadeData {
-            Window windowId;                            ///< ID of the window that is being faded.
-            int origAlpha;                              ///< Window's original opacity.
-            XRenderPictureWrapperPtr contentPicture;    ///< Window's contents.
-            XRenderPictureWrapperPtr maskPicture;       ///< Window's shape mask.
-            XRectangle dimensions;                      ///< Window's dimensions.
+            Window windowId;                    ///< ID of the window that is being faded.
+            int origAlpha;                      ///< Window's original opacity.
+            XRenderPicturePtr contentPicture;   ///< Window's contents.
+            XRenderPicturePtr maskPicture;      ///< Window's shape mask.
+            XRectangle dimensions;              ///< Window's dimensions.
 
-            int fadeAlpha;                              ///< Window's relative fade alpha.
-            Picture fadePicture;                        ///< Picture of the faded window mask.
-            Pixmap fadePixmap;                          ///< Pixmap of the faded window mask.
-            TickTracker timer;                          ///< Timer that tracks the current fade.
+            int fadeAlpha;                      ///< Window's relative fade alpha.
+            Picture fadePicture;                ///< Picture of the faded window mask.
+            Pixmap fadePixmap;                  ///< Pixmap of the faded window mask.
+            TickTracker timer;                  ///< Timer that tracks the current fade.
         };
 
         /** A list of disappearing (negative) fades. */

@@ -28,8 +28,8 @@
 #include "Enumerations.hh"
 #include "Exceptions.hh"
 #include "OpenGLPlugin.hh"
+#include "OpenGLResources.hh"
 #include "OpenGLUtility.hh"
-#include "ResourceWrappers.hh"
 #include "TickTracker.hh"
 
 #include "FbTk/FbString.hh"
@@ -143,14 +143,14 @@ namespace FbCompositor {
 
         /** Holds the data about positive fades. */
         struct NegFadeData {
-            Window windowId;                        ///< ID of the window being faded.
-            int origAlpha;                          ///< Window's original opacity.
-            OpenGLTextureWrapperPtr contentTexture; ///< Window's contents.
-            OpenGLTextureWrapperPtr shapeTexture;   ///< Window's shape.
-            OpenGLBufferWrapperPtr windowPosBuffer; ///< Window position buffer.
+            Window windowId;                    ///< ID of the window being faded.
+            int origAlpha;                      ///< Window's original opacity.
+            OpenGLTexturePtr contentTexture;    ///< Window's contents.
+            OpenGLTexturePtr shapeTexture;      ///< Window's shape.
+            OpenGLBufferPtr windowPosBuffer;    ///< Window position buffer.
 
-            int fadeAlpha;                          ///< Window's fade relative alpha.
-            TickTracker timer;                      ///< Timer that tracks the current fade.
+            int fadeAlpha;                      ///< Window's fade relative alpha.
+            TickTracker timer;                  ///< Timer that tracks the current fade.
         };
 
         /** A list of disappearing (negative) fades. */

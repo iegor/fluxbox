@@ -27,6 +27,8 @@
 
 #include "BaseScreen.hh"
 
+#include "XRenderResources.hh"
+
 #include <X11/extensions/Xrender.h>
 #include <X11/Xlib.h>
 

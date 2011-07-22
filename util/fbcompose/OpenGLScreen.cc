@@ -26,9 +26,9 @@
 #include "CompositorConfig.hh"
 #include "Logging.hh"
 #include "OpenGLPlugin.hh"
+#include "OpenGLResources.hh"
 #include "OpenGLShaders.hh"
 #include "OpenGLUtility.hh"
-#include "ResourceWrappers.hh"
 
 #include "FbTk/FbString.hh"
 
@@ -74,6 +74,9 @@ namespace {
         GLX_GREEN_SIZE, 8,
         GLX_BLUE_SIZE, 8,
         GLX_ALPHA_SIZE, 8,
+#ifdef GLXEW_EXT_texture_from_pixmap
+        GLX_BIND_TO_TEXTURE_RGBA_EXT, GL_TRUE,
+#endif  // GLXEW_EXT_texture_from_pixmap
         None
     };
 
@@ -86,6 +89,9 @@ namespace {
         GLX_GREEN_SIZE, 8,
         GLX_BLUE_SIZE, 8,
         GLX_ALPHA_SIZE, 8,
+#ifdef GLXEW_EXT_texture_from_pixmap
+        GLX_BIND_TO_TEXTURE_RGBA_EXT, GL_TRUE,
+#endif  // GLXEW_EXT_texture_from_pixmap
         None
     };
 
@@ -547,7 +553,7 @@ GLuint OpenGLScreen::createShaderProgram(GLuint vertexShader, GLuint geometrySha
 
 // Creates a window object from its XID.
 BaseCompWindow *OpenGLScreen::createWindowObject(Window window) {
-    OpenGLWindow *newWindow = new OpenGLWindow(*this, window, m_fbConfig);
+    OpenGLWindow *newWindow = new OpenGLWindow(*this, window);
     return newWindow;
 }
 
@@ -682,9 +688,9 @@ void OpenGLScreen::renderWindow(OpenGLWindow &window) {
     forEachPlugin(i, plugin) {
         plugin->preWindowRenderActions(window);
     }
-    render(GL_TRIANGLE_STRIP, window.windowPosBuffer()->unwrap(),
-           m_defaultTexCoordBuffer, window.contentTexture()->unwrap(),
-           m_defaultTexCoordBuffer, window.shapeTexture()->unwrap(),
+    render(GL_TRIANGLE_STRIP, window.windowPosBuffer()->handle(),
+           m_defaultTexCoordBuffer, window.contentTexture()->handle(),
+           m_defaultTexCoordBuffer, window.shapeTexture()->handle(),
            m_defaultElementBuffer, 4, window.alpha() / 255.0);
     forEachPlugin(i, plugin) {
         plugin->postWindowRenderActions(window);

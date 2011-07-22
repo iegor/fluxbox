@@ -56,57 +56,22 @@ namespace {
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-OpenGLWindow::OpenGLWindow(const BaseScreen &screen, Window windowXID, GLXFBConfig fbConfig) :
-    BaseCompWindow(screen, windowXID) {
+OpenGLWindow::OpenGLWindow(const OpenGLScreen &screen, Window windowXID) :
+    BaseCompWindow((const BaseScreen&)(screen), windowXID) {
 
-    m_glxContents = None;
-    m_glxShape = None;
-    m_fbConfig = fbConfig;
     m_shapePixmap = None;
 
-    // Create OpenGL elements.
-    m_contentTexturePtr = new OpenGLTextureWrapper();
-    m_shapeTexturePtr = new OpenGLTextureWrapper();
-    m_windowPosBufferPtr = new OpenGLBufferWrapper();
+    m_contentTexturePtr = new OpenGLTexture(screen, GL_TEXTURE_2D, true);
+    m_shapeTexturePtr = new OpenGLTexture(screen, GL_TEXTURE_2D, false);
+    m_windowPosBufferPtr = new OpenGLBuffer(screen, GL_ARRAY_BUFFER);
 
-    // Fill window position array.
     updateWindowPosArray();
-
-    // Initialize the content texture.
-    glBindTexture(GL_TEXTURE_2D, direct_contentTexture());
-
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-#ifdef GL_ARB_texture_swizzle
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, GL_ONE);
-#else
-#ifdef GL_EXT_texture_swizzle
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A_EXT, GL_ONE);
-#endif  // GL_EXT_texture_swizzle
-#endif  // GL_ARB_texture_swizzle
-
-    // Initialize the shape texture.
-    glBindTexture(GL_TEXTURE_2D, direct_shapeTexture());
-
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
 // Destructor.
 OpenGLWindow::~OpenGLWindow() {
     if (m_shapePixmap) {
         XFreePixmap(display(), m_shapePixmap);
-    }
-    if (m_glxContents) {
-        glXDestroyPixmap(display(), m_glxContents);
-    }
-    if (m_glxShape) {
-        glXDestroyPixmap(display(), m_glxShape);
     }
 }
 
@@ -121,8 +86,7 @@ void OpenGLWindow::updateContents() {
 
     updateContentPixmap();
     if (contentPixmap()) {
-        pixmapToTexture(display(), contentPixmap(), direct_contentTexture(), m_fbConfig,
-                        m_glxContents, realWidth(), realHeight(), TEX_PIXMAP_ATTRIBUTES);
+        m_contentTexturePtr->setPixmap(contentPixmap(), realWidth(), realHeight());
     }
 
     if (clipShapeChanged()) {
@@ -165,8 +129,7 @@ void OpenGLWindow::updateShape() {
 
     XFreeGC(display(), gc);
 
-    pixmapToTexture(display(), m_shapePixmap, direct_shapeTexture(), m_fbConfig,
-                    m_glxShape, realWidth(), realHeight(), TEX_PIXMAP_ATTRIBUTES);
+    m_shapeTexturePtr->setPixmap(m_shapePixmap, realWidth(), realHeight());
 }
 
 // Updates the window position vertex array.
@@ -180,6 +143,5 @@ void OpenGLWindow::updateWindowPosArray() {
     m_windowPosArray[1] = m_windowPosArray[3] = yLow;
     m_windowPosArray[5] = m_windowPosArray[7] = yHigh;
 
-    glBindBuffer(GL_ARRAY_BUFFER, direct_windowPosBuffer());
-    glBufferData(GL_ARRAY_BUFFER, sizeof(m_windowPosArray), (const GLvoid*)(m_windowPosArray), GL_STATIC_DRAW);
+    m_windowPosBufferPtr->bufferData(sizeof(m_windowPosArray), (const GLvoid*)(m_windowPosArray), GL_STATIC_DRAW);
 }

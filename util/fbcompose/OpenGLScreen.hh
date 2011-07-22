@@ -75,6 +75,16 @@ namespace FbCompositor {
         GLuint whiteTexture() const;
 
 
+        //--- OTHER ACCESSORS --------------------------------------------------
+
+        /** \return the main GLX context. */
+        GLXContext context() const;
+
+        /** \returns the main GLXFBConfig. */
+        GLXFBConfig fbConfig() const;
+
+
+
         //--- SCREEN MANIPULATION ----------------------------------------------
 
         /** Notifies the screen of the background change. */
@@ -271,6 +281,11 @@ namespace FbCompositor {
         return m_blackTexture;
     }
 
+    // Return the main GLX context.
+    inline GLXContext OpenGLScreen::context() const {
+        return m_glxContext;
+    }
+
     // Returns the default element buffer.
     inline GLuint OpenGLScreen::defaultElementBuffer() const {
         return m_defaultElementBuffer;
@@ -284,6 +299,11 @@ namespace FbCompositor {
     // Returns the default texture position buffer.
     inline GLuint OpenGLScreen::defaultTexCoordBuffer() const {
         return m_defaultTexCoordBuffer;
+    }
+
+    // Returns the main GLXFBConfig.
+    inline GLXFBConfig OpenGLScreen::fbConfig() const {
+        return m_fbConfig;
     }
 
     // Returns the default white texture.

@@ -229,7 +229,7 @@ void FadePlugin::extraRenderingJobInit(int job, int &op_return, Picture &srcPic_
 
     // Initialize the other rendering variables.
     op_return = PictOpOver;
-    srcPic_return = curFade.contentPicture->unwrap();
+    srcPic_return = curFade.contentPicture->handle();
     srcX_return = 0;
     srcY_return = 0;
     maskX_return = 0;
@@ -262,7 +262,7 @@ void FadePlugin::postExtraRenderingActions() {
 //--- INTERNAL FUNCTIONS -------------------------------------------------------
 
 // Returns the faded mask picture for the given window fade.
-void FadePlugin::createFadedMask(int alpha, XRenderPictureWrapperPtr mask, XRectangle dimensions,
+void FadePlugin::createFadedMask(int alpha, XRenderPicturePtr mask, XRectangle dimensions,
                                  Pixmap &fadePixmap_return, Picture &fadePicture_return) {
     if (fadePixmap_return) {
         XFreePixmap(display(), fadePixmap_return);
@@ -277,7 +277,7 @@ void FadePlugin::createFadedMask(int alpha, XRenderPictureWrapperPtr mask, XRect
     }
     fadePicture_return = XRenderCreatePicture(display(), fadePixmap_return, m_maskPictFormat, 0, NULL);
 
-    XRenderComposite(display(), PictOpIn, mask->unwrap(), None, fadePicture_return,
+    XRenderComposite(display(), PictOpIn, mask->handle(), None, fadePicture_return,
                      0, 0, 0, 0, 0, 0, dimensions.width, dimensions.height);
 }
 

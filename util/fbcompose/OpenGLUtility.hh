@@ -27,19 +27,13 @@
 
 #include "FbTk/RefCount.hh"
 
-#include <GL/glxew.h>
-#include <GL/glx.h>
-
-#include <X11/Xlib.h>
+#include <GL/glew.h>
+#include <GL/gl.h>
 
 
 namespace FbCompositor {
 
     //--- FUNCTIONS ------------------------------------------------------------
-
-    /** Converts an X pixmap to an OpenGL texture. */
-    void pixmapToTexture(Display *display, Pixmap pixmap, GLuint texture, GLXFBConfig fbConfig,
-                         GLXPixmap glxPixmap, unsigned int width, unsigned int height, const int *ATTRS);
 
     /** Converts screen coordinates to OpenGL coordinates. */
     void toOpenGLCoordinates(int screenWidth, int screenHeight, int x, int y, int width, int height,
