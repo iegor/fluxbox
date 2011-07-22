@@ -29,6 +29,7 @@
 #include "OpenGLResources.hh"
 #include "OpenGLShaders.hh"
 #include "OpenGLUtility.hh"
+#include "Utility.hh"
 
 #include "FbTk/FbString.hh"
 
@@ -136,9 +137,7 @@ OpenGLScreen::OpenGLScreen(int screenNumber, const CompositorConfig &config) :
     finishRenderingInit();
 
     initShaders();
-    createDefaultElements();
-    createBackgroundTexture();
-    createReconfigureRectElements();
+    createResources();
     initPlugins();
 }
 
@@ -151,17 +150,6 @@ OpenGLScreen::~OpenGLScreen() {
     glDeleteProgram(m_shaderProgram);
     glDeleteShader(m_vertexShader);
     glDeleteShader(m_fragmentShader);
-
-    glDeleteTextures(1, &m_blackTexture);
-    glDeleteBuffers(1, &m_defaultElementBuffer);
-    glDeleteBuffers(1, &m_defaultPrimPosBuffer);
-    glDeleteBuffers(1, &m_defaultTexCoordBuffer);
-    glDeleteTextures(1, &m_whiteTexture);
-
-    glDeleteTextures(1, &m_backgroundTexture);
-
-    glDeleteBuffers(1, &m_reconfigureRectElementBuffer);
-    glDeleteBuffers(1, &m_reconfigureRectLinePosBuffer);
 
     glXDestroyWindow(display(), m_glxRenderingWindow);
     glXDestroyContext(display(), m_glxContext);
@@ -357,74 +345,46 @@ void OpenGLScreen::initShaders() {
     m_shapeTexUniform = glGetUniformLocation(m_shaderProgram, "fb_ShapeTexture");
 }
 
-
-// Creates default texture rendering buffers.
-void OpenGLScreen::createDefaultElements() {
-    int textureData[1][1];
-
-    // Default black texture.
-    glGenTextures(1, &m_blackTexture);
-    glBindTexture(GL_TEXTURE_2D, m_blackTexture);
-
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    textureData[0][0] = 0x00000000;
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, (void*)(textureData));
+// Creates OpenGL resources.
+void OpenGLScreen::createResources() {
+    Pixmap pixmap;
 
     // Default element buffer.
-    glGenBuffers(1, &m_defaultElementBuffer);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_defaultElementBuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(DEFAULT_ELEMENT_ARRAY),
-                 (const GLvoid*)(DEFAULT_ELEMENT_ARRAY), GL_STATIC_DRAW);
+    m_defaultElementBuffer = new OpenGLBuffer(*this, GL_ELEMENT_ARRAY_BUFFER);
+    m_defaultElementBuffer->bufferData(sizeof(DEFAULT_ELEMENT_ARRAY), (const GLvoid*)(DEFAULT_ELEMENT_ARRAY), GL_STATIC_DRAW);
 
     // Default primitive position buffer.
-    glGenBuffers(1, &m_defaultPrimPosBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, m_defaultPrimPosBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(DEFAULT_PRIM_POS_ARRAY),
-                 (const GLvoid*)(DEFAULT_PRIM_POS_ARRAY), GL_STATIC_DRAW);
+    m_defaultPrimPosBuffer = new OpenGLBuffer(*this, GL_ARRAY_BUFFER);
+    m_defaultPrimPosBuffer->bufferData(sizeof(DEFAULT_PRIM_POS_ARRAY), (const GLvoid*)(DEFAULT_PRIM_POS_ARRAY), GL_STATIC_DRAW);
 
     // Default texture position buffer.
-    glGenBuffers(1, &m_defaultTexCoordBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, m_defaultTexCoordBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(DEFAULT_TEX_POS_ARRAY),
-                 (const GLvoid*)(DEFAULT_TEX_POS_ARRAY), GL_STATIC_DRAW);
+    m_defaultTexCoordBuffer = new OpenGLBuffer(*this, GL_ARRAY_BUFFER);
+    m_defaultTexCoordBuffer->bufferData(sizeof(DEFAULT_TEX_POS_ARRAY), (const GLvoid*)(DEFAULT_TEX_POS_ARRAY), GL_STATIC_DRAW);
 
-    // Default white texture.
-    glGenTextures(1, &m_whiteTexture);
-    glBindTexture(GL_TEXTURE_2D, m_whiteTexture);
 
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    // Reconfigure rectangle position buffer.
+    m_reconfigureRectLinePosBuffer = new OpenGLBuffer(*this, GL_ARRAY_BUFFER);
 
-    textureData[0][0] = 0xffffffff;
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, (void*)(textureData));
-}
+    // Reconfigure rectangle element buffer.
+    m_reconfigureRectElementBuffer = new OpenGLBuffer(*this, GL_ELEMENT_ARRAY_BUFFER);
+    m_reconfigureRectElementBuffer->bufferData(sizeof(RECONFIGURE_RECT_ELEMENT_ARRAY),
+                                               (const GLvoid*)(RECONFIGURE_RECT_ELEMENT_ARRAY), GL_STATIC_DRAW);
 
-// Creates the background texture.
-void OpenGLScreen::createBackgroundTexture() {
-    glGenTextures(1, &m_backgroundTexture);
-    glBindTexture(GL_TEXTURE_2D, m_backgroundTexture);
 
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-}
+    // Background texture.
+    m_backgroundTexture = new OpenGLTexture(*this, GL_TEXTURE_2D, true);
 
-// Creates all elements, needed to draw the reconfigure rectangle.
-void OpenGLScreen::createReconfigureRectElements() {
-    // Buffers.
-    glGenBuffers(1, &m_reconfigureRectLinePosBuffer);
+    // Plain black texture.
+    pixmap = createSolidPixmap(display(), rootWindow().window(), 1, 1, 0x00000000);
+    m_blackTexture = new OpenGLTexture(*this, GL_TEXTURE_2D, false);
+    m_blackTexture->setPixmap(pixmap, 1, 1, true);
+    XFreePixmap(display(), pixmap);
 
-    glGenBuffers(1, &m_reconfigureRectElementBuffer);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_reconfigureRectElementBuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(RECONFIGURE_RECT_ELEMENT_ARRAY),
-                 (const GLvoid*)(RECONFIGURE_RECT_ELEMENT_ARRAY), GL_STATIC_DRAW);
+    // Plain white texture.
+    pixmap = createSolidPixmap(display(), rootWindow().window(), 1, 1, 0xffffffff);
+    m_whiteTexture = new OpenGLTexture(*this, GL_TEXTURE_2D, false);
+    m_whiteTexture->setPixmap(pixmap, 1, 1, true);
+    XFreePixmap(display(), pixmap);
 }
 
 // Finish plugin initialization.
@@ -440,21 +400,7 @@ void OpenGLScreen::initPlugins() {
 
 // Renews the background texture.
 void OpenGLScreen::updateBackgroundTexture() {
-    // TODO: Use pixmapToTexture.
-
-    XImage *image = XGetImage(display(), rootWindowPixmap(), 0, 0, rootWindow().width(), rootWindow().height(), AllPlanes, ZPixmap);
-
-    if (!image) {
-        fbLog_info << "Cannot create background texture (cannot create XImage), using default black." << std::endl;
-        m_backgroundTexture = m_blackTexture;
-    } else {
-        glBindTexture(GL_TEXTURE_2D, m_backgroundTexture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, rootWindow().width(), rootWindow().height(),
-                     0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)(&(image->data[0])));
-
-        XDestroyImage(image);
-    }
-
+    m_backgroundTexture->setPixmap(rootWindowPixmap(), rootWindow().width(), rootWindow().height(), true);
     m_backgroundChanged = false;
 }
 
@@ -622,22 +568,17 @@ void OpenGLScreen::renderBackground() {
 // Perform extra rendering jobs from plugins.
 void OpenGLScreen::renderExtraJobs() {
     OpenGLPlugin *plugin = NULL;
-
-    GLfloat alpha;
-    GLuint mainTexCoordBuffer;
-    GLuint mainTexture;
-    GLuint primPosBuffer;
-    GLuint shapeTexCoordBuffer;
-    GLuint shapeTexture;
+    OpenGLExtraJob extraJob;
 
     forEachPlugin(i, plugin) {
         plugin->preExtraRenderingActions();
 
         for (int j = 0; j < plugin->extraRenderingJobCount(); j++) {
-            plugin->extraRenderingJobInit(j, primPosBuffer, mainTexCoordBuffer, mainTexture,
-                                          shapeTexCoordBuffer, shapeTexture, alpha);
-            render(GL_TRIANGLE_STRIP, primPosBuffer, mainTexCoordBuffer, mainTexture,
-                   shapeTexCoordBuffer, shapeTexture, m_defaultElementBuffer, 4, alpha);
+            extraJob = plugin->extraRenderingJobInit(j);
+
+            render(GL_TRIANGLE_STRIP, extraJob.primPosBuffer, extraJob.mainTexCoordBuffer, extraJob.mainTexture,
+                   extraJob.shapeTexCoordBuffer, extraJob.shapeTexture, m_defaultElementBuffer, 4, extraJob.alpha);
+
             plugin->extraRenderingJobCleanup(j);
         }
 
@@ -656,8 +597,7 @@ void OpenGLScreen::renderReconfigureRect() {
             &xLow, &xHigh, &yLow, &yHigh);
     GLfloat linePosArray[] = { xLow, yLow, xHigh, yLow, xHigh, yHigh, xLow, yHigh };
 
-    glBindBuffer(GL_ARRAY_BUFFER, m_reconfigureRectLinePosBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(linePosArray), (const GLvoid*)(linePosArray), GL_STATIC_DRAW);
+    m_reconfigureRectLinePosBuffer->bufferData(sizeof(linePosArray), (const GLvoid*)(linePosArray), GL_STATIC_DRAW);
 
     // Render it.
     glEnable(GL_COLOR_LOGIC_OP);
@@ -688,10 +628,8 @@ void OpenGLScreen::renderWindow(OpenGLWindow &window) {
     forEachPlugin(i, plugin) {
         plugin->preWindowRenderActions(window);
     }
-    render(GL_TRIANGLE_STRIP, window.windowPosBuffer()->handle(),
-           m_defaultTexCoordBuffer, window.contentTexture()->handle(),
-           m_defaultTexCoordBuffer, window.shapeTexture()->handle(),
-           m_defaultElementBuffer, 4, window.alpha() / 255.0);
+    render(GL_TRIANGLE_STRIP, window.windowPosBuffer(), m_defaultTexCoordBuffer, window.contentTexture(),
+           m_defaultTexCoordBuffer, window.shapeTexture(), m_defaultElementBuffer, 4, window.alpha() / 255.0);
     forEachPlugin(i, plugin) {
         plugin->postWindowRenderActions(window);
     }
@@ -699,38 +637,39 @@ void OpenGLScreen::renderWindow(OpenGLWindow &window) {
 
 
 // A function to render something onto the screen.
-void OpenGLScreen::render(GLenum renderingMode, GLuint primPosBuffer, GLuint mainTexCoordBuffer, GLuint mainTexture,
-                          GLuint shapeTexCoordBuffer, GLuint shapeTexture, GLuint elementBuffer, GLuint elementCount,
-                          GLfloat alpha) {
+void OpenGLScreen::render(GLenum renderingMode, OpenGLBufferPtr primPosBuffer,
+                          OpenGLBufferPtr mainTexCoordBuffer, OpenGLTexturePtr mainTexture,
+                          OpenGLBufferPtr shapeTexCoordBuffer, OpenGLTexturePtr shapeTexture,
+                          OpenGLBufferPtr elementBuffer, GLuint elementCount, GLfloat alpha) {
     // Load primitive position vertex array.
-    glBindBuffer(GL_ARRAY_BUFFER, primPosBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, primPosBuffer->handle());
     glVertexAttribPointer(m_primPosAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
     glEnableVertexAttribArray(m_primPosAttrib);
 
     // Load main texture position vertex array.
-    glBindBuffer(GL_ARRAY_BUFFER, mainTexCoordBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, mainTexCoordBuffer->handle());
     glVertexAttribPointer(m_mainTexCoordAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
     glEnableVertexAttribArray(m_mainTexCoordAttrib);
 
     // Load shape texture position vertex array.
-    glBindBuffer(GL_ARRAY_BUFFER, shapeTexCoordBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, shapeTexCoordBuffer->handle());
     glVertexAttribPointer(m_shapeTexCoordAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
     glEnableVertexAttribArray(m_shapeTexCoordAttrib);
 
     // Set up textures.
     glUniform1i(m_mainTexUniform, 0);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, mainTexture);
+    glBindTexture(GL_TEXTURE_2D, mainTexture->handle());
 
     glUniform1i(m_shapeTexUniform, 1);
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, shapeTexture);
+    glBindTexture(GL_TEXTURE_2D, shapeTexture->handle());
 
     // Set up other uniforms.
     glUniform1f(m_alphaUniform, alpha);
 
     // Load element array.
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer->handle());
 
     // Final setup.
     if (m_haveDoubleBuffering) {

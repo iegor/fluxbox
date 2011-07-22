@@ -59,20 +59,21 @@ namespace FbCompositor {
 
         //--- DEFAULT OPENGL OBJECT ACCESSORS ----------------------------------
 
-        /** \returns the default black texture. */
-        GLuint blackTexture() const;
-
         /** \returns the default element buffer (rectangle, corners in order of NW, NE, SW, SE). */
-        GLuint defaultElementBuffer() const;
+        OpenGLBufferPtr defaultElementBuffer() const;
 
         /** \returns the default primitive position buffer (four corners of the root window). */
-        GLuint defaultPrimPosBuffer() const;
+        OpenGLBufferPtr defaultPrimPosBuffer() const;
 
         /** \returns the default texture position buffer (the whole texture). */
-        GLuint defaultTexCoordBuffer() const;
+        OpenGLBufferPtr defaultTexCoordBuffer() const;
+
+
+        /** \returns the default black texture. */
+        OpenGLTexturePtr blackTexture() const;
 
         /** \returns the default white texture. */
-        GLuint whiteTexture() const;
+        OpenGLTexturePtr whiteTexture() const;
 
 
         //--- OTHER ACCESSORS --------------------------------------------------
@@ -82,7 +83,6 @@ namespace FbCompositor {
 
         /** \returns the main GLXFBConfig. */
         GLXFBConfig fbConfig() const;
-
 
 
         //--- SCREEN MANIPULATION ----------------------------------------------
@@ -110,14 +110,8 @@ namespace FbCompositor {
     private:
         //--- INITIALIZATION FUNCTIONS -----------------------------------------
 
-        /** Creates the background texture. */
-        void createBackgroundTexture();
-
-        /** Creates default texture rendering buffers. */
-        void createDefaultElements();
-
-        /** Creates all elements, needed to draw the reconfigure rectangle. */
-        void createReconfigureRectElements();
+        /** Creates OpenGL resources. */
+        void createResources();
 
         /** Early initialization of GLX function pointers. */
         void earlyInitGLXPointers();
@@ -173,11 +167,11 @@ namespace FbCompositor {
         /** Render a particular window onto the screen. */
         void renderWindow(OpenGLWindow &window);
 
-
         /** Render something onto the screen. */
-        void render(GLenum renderingMode, GLuint primPosBuffer, GLuint mainTexPosBuffer, GLuint mainTexture,
-                    GLuint shapeTexPosBuffer, GLuint shapeTexture, GLuint elementBuffer, GLuint elementCount,
-                    GLfloat alpha);
+        void render(GLenum renderingMode, OpenGLBufferPtr primPosBuffer,
+                    OpenGLBufferPtr mainTexCoordBuffer, OpenGLTexturePtr mainTexture,
+                    OpenGLBufferPtr shapeTexCoordBuffer, OpenGLTexturePtr shapeTexture,
+                    OpenGLBufferPtr elementBuffer, GLuint elementCount, GLfloat alpha);
 
 
         //--- MAIN RENDERING-RELATED VARIABLES ---------------------------------
@@ -202,7 +196,7 @@ namespace FbCompositor {
         //--- DESKTOP BACKGROUND RELATED ---------------------------------------
 
         /** The background texture. */
-        GLuint m_backgroundTexture;
+        OpenGLTexturePtr m_backgroundTexture;
 
         /** Whether the background changed since the last update. */
         bool m_backgroundChanged;
@@ -210,29 +204,30 @@ namespace FbCompositor {
 
         //--- DEFAULT OPENGL ELEMENTS ------------------------------------------
 
-        /** Default black texture. */
-        GLuint m_blackTexture;
-
         /** Default element buffer. */
-        GLuint m_defaultElementBuffer;
+        OpenGLBufferPtr m_defaultElementBuffer;
 
         /** Default primitive position buffer. */
-        GLuint m_defaultPrimPosBuffer;
+        OpenGLBufferPtr m_defaultPrimPosBuffer;
 
         /** Default texture position buffer. */
-        GLuint m_defaultTexCoordBuffer;
+        OpenGLBufferPtr m_defaultTexCoordBuffer;
+
+
+        /** Default black texture. */
+        OpenGLTexturePtr m_blackTexture;
 
         /** Default white texture. */
-        GLuint m_whiteTexture;
+        OpenGLTexturePtr m_whiteTexture;
 
 
         //--- RESIZE FRAME RELATED ---------------------------------------------
 
         /** The reconfigure rectangle element buffer. */
-        GLuint m_reconfigureRectElementBuffer;
+        OpenGLBufferPtr m_reconfigureRectElementBuffer;
 
         /** The reconfigure rectangle primitive position array buffer. */
-        GLuint m_reconfigureRectLinePosBuffer;
+        OpenGLBufferPtr m_reconfigureRectLinePosBuffer;
 
 
         //--- SHADER-RELATED ---------------------------------------------------
@@ -277,7 +272,7 @@ namespace FbCompositor {
     //--- INLINE FUNCTIONS -----------------------------------------------------
 
     // Returns the default black texture.
-    inline GLuint OpenGLScreen::blackTexture() const {
+    inline OpenGLTexturePtr OpenGLScreen::blackTexture() const {
         return m_blackTexture;
     }
 
@@ -287,17 +282,17 @@ namespace FbCompositor {
     }
 
     // Returns the default element buffer.
-    inline GLuint OpenGLScreen::defaultElementBuffer() const {
+    inline OpenGLBufferPtr OpenGLScreen::defaultElementBuffer() const {
         return m_defaultElementBuffer;
     }
 
     // Returns the default primitive position buffer.
-    inline GLuint OpenGLScreen::defaultPrimPosBuffer() const {
+    inline OpenGLBufferPtr OpenGLScreen::defaultPrimPosBuffer() const {
         return m_defaultPrimPosBuffer;
     }
 
     // Returns the default texture position buffer.
-    inline GLuint OpenGLScreen::defaultTexCoordBuffer() const {
+    inline OpenGLBufferPtr OpenGLScreen::defaultTexCoordBuffer() const {
         return m_defaultTexCoordBuffer;
     }
 
@@ -307,7 +302,7 @@ namespace FbCompositor {
     }
 
     // Returns the default white texture.
-    inline GLuint OpenGLScreen::whiteTexture() const {
+    inline OpenGLTexturePtr OpenGLScreen::whiteTexture() const {
         return m_whiteTexture;
     }
 }

@@ -28,6 +28,7 @@
 #include "BasePlugin.hh"
 #include "Enumerations.hh"
 #include "Exceptions.hh"
+#include "OpenGLResources.hh"
 
 #include "FbTk/FbString.hh"
 
@@ -46,6 +47,19 @@ namespace FbCompositor {
     class InitException;
     class OpenGLScreen;
     class OpenGLWindow;
+
+
+    /**
+     * Information about an extra rendering job.
+     */
+    struct OpenGLExtraJob {
+        OpenGLBufferPtr primPosBuffer;          ///< Primitive's position buffer.
+        OpenGLBufferPtr mainTexCoordBuffer;     ///< Main texture's position buffer.
+        OpenGLBufferPtr shapeTexCoordBuffer;    ///< Shape texture's position buffer.
+        OpenGLTexturePtr shapeTexture;          ///< Shape texture.
+        OpenGLTexturePtr mainTexture;           ///< Main texture.
+        GLfloat alpha;                          ///< Alpha value.
+    };
 
 
     /**
@@ -109,9 +123,7 @@ namespace FbCompositor {
         virtual int extraRenderingJobCount();
 
         /** Initialize the specified extra rendering job. */
-        virtual void extraRenderingJobInit(int job, GLuint &primPosBuffer_return, GLuint &mainTexCoordBuffer_return,
-                                           GLuint &mainTexture_return, GLuint &shapeTexCoordBuffer_return,
-                                           GLuint &shapeTexture_return, GLfloat &alpha_return);
+        virtual OpenGLExtraJob extraRenderingJobInit(int job);
 
         /** Clean up after an extra rendering job. */
         virtual void extraRenderingJobCleanup(int job);

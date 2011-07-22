@@ -85,9 +85,11 @@ int OpenGLPlugin::extraRenderingJobCount() {
 }
 
 // Initialize the specified extra rendering job.
-void OpenGLPlugin::extraRenderingJobInit(int /*job*/, GLuint &/*primPosBuffer_return*/,
-        GLuint &/*mainTexCoordBuffer_return*/, GLuint &/*mainTexture_return*/, GLuint &/*shapeTexCoordBuffer_return*/,
-        GLuint &/*shapeTexture_return*/, GLfloat &/*alpha_return*/) { }
+OpenGLExtraJob OpenGLPlugin::extraRenderingJobInit(int /*job*/) {
+    static OpenGLExtraJob extraJob = { OpenGLBufferPtr(), OpenGLBufferPtr(), OpenGLBufferPtr(),
+                                       OpenGLTexturePtr(), OpenGLTexturePtr(), 0.0 };
+    return extraJob;
+}
 
 // Clean up after an extra rendering job.
 void OpenGLPlugin::extraRenderingJobCleanup(int /*job*/) { }

@@ -200,18 +200,8 @@ int FadePlugin::extraRenderingJobCount() {
 }
 
 // Initialize the specified extra rendering job.
-void FadePlugin::extraRenderingJobInit(int job, GLuint &primPosBuffer_return, GLuint &mainTexCoordBuffer_return,
-        GLuint &mainTexture_return, GLuint &shapeTexCoordBuffer_return, GLuint &shapeTexture_return,
-        GLfloat &alpha_return) {
-
+OpenGLExtraJob FadePlugin::extraRenderingJobInit(int job) {
     NegFadeData &curFade = m_negativeFades[job];
-
-    primPosBuffer_return = curFade.windowPosBuffer->handle();
-    mainTexCoordBuffer_return = openGLScreen().defaultTexCoordBuffer();
-    mainTexture_return = curFade.contentTexture->handle();
-    shapeTexCoordBuffer_return = openGLScreen().defaultTexCoordBuffer();
-    shapeTexture_return = curFade.shapeTexture->handle();
-    alpha_return = curFade.origAlpha / 255.0;
 
     try {
         curFade.fadeAlpha -= curFade.timer.newElapsedTicks();
@@ -224,6 +214,15 @@ void FadePlugin::extraRenderingJobInit(int job, GLuint &primPosBuffer_return, GL
     } else {
         glUniform1f(alphaUniformPos, (curFade.fadeAlpha / 255.0));
     }
+
+    OpenGLExtraJob extraJob;
+    extraJob.primPosBuffer = curFade.windowPosBuffer;
+    extraJob.mainTexCoordBuffer = openGLScreen().defaultTexCoordBuffer();
+    extraJob.mainTexture = curFade.contentTexture;
+    extraJob.shapeTexCoordBuffer = openGLScreen().defaultTexCoordBuffer();
+    extraJob.shapeTexture = curFade.shapeTexture;
+    extraJob.alpha = curFade.origAlpha / 255.0;
+    return extraJob;
 }
 
 // Called after the extra rendering jobs are executed.

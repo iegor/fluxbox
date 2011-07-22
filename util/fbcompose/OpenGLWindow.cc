@@ -35,24 +35,6 @@
 using namespace FbCompositor;
 
 
-//--- CONSTANTS ----------------------------------------------------------------
-
-namespace {
-
-    // Attributes of the contents' GLX pixmap.
-    static const int TEX_PIXMAP_ATTRIBUTES[] = {
-#ifdef GLXEW_EXT_texture_from_pixmap
-        GLX_TEXTURE_TARGET_EXT, GLX_TEXTURE_2D_EXT,
-        GLX_TEXTURE_FORMAT_EXT, GLX_TEXTURE_FORMAT_RGBA_EXT,
-        None
-#else
-        None
-#endif  // GLXEW_EXT_texture_from_pixmap
-    };
-
-}
-
-
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.

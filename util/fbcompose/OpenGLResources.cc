@@ -113,36 +113,37 @@ OpenGLTexture::~OpenGLTexture() {
 //------- MUTATORS -------------------------------------------------------------
 
 // Sets the texture's contents to the given pixmap.
-void OpenGLTexture::setPixmap(Pixmap pixmap, int width, int height) {
+void OpenGLTexture::setPixmap(Pixmap pixmap, int width, int height, bool forceDirect) {
     bind();
 
 #ifdef GLXEW_EXT_texture_from_pixmap
-    if (m_glxPixmap) {
-        glXReleaseTexImageEXT(m_display, m_glxPixmap, GLX_BACK_LEFT_EXT);
-        glXDestroyPixmap(m_display, m_glxPixmap);
-        m_glxPixmap = 0;
-    }
-    m_glxPixmap = glXCreatePixmap(m_display, m_screen.fbConfig(), pixmap, TEX_PIXMAP_ATTRIBUTES);
+    if (!forceDirect) {
+        if (m_glxPixmap) {
+            glXReleaseTexImageEXT(m_display, m_glxPixmap, GLX_BACK_LEFT_EXT);
+            glXDestroyPixmap(m_display, m_glxPixmap);
+            m_glxPixmap = 0;
+        }
+        m_glxPixmap = glXCreatePixmap(m_display, m_screen.fbConfig(), pixmap, TEX_PIXMAP_ATTRIBUTES);
 
-    if (!m_glxPixmap) {
-        fbLog_info << "Could not create GLX pixmap for pixmap to texture conversion." << std::endl;
-        return;
-    } else {
-        glXBindTexImageEXT(m_display, m_glxPixmap, GLX_BACK_LEFT_EXT, NULL);
-    }
-
-    MARK_PARAMETER_UNUSED(height);
-    MARK_PARAMETER_UNUSED(width);
-
+        if (!m_glxPixmap) {
+            fbLog_info << "Could not create GLX pixmap for pixmap to texture conversion." << std::endl;
+            return;
+        } else {
+            glXBindTexImageEXT(m_display, m_glxPixmap, GLX_BACK_LEFT_EXT, NULL);
+        }
+    } else 
 #else
-    XImage *image = XGetImage(m_display, pixmap, 0, 0, width, height, AllPlanes, ZPixmap);
-    if (!image) {
-        fbLog_info << "Could not create XImage for pixmap to texture conversion." << std::endl;
-        return;
-    }
-
-    glTexImage2D(m_target, 0, GL_RGBA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)(&(image->data[0])));
-    XDestroyImage(image);
-
+    MARK_PARAMETER_UNUSED(forceDirect);
 #endif  // GLXEW_EXT_texture_from_pixmap
+
+    {
+        XImage *image = XGetImage(m_display, pixmap, 0, 0, width, height, AllPlanes, ZPixmap);
+        if (!image) {
+            fbLog_info << "Could not create XImage for pixmap to texture conversion." << std::endl;
+            return;
+        }
+
+        glTexImage2D(m_target, 0, GL_RGBA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)(&(image->data[0])));
+        XDestroyImage(image);
+    }
 }

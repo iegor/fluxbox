@@ -152,7 +152,7 @@ namespace FbCompositor {
         void bind();
 
         /** Sets the texture's contents to the given pixmap. */
-        void setPixmap(Pixmap pixmap, int width, int height);
+        void setPixmap(Pixmap pixmap, int width, int height, bool forceDirect = false);
 
 
     private:
