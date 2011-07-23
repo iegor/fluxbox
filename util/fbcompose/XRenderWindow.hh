@@ -87,10 +87,6 @@ namespace FbCompositor {
 
         //--- RENDERING RELATED ------------------------------------------------
 
-        /** The window's mask pixmap. */
-        Pixmap m_maskPixmap;
-
-
         /** The window's content picture. */
         XRenderPicturePtr m_contentPicture;
 

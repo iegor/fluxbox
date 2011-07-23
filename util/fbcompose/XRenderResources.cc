@@ -34,7 +34,10 @@ using namespace FbCompositor;
 
 // Constructor.
 XRenderPicture::XRenderPicture(const XRenderScreen &screen, XRenderPictFormat *pictFormat, const char *pictFilter) :
+    m_drawable(None),
+    m_gc(None),
     m_picture(None),
+    m_resourcesManaged(false),
     m_pictFilter(pictFilter),
     m_pictFormat(pictFormat),
     m_screen(screen) {
@@ -44,21 +47,54 @@ XRenderPicture::XRenderPicture(const XRenderScreen &screen, XRenderPictFormat *p
 
 // Destructor.
 XRenderPicture::~XRenderPicture() {
-    if (m_picture) {
-        XRenderFreePicture(m_display, m_picture);
-    }
+    freeResources();
 }
 
 
 //------- MUTATORS -------------------------------------------------------------
 
 // Associate the picture with the given pixmap.
-void XRenderPicture::setPixmap(Pixmap pixmap, XRenderPictureAttributes pa, long paMask) {
+void XRenderPicture::setPixmap(Pixmap pixmap, bool managePixmap, XRenderPictureAttributes pa, long paMask) {
+    freeResources();
+
+    m_drawable = pixmap;
+    m_gc = XCreateGC(m_display, pixmap, 0, NULL);
+    m_resourcesManaged = managePixmap;
+
+    m_picture = XRenderCreatePicture(m_display, pixmap, m_pictFormat, paMask, &pa);
+    XRenderSetPictureFilter(m_display, m_picture, m_pictFilter, NULL, 0);
+}
+
+// Associate the picture with the given window.
+void XRenderPicture::setWindow(Window window, XRenderPictureAttributes pa, long paMask) {
+    freeResources();
+
+    m_drawable = window;
+    m_gc = XCreateGC(m_display, window, 0, NULL);
+    m_resourcesManaged = false;
+
+    m_picture = XRenderCreatePicture(m_display, window, m_pictFormat, paMask, &pa);
+    XRenderSetPictureFilter(m_display, m_picture, m_pictFilter, NULL, 0);
+}
+
+
+//--- OTHER FUNCTIONS ----------------------------------------------------------
+
+// Free held resources, if any.
+void XRenderPicture::freeResources() {
     if (m_picture) {
         XRenderFreePicture(m_display, m_picture);
         m_picture = None;
     }
+    if (m_gc) {
+        XFreeGC(m_display, m_gc);
+        m_gc = None;
+    }
 
-    m_picture = XRenderCreatePicture(m_display, pixmap, m_pictFormat, paMask, &pa);
-    XRenderSetPictureFilter(m_display, m_picture, m_pictFilter, NULL, 0);
+    if (m_resourcesManaged) {
+        if (m_drawable) {
+            XFreePixmap(m_display, m_drawable);     // Windows will never be managed.
+            m_drawable = None;
+        }
+    }
 }

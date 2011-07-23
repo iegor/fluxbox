@@ -56,8 +56,14 @@ namespace FbCompositor {
 
         //--- ACCESSORS --------------------------------------------------------
 
+        /** \returns the handle of the picture's drawable. */
+        Drawable drawableHandle() const;
+
+        /** \returns the GC of the picture's drawable. */
+        GC gcHandle() const;
+
         /** \returns the handle of the picture held. */
-        Picture handle() const;
+        Picture pictureHandle() const;
 
 
         //--- MUTATORS ---------------------------------------------------------
@@ -66,7 +72,10 @@ namespace FbCompositor {
         void setPictFormat(XRenderPictFormat *pictFormat);
 
         /** Associate the picture with the given pixmap. */
-        void setPixmap(Pixmap pixmap, XRenderPictureAttributes pa = XRenderPictureAttributes(), long paMask = 0);
+        void setPixmap(Pixmap pixmap, bool managePixmap, XRenderPictureAttributes pa = XRenderPictureAttributes(), long paMask = 0);
+
+        /** Associate the picture with the given window. */
+        void setWindow(Window window, XRenderPictureAttributes pa = XRenderPictureAttributes(), long paMask = 0);
 
 
     private:
@@ -79,10 +88,26 @@ namespace FbCompositor {
         XRenderPicture &operator=(const XRenderPicture &other);
 
 
+        //--- OTHER FUNCTIONS --------------------------------------------------
+
+        /** Free held resources, if any. */
+        void freeResources();
+
+
         //--- INTERNALS --------------------------------------------------------
+
+        /** The picture's drawable. */
+        Drawable m_drawable;
+
+        /** The picture's drawable's GC. */
+        GC m_gc;
 
         /** The picture in question. */
         Picture m_picture;
+
+        /** Whether the resources are managed by this object. */
+        bool m_resourcesManaged;
+        
 
         /** Picture filter to use. */
         const char *m_pictFilter;
@@ -98,8 +123,19 @@ namespace FbCompositor {
         const XRenderScreen &m_screen;
     };
 
+
+    // Returns the handle of the picture's drawable.
+    inline Drawable XRenderPicture::drawableHandle() const {
+        return m_drawable;
+    }
+
+    // Returns the GC of the picture's drawable.
+    inline GC XRenderPicture::gcHandle() const {
+        return m_gc;
+    }
+
     // Returns the picture held.
-    inline Picture XRenderPicture::handle() const {
+    inline Picture XRenderPicture::pictureHandle() const {
         return m_picture;
     }
 

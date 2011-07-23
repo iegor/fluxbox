@@ -112,23 +112,22 @@ namespace FbCompositor {
 
         /** \returns the faded mask picture for the given window fade. */
         void createFadedMask(int alpha, XRenderPicturePtr mask, XRectangle dimensions,
-                             Pixmap &fadePixmap_return, Picture &fadePicture_return);
+                             XRenderPicturePtr &fadePicture_return);
 
 
         //--- GENERAL RENDERING VARIABLES --------------------------------------
 
-        /** PictFormat for mask pictures. */
-        XRenderPictFormat *m_maskPictFormat;
+        /** PictFormat for fade pictures. */
+        XRenderPictFormat *m_fadePictFormat;
 
 
         //--- FADE SPECIFIC ----------------------------------------------------
 
         /** Holds the data about positive fades. */
         struct PosFadeData {
-            int fadeAlpha;          ///< Window's relative fade alpha.
-            Picture fadePicture;    ///< Picture of the faded window mask.
-            Pixmap fadePixmap;      ///< Pixmap of the faded window mask.
-            TickTracker timer;      ///< Timer that tracks the current fade.
+            int fadeAlpha;                  ///< Window's relative fade alpha.
+            XRenderPicturePtr fadePicture;  ///< Picture of the faded window.
+            TickTracker timer;              ///< Timer that tracks the current fade.
         };
 
         /** A list of appearing (positive) fades. */
@@ -144,8 +143,7 @@ namespace FbCompositor {
             XRectangle dimensions;              ///< Window's dimensions.
 
             int fadeAlpha;                      ///< Window's relative fade alpha.
-            Picture fadePicture;                ///< Picture of the faded window mask.
-            Pixmap fadePixmap;                  ///< Pixmap of the faded window mask.
+            XRenderPicturePtr fadePicture;      ///< Picture of the faded window.
             TickTracker timer;                  ///< Timer that tracks the current fade.
         };
 

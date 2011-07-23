@@ -55,6 +55,12 @@ namespace FbCompositor {
         ~XRenderScreen();
 
 
+        //--- ACCESSORS --------------------------------------------------------
+
+        /** \returns the preferred filter for XRender Pictures. */
+        const char *pictFilter() const;
+
+
         //--- SCREEN MANIPULATION ----------------------------------------------
 
         /** Notifies the screen of a background change. */
@@ -83,9 +89,6 @@ namespace FbCompositor {
         /** Initializes the rendering surface. */
         void initRenderingSurface();
 
-        /** Initializes background picture. */
-        void initBackgroundPicture();
-
 
         //--- SCREEN MANIPULATION ----------------------------------------------
 
@@ -113,34 +116,18 @@ namespace FbCompositor {
 
         //--- MAIN RENDERING-RELATED VARIABLES ---------------------------------
 
-        /** The back buffer graphical context. */
-        GC m_backBufferGC;
-
-        /** The picture format of the back buffer. */
-        XRenderPictFormat *m_backBufferPictFormat;
-
-        /** The picture of the back buffer. */
-        Picture m_backBufferPicture;
-
-        /** Back buffer pixmap. */
-        Pixmap m_backBufferPixmap;
-
-
-        /** The picture format of the rendering window. */
-        XRenderPictFormat *m_renderingPictFormat;
-
-        /** The picture of the rendering window. */
-        Picture m_renderingPicture;
-
         /** The rendering window. */
         Window m_renderingWindow;
 
+        /** The picture of the back buffer. */
+        XRenderPicturePtr m_backBufferPicture;
 
-        /** The format of the root window picture. */
-        XRenderPictFormat *m_rootPictFormat;
+        /** The picture of the rendering window. */
+        XRenderPicturePtr m_renderingPicture;
+
 
         /** The picture of the root window. */
-        Picture m_rootPicture;
+        XRenderPicturePtr m_rootPicture;
 
         /** Whether the root window has changed since the last update. */
         bool m_rootChanged;
@@ -150,6 +137,13 @@ namespace FbCompositor {
         const char *m_pictFilter;
     };
 
+
+    //--- INLINE FUNCTIONS -------------------------------------------------
+
+    // Returns the preferred filter for XRender Pictures.
+    inline const char *XRenderScreen::pictFilter() const {
+        return m_pictFilter;
+    }
 }
 
 #endif  // FBCOMPOSITOR_XRENDERSCREEN_HH

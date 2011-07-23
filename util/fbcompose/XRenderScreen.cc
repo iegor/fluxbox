@@ -59,27 +59,11 @@ XRenderScreen::XRenderScreen(int screenNumber, const CompositorConfig &config):
     m_pictFilter(config.xRenderPictFilter()) {
 
     initRenderingSurface();
-    initBackgroundPicture();
+    updateBackgroundPicture();
 }
 
 // Destructor.
 XRenderScreen::~XRenderScreen() {
-    if (m_backBufferGC) {
-        XFreeGC(display(), m_backBufferGC);
-    }
-    if (m_backBufferPicture) {
-        XRenderFreePicture(display(), m_backBufferPicture);
-    }
-    if (m_backBufferPixmap) {
-        XFreePixmap(display(), m_backBufferPixmap);
-    }
-    if (m_renderingPicture) {
-        XRenderFreePicture(display(), m_renderingPicture);
-    }
-    if (m_rootPicture) {
-        XRenderFreePicture(display(), m_rootPicture);
-    }
-
     XUnmapWindow(display(), m_renderingWindow);
     XDestroyWindow(display(), m_renderingWindow);
 }
@@ -122,30 +106,20 @@ void XRenderScreen::initRenderingSurface() {
     pa.subwindow_mode = IncludeInferiors;
     long paMask = CPSubwindowMode;
 
-    m_renderingPictFormat = XRenderFindVisualFormat(display(), visualInfo.visual);  // Do not XFree.
-    if (!m_renderingPictFormat) {
+    XRenderPictFormat *renderingPictFormat = XRenderFindVisualFormat(display(), visualInfo.visual);
+    if (!renderingPictFormat) {
         throw InitException("Cannot find the required picture format.");
     }
-    m_renderingPicture = XRenderCreatePicture(display(), m_renderingWindow, m_renderingPictFormat, paMask, &pa);
+
+    m_renderingPicture = new XRenderPicture(*this, renderingPictFormat, m_pictFilter);
+    m_renderingPicture->setWindow(m_renderingWindow, pa, paMask);
 
     // Create the back buffer.
-    m_backBufferPictFormat = XRenderFindStandardFormat(display(), PictStandardARGB32);     // Do not XFree.
-    m_backBufferPixmap = XCreatePixmap(display(), rootWindow().window(), rootWindow().width(), rootWindow().height(), 32);
-    m_backBufferPicture = XRenderCreatePicture(display(), m_backBufferPixmap, m_backBufferPictFormat, paMask, &pa);
-    m_backBufferGC = XCreateGC(display(), m_backBufferPixmap, 0, NULL);
+    XRenderPictFormat *backBufferPictFormat = XRenderFindStandardFormat(display(), PictStandardARGB32);
+    Pixmap backBufferPixmap = XCreatePixmap(display(), rootWindow().window(), rootWindow().width(), rootWindow().height(), 32);
 
-    // Set picture filters.
-    XRenderSetPictureFilter(display(), m_renderingPicture, m_pictFilter, NULL, 0);
-    XRenderSetPictureFilter(display(), m_backBufferPicture, m_pictFilter, NULL, 0);
-}
-
-// Initializes background picture.
-void XRenderScreen::initBackgroundPicture() {
-    m_rootChanged = false;
-    m_rootPictFormat = XRenderFindVisualFormat(display(), rootWindow().visual());
-    m_rootPicture = None;
-
-    updateBackgroundPicture();
+    m_backBufferPicture = new XRenderPicture(*this, backBufferPictFormat, m_pictFilter);
+    m_backBufferPicture->setPixmap(backBufferPixmap, true, pa, paMask);
 }
 
 
@@ -162,56 +136,41 @@ void XRenderScreen::setRootWindowSizeChanged() {
     BaseScreen::setRootWindowSizeChanged();
     m_rootChanged = true;
 
-    if (m_backBufferGC) {
-        XFreeGC(display(), m_backBufferGC);
-        m_backBufferGC = None;
-    }
-    if (m_backBufferPicture) {
-        XRenderFreePicture(display(), m_backBufferPicture);
-        m_backBufferPicture = None;
-    }
-    if (m_backBufferPixmap) {
-        XFreePixmap(display(), m_backBufferPixmap);
-        m_backBufferPixmap = None;
-    }
-    if (m_renderingPicture) {
-        XRenderFreePicture(display(), m_renderingPicture);
-        m_renderingPicture = None;
-    }
-
     XRenderPictureAttributes pa;
     pa.subwindow_mode = IncludeInferiors;
     long paMask = CPSubwindowMode;
 
     XResizeWindow(display(), m_renderingWindow, rootWindow().width(), rootWindow().height());
-    m_renderingPicture = XRenderCreatePicture(display(), m_renderingWindow, m_renderingPictFormat, paMask, &pa);
+    m_renderingPicture->setWindow(m_renderingWindow, pa, paMask);   // We need to recreate the picture.
 
-    m_backBufferPixmap = XCreatePixmap(display(), rootWindow().window(), rootWindow().width(), rootWindow().height(), 32);
-    m_backBufferPicture = XRenderCreatePicture(display(), m_backBufferPixmap, m_backBufferPictFormat, paMask, &pa);
-    m_backBufferGC = XCreateGC(display(), m_backBufferPixmap, 0, NULL);
-
-    XRenderSetPictureFilter(display(), m_renderingPicture, m_pictFilter, NULL, 0);
-    XRenderSetPictureFilter(display(), m_backBufferPicture, m_pictFilter, NULL, 0);
+    Pixmap backBufferPixmap = XCreatePixmap(display(), rootWindow().window(), rootWindow().width(), rootWindow().height(), 32);
+    m_backBufferPicture->setPixmap(backBufferPixmap, true, pa, paMask);
 }
 
 
 // Update the background picture.
 void XRenderScreen::updateBackgroundPicture() {
-    XRenderPictFormat *pictFormat = m_rootPictFormat;
-    if (!wmSetRootWindowPixmap()) {
+    XRenderPictFormat *pictFormat;
+    if (wmSetRootWindowPixmap()) {
+        pictFormat = XRenderFindVisualFormat(display(), rootWindow().visual());
+    } else {
         pictFormat = XRenderFindStandardFormat(display(), PictStandardARGB32);
     }
 
-    if (m_rootPicture) {
-        XRenderFreePicture(display(), m_rootPicture);
-        m_rootPicture = None;
+    if (!pictFormat) {
+        throw RuntimeException("Cannot find the required picture format.");
     }
 
     XRenderPictureAttributes pa;
     pa.subwindow_mode = IncludeInferiors;
     long paMask = CPSubwindowMode;
 
-    m_rootPicture = XRenderCreatePicture(display(), rootWindowPixmap(), pictFormat, paMask, &pa);
+    if (!m_rootPicture) {
+        m_rootPicture = new XRenderPicture(*this, pictFormat, m_pictFilter);
+    } else {
+        m_rootPicture->setPictFormat(pictFormat);
+    }
+    m_rootPicture->setPixmap(rootWindowPixmap(), false, pa, paMask);
     m_rootChanged = false;
 }
 
@@ -255,7 +214,7 @@ void XRenderScreen::renderBackground() {
     }
 
     // Draw the desktop.
-    XRenderComposite(display(), PictOpSrc, m_rootPicture, None, m_backBufferPicture,
+    XRenderComposite(display(), PictOpSrc, m_rootPicture->pictureHandle(), None, m_backBufferPicture->pictureHandle(),
                      0, 0, 0, 0, 0, 0, rootWindow().width(), rootWindow().height());
 
     // Additional rendering of desktop.
@@ -265,8 +224,8 @@ void XRenderScreen::renderBackground() {
     forEachPlugin(i, plugin) {
         plugin->extraBackgroundRenderingJob(op, srcPic, srcX, srcY, maskPic, maskX, maskY, destX, destY, width, height);
         if (op != PictOpClear) {
-            XRenderComposite(display(), op, srcPic, maskPic, m_backBufferPicture, srcX, srcY,
-                             maskX, maskY, destX, destY, width, height);
+            XRenderComposite(display(), op, srcPic, maskPic, m_backBufferPicture->pictureHandle(),
+                             srcX, srcY, maskX, maskY, destX, destY, width, height);
         }
     }
 }
@@ -284,7 +243,7 @@ void XRenderScreen::renderExtraJobs() {
         for (int j = 0; j < plugin->extraRenderingJobCount(); j++) {
             plugin->extraRenderingJobInit(j, op, srcPic, srcX, srcY, maskPic, maskX, maskY, destX, destY, width, height);
             if (op != PictOpClear) {
-                XRenderComposite(display(), op, srcPic, maskPic, m_backBufferPicture, srcX, srcY,
+                XRenderComposite(display(), op, srcPic, maskPic, m_backBufferPicture->pictureHandle(), srcX, srcY,
                                  maskX, maskY, destX, destY, width, height);
             }
             plugin->extraRenderingJobCleanup(j);
@@ -300,14 +259,15 @@ void XRenderScreen::renderReconfigureRect() {
 
     XRectangle rect = reconfigureRectangle();
 
-    XSetForeground(display(), m_backBufferGC, XWhitePixel(display(), screenNumber()));
-    XSetFunction(display(), m_backBufferGC, GXxor);
-    XSetLineAttributes(display(), m_backBufferGC, 1, LineSolid, CapNotLast, JoinMiter);
+    XSetForeground(display(), m_backBufferPicture->gcHandle(), XWhitePixel(display(), screenNumber()));
+    XSetFunction(display(), m_backBufferPicture->gcHandle(), GXxor);
+    XSetLineAttributes(display(), m_backBufferPicture->gcHandle(), 1, LineSolid, CapNotLast, JoinMiter);
 
     forEachPlugin(i, plugin) {
-        plugin->reconfigureRectRenderActions(rect, m_backBufferGC);
+        plugin->reconfigureRectRenderActions(rect, m_backBufferPicture->gcHandle());
     }
-    XDrawRectangles(display(), m_backBufferPixmap, m_backBufferGC, &rect, 1);
+    XDrawRectangles(display(), m_backBufferPicture->drawableHandle(),
+                    m_backBufferPicture->gcHandle(), &rect, 1);
 }
 
 // Render a particular window onto the screen.
@@ -327,19 +287,19 @@ void XRenderScreen::renderWindow(XRenderWindow &window) {
         plugin->extraPreWindowRenderingJob(window, op, srcPic, srcX, srcY, maskPic,
                                            maskX, maskY, destX, destY, width, height);
         if (op != PictOpClear) {
-            XRenderComposite(display(), op, srcPic, maskPic, m_backBufferPicture, srcX, srcY,
+            XRenderComposite(display(), op, srcPic, maskPic, m_backBufferPicture->pictureHandle(), srcX, srcY,
                              maskX, maskY, destX, destY, width, height);
         }
     }
 
     // Render the window.
     op = PictOpOver;
-    maskPic = window.maskPicture()->handle();
+    maskPic = window.maskPicture()->pictureHandle();
 
     forEachPlugin(i, plugin) {
         plugin->windowRenderingJobInit(window, op, maskPic);
     }
-    XRenderComposite(display(), op, window.contentPicture()->handle(), maskPic, m_backBufferPicture,
+    XRenderComposite(display(), op, window.contentPicture()->pictureHandle(), maskPic, m_backBufferPicture->pictureHandle(),
                      0, 0, 0, 0, window.x(), window.y(), window.realWidth(), window.realHeight());
     forEachPlugin(i, plugin) {
         plugin->windowRenderingJobCleanup(window);
@@ -350,7 +310,7 @@ void XRenderScreen::renderWindow(XRenderWindow &window) {
         plugin->extraPostWindowRenderingJob(window, op, srcPic, srcX, srcY, maskPic,
                                             maskX, maskY, destX, destY, width, height);
         if (op != PictOpClear) {
-            XRenderComposite(display(), op, srcPic, maskPic, m_backBufferPicture, srcX, srcY,
+            XRenderComposite(display(), op, srcPic, maskPic, m_backBufferPicture->pictureHandle(), srcX, srcY,
                              maskX, maskY, destX, destY, width, height);
         }
     }
@@ -358,7 +318,7 @@ void XRenderScreen::renderWindow(XRenderWindow &window) {
 
 // Swap back and front buffers.
 void XRenderScreen::swapBuffers() {
-    XRenderComposite(display(), PictOpSrc, m_backBufferPicture, None, m_renderingPicture,
+    XRenderComposite(display(), PictOpSrc, m_backBufferPicture->pictureHandle(), None, m_renderingPicture->pictureHandle(),
                      0, 0, 0, 0, 0, 0, rootWindow().width(), rootWindow().height());
 }
 

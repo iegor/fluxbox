@@ -40,7 +40,7 @@ using namespace FbCompositor;
 FadePlugin::FadePlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args) :
     XRenderPlugin(screen, args) {
 
-    m_maskPictFormat = XRenderFindStandardFormat(display(), PictStandardARGB32);
+    m_fadePictFormat = XRenderFindStandardFormat(display(), PictStandardARGB32);
 }
 
 // Destructor.
@@ -54,14 +54,6 @@ void FadePlugin::windowBecameIgnored(const BaseCompWindow &window) {
     // Remove the window's positive fade, if any.
     std::map<Window, PosFadeData>::iterator posIt = m_positiveFades.find(window.window());
     if (posIt != m_positiveFades.end()) {
-        PosFadeData &curFade = posIt->second;
-        if (curFade.fadePicture) {
-            XRenderFreePicture(display(), curFade.fadePicture);
-        }
-        if (curFade.fadePixmap) {
-            XFreePixmap(display(), curFade.fadePixmap);
-        }
-
         m_positiveFades.erase(posIt);
     } 
 
@@ -69,13 +61,6 @@ void FadePlugin::windowBecameIgnored(const BaseCompWindow &window) {
     std::vector<NegFadeData>::iterator negIt = m_negativeFades.begin();
     while (negIt != m_negativeFades.end()) {
         if (negIt->windowId == window.window()) {
-            if (negIt->fadePicture) {
-                XRenderFreePicture(display(), negIt->fadePicture);
-            }
-            if (negIt->fadePixmap) {
-                XFreePixmap(display(), negIt->fadePixmap);
-            }
-
             m_negativeFades.erase(negIt);
             break;
         } 
@@ -92,13 +77,11 @@ void FadePlugin::windowMapped(const BaseCompWindow &window) {
     while (true) {
         if (it == m_negativeFades.end()) {
             fade.fadeAlpha = 0;
-            fade.fadePicture = None;
-            fade.fadePixmap = None;
+            fade.fadePicture = new XRenderPicture(xrenderScreen(), m_fadePictFormat, xrenderScreen().pictFilter());
             break;
         } else if (it->windowId == window.window()) {
             fade.fadeAlpha = it->fadeAlpha;
             fade.fadePicture = it->fadePicture;
-            fade.fadePixmap = it->fadePixmap;
             m_negativeFades.erase(it);
             break;
         } else {
@@ -124,12 +107,10 @@ void FadePlugin::windowUnmapped(const BaseCompWindow &window) {
     if (it != m_positiveFades.end()) {
         fade.fadeAlpha = it->second.fadeAlpha;
         fade.fadePicture = it->second.fadePicture;
-        fade.fadePixmap = it->second.fadePixmap;
         m_positiveFades.erase(it);
     } else {
         fade.fadeAlpha = 255;
-        fade.fadePicture = None;
-        fade.fadePixmap = None;
+        fade.fadePicture = new XRenderPicture(xrenderScreen(), m_fadePictFormat, xrenderScreen().pictFilter());
     }
 
     // Initialize the remaining fields.
@@ -163,17 +144,16 @@ void FadePlugin::windowRenderingJobInit(const XRenderWindow &window, int &/*op_r
             newTicks = 255;
         }
 
-        if ((newTicks > 0) || (curFade.fadePicture == None)) {
+        if ((newTicks > 0) || (curFade.fadePicture->pictureHandle() == None)) {
             curFade.fadeAlpha += newTicks;
             if (curFade.fadeAlpha > 255) {
                 curFade.fadeAlpha = 255;
             }
 
-            createFadedMask(curFade.fadeAlpha, window.maskPicture(), window.dimensions(),
-                            curFade.fadePixmap, curFade.fadePicture);
+            createFadedMask(curFade.fadeAlpha, window.maskPicture(), window.dimensions(), curFade.fadePicture);
         }
 
-        maskPic_return = curFade.fadePicture;
+        maskPic_return = curFade.fadePicture->pictureHandle();
     }
 }
 
@@ -182,12 +162,6 @@ void FadePlugin::windowRenderingJobCleanup(const XRenderWindow &window) {
     std::map<Window, PosFadeData>::iterator it = m_positiveFades.find(window.window());
     if (it != m_positiveFades.end()) {
         if (it->second.fadeAlpha >= 255) {
-            if (it->second.fadePicture) {
-                XRenderFreePicture(display(), it->second.fadePicture);
-            }
-            if (it->second.fadePixmap) {
-                XFreePixmap(display(), it->second.fadePixmap);
-            }
             m_positiveFades.erase(it);
         }
     }
@@ -215,21 +189,20 @@ void FadePlugin::extraRenderingJobInit(int job, int &op_return, Picture &srcPic_
         newTicks = 255;
     }
 
-    if ((newTicks > 0) || (curFade.fadePicture == None)) {
+    if ((newTicks > 0) || (curFade.fadePicture->pictureHandle() == None)) {
         curFade.fadeAlpha -= newTicks;
         if (curFade.fadeAlpha < 0) {
             curFade.fadeAlpha = 0;
         }
 
-        createFadedMask(curFade.fadeAlpha, curFade.maskPicture, curFade.dimensions,
-                        curFade.fadePixmap, curFade.fadePicture);
+        createFadedMask(curFade.fadeAlpha, curFade.maskPicture, curFade.dimensions, curFade.fadePicture);
     }
 
-    maskPic_return = curFade.fadePicture;
+    maskPic_return = curFade.fadePicture->pictureHandle();
 
     // Initialize the other rendering variables.
     op_return = PictOpOver;
-    srcPic_return = curFade.contentPicture->handle();
+    srcPic_return = curFade.contentPicture->pictureHandle();
     srcX_return = 0;
     srcY_return = 0;
     maskX_return = 0;
@@ -245,12 +218,6 @@ void FadePlugin::postExtraRenderingActions() {
     std::vector<NegFadeData>::iterator it = m_negativeFades.begin();
     while (it != m_negativeFades.end()) {
         if (it->fadeAlpha <= 0) {
-            if (it->fadePicture) {
-                XRenderFreePicture(display(), it->fadePicture);
-            }
-            if (it->fadePixmap) {
-                XFreePixmap(display(), it->fadePixmap);
-            }
             it = m_negativeFades.erase(it);
         } else {
             ++it;
@@ -263,21 +230,12 @@ void FadePlugin::postExtraRenderingActions() {
 
 // Returns the faded mask picture for the given window fade.
 void FadePlugin::createFadedMask(int alpha, XRenderPicturePtr mask, XRectangle dimensions,
-                                 Pixmap &fadePixmap_return, Picture &fadePicture_return) {
-    if (fadePixmap_return) {
-        XFreePixmap(display(), fadePixmap_return);
-        fadePixmap_return = None;
-    }
-    fadePixmap_return = createSolidPixmap(display(), screen().rootWindow().window(),
+                                 XRenderPicturePtr &fadePicture_return) {
+    Pixmap fadePixmap = createSolidPixmap(display(), screen().rootWindow().window(),
                                           dimensions.width, dimensions.height, alpha * 0x01010101);
+    fadePicture_return->setPixmap(fadePixmap, true);
 
-    if (fadePicture_return) {
-        XRenderFreePicture(display(), fadePicture_return);
-        fadePicture_return = None;
-    }
-    fadePicture_return = XRenderCreatePicture(display(), fadePixmap_return, m_maskPictFormat, 0, NULL);
-
-    XRenderComposite(display(), PictOpIn, mask->handle(), None, fadePicture_return,
+    XRenderComposite(display(), PictOpIn, mask->pictureHandle(), None, fadePicture_return->pictureHandle(),
                      0, 0, 0, 0, 0, 0, dimensions.width, dimensions.height);
 }
 

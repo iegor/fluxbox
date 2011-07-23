@@ -37,8 +37,6 @@ XRenderWindow::XRenderWindow(const XRenderScreen &screen, Window windowXID, cons
     BaseCompWindow((const BaseScreen&)(screen), windowXID),
     m_pictFilter(pictFilter) {
 
-    m_maskPixmap = None;
-
     XRenderPictFormat *contentPictFormat = XRenderFindVisualFormat(display(), visual());
     m_contentPicture = new XRenderPicture(screen, contentPictFormat, m_pictFilter);
 
@@ -47,11 +45,7 @@ XRenderWindow::XRenderWindow(const XRenderScreen &screen, Window windowXID, cons
 }
 
 // Destructor.
-XRenderWindow::~XRenderWindow() {
-    if (m_maskPixmap) {
-        XFreePixmap(display(), m_maskPixmap);
-    }
-}
+XRenderWindow::~XRenderWindow() { }
 
 
 //--- WINDOW MANIPULATION ------------------------------------------------------
@@ -69,7 +63,7 @@ void XRenderWindow::updateContents() {
         long paMask = CPSubwindowMode;
 
         m_contentPicture->setPictFormat(XRenderFindVisualFormat(display(), visual()));
-        m_contentPicture->setPixmap(contentPixmap(), pa, paMask);
+        m_contentPicture->setPixmap(contentPixmap(), false, pa, paMask);
     }
 
     if (clipShapeChanged()) {
@@ -103,18 +97,13 @@ void XRenderWindow::updateShape() {
 // Update the window's mask picture.
 void XRenderWindow::updateMaskPicture() {
     if (!m_maskPicture || isResized()) {
-        if (m_maskPixmap) {
-            XFreePixmap(display(), m_maskPixmap);
-            m_maskPixmap = None;
-        }
-        m_maskPixmap = XCreatePixmap(display(), window(), realWidth(), realHeight(), 32);
-
-        m_maskPicture->setPixmap(m_maskPixmap);
+        Pixmap maskPixmap = XCreatePixmap(display(), window(), realWidth(), realHeight(), 32);
+        m_maskPicture->setPixmap(maskPixmap, true);
     }
 
     XRenderColor color = { 0, 0, 0, 0 };
-    XRenderFillRectangle(display(), PictOpSrc, m_maskPicture->handle(), &color, 0, 0, realWidth(), realHeight());
+    XRenderFillRectangle(display(), PictOpSrc, m_maskPicture->pictureHandle(), &color, 0, 0, realWidth(), realHeight());
 
     color.alpha = (unsigned long)((alpha() * 0xffff) / 255.0);
-    XRenderFillRectangles(display(), PictOpSrc, m_maskPicture->handle(), &color, clipShapeRects(), clipShapeRectCount());
+    XRenderFillRectangles(display(), PictOpSrc, m_maskPicture->pictureHandle(), &color, clipShapeRects(), clipShapeRectCount());
 }
