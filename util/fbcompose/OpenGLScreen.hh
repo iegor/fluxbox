@@ -27,6 +27,7 @@
 
 #include "BaseScreen.hh"
 #include "Exceptions.hh"
+#include "OpenGLShaders.hh"
 #include "OpenGLWindow.hh"
 
 #include <GL/glxew.h>
@@ -131,9 +132,6 @@ namespace FbCompositor {
         /** Initializes the rendering surface. */
         void initRenderingSurface();
 
-        /** Initializes shaders. */
-        void initShaders();
-
 
         //--- OTHER FUNCTIONS --------------------------------------------------
 
@@ -142,15 +140,6 @@ namespace FbCompositor {
 
         /** React to the geometry change of the root window. */
         void updateOnRootWindowResize();
-
-
-        //--- CONVENIENCE OPENGL WRAPPERS --------------------------------------
-
-        /** Creates a shader. */
-        GLuint createShader(GLenum shaderType, GLint sourceLength, const GLchar *source);
-
-        /** Creates a shader program. */
-        GLuint createShaderProgram(GLuint vertexShader, GLuint geometryShader, GLuint fragmentShader);
 
 
         //--- RENDERING FUNCTIONS ----------------------------------------------
@@ -181,6 +170,9 @@ namespace FbCompositor {
 
         /** The GLX context. */
         GLXContext m_glxContext;
+
+        /** Shaders. */
+        OpenGLShaderProgramPtr m_shaderProgram;
 
 
         /** GLX handle to the rendering window. */
@@ -228,38 +220,6 @@ namespace FbCompositor {
 
         /** The reconfigure rectangle primitive position array buffer. */
         OpenGLBufferPtr m_reconfigureRectLinePosBuffer;
-
-
-        //--- SHADER-RELATED ---------------------------------------------------
-
-        /** The vertex shader. */
-        GLuint m_vertexShader;
-
-        /** The fragment shader. */
-        GLuint m_fragmentShader;
-        
-        /** The shader program. */
-        GLuint m_shaderProgram;
-
-
-        /** Location of the fb_InitMainTexCoord attribute. */
-        GLuint m_mainTexCoordAttrib;
-
-        /** Location of the fb_InitPrimPos attribute. */
-        GLuint m_primPosAttrib;
-
-        /** Location of the fb_InitShapeTexCoord attribute. */
-        GLuint m_shapeTexCoordAttrib;
-
-
-        /** Location of the fb_Alpha uniform. */
-        GLuint m_alphaUniform;
-        
-        /** Location of the fb_MainTexture uniform. */
-        GLuint m_mainTexUniform;
-
-        /** Location of the fb_ShapeTexture uniform. */
-        GLuint m_shapeTexUniform;
 
 
         //--- OTHER VARIABLES --------------------------------------------------

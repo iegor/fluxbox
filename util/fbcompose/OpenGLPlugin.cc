@@ -43,7 +43,7 @@ OpenGLPlugin::~OpenGLPlugin() { }
 //--- OTHER INITIALIZATION -----------------------------------------------------
 
 // Initialize OpenGL-specific code.
-void OpenGLPlugin::initOpenGL(GLuint /*shaderProgram*/) { }
+void OpenGLPlugin::initOpenGL(OpenGLShaderProgramPtr /*shaderProgram*/) { }
 
 
 //--- ACCESSORS ----------------------------------------------------------------

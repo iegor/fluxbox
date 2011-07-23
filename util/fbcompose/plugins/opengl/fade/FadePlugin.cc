@@ -65,8 +65,8 @@ FadePlugin::~FadePlugin() { }
 //--- OTHER INITIALIZATION -----------------------------------------------------
 
 // Initialize OpenGL-specific code.
-void FadePlugin::initOpenGL(GLuint shaderProgram) {
-    alphaUniformPos = glGetUniformLocation(shaderProgram, "fade_Alpha");
+void FadePlugin::initOpenGL(OpenGLShaderProgramPtr shaderProgram) {
+    alphaUniformPos = shaderProgram->getUniformLocation("fade_Alpha");
 }
 
 

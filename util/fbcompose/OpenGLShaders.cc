@@ -23,11 +23,22 @@
 
 #include "OpenGLShaders.hh"
 
+#include "Logging.hh"
+#include "OpenGLPlugin.hh"
+
+#include <sstream>
+
 using namespace FbCompositor;
 
 
 namespace {
-    //--- SHADER SOURCES -------------------------------------------------------
+    //--- CONSTANTS ------------------------------------------------------------
+
+    /** Size of the info log buffer. */
+    static const int INFO_LOG_BUFFER_SIZE = 256;
+
+
+    //--- VERTEX SHADER SOURCE -------------------------------------------------
 
     /** Head of the vertex shader source code. */
     static const GLchar VERTEX_SHADER_HEAD[] = "\
@@ -54,6 +65,8 @@ namespace {
         }                                                                    \n\
     ";
 
+
+    //--- FRAGMENT SHADER SOURCE -----------------------------------------------
 
     /** Head of the fragment shader source code. */
     static const GLchar FRAGMENT_SHADER_HEAD[] = "\
@@ -82,34 +95,137 @@ namespace {
 }
 
 
-//--- ACCESSORS ----------------------------------------------------------------
+//--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
-// Returns the head of the fragment shader source code.
-const GLchar *OpenGLShaders::fragmentShaderHead() {
-    return FRAGMENT_SHADER_HEAD;
+// Constructor.
+OpenGLShaderProgram::OpenGLShaderProgram(const std::vector<BasePlugin*> &plugins) {
+    std::stringstream ss;
+
+    // Assemble vertex shader.
+    ss.str("");
+    ss << VERTEX_SHADER_HEAD;
+    for (size_t i = 0; i < plugins.size(); i++) {
+        ss << ((OpenGLPlugin*)(plugins[i]))->vertexShader() << "\n";
+    }
+    ss << VERTEX_SHADER_MIDDLE;
+    for (size_t i = 0; i < plugins.size(); i++) {
+        ss << ((OpenGLPlugin*)(plugins[i]))->pluginName() << "();\n";
+    }
+    ss << VERTEX_SHADER_TAIL;
+    m_vertexShader = createShader(GL_VERTEX_SHADER, ss.str().length(), ss.str().c_str());
+
+    // Assemble fragment shader.
+    ss.str("");
+    ss << FRAGMENT_SHADER_HEAD;
+    for (size_t i = 0; i < plugins.size(); i++) {
+        ss << ((OpenGLPlugin*)(plugins[i]))->fragmentShader() << "\n";
+    }
+    ss << FRAGMENT_SHADER_MIDDLE;
+    for (size_t i = 0; i < plugins.size(); i++) {
+        ss << ((OpenGLPlugin*)(plugins[i]))->pluginName() << "();\n";
+    }
+    ss << FRAGMENT_SHADER_TAIL;
+    m_fragmentShader = createShader(GL_FRAGMENT_SHADER, ss.str().length(), ss.str().c_str());
+
+    // Create shader program.
+    m_shaderProgram = createShaderProgram(m_vertexShader, m_fragmentShader);
+
+    // Initialize attribute locations.
+    m_mainTexCoordAttrib = getAttributeLocation("fb_InitMainTexCoord");
+    m_primPosAttrib = getAttributeLocation("fb_InitPrimPos");
+    m_shapeTexCoordAttrib = getAttributeLocation("fb_InitShapeTexCoord");
+
+    // Initialize uniform locations.
+    m_alphaUniform = getUniformLocation("fb_Alpha");
+    m_mainTexUniform = getUniformLocation("fb_MainTexture");
+    m_shapeTexUniform = getUniformLocation("fb_ShapeTexture");
 }
 
-// Returns the middle of the fragment shader source code.
-const GLchar *OpenGLShaders::fragmentShaderMiddle() {
-    return FRAGMENT_SHADER_MIDDLE;
+// Destructor.
+OpenGLShaderProgram::~OpenGLShaderProgram() {
+    glDetachShader(m_shaderProgram, m_vertexShader);
+    glDetachShader(m_shaderProgram, m_fragmentShader);
+
+    glDeleteProgram(m_shaderProgram);
+    glDeleteShader(m_vertexShader);
+    glDeleteShader(m_fragmentShader);
 }
 
-// Returns the tail of the fragment shader source code.
-const GLchar *OpenGLShaders::fragmentShaderTail() {
-    return FRAGMENT_SHADER_TAIL;
+
+//--- INITIALIZATION FUNCTIONS -------------------------------------------------
+
+// Creates a shader.
+GLuint OpenGLShaderProgram::createShader(GLenum shaderType, GLint sourceLength, const GLchar *source) {
+    // Determine shader type.
+    FbTk::FbString shaderName;
+    if (shaderType == GL_VERTEX_SHADER) {
+        shaderName = "vertex";
+    } else if (shaderType == GL_GEOMETRY_SHADER) {  // For completeness.
+        shaderName = "geometry";
+    } else if (shaderType == GL_FRAGMENT_SHADER) {
+        shaderName = "fragment";
+    } else {
+        throw InitException("createShader() was given an invalid shader type.");
+    }
+
+    // Create and compile.
+    GLuint shader = glCreateShader(shaderType);
+    if (!shader) {
+        std::stringstream ss;
+        ss << "Could not create " << shaderName << " shader.";
+        throw InitException(ss.str());
+    }
+
+    glShaderSource(shader, 1, &source, &sourceLength);
+    glCompileShader(shader);
+
+    // Check for errors.
+    GLint compileStatus;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
+
+    if (!compileStatus) {
+        GLsizei infoLogSize;
+        GLchar infoLog[INFO_LOG_BUFFER_SIZE];
+        glGetShaderInfoLog(shader, INFO_LOG_BUFFER_SIZE, &infoLogSize, infoLog);
+
+        std::stringstream ss;
+        ss << "Error in compilation of the " << shaderName << " shader: "
+           << std::endl << (const char*)(infoLog);
+        throw InitException(ss.str());
+    }
+
+    return shader;
 }
 
-// Returns the head of the vertex shader source code.
-const GLchar *OpenGLShaders::vertexShaderHead() {
-    return VERTEX_SHADER_HEAD;
-}
+// Creates a shader program.
+GLuint OpenGLShaderProgram::createShaderProgram(GLuint vertexShader, GLuint fragmentShader) {
+    GLuint program = glCreateProgram();
+    if (!program) {
+        throw InitException("Cannot create a shader program.");
+    }
 
-// Returns the middle of the vertex shader source code.
-const GLchar *OpenGLShaders::vertexShaderMiddle() {
-    return VERTEX_SHADER_MIDDLE;
-}
+    // Link program.
+    if (vertexShader) {
+        glAttachShader(program, vertexShader);
+    }
+    if (fragmentShader) {
+        glAttachShader(program, fragmentShader);
+    }
+    glLinkProgram(program);
 
-// Returns the tail of the vertex shader source code.
-const GLchar *OpenGLShaders::vertexShaderTail() {
-    return VERTEX_SHADER_TAIL;
+    // Check for errors.
+    GLint linkStatus;
+    glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
+
+    if (!linkStatus) {
+        GLsizei infoLogSize;
+        GLchar infoLog[INFO_LOG_BUFFER_SIZE];
+        glGetProgramInfoLog(program, INFO_LOG_BUFFER_SIZE, &infoLogSize, infoLog);
+
+        std::stringstream ss;
+        ss << "Error in linking of the shader program: " << std::endl << (const char*)(infoLog);
+        throw InitException(ss.str());
+    }
+
+    return program;
 }

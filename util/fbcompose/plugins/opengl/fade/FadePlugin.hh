@@ -29,7 +29,7 @@
 #include "Exceptions.hh"
 #include "OpenGLPlugin.hh"
 #include "OpenGLResources.hh"
-#include "OpenGLUtility.hh"
+#include "OpenGLShaders.hh"
 #include "TickTracker.hh"
 
 #include "FbTk/FbString.hh"
@@ -70,7 +70,7 @@ namespace FbCompositor {
         //--- OTHER INITIALIZATION ---------------------------------------------
 
         /** Initialize OpenGL-specific code. */
-        void initOpenGL(GLuint shaderProgram);
+        void initOpenGL(OpenGLShaderProgramPtr shaderProgram);
 
 
         //--- ACCESSORS --------------------------------------------------------

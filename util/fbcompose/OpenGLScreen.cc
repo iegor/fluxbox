@@ -27,7 +27,6 @@
 #include "Logging.hh"
 #include "OpenGLPlugin.hh"
 #include "OpenGLResources.hh"
-#include "OpenGLShaders.hh"
 #include "OpenGLUtility.hh"
 #include "Utility.hh"
 
@@ -61,10 +60,6 @@ using namespace FbCompositor;
 //--- CONSTANTS ----------------------------------------------------------------
 
 namespace {
-
-    /** Size of the info log buffer. */
-    static const int INFO_LOG_BUFFER_SIZE = 256;
-
 
     /** The preferred framebuffer configuration. */
     static const int PREFERRED_FBCONFIG_ATTRIBUTES[] = {
@@ -136,7 +131,6 @@ OpenGLScreen::OpenGLScreen(int screenNumber, const CompositorConfig &config) :
     initGlew();
     finishRenderingInit();
 
-    initShaders();
     createResources();
     initPlugins();
 }
@@ -144,13 +138,6 @@ OpenGLScreen::OpenGLScreen(int screenNumber, const CompositorConfig &config) :
 // Destructor.
 OpenGLScreen::~OpenGLScreen() {
     XUnmapWindow(display(), m_renderingWindow);
-
-    glDetachShader(m_shaderProgram, m_vertexShader);
-    glDetachShader(m_shaderProgram, m_fragmentShader);
-    glDeleteProgram(m_shaderProgram);
-    glDeleteShader(m_vertexShader);
-    glDeleteShader(m_fragmentShader);
-
     glXDestroyWindow(display(), m_glxRenderingWindow);
     glXDestroyContext(display(), m_glxContext);
     XDestroyWindow(display(), m_renderingWindow);
@@ -300,51 +287,6 @@ void OpenGLScreen::finishRenderingInit() {
 #endif
 }
 
-// Initializes shaders.
-void OpenGLScreen::initShaders() {
-    std::stringstream ss;
-    OpenGLPlugin *plugin;
-
-    // Assemble vertex shader.
-    ss.str("");
-    ss << OpenGLShaders::vertexShaderHead();
-    forEachPlugin(i, plugin) {
-        ss << plugin->vertexShader() << "\n";
-    }
-    ss << OpenGLShaders::vertexShaderMiddle();
-    forEachPlugin(i, plugin) {
-        ss << plugin->pluginName() << "();\n";
-    }
-    ss << OpenGLShaders::vertexShaderTail();
-    m_vertexShader = createShader(GL_VERTEX_SHADER, ss.str().length(), ss.str().c_str());
-
-    // Assemble fragment shader.
-    ss.str("");
-    ss << OpenGLShaders::fragmentShaderHead();
-    forEachPlugin(i, plugin) {
-        ss << plugin->fragmentShader() << "\n";
-    }
-    ss << OpenGLShaders::fragmentShaderMiddle();
-    forEachPlugin(i, plugin) {
-        ss << plugin->pluginName() << "();\n";
-    }
-    ss << OpenGLShaders::fragmentShaderTail();
-    m_fragmentShader = createShader(GL_FRAGMENT_SHADER, ss.str().length(), ss.str().c_str());
-
-    // Create shader program.
-    m_shaderProgram = createShaderProgram(m_vertexShader, 0, m_fragmentShader);
-
-    // Initialize attribute locations.
-    m_mainTexCoordAttrib = glGetAttribLocation(m_shaderProgram, "fb_InitMainTexCoord");
-    m_primPosAttrib = glGetAttribLocation(m_shaderProgram, "fb_InitPrimPos");
-    m_shapeTexCoordAttrib = glGetAttribLocation(m_shaderProgram, "fb_InitShapeTexCoord");
-
-    // Initialize uniform locations.
-    m_alphaUniform = glGetUniformLocation(m_shaderProgram, "fb_Alpha");
-    m_mainTexUniform = glGetUniformLocation(m_shaderProgram, "fb_MainTexture");
-    m_shapeTexUniform = glGetUniformLocation(m_shaderProgram, "fb_ShapeTexture");
-}
-
 // Creates OpenGL resources.
 void OpenGLScreen::createResources() {
     Pixmap pixmap;
@@ -385,6 +327,10 @@ void OpenGLScreen::createResources() {
     m_whiteTexture = new OpenGLTexture(*this, GL_TEXTURE_2D, false);
     m_whiteTexture->setPixmap(pixmap, 1, 1, true);
     XFreePixmap(display(), pixmap);
+
+
+    // Shader program.
+    m_shaderProgram = new OpenGLShaderProgram(pluginManager().plugins());
 }
 
 // Finish plugin initialization.
@@ -418,83 +364,6 @@ void OpenGLScreen::updateOnRootWindowResize() {
 }
 
 
-//--- CONVENIENCE OPENGL WRAPPERS ----------------------------------------------
-
-// Creates a shader.
-GLuint OpenGLScreen::createShader(GLenum shaderType, GLint sourceLength, const GLchar *source) {
-    FbTk::FbString shaderName;
-    if (shaderType == GL_VERTEX_SHADER) {
-        shaderName = "vertex";
-    } else if (shaderType == GL_GEOMETRY_SHADER) {
-        shaderName = "geometry";
-    } else if (shaderType == GL_FRAGMENT_SHADER) {
-        shaderName = "fragment";
-    } else {
-        throw InitException("createShader() was given an invalid shader type.");
-    }
-
-    GLuint shader = glCreateShader(shaderType);
-    if (!shader) {
-        std::stringstream ss;
-        ss << "Could not create " << shaderName << " shader.";
-        throw InitException(ss.str());
-    }
-
-    glShaderSource(shader, 1, &source, &sourceLength);
-    glCompileShader(shader);
-
-    GLint compileStatus;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
-
-    if (!compileStatus) {
-        GLsizei infoLogSize;
-        GLchar infoLog[INFO_LOG_BUFFER_SIZE];
-        glGetShaderInfoLog(shader, INFO_LOG_BUFFER_SIZE, &infoLogSize, infoLog);
-
-        std::stringstream ss;
-        ss << "Error in compilation of the " << shaderName << " shader: "
-           << std::endl << (const char*)(infoLog);
-        throw InitException(ss.str());
-    }
-
-    return shader;
-}
-
-// Creates a shader program.
-GLuint OpenGLScreen::createShaderProgram(GLuint vertexShader, GLuint geometryShader, GLuint fragmentShader) {
-    GLuint program = glCreateProgram();
-    if (!program) {
-        throw InitException("Cannot create a shader program.");
-    }
-
-    if (vertexShader) {
-        glAttachShader(program, vertexShader);
-    }
-    if (geometryShader) {
-        glAttachShader(program, geometryShader);
-    }
-    if (fragmentShader) {
-        glAttachShader(program, fragmentShader);
-    }
-    glLinkProgram(program);
-
-    GLint linkStatus;
-    glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
-
-    if (!linkStatus) {
-        GLsizei infoLogSize;
-        GLchar infoLog[INFO_LOG_BUFFER_SIZE];
-        glGetProgramInfoLog(program, INFO_LOG_BUFFER_SIZE, &infoLogSize, infoLog);
-
-        std::stringstream ss;
-        ss << "Error in linking of the shader program: " << std::endl << (const char*)(infoLog);
-        throw InitException(ss.str());
-    }
-
-    return program;
-}
-
-
 //--- WINDOW MANIPULATION ------------------------------------------------------
 
 // Creates a window object from its XID.
@@ -515,7 +384,7 @@ void OpenGLScreen::renderScreen() {
 
     // Prepare for rendering.
     glXMakeCurrent(display(), m_glxRenderingWindow, m_glxContext);
-    glUseProgram(m_shaderProgram);
+    m_shaderProgram->use();
 
     // Render desktop background.
     renderBackground();
@@ -643,30 +512,30 @@ void OpenGLScreen::render(GLenum renderingMode, OpenGLBufferPtr primPosBuffer,
                           OpenGLBufferPtr elementBuffer, GLuint elementCount, GLfloat alpha) {
     // Load primitive position vertex array.
     glBindBuffer(GL_ARRAY_BUFFER, primPosBuffer->handle());
-    glVertexAttribPointer(m_primPosAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
-    glEnableVertexAttribArray(m_primPosAttrib);
+    glVertexAttribPointer(m_shaderProgram->primPosAttrib(), 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
+    glEnableVertexAttribArray(m_shaderProgram->primPosAttrib());
 
     // Load main texture position vertex array.
     glBindBuffer(GL_ARRAY_BUFFER, mainTexCoordBuffer->handle());
-    glVertexAttribPointer(m_mainTexCoordAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
-    glEnableVertexAttribArray(m_mainTexCoordAttrib);
+    glVertexAttribPointer(m_shaderProgram->mainTexCoordAttrib(), 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
+    glEnableVertexAttribArray(m_shaderProgram->mainTexCoordAttrib());
 
     // Load shape texture position vertex array.
     glBindBuffer(GL_ARRAY_BUFFER, shapeTexCoordBuffer->handle());
-    glVertexAttribPointer(m_shapeTexCoordAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
-    glEnableVertexAttribArray(m_shapeTexCoordAttrib);
+    glVertexAttribPointer(m_shaderProgram->shapeTexCoordAttrib(), 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
+    glEnableVertexAttribArray(m_shaderProgram->shapeTexCoordAttrib());
 
     // Set up textures.
-    glUniform1i(m_mainTexUniform, 0);
+    glUniform1i(m_shaderProgram->mainTexUniform(), 0);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, mainTexture->handle());
 
-    glUniform1i(m_shapeTexUniform, 1);
+    glUniform1i(m_shaderProgram->shapeTexUniform(), 1);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, shapeTexture->handle());
 
     // Set up other uniforms.
-    glUniform1f(m_alphaUniform, alpha);
+    glUniform1f(m_shaderProgram->alphaUniform(), alpha);
 
     // Load element array.
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer->handle());
@@ -681,7 +550,7 @@ void OpenGLScreen::render(GLenum renderingMode, OpenGLBufferPtr primPosBuffer,
     glDrawElements(renderingMode, elementCount, GL_UNSIGNED_SHORT, (void*)0);
 
     // Cleanup.
-    glDisableVertexAttribArray(m_mainTexCoordAttrib);
-    glDisableVertexAttribArray(m_primPosAttrib);
-    glDisableVertexAttribArray(m_shapeTexCoordAttrib);
+    glDisableVertexAttribArray(m_shaderProgram->mainTexCoordAttrib());
+    glDisableVertexAttribArray(m_shaderProgram->primPosAttrib());
+    glDisableVertexAttribArray(m_shaderProgram->shapeTexCoordAttrib());
 }

@@ -29,6 +29,7 @@
 #include "Enumerations.hh"
 #include "Exceptions.hh"
 #include "OpenGLResources.hh"
+#include "OpenGLShaders.hh"
 
 #include "FbTk/FbString.hh"
 
@@ -79,7 +80,7 @@ namespace FbCompositor {
         //--- OTHER INITIALIZATION ---------------------------------------------
 
         /** Initialize OpenGL-specific code. */
-        virtual void initOpenGL(GLuint shaderProgram);
+        virtual void initOpenGL(OpenGLShaderProgramPtr shaderProgram);
 
 
         //--- ACCESSORS --------------------------------------------------------
