@@ -29,6 +29,16 @@
 using namespace FbCompositor;
 
 
+//--- CONSTANTS ----------------------------------------------------------------
+
+namespace {
+    /** Null rendering job. */
+    static const XRenderRenderingJob NULL_JOB = {
+            PictOpClear, XRenderPicturePtr(), XRenderPicturePtr(), 0, 0, 0, 0, 0, 0, 0, 0
+    };
+}
+
+
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Costructor.
@@ -52,11 +62,8 @@ const XRenderScreen &XRenderPlugin::xrenderScreen() const {
 //--- PLUGIN ACTIONS -----------------------------------------------------------
 
 // Extra background rendering job.
-void XRenderPlugin::extraBackgroundRenderingJob(int &op_return, Picture &/*srcPic_return*/,
-        int &/*srcX_return*/, int &/*srcY_return*/, Picture &/*maskPic_return*/, int &/*maskX_return*/,
-        int &/*maskY_return*/, int &/*destX_return*/, int &/*destY_return*/, int &/*width_return*/,
-        int &/*height_return*/) {
-    op_return = PictOpClear;
+XRenderRenderingJob XRenderPlugin::extraBackgroundRenderingJob() {
+    return NULL_JOB;
 }
 
 // Reconfigure rectangle rendering options.
@@ -64,26 +71,19 @@ void XRenderPlugin::reconfigureRectRenderActions(XRectangle &/*rect_return*/, GC
 
 
 // Extra pre window rendering job.
-void XRenderPlugin::extraPreWindowRenderingJob(const XRenderWindow &/*window*/, int &op_return,
-        Picture &/*srcPic_return*/, int &/*srcX_return*/, int &/*srcY_return*/, Picture &/*maskPic_return*/,
-        int &/*maskX_return*/, int &/*maskY_return*/, int &/*destX_return*/, int &/*destY_return*/,
-        int &/*width_return*/, int &/*height_return*/) {
-    op_return = PictOpClear;
+XRenderRenderingJob XRenderPlugin::extraPreWindowRenderingJob(const XRenderWindow &/*window*/) {
+    return NULL_JOB;
 }
 
 // Window rendering options.
-void XRenderPlugin::windowRenderingJobInit(const XRenderWindow &/*window*/, int &/*op_return*/,
-                                           Picture &/*maskPic_return*/) { }
+void XRenderPlugin::windowRenderingJobInit(const XRenderWindow &/*window*/, XRenderRenderingJob &/*job*/) { }
 
 // Window rendering job cleanup.
 void XRenderPlugin::windowRenderingJobCleanup(const XRenderWindow &/*window*/) { }
 
 // Extra post window rendering job.
-void XRenderPlugin::extraPostWindowRenderingJob(const XRenderWindow &/*window*/, int &op_return,
-        Picture &/*srcPic_return*/, int &/*srcX_return*/, int &/*srcY_return*/, Picture &/*maskPic_return*/,
-        int &/*maskX_return*/, int &/*maskY_return*/, int &/*destX_return*/, int &/*destY_return*/,
-        int &/*width_return*/, int &/*height_return*/) {
-    op_return = PictOpClear;
+XRenderRenderingJob XRenderPlugin::extraPostWindowRenderingJob(const XRenderWindow &/*window*/) {
+    return NULL_JOB;
 }
 
 
@@ -96,11 +96,8 @@ int XRenderPlugin::extraRenderingJobCount() {
 }
 
 // Initialize the specified extra rendering job.
-void XRenderPlugin::extraRenderingJobInit(int /*job*/, int &op_return, Picture &/*srcPic_return*/,
-        int &/*srcX_return*/, int &/*srcY_return*/, Picture &/*maskPic_return*/, int &/*maskX_return*/,
-        int &/*maskY_return*/, int &/*destX_return*/, int &/*destY_return*/, int &/*width_return*/,
-        int &/*height_return*/) {
-    op_return = PictOpClear;
+XRenderRenderingJob XRenderPlugin::extraRenderingJobInit(int /*job*/) {
+    return NULL_JOB;
 }
 
 // Clean up after an extra rendering job.

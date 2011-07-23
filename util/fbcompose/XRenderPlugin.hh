@@ -27,6 +27,7 @@
 #include "BasePlugin.hh"
 #include "Enumerations.hh"
 #include "Exceptions.hh"
+#include "XRenderResources.hh"
 
 #include "FbTk/FbString.hh"
 
@@ -44,6 +45,24 @@ namespace FbCompositor {
     class XRenderScreen;
     class XRenderWindow;
     class RenderingException;
+
+
+    /**
+     * A rendering job.
+     */
+    struct XRenderRenderingJob {
+        int operation;                      ///< Compositing operation to use.
+        XRenderPicturePtr sourcePicture;    ///< Picture to render.
+        XRenderPicturePtr maskPicture;      ///< Mask picture to use.
+        int sourceX;                        ///< X offset on the source picture.
+        int sourceY;                        ///< Y offset on the source picture.
+        int maskX;                          ///< X offset on the mask picture.
+        int maskY;                          ///< Y offset on the mask picture.
+        int destinationX;                   ///< X offset on the destination picture.
+        int destinationY;                   ///< Y offset on the destination picture.
+        int width;                          ///< Width of the picture to render.
+        int height;                         ///< Height of the picture to render.
+    };
 
 
     /**
@@ -69,36 +88,23 @@ namespace FbCompositor {
         //--- RENDERING ACTIONS ------------------------------------------------
 
         /** Extra background rendering job. */
-        virtual void extraBackgroundRenderingJob(int &op_return,
-                                                 Picture &srcPic_return, int &srcX_return, int &srcY_return,
-                                                 Picture &maskPic_return, int &maskX_return, int &maskY_return,
-                                                 int &destX_return, int &destY_return,
-                                                 int &width_return, int &height_return);
+        virtual XRenderRenderingJob extraBackgroundRenderingJob();
 
         /** Reconfigure rectangle rendering options. */
         virtual void reconfigureRectRenderActions(XRectangle &rect_return, GC gc);
 
 
         /** Extra pre window rendering job. */
-        virtual void extraPreWindowRenderingJob(const XRenderWindow &window, int &op_return,
-                                                Picture &srcPic_return, int &srcX_return, int &srcY_return,
-                                                Picture &maskPic_return, int &maskX_return, int &maskY_return,
-                                                int &destX_return, int &destY_return,
-                                                int &width_return, int &height_return);
+        virtual XRenderRenderingJob extraPreWindowRenderingJob(const XRenderWindow &window);
 
         /** Window rendering job initialization. */
-        virtual void windowRenderingJobInit(const XRenderWindow &window, int &op_return,
-                                            Picture &maskPic_return);
+        virtual void windowRenderingJobInit(const XRenderWindow &window, XRenderRenderingJob &job);
 
         /** Window rendering job cleanup. */
         virtual void windowRenderingJobCleanup(const XRenderWindow &window);
 
         /** Extra post window rendering job. */
-        virtual void extraPostWindowRenderingJob(const XRenderWindow &window, int &op_return,
-                                                 Picture &srcPic_return, int &srcX_return, int &srcY_return,
-                                                 Picture &maskPic_return, int &maskX_return, int &maskY_return,
-                                                 int &destX_return, int &destY_return,
-                                                 int &width_return, int &height_return);
+        virtual XRenderRenderingJob extraPostWindowRenderingJob(const XRenderWindow &window);
 
 
         /** Called before the extra rendering jobs are executed. */
@@ -108,11 +114,7 @@ namespace FbCompositor {
         virtual int extraRenderingJobCount();
 
         /** Initialize the specified extra rendering job. */
-        virtual void extraRenderingJobInit(int job, int &op_return,
-                                           Picture &srcPic_return, int &srcX_return, int &srcY_return,
-                                           Picture &maskPic_return, int &maskX_return, int &maskY_return,
-                                           int &destX_return, int &destY_return,
-                                           int &width_return, int &height_return);
+        virtual XRenderRenderingJob extraRenderingJobInit(int job);
 
         /** Clean up after an extra rendering job. */
         virtual void extraRenderingJobCleanup(int job);

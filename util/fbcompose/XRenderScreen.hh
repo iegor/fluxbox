@@ -27,6 +27,7 @@
 
 #include "BaseScreen.hh"
 
+#include "XRenderPlugin.hh"
 #include "XRenderResources.hh"
 
 #include <X11/extensions/Xrender.h>
@@ -109,6 +110,9 @@ namespace FbCompositor {
 
         /** Render a particular window onto the screen. */
         void renderWindow(XRenderWindow &window);
+
+        /** Perform a rendering job on the back buffer picture. */
+        void renderToBackBuffer(XRenderRenderingJob job);
 
         /** Swap back and front buffers. */
         void swapBuffers();

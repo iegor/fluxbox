@@ -131,8 +131,7 @@ void FadePlugin::windowUnmapped(const BaseCompWindow &window) {
 //--- RENDERING ACTIONS --------------------------------------------------------
 
 // Window rendering job initialization.
-void FadePlugin::windowRenderingJobInit(const XRenderWindow &window, int &/*op_return*/,
-                                        Picture &maskPic_return) {
+void FadePlugin::windowRenderingJobInit(const XRenderWindow &window, XRenderRenderingJob &job) {
     std::map<Window, PosFadeData>::iterator it = m_positiveFades.find(window.window());
     if (it != m_positiveFades.end()) {
         PosFadeData &curFade = it->second;
@@ -153,7 +152,7 @@ void FadePlugin::windowRenderingJobInit(const XRenderWindow &window, int &/*op_r
             createFadedMask(curFade.fadeAlpha, window.maskPicture(), window.dimensions(), curFade.fadePicture);
         }
 
-        maskPic_return = curFade.fadePicture->pictureHandle();
+        job.maskPicture = curFade.fadePicture;
     }
 }
 
@@ -174,11 +173,7 @@ int FadePlugin::extraRenderingJobCount() {
 }
 
 // Initialize the specified extra rendering job.
-void FadePlugin::extraRenderingJobInit(int job, int &op_return, Picture &srcPic_return,
-        int &srcX_return, int &srcY_return, Picture &maskPic_return, int &maskX_return,
-        int &maskY_return, int &destX_return, int &destY_return, int &width_return,
-        int &height_return) {
-
+XRenderRenderingJob FadePlugin::extraRenderingJobInit(int job) {
     NegFadeData &curFade = m_negativeFades[job];
 
     // Set up the fade mask.
@@ -198,19 +193,20 @@ void FadePlugin::extraRenderingJobInit(int job, int &op_return, Picture &srcPic_
         createFadedMask(curFade.fadeAlpha, curFade.maskPicture, curFade.dimensions, curFade.fadePicture);
     }
 
-    maskPic_return = curFade.fadePicture->pictureHandle();
-
-    // Initialize the other rendering variables.
-    op_return = PictOpOver;
-    srcPic_return = curFade.contentPicture->pictureHandle();
-    srcX_return = 0;
-    srcY_return = 0;
-    maskX_return = 0;
-    maskY_return = 0;
-    destX_return = curFade.dimensions.x;
-    destY_return = curFade.dimensions.y;
-    width_return = curFade.dimensions.width;
-    height_return = curFade.dimensions.height;
+    // Return the job.
+    XRenderRenderingJob extraJob;
+    extraJob.operation = PictOpOver;
+    extraJob.sourcePicture = curFade.contentPicture;
+    extraJob.maskPicture = curFade.fadePicture;
+    extraJob.sourceX = 0;
+    extraJob.sourceY = 0;
+    extraJob.maskX = 0;
+    extraJob.maskY = 0;
+    extraJob.destinationX = curFade.dimensions.x;
+    extraJob.destinationY = curFade.dimensions.y;
+    extraJob.width = curFade.dimensions.width;
+    extraJob.height = curFade.dimensions.height;
+    return extraJob;
 }
 
 // Called after the extra rendering jobs are executed.

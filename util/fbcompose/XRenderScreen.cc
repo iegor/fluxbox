@@ -25,7 +25,6 @@
 #include "CompositorConfig.hh"
 #include "Logging.hh"
 #include "Utility.hh"
-#include "XRenderPlugin.hh"
 #include "XRenderWindow.hh"
 
 #include <X11/extensions/shape.h>
@@ -204,10 +203,8 @@ void XRenderScreen::renderScreen() {
 }
 
 // Render the desktop wallpaper.
+// TODO: Simply make the window transparent.
 void XRenderScreen::renderBackground() {
-    // TODO: Simply make the window transparent.
-    XRenderPlugin *plugin = NULL;
-
     // React to desktop background change.
     if (m_rootChanged) {
         updateBackgroundPicture();
@@ -218,34 +215,26 @@ void XRenderScreen::renderBackground() {
                      0, 0, 0, 0, 0, 0, rootWindow().width(), rootWindow().height());
 
     // Additional rendering of desktop.
-    Picture srcPic, maskPic;
-    int op, srcX, srcY, maskX, maskY, destX, destY, width, height;
-
+    XRenderPlugin *plugin = NULL;
+    XRenderRenderingJob job;
+    
     forEachPlugin(i, plugin) {
-        plugin->extraBackgroundRenderingJob(op, srcPic, srcX, srcY, maskPic, maskX, maskY, destX, destY, width, height);
-        if (op != PictOpClear) {
-            XRenderComposite(display(), op, srcPic, maskPic, m_backBufferPicture->pictureHandle(),
-                             srcX, srcY, maskX, maskY, destX, destY, width, height);
-        }
+        job = plugin->extraBackgroundRenderingJob();
+        renderToBackBuffer(job);
     }
 }
 
 // Perform extra rendering jobs from plugins.
 void XRenderScreen::renderExtraJobs() {
     XRenderPlugin *plugin = NULL;
-
-    Picture srcPic, maskPic;
-    int op, srcX, srcY, maskX, maskY, destX, destY, width, height;
+    XRenderRenderingJob job;
 
     forEachPlugin(i, plugin) {
         plugin->preExtraRenderingActions();
 
         for (int j = 0; j < plugin->extraRenderingJobCount(); j++) {
-            plugin->extraRenderingJobInit(j, op, srcPic, srcX, srcY, maskPic, maskX, maskY, destX, destY, width, height);
-            if (op != PictOpClear) {
-                XRenderComposite(display(), op, srcPic, maskPic, m_backBufferPicture->pictureHandle(), srcX, srcY,
-                                 maskX, maskY, destX, destY, width, height);
-            }
+            job = plugin->extraRenderingJobInit(j);
+            renderToBackBuffer(job);
             plugin->extraRenderingJobCleanup(j);
         }
 
@@ -256,7 +245,6 @@ void XRenderScreen::renderExtraJobs() {
 // Render the reconfigure rectangle.
 void XRenderScreen::renderReconfigureRect() {
     XRenderPlugin *plugin = NULL;
-
     XRectangle rect = reconfigureRectangle();
 
     XSetForeground(display(), m_backBufferPicture->gcHandle(), XWhitePixel(display(), screenNumber()));
@@ -273,6 +261,7 @@ void XRenderScreen::renderReconfigureRect() {
 // Render a particular window onto the screen.
 void XRenderScreen::renderWindow(XRenderWindow &window) {
     XRenderPlugin *plugin = NULL;
+    XRenderRenderingJob job;
 
     // Update window contents.
     if (window.isDamaged()) {
@@ -280,39 +269,46 @@ void XRenderScreen::renderWindow(XRenderWindow &window) {
     }
 
     // Extra rendering jobs before the window is drawn.
-    Picture srcPic, maskPic;
-    int op, srcX, srcY, maskX, maskY, destX, destY, width, height;
-
     forEachPlugin(i, plugin) {
-        plugin->extraPreWindowRenderingJob(window, op, srcPic, srcX, srcY, maskPic,
-                                           maskX, maskY, destX, destY, width, height);
-        if (op != PictOpClear) {
-            XRenderComposite(display(), op, srcPic, maskPic, m_backBufferPicture->pictureHandle(), srcX, srcY,
-                             maskX, maskY, destX, destY, width, height);
-        }
+        job = plugin->extraPreWindowRenderingJob(window);
+        renderToBackBuffer(job);
     }
 
     // Render the window.
-    op = PictOpOver;
-    maskPic = window.maskPicture()->pictureHandle();
+    job.operation = PictOpOver;
+    job.sourcePicture = window.contentPicture();
+    job.maskPicture = window.maskPicture();
+    job.sourceX = 0;
+    job.sourceY = 0;
+    job.maskX = 0;
+    job.maskY = 0;
+    job.destinationX = window.x();
+    job.destinationY = window.y();
+    job.width = window.realWidth();
+    job.height = window.realHeight();
 
     forEachPlugin(i, plugin) {
-        plugin->windowRenderingJobInit(window, op, maskPic);
+        plugin->windowRenderingJobInit(window, job);
     }
-    XRenderComposite(display(), op, window.contentPicture()->pictureHandle(), maskPic, m_backBufferPicture->pictureHandle(),
-                     0, 0, 0, 0, window.x(), window.y(), window.realWidth(), window.realHeight());
+    renderToBackBuffer(job);
     forEachPlugin(i, plugin) {
         plugin->windowRenderingJobCleanup(window);
     }
 
     // Extra rendering jobs after the window is drawn.
     forEachPlugin(i, plugin) {
-        plugin->extraPostWindowRenderingJob(window, op, srcPic, srcX, srcY, maskPic,
-                                            maskX, maskY, destX, destY, width, height);
-        if (op != PictOpClear) {
-            XRenderComposite(display(), op, srcPic, maskPic, m_backBufferPicture->pictureHandle(), srcX, srcY,
-                             maskX, maskY, destX, destY, width, height);
-        }
+        job = plugin->extraPostWindowRenderingJob(window);
+        renderToBackBuffer(job);
+    }
+}
+
+// Perform a rendering job on the back buffer picture.
+void XRenderScreen::renderToBackBuffer(XRenderRenderingJob job) {
+    if (job.operation != PictOpClear) {
+        XRenderComposite(display(), job.operation,
+                         job.sourcePicture->pictureHandle(), job.maskPicture->pictureHandle(),
+                         m_backBufferPicture->pictureHandle(), job.sourceX, job.sourceY,
+                         job.maskX, job.maskY, job.destinationX, job.destinationY, job.width, job.height);
     }
 }
 
