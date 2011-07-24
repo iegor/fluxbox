@@ -29,6 +29,17 @@
 using namespace FbCompositor;
 
 
+namespace {
+    //--- CONSTANTS ------------------------------------------------------------
+
+    /** Null rendering job. */
+    static const OpenGLRenderingJob NULL_JOB = {
+        OpenGLBufferPtr(), OpenGLBufferPtr(), OpenGLBufferPtr(),
+        OpenGLTexturePtr(), OpenGLTexturePtr(), -1.0
+    };
+}
+
+
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Costructor.
@@ -69,11 +80,22 @@ void OpenGLPlugin::preReconfigureRectRenderActions(XRectangle /*reconfigureRect*
 // Post window rendering actions.
 void OpenGLPlugin::postReconfigureRectRenderActions(XRectangle /*reconfigureRect*/) { }
 
+
+// Extra rendering job before window rendering.
+OpenGLRenderingJob OpenGLPlugin::extraPreWindowRenderJob(const OpenGLWindow &/*window*/) {
+    return NULL_JOB;
+}
+
 // Pre window rendering actions.
 void OpenGLPlugin::preWindowRenderActions(const OpenGLWindow &/*window*/) { }
 
 // Post window rendering actions.
 void OpenGLPlugin::postWindowRenderActions(const OpenGLWindow &/*window*/) { }
+
+// Extra rendering job after window rendering.
+OpenGLRenderingJob OpenGLPlugin::extraPostWindowRenderJob(const OpenGLWindow &/*window*/) {
+    return NULL_JOB;
+}
 
 
 // Called before the extra rendering jobs are executed.
@@ -85,14 +107,12 @@ int OpenGLPlugin::extraRenderingJobCount() {
 }
 
 // Initialize the specified extra rendering job.
-OpenGLExtraJob OpenGLPlugin::extraRenderingJobInit(int /*job*/) {
-    static OpenGLExtraJob extraJob = { OpenGLBufferPtr(), OpenGLBufferPtr(), OpenGLBufferPtr(),
-                                       OpenGLTexturePtr(), OpenGLTexturePtr(), 0.0 };
-    return extraJob;
+OpenGLRenderingJob OpenGLPlugin::extraRenderingJobInit(int /*jobId*/) {
+    return NULL_JOB;
 }
 
 // Clean up after an extra rendering job.
-void OpenGLPlugin::extraRenderingJobCleanup(int /*job*/) { }
+void OpenGLPlugin::extraRenderingJobCleanup(int /*jobId*/) { }
 
 // Called after the extra rendering jobs are executed.
 void OpenGLPlugin::postExtraRenderingActions() { }

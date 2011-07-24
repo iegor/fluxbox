@@ -96,12 +96,12 @@ int XRenderPlugin::extraRenderingJobCount() {
 }
 
 // Initialize the specified extra rendering job.
-XRenderRenderingJob XRenderPlugin::extraRenderingJobInit(int /*job*/) {
+XRenderRenderingJob XRenderPlugin::extraRenderingJobInit(int /*jobId*/) {
     return NULL_JOB;
 }
 
 // Clean up after an extra rendering job.
-void XRenderPlugin::extraRenderingJobCleanup(int /*job*/) { }
+void XRenderPlugin::extraRenderingJobCleanup(int /*jobId*/) { }
 
 // Called after the extra rendering jobs are executed.
 void XRenderPlugin::postExtraRenderingActions() { }

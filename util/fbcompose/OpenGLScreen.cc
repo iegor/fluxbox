@@ -25,7 +25,6 @@
 
 #include "CompositorConfig.hh"
 #include "Logging.hh"
-#include "OpenGLPlugin.hh"
 #include "OpenGLResources.hh"
 #include "OpenGLUtility.hh"
 #include "Utility.hh"
@@ -437,20 +436,16 @@ void OpenGLScreen::renderBackground() {
 // Perform extra rendering jobs from plugins.
 void OpenGLScreen::renderExtraJobs() {
     OpenGLPlugin *plugin = NULL;
-    OpenGLExtraJob extraJob;
+    OpenGLRenderingJob renderJob;
 
     forEachPlugin(i, plugin) {
         plugin->preExtraRenderingActions();
 
         for (int j = 0; j < plugin->extraRenderingJobCount(); j++) {
-            extraJob = plugin->extraRenderingJobInit(j);
-
-            render(GL_TRIANGLE_STRIP, extraJob.primPosBuffer, extraJob.mainTexCoordBuffer, extraJob.mainTexture,
-                   extraJob.shapeTexCoordBuffer, extraJob.shapeTexture, m_defaultElementBuffer, 4, extraJob.alpha);
-
+            renderJob = plugin->extraRenderingJobInit(j);
+            executeRenderingJob(renderJob);
             plugin->extraRenderingJobCleanup(j);
         }
-
         plugin->postExtraRenderingActions();
     }
 }
@@ -462,8 +457,9 @@ void OpenGLScreen::renderReconfigureRect() {
     // Convert reconfigure rectangle to OpenGL coordinates.
     GLfloat xLow, xHigh, yLow, yHigh;
     toOpenGLCoordinates(rootWindow().width(), rootWindow().height(),
-            reconfigureRectangle().x, reconfigureRectangle().y, reconfigureRectangle().width, reconfigureRectangle().height,
-            &xLow, &xHigh, &yLow, &yHigh);
+                        reconfigureRectangle().x, reconfigureRectangle().y,
+                        reconfigureRectangle().width, reconfigureRectangle().height,
+                        &xLow, &xHigh, &yLow, &yHigh);
     GLfloat linePosArray[] = { xLow, yLow, xHigh, yLow, xHigh, yHigh, xLow, yHigh };
 
     m_reconfigureRectLinePosBuffer->bufferData(sizeof(linePosArray), (const GLvoid*)(linePosArray), GL_STATIC_DRAW);
@@ -487,10 +483,17 @@ void OpenGLScreen::renderReconfigureRect() {
 // A function to render a particular window onto the screen.
 void OpenGLScreen::renderWindow(OpenGLWindow &window) {
     OpenGLPlugin *plugin = NULL;
+    OpenGLRenderingJob renderJob;
 
     // Update window's contents.
     if (window.isDamaged()) {
         window.updateContents();
+    }
+
+    // Extra rendering jobs before a window is drawn.
+    forEachPlugin(i, plugin) {
+        renderJob = plugin->extraPreWindowRenderJob(window);
+        executeRenderingJob(renderJob);
     }
 
     // Render it.
@@ -501,6 +504,22 @@ void OpenGLScreen::renderWindow(OpenGLWindow &window) {
            m_defaultTexCoordBuffer, window.shapeTexture(), m_defaultElementBuffer, 4, window.alpha() / 255.0);
     forEachPlugin(i, plugin) {
         plugin->postWindowRenderActions(window);
+    }
+
+    // Extra rendering jobs after a window is drawn.
+    forEachPlugin(i, plugin) {
+        renderJob = plugin->extraPostWindowRenderJob(window);
+        executeRenderingJob(renderJob);
+    }
+}
+
+// Execute a given rendering job.
+void OpenGLScreen::executeRenderingJob(OpenGLRenderingJob job) {
+    if ((job.alpha >= 0.0) && (job.alpha <= 1.0)) {
+        render(GL_TRIANGLE_STRIP, job.primPosBuffer,
+               job.mainTexCoordBuffer, job.mainTexture,
+               job.shapeTexCoordBuffer, job.shapeTexture,
+               m_defaultElementBuffer, 4, job.alpha);
     }
 }
 

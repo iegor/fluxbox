@@ -173,8 +173,8 @@ int FadePlugin::extraRenderingJobCount() {
 }
 
 // Initialize the specified extra rendering job.
-XRenderRenderingJob FadePlugin::extraRenderingJobInit(int job) {
-    NegFadeData &curFade = m_negativeFades[job];
+XRenderRenderingJob FadePlugin::extraRenderingJobInit(int jobId) {
+    NegFadeData &curFade = m_negativeFades[jobId];
 
     // Set up the fade mask.
     int newTicks;

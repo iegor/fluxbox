@@ -96,7 +96,7 @@ namespace FbCompositor {
         int extraRenderingJobCount();
 
         /** Initialize the specified extra rendering job. */
-        XRenderRenderingJob extraRenderingJobInit(int job);
+        XRenderRenderingJob extraRenderingJobInit(int jobId);
 
         /** Called after the extra rendering jobs are executed. */
         void postExtraRenderingActions();

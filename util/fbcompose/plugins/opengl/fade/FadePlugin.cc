@@ -200,8 +200,8 @@ int FadePlugin::extraRenderingJobCount() {
 }
 
 // Initialize the specified extra rendering job.
-OpenGLExtraJob FadePlugin::extraRenderingJobInit(int job) {
-    NegFadeData &curFade = m_negativeFades[job];
+OpenGLRenderingJob FadePlugin::extraRenderingJobInit(int jobId) {
+    NegFadeData &curFade = m_negativeFades[jobId];
 
     try {
         curFade.fadeAlpha -= curFade.timer.newElapsedTicks();
@@ -215,7 +215,7 @@ OpenGLExtraJob FadePlugin::extraRenderingJobInit(int job) {
         glUniform1f(alphaUniformPos, (curFade.fadeAlpha / 255.0));
     }
 
-    OpenGLExtraJob extraJob;
+    OpenGLRenderingJob extraJob;
     extraJob.primPosBuffer = curFade.windowPosBuffer;
     extraJob.mainTexCoordBuffer = openGLScreen().defaultTexCoordBuffer();
     extraJob.mainTexture = curFade.contentTexture;

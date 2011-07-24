@@ -27,6 +27,7 @@
 
 #include "BaseScreen.hh"
 #include "Exceptions.hh"
+#include "OpenGLPlugin.hh"
 #include "OpenGLShaders.hh"
 #include "OpenGLWindow.hh"
 
@@ -155,6 +156,9 @@ namespace FbCompositor {
 
         /** Render a particular window onto the screen. */
         void renderWindow(OpenGLWindow &window);
+
+        /** Execute a given rendering job. */
+        void executeRenderingJob(OpenGLRenderingJob job);
 
         /** Render something onto the screen. */
         void render(GLenum renderingMode, OpenGLBufferPtr primPosBuffer,

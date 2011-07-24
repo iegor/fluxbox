@@ -53,7 +53,7 @@ namespace FbCompositor {
     /**
      * Information about an extra rendering job.
      */
-    struct OpenGLExtraJob {
+    struct OpenGLRenderingJob {
         OpenGLBufferPtr primPosBuffer;          ///< Primitive's position buffer.
         OpenGLBufferPtr mainTexCoordBuffer;     ///< Main texture's position buffer.
         OpenGLBufferPtr shapeTexCoordBuffer;    ///< Shape texture's position buffer.
@@ -104,17 +104,24 @@ namespace FbCompositor {
         /** Post background rendering actions. */
         virtual void postBackgroundRenderActions();
 
-        /** Pre window rendering actions. */
+        /** Pre reconfigure rectangle rendering actions. */
         virtual void preReconfigureRectRenderActions(XRectangle reconfigureRect);
 
-        /** Post window rendering actions. */
+        /** Post reconfigure rectangle rendering actions. */
         virtual void postReconfigureRectRenderActions(XRectangle reconfigureRect);
+
+
+        /** Extra rendering job before window rendering. */
+        virtual OpenGLRenderingJob extraPreWindowRenderJob(const OpenGLWindow &window);
 
         /** Pre window rendering actions. */
         virtual void preWindowRenderActions(const OpenGLWindow &window);
 
         /** Post window rendering actions. */
         virtual void postWindowRenderActions(const OpenGLWindow &window);
+
+        /** Extra rendering job after window rendering. */
+        virtual OpenGLRenderingJob extraPostWindowRenderJob(const OpenGLWindow &window);
 
 
         /** Called before the extra rendering jobs are executed. */
@@ -124,10 +131,10 @@ namespace FbCompositor {
         virtual int extraRenderingJobCount();
 
         /** Initialize the specified extra rendering job. */
-        virtual OpenGLExtraJob extraRenderingJobInit(int job);
+        virtual OpenGLRenderingJob extraRenderingJobInit(int jobId);
 
         /** Clean up after an extra rendering job. */
-        virtual void extraRenderingJobCleanup(int job);
+        virtual void extraRenderingJobCleanup(int jobId);
 
         /** Called after the extra rendering jobs are executed. */
         virtual void postExtraRenderingActions();
