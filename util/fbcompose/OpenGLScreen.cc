@@ -337,17 +337,17 @@ void OpenGLScreen::createResources() {
 
 
     // Background texture.
-    m_backgroundTexture = new OpenGLTexture(*this, GL_TEXTURE_2D, true);
+    m_backgroundTexture = new OpenGL2DTexture(*this, true);
 
     // Plain black texture.
     pixmap = createSolidPixmap(display(), rootWindow().window(), 1, 1, 0x00000000);
-    m_blackTexture = new OpenGLTexture(*this, GL_TEXTURE_2D, false);
+    m_blackTexture = new OpenGL2DTexture(*this, false);
     m_blackTexture->setPixmap(pixmap, 1, 1, true);
     XFreePixmap(display(), pixmap);
 
     // Plain white texture.
     pixmap = createSolidPixmap(display(), rootWindow().window(), 1, 1, 0xffffffff);
-    m_whiteTexture = new OpenGLTexture(*this, GL_TEXTURE_2D, false);
+    m_whiteTexture = new OpenGL2DTexture(*this, false);
     m_whiteTexture->setPixmap(pixmap, 1, 1, true);
     XFreePixmap(display(), pixmap);
 
@@ -550,8 +550,8 @@ void OpenGLScreen::executeRenderingJob(OpenGLRenderingJob job) {
 
 // A function to render something onto the screen.
 void OpenGLScreen::render(GLenum renderingMode, OpenGLBufferPtr primPosBuffer,
-                          OpenGLBufferPtr mainTexCoordBuffer, OpenGLTexturePtr mainTexture,
-                          OpenGLBufferPtr shapeTexCoordBuffer, OpenGLTexturePtr shapeTexture,
+                          OpenGLBufferPtr mainTexCoordBuffer, OpenGL2DTexturePtr mainTexture,
+                          OpenGLBufferPtr shapeTexCoordBuffer, OpenGL2DTexturePtr shapeTexture,
                           OpenGLBufferPtr elementBuffer, GLuint elementCount, GLfloat alpha) {
     // Load primitive position vertex array.
     glBindBuffer(GL_ARRAY_BUFFER, primPosBuffer->handle());

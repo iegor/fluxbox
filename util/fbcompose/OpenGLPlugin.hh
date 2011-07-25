@@ -57,8 +57,8 @@ namespace FbCompositor {
         OpenGLBufferPtr primPosBuffer;          ///< Primitive's position buffer.
         OpenGLBufferPtr mainTexCoordBuffer;     ///< Main texture's position buffer.
         OpenGLBufferPtr shapeTexCoordBuffer;    ///< Shape texture's position buffer.
-        OpenGLTexturePtr shapeTexture;          ///< Shape texture.
-        OpenGLTexturePtr mainTexture;           ///< Main texture.
+        OpenGL2DTexturePtr shapeTexture;        ///< Shape texture.
+        OpenGL2DTexturePtr mainTexture;         ///< Main texture.
         GLfloat alpha;                          ///< Alpha value.
     };
 

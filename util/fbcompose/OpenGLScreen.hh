@@ -72,10 +72,10 @@ namespace FbCompositor {
 
 
         /** \returns the default black texture. */
-        OpenGLTexturePtr blackTexture() const;
+        OpenGL2DTexturePtr blackTexture() const;
 
         /** \returns the default white texture. */
-        OpenGLTexturePtr whiteTexture() const;
+        OpenGL2DTexturePtr whiteTexture() const;
 
 
         //--- OTHER ACCESSORS --------------------------------------------------
@@ -168,8 +168,8 @@ namespace FbCompositor {
 
         /** Render something onto the screen. */
         void render(GLenum renderingMode, OpenGLBufferPtr primPosBuffer,
-                    OpenGLBufferPtr mainTexCoordBuffer, OpenGLTexturePtr mainTexture,
-                    OpenGLBufferPtr shapeTexCoordBuffer, OpenGLTexturePtr shapeTexture,
+                    OpenGLBufferPtr mainTexCoordBuffer, OpenGL2DTexturePtr mainTexture,
+                    OpenGLBufferPtr shapeTexCoordBuffer, OpenGL2DTexturePtr shapeTexture,
                     OpenGLBufferPtr elementBuffer, GLuint elementCount, GLfloat alpha);
 
 
@@ -198,7 +198,7 @@ namespace FbCompositor {
         //--- DESKTOP BACKGROUND RELATED ---------------------------------------
 
         /** The background texture. */
-        OpenGLTexturePtr m_backgroundTexture;
+        OpenGL2DTexturePtr m_backgroundTexture;
 
         /** Whether the background changed since the last update. */
         bool m_backgroundChanged;
@@ -217,10 +217,10 @@ namespace FbCompositor {
 
 
         /** Default black texture. */
-        OpenGLTexturePtr m_blackTexture;
+        OpenGL2DTexturePtr m_blackTexture;
 
         /** Default white texture. */
-        OpenGLTexturePtr m_whiteTexture;
+        OpenGL2DTexturePtr m_whiteTexture;
 
 
         //--- RESIZE FRAME RELATED ---------------------------------------------
@@ -245,7 +245,7 @@ namespace FbCompositor {
     //--- INLINE FUNCTIONS -----------------------------------------------------
 
     // Returns the default black texture.
-    inline OpenGLTexturePtr OpenGLScreen::blackTexture() const {
+    inline OpenGL2DTexturePtr OpenGLScreen::blackTexture() const {
         return m_blackTexture;
     }
 
@@ -280,7 +280,7 @@ namespace FbCompositor {
     }
 
     // Returns the default white texture.
-    inline OpenGLTexturePtr OpenGLScreen::whiteTexture() const {
+    inline OpenGL2DTexturePtr OpenGLScreen::whiteTexture() const {
         return m_whiteTexture;
     }
 }

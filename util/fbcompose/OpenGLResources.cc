@@ -25,14 +25,14 @@
 
 #include "Logging.hh"
 #include "OpenGLScreen.hh"
+#include "OpenGLUtility.hh"
 #include "Utility.hh"
 
 using namespace FbCompositor;
 
 
-//--- CONSTANTS ----------------------------------------------------------------
-
 namespace {
+    //--- CONSTANTS ------------------------------------------------------------
 
     // Attributes of the textures' GLX pixmaps.
     static const int TEX_PIXMAP_ATTRIBUTES[] = {
@@ -73,56 +73,68 @@ OpenGLBuffer::~OpenGLBuffer() {
 //------- CONSTRUCTORS AND DESTRUCTORS -----------------------------------------
 
 // Constructor.
-OpenGLTexture::OpenGLTexture(const OpenGLScreen &screen, GLenum targetTexture, bool swizzleAlphaToOne) :
+OpenGL2DTexture::OpenGL2DTexture(const OpenGLScreen &screen, bool swizzleAlphaToOne) :
     m_screen(screen) {
 
     m_display = (Display*)(screen.display());
     m_glxPixmap = 0;
-
-    // TODO: Support for all texture targets (GLX pixmap creation is broken).
-    m_target = targetTexture;
-    if (m_target != GL_TEXTURE_2D) {
-        fbLog_warn << "Someone created a non-2D OpenGLTexture object. Expect glitches." << std::endl;
-    }
+    m_pixmap = None;
 
     glGenTextures(1, &m_texture);
     bind();
 
-    glTexParameterf(m_target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameterf(m_target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(m_target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(m_target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     if (swizzleAlphaToOne) {
 #ifdef GL_ARB_texture_swizzle
-        glTexParameteri(m_target, GL_TEXTURE_SWIZZLE_A, GL_ONE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, GL_ONE);
 #else
 #ifdef GL_EXT_texture_swizzle
-        glTexParameteri(m_target, GL_TEXTURE_SWIZZLE_A_EXT, GL_ONE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A_EXT, GL_ONE);
 #endif  // GL_EXT_texture_swizzle
 #endif  // GL_ARB_texture_swizzle
     }
 }
 
 // Destructor.
-OpenGLTexture::~OpenGLTexture() {
+OpenGL2DTexture::~OpenGL2DTexture() {
     glDeleteTextures(1, &m_texture);
+    if (m_glxPixmap) {
+        glXDestroyPixmap(m_display, m_glxPixmap);
+    }
+    if (m_pixmap) {
+        XFreePixmap(m_display, m_pixmap);
+    }
 }
 
 
 //------- MUTATORS -------------------------------------------------------------
 
 // Sets the texture's contents to the given pixmap.
-void OpenGLTexture::setPixmap(Pixmap pixmap, int width, int height, bool forceDirect) {
+void OpenGL2DTexture::setPixmap(Pixmap pixmap, bool managePixmap, int width, int height, bool forceDirect) {
     bind();
+    m_height = height;
+    m_width = width;
+
+    if (m_pixmap) {
+        XFreePixmap(m_display, m_pixmap);
+        m_pixmap = None;
+    }
+    if (managePixmap) {
+        m_pixmap = pixmap;
+    }
 
 #ifdef GLXEW_EXT_texture_from_pixmap
+    if (m_glxPixmap) {
+        glXReleaseTexImageEXT(m_display, m_glxPixmap, GLX_BACK_LEFT_EXT);
+        glXDestroyPixmap(m_display, m_glxPixmap);
+        m_glxPixmap = 0;
+    }
+
     if (!forceDirect) {
-        if (m_glxPixmap) {
-            glXReleaseTexImageEXT(m_display, m_glxPixmap, GLX_BACK_LEFT_EXT);
-            glXDestroyPixmap(m_display, m_glxPixmap);
-            m_glxPixmap = 0;
-        }
         m_glxPixmap = glXCreatePixmap(m_display, m_screen.fbConfig(), pixmap, TEX_PIXMAP_ATTRIBUTES);
 
         if (!m_glxPixmap) {
@@ -143,7 +155,89 @@ void OpenGLTexture::setPixmap(Pixmap pixmap, int width, int height, bool forceDi
             return;
         }
 
-        glTexImage2D(m_target, 0, GL_RGBA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)(&(image->data[0])));
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)(&(image->data[0])));
         XDestroyImage(image);
     }
+}
+
+
+//--- OPENGL TEXTURE PARTITION -------------------------------------------------
+
+//------- CONSTRUCTORS AND DESTRUCTORS -----------------------------------------
+
+// Constructor.
+OpenGL2DTexturePartition::OpenGL2DTexturePartition(const OpenGLScreen &screen, bool swizzleAlphaToOne) :
+    m_screen(screen) {
+
+    m_display = (Display*)(screen.display());
+    m_maxTextureSize = screen.maxTextureSize();
+    m_pixmap = None;
+    m_swizzleAlphaToOne = swizzleAlphaToOne;
+
+    m_fullHeight = m_fullWidth = m_unitHeight = m_unitWidth = 0;
+}
+
+// Destructor.
+OpenGL2DTexturePartition::~OpenGL2DTexturePartition() { }
+
+
+//------- MUTATORS -------------------------------------------------------------
+
+// Sets the texture's contents to the given pixmap.
+void OpenGL2DTexturePartition::setPixmap(Pixmap pixmap, bool managePixmap, int width, int height, int depth, bool forceDirect) {
+    // Handle the pixmap and its GC.
+    if (m_pixmap) {
+        XFreePixmap(m_display, m_pixmap);
+        m_pixmap = None;
+    }
+    if (managePixmap) {
+        m_pixmap = pixmap;
+    }
+    GC gc = XCreateGC(m_display, pixmap, 0, NULL);
+
+    // Set partition's dimensions.
+    m_fullHeight = height;
+    m_fullWidth = width;
+    m_unitHeight = ((height - 1) / m_maxTextureSize) + 1;
+    m_unitWidth = ((width - 1) / m_maxTextureSize) + 1;
+
+    int totalUnits = m_unitHeight * m_unitWidth;
+
+    // Adjust number of stored partitions.
+    while ((size_t)(totalUnits) > m_partitions.size()) {
+        TexturePart partition;
+        partition.borders = 0;
+        partition.texture = new OpenGL2DTexture(m_screen, m_swizzleAlphaToOne);
+        m_partitions.push_back(partition);
+    }
+    while ((size_t)(totalUnits) < m_partitions.size()) {
+        m_partitions.pop_back();
+    }
+
+    // Create partitions.
+    for (int i = 0; i < m_unitHeight; i++) {
+        for (int j = 0; j < m_unitWidth; j++) {
+            // Partition's index and extents.
+            int idx = partitionIndex(j, i);
+            int partHeight = std::min(m_fullHeight - i * m_maxTextureSize, m_maxTextureSize);
+            int partWidth = std::min(m_fullWidth - j * m_maxTextureSize, m_maxTextureSize);
+
+            // Create partition's pixmap.
+            Pixmap partPixmap = XCreatePixmap(m_display, m_screen.rootWindow().window(), partWidth, partHeight, depth);
+            XCopyArea(m_display, pixmap, partPixmap, gc, j * m_maxTextureSize, i * m_maxTextureSize, partWidth, partHeight, 0, 0);
+
+            // Fill adjacent border field.
+            int borders = 0;
+            borders |= ((i == 0) ? BORDER_NORTH : 0);
+            borders |= ((j == 0) ? BORDER_WEST : 0);
+            borders |= ((i == (m_unitHeight - 1)) ? BORDER_SOUTH : 0);
+            borders |= ((j == (m_unitWidth - 1)) ? BORDER_EAST : 0);
+
+            // Set up the partition.
+            m_partitions[idx].borders = borders;
+            m_partitions[idx].texture->setPixmap(partPixmap, true, partWidth, partHeight, forceDirect);
+        }
+    }
+
+    XFreeGC(m_display, gc);
 }

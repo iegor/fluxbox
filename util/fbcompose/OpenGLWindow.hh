@@ -58,10 +58,10 @@ namespace FbCompositor {
         //--- ACCESSORS --------------------------------------------------------
 
         /** \returns an object, holding the window's contents as an OpenGL texture. */
-        OpenGLTexturePtr contentTexture() const;
+        OpenGL2DTexturePtr contentTexture() const;
 
         /** \returns an object, holding the window's shape as an OpenGL texture. */
-        OpenGLTexturePtr shapeTexture() const;
+        OpenGL2DTexturePtr shapeTexture() const;
 
         /** \returns an object, holding the window position buffer. */
         OpenGLBufferPtr windowPosBuffer() const;
@@ -85,11 +85,11 @@ namespace FbCompositor {
     private :
         //--- RENDERING-RELATED VARIABLES --------------------------------------
 
-        /** Window's content texture holder. */
-        OpenGLTexturePtr m_contentTexturePtr;
+        /** Window's content texture. */
+        OpenGL2DTexturePtr m_contentTexturePtr;
 
-        /** Window's shape texture holder. */
-        OpenGLTexturePtr m_shapeTexturePtr;
+        /** Window's shape texture. */
+        OpenGL2DTexturePtr m_shapeTexturePtr;
 
 
         /** Window position array. */
@@ -97,22 +97,18 @@ namespace FbCompositor {
 
         /** Window position buffer holder. */
         OpenGLBufferPtr m_windowPosBufferPtr;
-
-
-        /** Window's shape pixmap. */
-        Pixmap m_shapePixmap;
     };
 
 
     //--- INLINE FUNCTIONS -------------------------------------------------
 
     // Returns the window's contents as an OpenGL texture.
-    inline OpenGLTexturePtr OpenGLWindow::contentTexture() const {
+    inline OpenGL2DTexturePtr OpenGLWindow::contentTexture() const {
         return m_contentTexturePtr;
     }
 
     // Returns an object, holding the window's shape as an OpenGL texture.
-    inline OpenGLTexturePtr OpenGLWindow::shapeTexture() const {
+    inline OpenGL2DTexturePtr OpenGLWindow::shapeTexture() const {
         return m_shapeTexturePtr;
     }
 

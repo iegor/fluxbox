@@ -41,21 +41,15 @@ using namespace FbCompositor;
 OpenGLWindow::OpenGLWindow(const OpenGLScreen &screen, Window windowXID) :
     BaseCompWindow((const BaseScreen&)(screen), windowXID) {
 
-    m_shapePixmap = None;
-
-    m_contentTexturePtr = new OpenGLTexture(screen, GL_TEXTURE_2D, true);
-    m_shapeTexturePtr = new OpenGLTexture(screen, GL_TEXTURE_2D, false);
+    m_contentTexturePtr = new OpenGL2DTexture(screen, true);
+    m_shapeTexturePtr = new OpenGL2DTexture(screen, false);
     m_windowPosBufferPtr = new OpenGLBuffer(screen, GL_ARRAY_BUFFER);
 
     updateWindowPosArray();
 }
 
 // Destructor.
-OpenGLWindow::~OpenGLWindow() {
-    if (m_shapePixmap) {
-        XFreePixmap(display(), m_shapePixmap);
-    }
-}
+OpenGLWindow::~OpenGLWindow() { }
 
 
 //--- WINDOW UPDATE FUNCTIONS ------------------------------------------
@@ -68,7 +62,7 @@ void OpenGLWindow::updateContents() {
 
     updateContentPixmap();
     if (contentPixmap()) {
-        m_contentTexturePtr->setPixmap(contentPixmap(), realWidth(), realHeight());
+        m_contentTexturePtr->setPixmap(contentPixmap(), false, realWidth(), realHeight());
     }
 
     if (clipShapeChanged()) {
@@ -88,30 +82,23 @@ void OpenGLWindow::updateGeometry(const XConfigureEvent &event) {
 void OpenGLWindow::updateShape() {
     BaseCompWindow::updateShape();
 
-    if (m_shapePixmap) {
-        XFreePixmap(display(), m_shapePixmap);
-        m_shapePixmap = None;
-    }
-    m_shapePixmap = XCreatePixmap(display(), window(), realWidth(), realHeight(), depth());
-    if (!m_shapePixmap) {
-        return;     // In case the window was unmapped/destroyed.
-    }
+    Pixmap shapePixmap = XCreatePixmap(display(), window(), realWidth(), realHeight(), depth());
 
-    GC gc = XCreateGC(display(), m_shapePixmap, 0, 0);
+    GC gc = XCreateGC(display(), shapePixmap, 0, 0);
     XSetGraphicsExposures(display(), gc, False);
     XSetPlaneMask(display(), gc, 0xffffffff);
 
     XSetForeground(display(), gc, 0x00000000);
-    XFillRectangle(display(), m_shapePixmap, gc, 0, 0, realWidth(), realHeight());
+    XFillRectangle(display(), shapePixmap, gc, 0, 0, realWidth(), realHeight());
 
     XSetForeground(display(), gc, 0xffffffff);
     // TODO: Fix rectangle ordering mismatch.
     XSetClipRectangles(display(), gc, 0, 0, clipShapeRects(), clipShapeRectCount(), Unsorted);
-    XFillRectangle(display(), m_shapePixmap, gc, 0, 0, realWidth(), realHeight());
+    XFillRectangle(display(), shapePixmap, gc, 0, 0, realWidth(), realHeight());
 
     XFreeGC(display(), gc);
 
-    m_shapeTexturePtr->setPixmap(m_shapePixmap, realWidth(), realHeight());
+    m_shapeTexturePtr->setPixmap(shapePixmap, true, realWidth(), realHeight());
 }
 
 // Updates the window position vertex array.

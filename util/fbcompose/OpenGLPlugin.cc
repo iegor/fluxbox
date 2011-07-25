@@ -35,7 +35,7 @@ namespace {
     /** Null rendering job. */
     static const OpenGLRenderingJob NULL_JOB = {
         OpenGLBufferPtr(), OpenGLBufferPtr(), OpenGLBufferPtr(),
-        OpenGLTexturePtr(), OpenGLTexturePtr(), -1.0
+        OpenGL2DTexturePtr(), OpenGL2DTexturePtr(), -1.0
     };
 }
 
