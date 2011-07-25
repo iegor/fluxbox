@@ -86,6 +86,9 @@ namespace FbCompositor {
         /** \returns the main GLXFBConfig. */
         GLXFBConfig fbConfig() const;
 
+        /** \returns maximum supported texture size. */
+        int maxTextureSize() const;
+
 
         //--- SCREEN MANIPULATION ----------------------------------------------
 
@@ -117,6 +120,9 @@ namespace FbCompositor {
 
         /** Early initialization of GLX function pointers. */
         void earlyInitGLXPointers();
+
+        /** Finds the maximum usable texture size. */
+        void findMaxTextureSize();
 
         /** Finishes the initialization of the rendering context and surface. */
         void finishRenderingInit();
@@ -230,6 +236,9 @@ namespace FbCompositor {
 
         /** Whether we have a double-buffered window. */
         bool m_haveDoubleBuffering;
+
+        /** Maximum texture size. */
+        int m_maxTextureSize;
     };
 
 
@@ -263,6 +272,11 @@ namespace FbCompositor {
     // Returns the main GLXFBConfig.
     inline GLXFBConfig OpenGLScreen::fbConfig() const {
         return m_fbConfig;
+    }
+
+    // Returns maximum supported texture size.
+    inline int OpenGLScreen::maxTextureSize() const {
+        return m_maxTextureSize;
     }
 
     // Returns the default white texture.

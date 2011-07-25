@@ -40,6 +40,9 @@ namespace FbCompositor {
     /** Creates a new pixmap, filled with the specified color. */
     Pixmap createSolidPixmap(Display *display, Window rootWindow, int width, int height, unsigned long color);
 
+    /** Computes the highest power of two that equals or is less than the given value. */
+    int largestSmallerPow2(int value);
+
 }
 
 #endif  // FBCOMPOSITOR_UTILITY_HH

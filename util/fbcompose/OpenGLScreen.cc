@@ -130,6 +130,7 @@ OpenGLScreen::OpenGLScreen(int screenNumber, const CompositorConfig &config) :
     initGlew();
     finishRenderingInit();
 
+    findMaxTextureSize();
     createResources();
     initPlugins();
 }
@@ -284,6 +285,29 @@ void OpenGLScreen::finishRenderingInit() {
     fbLog_warn << "Could not find GL_ARB_texture_swizzle or GL_EXT_texture_swizzle extensions. Expect glitches." << std::endl;
 #endif
 #endif
+}
+
+// Finds the maximum usable texture size.
+void OpenGLScreen::findMaxTextureSize() {
+    GLint texSize;
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &texSize);
+    texSize = (GLint)(largestSmallerPow2((int)(texSize)));
+
+    while (texSize > 0) {
+        GLint width;
+
+        glTexImage2D(GL_PROXY_TEXTURE_2D, 0, GL_RGBA, texSize, texSize, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
+        glGetTexLevelParameteriv(GL_PROXY_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
+
+        if (width == 0) {
+            texSize >>= 1;
+        } else {
+            break;
+        }
+    }
+
+    m_maxTextureSize = (int)(texSize);
+    fbLog_info << "Maximum OpenGL texture size: " << m_maxTextureSize << ". Just so you know." << std::endl;
 }
 
 // Creates OpenGL resources.
