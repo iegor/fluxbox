@@ -25,7 +25,9 @@
 
 #include "BaseScreen.hh"
 #include "Logging.hh"
+#include "OpenGLScreen.hh"
 #include "OpenGLUtility.hh"
+#include "Utility.hh"
 
 #include <X11/Xutil.h>
 
@@ -41,9 +43,8 @@ using namespace FbCompositor;
 OpenGLWindow::OpenGLWindow(const OpenGLScreen &screen, Window windowXID) :
     BaseCompWindow((const BaseScreen&)(screen), windowXID) {
 
-    m_contentTexturePtr = new OpenGL2DTexture(screen, true);
-    m_shapeTexturePtr = new OpenGL2DTexture(screen, false);
-    m_windowPosBufferPtr = new OpenGLBuffer(screen, GL_ARRAY_BUFFER);
+    m_contentTexturePartition = new OpenGL2DTexturePartition(screen, true);
+    m_shapeTexturePartition = new OpenGL2DTexturePartition(screen, false);
 
     updateWindowPosArray();
 }
@@ -62,7 +63,7 @@ void OpenGLWindow::updateContents() {
 
     updateContentPixmap();
     if (contentPixmap()) {
-        m_contentTexturePtr->setPixmap(contentPixmap(), false, realWidth(), realHeight());
+        m_contentTexturePartition->setPixmap(contentPixmap(), false, realWidth(), realHeight(), depth());
     }
 
     if (clipShapeChanged()) {
@@ -98,19 +99,39 @@ void OpenGLWindow::updateShape() {
 
     XFreeGC(display(), gc);
 
-    m_shapeTexturePtr->setPixmap(shapePixmap, true, realWidth(), realHeight());
+    m_shapeTexturePartition->setPixmap(shapePixmap, true, realWidth(), realHeight(), depth());
 }
 
 // Updates the window position vertex array.
 void OpenGLWindow::updateWindowPosArray() {
     GLfloat xLow, xHigh, yLow, yHigh;
-    toOpenGLCoordinates(screen().rootWindow().width(), screen().rootWindow().height(),
-                        x(), y(), realWidth(), realHeight(), &xLow, &xHigh, &yLow, &yHigh);
 
-    m_windowPosArray[0] = m_windowPosArray[4] = xLow;
-    m_windowPosArray[2] = m_windowPosArray[6] = xHigh;
-    m_windowPosArray[1] = m_windowPosArray[3] = yLow;
-    m_windowPosArray[5] = m_windowPosArray[7] = yHigh;
+    int maxTextureSize = ((const OpenGLScreen&)(screen())).maxTextureSize();
 
-    m_windowPosBufferPtr->bufferData(sizeof(m_windowPosArray), (const GLvoid*)(m_windowPosArray), GL_STATIC_DRAW);
+    int unitWidth = ((realWidth() - 1) / maxTextureSize) + 1;
+    int unitHeight = ((realHeight() - 1) / maxTextureSize) + 1;
+    int totalUnits = unitWidth * unitHeight;
+
+    while ((size_t)(totalUnits) > m_windowPosBuffer.size()) {
+        m_windowPosBuffer.push_back(OpenGLBufferPtr(new OpenGLBuffer((const OpenGLScreen&)(screen()), GL_ARRAY_BUFFER)));
+    }
+
+    for (int i = 0; i < unitHeight; i++) {
+        for (int j = 0; j < unitWidth; j++) {
+            int idx = i * unitWidth + j;
+            int partX = x() + j * maxTextureSize;
+            int partY = y() + i * maxTextureSize;
+            int partHeight = std::min(int(realHeight() - i * maxTextureSize), maxTextureSize);
+            int partWidth = std::min(int(realWidth() - j * maxTextureSize), maxTextureSize);
+
+            toOpenGLCoordinates(screen().rootWindow().width(), screen().rootWindow().height(),
+                                partX, partY, partWidth, partHeight, &xLow, &xHigh, &yLow, &yHigh);
+            m_windowPosArray[0] = m_windowPosArray[4] = xLow;
+            m_windowPosArray[2] = m_windowPosArray[6] = xHigh;
+            m_windowPosArray[1] = m_windowPosArray[3] = yLow;
+            m_windowPosArray[5] = m_windowPosArray[7] = yHigh;
+            
+            m_windowPosBuffer[idx]->bufferData(sizeof(m_windowPosArray), (const GLvoid*)(m_windowPosArray), GL_STATIC_DRAW);
+        }
+    }
 }

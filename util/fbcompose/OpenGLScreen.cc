@@ -524,8 +524,12 @@ void OpenGLScreen::renderWindow(OpenGLWindow &window) {
     forEachPlugin(i, plugin) {
         plugin->preWindowRenderActions(window);
     }
-    render(GL_TRIANGLE_STRIP, window.windowPosBuffer(), m_defaultTexCoordBuffer, window.contentTexture(),
-           m_defaultTexCoordBuffer, window.shapeTexture(), m_defaultElementBuffer, 4, window.alpha() / 255.0);
+    for (int i = 0; i < window.partitionCount(); i++) {
+        render(GL_TRIANGLE_STRIP, window.windowPosBuffer()[i],
+               m_defaultTexCoordBuffer, window.contentTexturePartition()->partitions()[i].texture,
+               m_defaultTexCoordBuffer, window.shapeTexturePartition()->partitions()[i].texture,
+               m_defaultElementBuffer, 4, window.alpha() / 255.0);
+    }
     forEachPlugin(i, plugin) {
         plugin->postWindowRenderActions(window);
     }

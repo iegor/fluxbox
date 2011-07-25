@@ -215,27 +215,32 @@ void OpenGL2DTexturePartition::setPixmap(Pixmap pixmap, bool managePixmap, int w
     }
 
     // Create partitions.
-    for (int i = 0; i < m_unitHeight; i++) {
-        for (int j = 0; j < m_unitWidth; j++) {
-            // Partition's index and extents.
-            int idx = partitionIndex(j, i);
-            int partHeight = std::min(m_fullHeight - i * m_maxTextureSize, m_maxTextureSize);
-            int partWidth = std::min(m_fullWidth - j * m_maxTextureSize, m_maxTextureSize);
+    if ((totalUnits == 1) && !forceDirect) {
+        m_partitions[0].borders = BORDER_NORTH | BORDER_EAST | BORDER_SOUTH | BORDER_WEST;
+        m_partitions[0].texture->setPixmap(pixmap, true, m_fullWidth, m_fullHeight, false);
+    } else {
+        for (int i = 0; i < m_unitHeight; i++) {
+            for (int j = 0; j < m_unitWidth; j++) {
+                // Partition's index and extents.
+                int idx = partitionIndex(j, i);
+                int partHeight = std::min(m_fullHeight - i * m_maxTextureSize, m_maxTextureSize);
+                int partWidth = std::min(m_fullWidth - j * m_maxTextureSize, m_maxTextureSize);
 
-            // Create partition's pixmap.
-            Pixmap partPixmap = XCreatePixmap(m_display, m_screen.rootWindow().window(), partWidth, partHeight, depth);
-            XCopyArea(m_display, pixmap, partPixmap, gc, j * m_maxTextureSize, i * m_maxTextureSize, partWidth, partHeight, 0, 0);
+                // Create partition's pixmap.
+                Pixmap partPixmap = XCreatePixmap(m_display, m_screen.rootWindow().window(), partWidth, partHeight, depth);
+                XCopyArea(m_display, pixmap, partPixmap, gc, j * m_maxTextureSize, i * m_maxTextureSize, partWidth, partHeight, 0, 0);
 
-            // Fill adjacent border field.
-            int borders = 0;
-            borders |= ((i == 0) ? BORDER_NORTH : 0);
-            borders |= ((j == 0) ? BORDER_WEST : 0);
-            borders |= ((i == (m_unitHeight - 1)) ? BORDER_SOUTH : 0);
-            borders |= ((j == (m_unitWidth - 1)) ? BORDER_EAST : 0);
+                // Fill adjacent border field.
+                int borders = 0;
+                borders |= ((i == 0) ? BORDER_NORTH : 0);
+                borders |= ((j == 0) ? BORDER_WEST : 0);
+                borders |= ((i == (m_unitHeight - 1)) ? BORDER_SOUTH : 0);
+                borders |= ((j == (m_unitWidth - 1)) ? BORDER_EAST : 0);
 
-            // Set up the partition.
-            m_partitions[idx].borders = borders;
-            m_partitions[idx].texture->setPixmap(partPixmap, true, partWidth, partHeight, forceDirect);
+                // Set up the partition.
+                m_partitions[idx].borders = borders;
+                m_partitions[idx].texture->setPixmap(partPixmap, true, partWidth, partHeight, forceDirect);
+            }
         }
     }
 

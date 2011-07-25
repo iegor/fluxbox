@@ -32,7 +32,8 @@
 
 #include <GL/glxew.h>
 #include <GL/glx.h>
-#include <GL/gl.h>
+
+#include <vector>
 
 
 namespace FbCompositor {
@@ -58,13 +59,16 @@ namespace FbCompositor {
         //--- ACCESSORS --------------------------------------------------------
 
         /** \returns an object, holding the window's contents as an OpenGL texture. */
-        OpenGL2DTexturePtr contentTexture() const;
+        OpenGL2DTexturePartitionPtr contentTexturePartition() const;
 
         /** \returns an object, holding the window's shape as an OpenGL texture. */
-        OpenGL2DTexturePtr shapeTexture() const;
+        OpenGL2DTexturePartitionPtr shapeTexturePartition() const;
+
+        /** \returns the number of contents' partitions. */
+        int partitionCount() const;
 
         /** \returns an object, holding the window position buffer. */
-        OpenGLBufferPtr windowPosBuffer() const;
+        std::vector<OpenGLBufferPtr> windowPosBuffer() const;
 
 
         //--- WINDOW UPDATE FUNCTIONS ------------------------------------------
@@ -86,35 +90,40 @@ namespace FbCompositor {
         //--- RENDERING-RELATED VARIABLES --------------------------------------
 
         /** Window's content texture. */
-        OpenGL2DTexturePtr m_contentTexturePtr;
+        OpenGL2DTexturePartitionPtr m_contentTexturePartition;
 
         /** Window's shape texture. */
-        OpenGL2DTexturePtr m_shapeTexturePtr;
+        OpenGL2DTexturePartitionPtr m_shapeTexturePartition;
 
 
         /** Window position array. */
         GLfloat m_windowPosArray[8];
 
         /** Window position buffer holder. */
-        OpenGLBufferPtr m_windowPosBufferPtr;
+        std::vector<OpenGLBufferPtr> m_windowPosBuffer;
     };
 
 
     //--- INLINE FUNCTIONS -------------------------------------------------
 
     // Returns the window's contents as an OpenGL texture.
-    inline OpenGL2DTexturePtr OpenGLWindow::contentTexture() const {
-        return m_contentTexturePtr;
+    inline OpenGL2DTexturePartitionPtr OpenGLWindow::contentTexturePartition() const {
+        return m_contentTexturePartition;
+    }
+
+    // Returns the number of contents' partitions.
+    inline int OpenGLWindow::partitionCount() const {
+        return m_contentTexturePartition->partitions().size();
     }
 
     // Returns an object, holding the window's shape as an OpenGL texture.
-    inline OpenGL2DTexturePtr OpenGLWindow::shapeTexture() const {
-        return m_shapeTexturePtr;
+    inline OpenGL2DTexturePartitionPtr OpenGLWindow::shapeTexturePartition() const {
+        return m_shapeTexturePartition;
     }
 
     // Returns the window position buffer.
-    inline OpenGLBufferPtr OpenGLWindow::windowPosBuffer() const {
-        return m_windowPosBufferPtr;
+    inline std::vector<OpenGLBufferPtr> OpenGLWindow::windowPosBuffer() const {
+        return m_windowPosBuffer;
     }
 }
 

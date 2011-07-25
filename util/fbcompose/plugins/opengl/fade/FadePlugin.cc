@@ -137,26 +137,29 @@ void FadePlugin::windowUnmapped(const BaseCompWindow &window) {
     NegFadeData fade;
 
     // Is the window being faded in?
+    float fadeAlpha = 255;
     std::map<Window, PosFadeData>::iterator it = m_positiveFades.find(window.window());
     if (it != m_positiveFades.end()) {
-        fade.fadeAlpha = it->second.fadeAlpha;
+        fadeAlpha = it->second.fadeAlpha;
         m_positiveFades.erase(it);
-    } else {
-        fade.fadeAlpha = 255;
     }
 
-    // Initialize the remaining fields.
-    fade.contentTexture = glWindow.contentTexture();
-    fade.origAlpha = glWindow.alpha();
-    fade.shapeTexture = glWindow.shapeTexture();
-    fade.windowId = glWindow.window();
-    fade.windowPosBuffer = glWindow.windowPosBuffer();
+    // Create a fade for each window partition.
+    for (int i = 0; i < glWindow.partitionCount(); i++) {
+        NegFadeData fade;
 
-    fade.timer.setTickSize(250000 / 255);
-    fade.timer.start();
+        fade.contentTexture = glWindow.contentTexturePartition()->partitions()[i].texture;
+        fade.fadeAlpha = fadeAlpha;
+        fade.origAlpha = glWindow.alpha();
+        fade.shapeTexture = glWindow.shapeTexturePartition()->partitions()[i].texture;
+        fade.windowId = glWindow.window();
+        fade.windowPosBuffer = glWindow.windowPosBuffer()[i];
 
-    // Track the fade.
-    m_negativeFades.push_back(fade);
+        fade.timer.setTickSize(250000 / 255);
+        fade.timer.start();
+
+        m_negativeFades.push_back(fade);
+    }
 }
 
 
