@@ -30,9 +30,18 @@ using namespace FbCompositor;
 
 // Converts screen coordinates to OpenGL coordinates.
 void FbCompositor::toOpenGLCoordinates(int screenWidth, int screenHeight, int x, int y, int width, int height,
-                                       GLfloat *xLow_gl, GLfloat *xHigh_gl, GLfloat *yLow_gl, GLfloat *yHigh_gl) {
-    *xLow_gl  = ((x * 2.0) / screenWidth) - 1.0;
-    *xHigh_gl = (((x + width) * 2.0) / screenWidth) - 1.0;
-    *yLow_gl  = 1.0 - ((y * 2.0) / screenHeight);
-    *yHigh_gl = 1.0 - (((y + height) * 2.0) / screenHeight);
+                                       GLfloat *xLow_return, GLfloat *xHigh_return, GLfloat *yLow_return,
+                                       GLfloat *yHigh_return) {
+    *xLow_return  = ((x * 2.0) / screenWidth) - 1.0;
+    *xHigh_return = (((x + width) * 2.0) / screenWidth) - 1.0;
+    *yLow_return  = 1.0 - ((y * 2.0) / screenHeight);
+    *yHigh_return = 1.0 - (((y + height) * 2.0) / screenHeight);
+}
+
+// Converts screen coordinates to OpenGL coordinates. */
+void FbCompositor::toOpenGLCoordinates(int screenWidth, int screenHeight, XRectangle rect,
+                                       GLfloat *xLow_return, GLfloat *xHigh_return, GLfloat *yLow_return,
+                                       GLfloat *yHigh_return) {
+    toOpenGLCoordinates(screenWidth, screenHeight, rect.x, rect.y, rect.width, rect.height,
+                        xLow_return, xHigh_return, yLow_return, yHigh_return);
 }

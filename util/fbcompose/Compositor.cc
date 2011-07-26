@@ -352,6 +352,7 @@ void Compositor::eventLoop() {
             for (size_t i = 0; i < m_screens.size(); i++) {
                 m_screens[i]->renderScreen();
             }
+            XSync(display(), False);
 
             fbLog_vDebug << m_screens.size() << " screen(s) available." << std::endl;
             for (size_t i = 0; i < m_screens.size(); i++) {

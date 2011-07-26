@@ -29,6 +29,7 @@
 #include "Exceptions.hh"
 #include "OpenGLUtility.hh"
 #include "OpenGLResources.hh"
+#include "OpenGLTexPartitioner.hh"
 
 #include <GL/glxew.h>
 #include <GL/glx.h>
@@ -58,17 +59,25 @@ namespace FbCompositor {
 
         //--- ACCESSORS --------------------------------------------------------
 
-        /** \returns an object, holding the window's contents as an OpenGL texture. */
-        OpenGL2DTexturePartitionPtr contentTexturePartition() const;
-
-        /** \returns an object, holding the window's shape as an OpenGL texture. */
-        OpenGL2DTexturePartitionPtr shapeTexturePartition() const;
-
-        /** \returns the number of contents' partitions. */
+        /** \returns the number of content partitions. */
         int partitionCount() const;
 
-        /** \returns an object, holding the window position buffer. */
-        std::vector<OpenGLBufferPtr> windowPosBuffer() const;
+
+        /** \returns the specified content texture partiton. */
+        const OpenGL2DTexturePtr contentTexturePartition(int id) const;
+
+        /** \returns the specified shape texture partition. */
+        const OpenGL2DTexturePtr shapeTexturePartition(int id) const;
+
+        /** \returns the adjacent borders of the given partition. */
+        unsigned int partitionBorders(int id) const;
+
+        /** \returns the array buffer, containing the position of the given partition. */
+        const OpenGLBufferPtr partitionPosBuffer(int id) const;
+
+
+        /** \returns the window's screen, cast into the correct class. */
+        const OpenGLScreen &openGLScreen() const;
 
 
         //--- WINDOW UPDATE FUNCTIONS ------------------------------------------
@@ -83,47 +92,60 @@ namespace FbCompositor {
         void updateShape();
 
         /** Updates the window position vertex array. */
-        void updateWindowPosArray();
+        void updateWindowPos();
 
 
     private :
         //--- RENDERING-RELATED VARIABLES --------------------------------------
 
         /** Window's content texture. */
-        OpenGL2DTexturePartitionPtr m_contentTexturePartition;
+        OpenGL2DTexturePartitionPtr m_contentTexPartition;
 
         /** Window's shape texture. */
-        OpenGL2DTexturePartitionPtr m_shapeTexturePartition;
-
-
-        /** Window position array. */
-        GLfloat m_windowPosArray[8];
+        OpenGL2DTexturePartitionPtr m_shapeTexPartition;
 
         /** Window position buffer holder. */
-        std::vector<OpenGLBufferPtr> m_windowPosBuffer;
+        std::vector<OpenGLBufferPtr> m_windowPosBuffers;
     };
 
 
     //--- INLINE FUNCTIONS -------------------------------------------------
 
-    // Returns the window's contents as an OpenGL texture.
-    inline OpenGL2DTexturePartitionPtr OpenGLWindow::contentTexturePartition() const {
-        return m_contentTexturePartition;
+    // Returns the specified content texture partiton.
+    inline const OpenGL2DTexturePtr OpenGLWindow::contentTexturePartition(int id) const {
+        if ((id < 0) || (id >= partitionCount())) {
+            throw IndexException("Out of bounds index in OpenGLWindow::contentTexturePartition.");
+        }
+        return m_contentTexPartition->partitions()[id].texture;
+    }
+
+    // Returns the adjacent borders of the given partition.
+    inline unsigned int OpenGLWindow::partitionBorders(int id) const {
+        if ((id < 0) || (id >= partitionCount())) {
+            throw IndexException("Out of bounds index in OpenGLWindow::partitionBorders.");
+        }
+        return m_contentTexPartition->partitions()[id].borders;
     }
 
     // Returns the number of contents' partitions.
     inline int OpenGLWindow::partitionCount() const {
-        return m_contentTexturePartition->partitions().size();
+        return m_contentTexPartition->partitions().size();
     }
 
-    // Returns an object, holding the window's shape as an OpenGL texture.
-    inline OpenGL2DTexturePartitionPtr OpenGLWindow::shapeTexturePartition() const {
-        return m_shapeTexturePartition;
+    // Returns the array buffer, containing the position of the given partition.
+    inline const OpenGLBufferPtr OpenGLWindow::partitionPosBuffer(int id) const {
+        if ((id < 0) || (id >= partitionCount())) {
+            throw IndexException("Out of bounds index in OpenGLWindow::partitionPosBuffer.");
+        }
+        return m_windowPosBuffers[id];
     }
 
-    // Returns the window position buffer.
-    inline std::vector<OpenGLBufferPtr> OpenGLWindow::windowPosBuffer() const {
-        return m_windowPosBuffer;
+    // Returns the specified shape texture partition.
+    inline const OpenGL2DTexturePtr OpenGLWindow::shapeTexturePartition(int id) const {
+        if ((id < 0) || (id >= partitionCount())) {
+            throw IndexException("Out of bounds index in OpenGLWindow::shapeTexturePartition.");
+        }
+        return m_shapeTexPartition->partitions()[id].texture;
     }
 }
 

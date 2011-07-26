@@ -26,6 +26,7 @@ fbcompose_opengl_SOURCES = \
 	util/fbcompose/OpenGLResources.hh util/fbcompose/OpenGLResources.cc \
 	util/fbcompose/OpenGLScreen.hh util/fbcompose/OpenGLScreen.cc \
 	util/fbcompose/OpenGLShaders.hh util/fbcompose/OpenGLShaders.cc \
+    util/fbcompose/OpenGLTexPartitioner.hh util/fbcompose/OpenGLTexPartitioner.cc \
 	util/fbcompose/OpenGLUtility.hh util/fbcompose/OpenGLUtility.cc \
 	util/fbcompose/OpenGLWindow.hh util/fbcompose/OpenGLWindow.cc
 else

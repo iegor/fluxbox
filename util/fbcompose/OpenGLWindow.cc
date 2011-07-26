@@ -43,17 +43,26 @@ using namespace FbCompositor;
 OpenGLWindow::OpenGLWindow(const OpenGLScreen &screen, Window windowXID) :
     BaseCompWindow((const BaseScreen&)(screen), windowXID) {
 
-    m_contentTexturePartition = new OpenGL2DTexturePartition(screen, true);
-    m_shapeTexturePartition = new OpenGL2DTexturePartition(screen, false);
+    m_contentTexPartition = new OpenGL2DTexturePartition(screen, true);
+    m_shapeTexPartition = new OpenGL2DTexturePartition(screen, false);
 
-    updateWindowPosArray();
+    updateWindowPos();
 }
 
 // Destructor.
 OpenGLWindow::~OpenGLWindow() { }
 
 
-//--- WINDOW UPDATE FUNCTIONS ------------------------------------------
+//--- ACCESSORS ----------------------------------------------------------------
+
+// Returns the window's screen, cast into the correct class.
+const OpenGLScreen &OpenGLWindow::openGLScreen() const {
+    static const OpenGLScreen &s = dynamic_cast<const OpenGLScreen&>(screen());
+    return s;
+}
+
+
+//--- WINDOW UPDATE FUNCTIONS --------------------------------------------------
 
 // Updates the window's contents.
 void OpenGLWindow::updateContents() {
@@ -63,7 +72,7 @@ void OpenGLWindow::updateContents() {
 
     updateContentPixmap();
     if (contentPixmap()) {
-        m_contentTexturePartition->setPixmap(contentPixmap(), false, realWidth(), realHeight(), depth());
+        m_contentTexPartition->setPixmap(contentPixmap(), false, realWidth(), realHeight(), depth());
     }
 
     if (clipShapeChanged()) {
@@ -76,7 +85,7 @@ void OpenGLWindow::updateContents() {
 // Updates window's geometry.
 void OpenGLWindow::updateGeometry(const XConfigureEvent &event) {
     BaseCompWindow::updateGeometry(event);
-    updateWindowPosArray();
+    updateWindowPos();
 }
 
 // Updates the window's shape.
@@ -99,39 +108,17 @@ void OpenGLWindow::updateShape() {
 
     XFreeGC(display(), gc);
 
-    m_shapeTexturePartition->setPixmap(shapePixmap, true, realWidth(), realHeight(), depth());
+    m_shapeTexPartition->setPixmap(shapePixmap, true, realWidth(), realHeight(), depth());
 }
 
 // Updates the window position vertex array.
-void OpenGLWindow::updateWindowPosArray() {
-    GLfloat xLow, xHigh, yLow, yHigh;
-
-    int maxTextureSize = ((const OpenGLScreen&)(screen())).maxTextureSize();
-
-    int unitWidth = ((realWidth() - 1) / maxTextureSize) + 1;
-    int unitHeight = ((realHeight() - 1) / maxTextureSize) + 1;
-    int totalUnits = unitWidth * unitHeight;
-
-    while ((size_t)(totalUnits) > m_windowPosBuffer.size()) {
-        m_windowPosBuffer.push_back(OpenGLBufferPtr(new OpenGLBuffer((const OpenGLScreen&)(screen()), GL_ARRAY_BUFFER)));
+void OpenGLWindow::updateWindowPos() {
+    std::vector<XRectangle> spacePart = partitionSpace(x(), y(), realWidth(), realHeight(), openGLScreen().maxTextureSize());
+    while (spacePart.size() > m_windowPosBuffers.size()) {
+        m_windowPosBuffers.push_back(OpenGLBufferPtr(new OpenGLBuffer(openGLScreen(), GL_ARRAY_BUFFER)));
     }
 
-    for (int i = 0; i < unitHeight; i++) {
-        for (int j = 0; j < unitWidth; j++) {
-            int idx = i * unitWidth + j;
-            int partX = x() + j * maxTextureSize;
-            int partY = y() + i * maxTextureSize;
-            int partHeight = std::min(int(realHeight() - i * maxTextureSize), maxTextureSize);
-            int partWidth = std::min(int(realWidth() - j * maxTextureSize), maxTextureSize);
-
-            toOpenGLCoordinates(screen().rootWindow().width(), screen().rootWindow().height(),
-                                partX, partY, partWidth, partHeight, &xLow, &xHigh, &yLow, &yHigh);
-            m_windowPosArray[0] = m_windowPosArray[4] = xLow;
-            m_windowPosArray[2] = m_windowPosArray[6] = xHigh;
-            m_windowPosArray[1] = m_windowPosArray[3] = yLow;
-            m_windowPosArray[5] = m_windowPosArray[7] = yHigh;
-            
-            m_windowPosBuffer[idx]->bufferData(sizeof(m_windowPosArray), (const GLvoid*)(m_windowPosArray), GL_STATIC_DRAW);
-        }
+    for (size_t i = 0; i < spacePart.size(); i++) {
+        m_windowPosBuffers[i]->bufferPosRectangle(screen().rootWindow().width(), screen().rootWindow().height(), spacePart[i]);
     }
 }

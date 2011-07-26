@@ -29,7 +29,7 @@
 #include "Exceptions.hh"
 #include "OpenGLPlugin.hh"
 #include "OpenGLResources.hh"
-#include "OpenGLShaders.hh"
+#include "OpenGLTexPartitioner.hh"
 #include "TickTracker.hh"
 
 #include "FbTk/FbString.hh"
@@ -107,7 +107,7 @@ namespace FbCompositor {
         void preReconfigureRectRenderActions(XRectangle reconfigureRect);
 
         /** Pre window rendering actions. */
-        void preWindowRenderActions(const OpenGLWindow &window);
+        void preWindowRenderActions(const OpenGLWindow &window, int partId);
 
 
         /** \returns the number of extra rendering jobs the plugin will do. */

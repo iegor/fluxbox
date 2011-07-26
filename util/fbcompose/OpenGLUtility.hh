@@ -25,10 +25,10 @@
 #define FBCOMPOSITOR_OPENGLUTILITY_HH
 
 
-#include "FbTk/RefCount.hh"
-
 #include <GL/glew.h>
 #include <GL/gl.h>
+
+#include <X11/Xlib.h>
 
 
 namespace FbCompositor {
@@ -37,7 +37,11 @@ namespace FbCompositor {
 
     /** Converts screen coordinates to OpenGL coordinates. */
     void toOpenGLCoordinates(int screenWidth, int screenHeight, int x, int y, int width, int height,
-                             GLfloat *xLow_gl, GLfloat *xHigh_gl, GLfloat *yLow_gl, GLfloat *yHigh_gl);
+                             GLfloat *xLow_return, GLfloat *xHigh_return, GLfloat *yLow_return, GLfloat *yHigh_return);
+
+    /** Converts screen coordinates to OpenGL coordinates. */
+    void toOpenGLCoordinates(int screenWidth, int screenHeight, XRectangle rect,
+                             GLfloat *xLow_return, GLfloat *xHigh_return, GLfloat *yLow_return, GLfloat *yHigh_return);
 
 }
 

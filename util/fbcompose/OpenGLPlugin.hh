@@ -115,10 +115,10 @@ namespace FbCompositor {
         virtual OpenGLRenderingJob extraPreWindowRenderJob(const OpenGLWindow &window);
 
         /** Pre window rendering actions. */
-        virtual void preWindowRenderActions(const OpenGLWindow &window);
+        virtual void preWindowRenderActions(const OpenGLWindow &window, int partId);
 
         /** Post window rendering actions. */
-        virtual void postWindowRenderActions(const OpenGLWindow &window);
+        virtual void postWindowRenderActions(const OpenGLWindow &window, int partId);
 
         /** Extra rendering job after window rendering. */
         virtual OpenGLRenderingJob extraPostWindowRenderJob(const OpenGLWindow &window);

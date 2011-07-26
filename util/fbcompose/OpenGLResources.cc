@@ -31,21 +31,18 @@
 using namespace FbCompositor;
 
 
-namespace {
-    //--- CONSTANTS ------------------------------------------------------------
+//--- CONSTANTS ----------------------------------------------------------------
 
-    // Attributes of the textures' GLX pixmaps.
-    static const int TEX_PIXMAP_ATTRIBUTES[] = {
+// Attributes of the textures' GLX pixmaps.
+const int TEX_PIXMAP_ATTRIBUTES[] = {
 #ifdef GLXEW_EXT_texture_from_pixmap
-        GLX_TEXTURE_TARGET_EXT, GLX_TEXTURE_2D_EXT,
-        GLX_TEXTURE_FORMAT_EXT, GLX_TEXTURE_FORMAT_RGBA_EXT,
-        None
+    GLX_TEXTURE_TARGET_EXT, GLX_TEXTURE_2D_EXT,
+    GLX_TEXTURE_FORMAT_EXT, GLX_TEXTURE_FORMAT_RGBA_EXT,
+    None
 #else
-        None
+    None
 #endif  // GLXEW_EXT_texture_from_pixmap
-    };
-
-}
+};
 
 
 //--- OPENGL BUFFER WRAPPER ----------------------------------------------------
@@ -56,7 +53,6 @@ namespace {
 OpenGLBuffer::OpenGLBuffer(const OpenGLScreen &screen, GLenum targetBuffer) :
     m_screen(screen) {
 
-    m_display = (Display*)(screen.display());
     m_target = targetBuffer;
 
     glGenBuffers(1, &m_buffer);
@@ -67,6 +63,22 @@ OpenGLBuffer::~OpenGLBuffer() {
     glDeleteBuffers(1, &m_buffer);
 }
 
+//------- MUTATORS -------------------------------------------------------------
+
+// Sets the buffer's contents to be the rectangle's coordinates on the screen.
+void OpenGLBuffer::bufferPosRectangle(int screenWidth, int screenHeight, XRectangle rect) {
+    static GLfloat xLow, xHigh, yLow, yHigh;
+    static GLfloat tempPosArray[8];
+
+    toOpenGLCoordinates(screenWidth, screenHeight, rect, &xLow, &xHigh, &yLow, &yHigh);
+
+    tempPosArray[0] = tempPosArray[4] = xLow;
+    tempPosArray[2] = tempPosArray[6] = xHigh;
+    tempPosArray[1] = tempPosArray[3] = yLow;
+    tempPosArray[5] = tempPosArray[7] = yHigh;
+    
+    bufferData(sizeof(tempPosArray), (const GLvoid*)(tempPosArray), GL_STATIC_DRAW);
+}
 
 //--- OPENGL TEXTURE WRAPPER ---------------------------------------------------
 
@@ -158,91 +170,4 @@ void OpenGL2DTexture::setPixmap(Pixmap pixmap, bool managePixmap, int width, int
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)(&(image->data[0])));
         XDestroyImage(image);
     }
-}
-
-
-//--- OPENGL TEXTURE PARTITION -------------------------------------------------
-
-//------- CONSTRUCTORS AND DESTRUCTORS -----------------------------------------
-
-// Constructor.
-OpenGL2DTexturePartition::OpenGL2DTexturePartition(const OpenGLScreen &screen, bool swizzleAlphaToOne) :
-    m_screen(screen) {
-
-    m_display = (Display*)(screen.display());
-    m_maxTextureSize = screen.maxTextureSize();
-    m_pixmap = None;
-    m_swizzleAlphaToOne = swizzleAlphaToOne;
-
-    m_fullHeight = m_fullWidth = m_unitHeight = m_unitWidth = 0;
-}
-
-// Destructor.
-OpenGL2DTexturePartition::~OpenGL2DTexturePartition() { }
-
-
-//------- MUTATORS -------------------------------------------------------------
-
-// Sets the texture's contents to the given pixmap.
-void OpenGL2DTexturePartition::setPixmap(Pixmap pixmap, bool managePixmap, int width, int height, int depth, bool forceDirect) {
-    // Handle the pixmap and its GC.
-    if (m_pixmap) {
-        XFreePixmap(m_display, m_pixmap);
-        m_pixmap = None;
-    }
-    if (managePixmap) {
-        m_pixmap = pixmap;
-    }
-    GC gc = XCreateGC(m_display, pixmap, 0, NULL);
-
-    // Set partition's dimensions.
-    m_fullHeight = height;
-    m_fullWidth = width;
-    m_unitHeight = ((height - 1) / m_maxTextureSize) + 1;
-    m_unitWidth = ((width - 1) / m_maxTextureSize) + 1;
-
-    int totalUnits = m_unitHeight * m_unitWidth;
-
-    // Adjust number of stored partitions.
-    while ((size_t)(totalUnits) > m_partitions.size()) {
-        TexturePart partition;
-        partition.borders = 0;
-        partition.texture = new OpenGL2DTexture(m_screen, m_swizzleAlphaToOne);
-        m_partitions.push_back(partition);
-    }
-    while ((size_t)(totalUnits) < m_partitions.size()) {
-        m_partitions.pop_back();
-    }
-
-    // Create partitions.
-    if ((totalUnits == 1) && !forceDirect) {
-        m_partitions[0].borders = BORDER_NORTH | BORDER_EAST | BORDER_SOUTH | BORDER_WEST;
-        m_partitions[0].texture->setPixmap(pixmap, true, m_fullWidth, m_fullHeight, false);
-    } else {
-        for (int i = 0; i < m_unitHeight; i++) {
-            for (int j = 0; j < m_unitWidth; j++) {
-                // Partition's index and extents.
-                int idx = partitionIndex(j, i);
-                int partHeight = std::min(m_fullHeight - i * m_maxTextureSize, m_maxTextureSize);
-                int partWidth = std::min(m_fullWidth - j * m_maxTextureSize, m_maxTextureSize);
-
-                // Create partition's pixmap.
-                Pixmap partPixmap = XCreatePixmap(m_display, m_screen.rootWindow().window(), partWidth, partHeight, depth);
-                XCopyArea(m_display, pixmap, partPixmap, gc, j * m_maxTextureSize, i * m_maxTextureSize, partWidth, partHeight, 0, 0);
-
-                // Fill adjacent border field.
-                int borders = 0;
-                borders |= ((i == 0) ? BORDER_NORTH : 0);
-                borders |= ((j == 0) ? BORDER_WEST : 0);
-                borders |= ((i == (m_unitHeight - 1)) ? BORDER_SOUTH : 0);
-                borders |= ((j == (m_unitWidth - 1)) ? BORDER_EAST : 0);
-
-                // Set up the partition.
-                m_partitions[idx].borders = borders;
-                m_partitions[idx].texture->setPixmap(partPixmap, true, partWidth, partHeight, forceDirect);
-            }
-        }
-    }
-
-    XFreeGC(m_display, gc);
 }

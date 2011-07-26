@@ -379,7 +379,7 @@ void OpenGLScreen::updateOnRootWindowResize() {
 
     std::list<BaseCompWindow*>::const_iterator it = allWindows().begin();
     while (it != allWindows().end()) {
-        (dynamic_cast<OpenGLWindow*>(*it))->updateWindowPosArray();
+        (dynamic_cast<OpenGLWindow*>(*it))->updateWindowPos();
         ++it;
     }
 
@@ -521,17 +521,17 @@ void OpenGLScreen::renderWindow(OpenGLWindow &window) {
     }
 
     // Render it.
-    forEachPlugin(i, plugin) {
-        plugin->preWindowRenderActions(window);
-    }
     for (int i = 0; i < window.partitionCount(); i++) {
-        render(GL_TRIANGLE_STRIP, window.windowPosBuffer()[i],
-               m_defaultTexCoordBuffer, window.contentTexturePartition()->partitions()[i].texture,
-               m_defaultTexCoordBuffer, window.shapeTexturePartition()->partitions()[i].texture,
+        forEachPlugin(j, plugin) {
+            plugin->preWindowRenderActions(window, i);
+        }
+        render(GL_TRIANGLE_STRIP, window.partitionPosBuffer(i),
+               m_defaultTexCoordBuffer, window.contentTexturePartition(i),
+               m_defaultTexCoordBuffer, window.shapeTexturePartition(i),
                m_defaultElementBuffer, 4, window.alpha() / 255.0);
-    }
-    forEachPlugin(i, plugin) {
-        plugin->postWindowRenderActions(window);
+        forEachPlugin(j, plugin) {
+            plugin->postWindowRenderActions(window, i);
+        }
     }
 
     // Extra rendering jobs after a window is drawn.

@@ -105,6 +105,17 @@ namespace FbCompositor {
 
 
     /**
+     * This exception is thrown whenever an index-related error condition
+     * occurs.
+     */
+    class IndexException : public RuntimeException {
+    public:
+        /** Public constructor. */
+        IndexException(FbTk::FbString errorMessage) :
+            RuntimeException(errorMessage) {}
+    };
+
+    /**
      * This exception is thrown whenever an error occurs while attempting to
      * obtain current system time.
      */

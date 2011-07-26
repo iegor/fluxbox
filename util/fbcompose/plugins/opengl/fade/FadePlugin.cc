@@ -148,12 +148,12 @@ void FadePlugin::windowUnmapped(const BaseCompWindow &window) {
     for (int i = 0; i < glWindow.partitionCount(); i++) {
         NegFadeData fade;
 
-        fade.contentTexture = glWindow.contentTexturePartition()->partitions()[i].texture;
+        fade.contentTexture = glWindow.contentTexturePartition(i);
         fade.fadeAlpha = fadeAlpha;
         fade.origAlpha = glWindow.alpha();
-        fade.shapeTexture = glWindow.shapeTexturePartition()->partitions()[i].texture;
+        fade.shapeTexture = glWindow.shapeTexturePartition(i);
         fade.windowId = glWindow.window();
-        fade.windowPosBuffer = glWindow.windowPosBuffer()[i];
+        fade.windowPosBuffer = glWindow.partitionPosBuffer(i);
 
         fade.timer.setTickSize(250000 / 255);
         fade.timer.start();
@@ -176,7 +176,7 @@ void FadePlugin::preReconfigureRectRenderActions(XRectangle /*reconfigureRect*/)
 }
 
 // Pre window rendering actions.
-void FadePlugin::preWindowRenderActions(const OpenGLWindow &window) {
+void FadePlugin::preWindowRenderActions(const OpenGLWindow &window, int /*partId*/) {
     std::map<Window, PosFadeData>::iterator it = m_positiveFades.find(window.window());
     if (it != m_positiveFades.end()) {
         try {

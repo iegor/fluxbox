@@ -87,10 +87,10 @@ OpenGLRenderingJob OpenGLPlugin::extraPreWindowRenderJob(const OpenGLWindow &/*w
 }
 
 // Pre window rendering actions.
-void OpenGLPlugin::preWindowRenderActions(const OpenGLWindow &/*window*/) { }
+void OpenGLPlugin::preWindowRenderActions(const OpenGLWindow &/*window*/, int /*partId*/) { }
 
 // Post window rendering actions.
-void OpenGLPlugin::postWindowRenderActions(const OpenGLWindow &/*window*/) { }
+void OpenGLPlugin::postWindowRenderActions(const OpenGLWindow &/*window*/, int /*partId*/) { }
 
 // Extra rendering job after window rendering.
 OpenGLRenderingJob OpenGLPlugin::extraPostWindowRenderJob(const OpenGLWindow &/*window*/) {
