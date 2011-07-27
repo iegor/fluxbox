@@ -103,10 +103,6 @@ void BaseCompWindow::setUnmapped() {
 
 // Update the window's contents.
 void BaseCompWindow::updateContents() {
-    if (isWindowBad()) {
-        return;
-    }
-
     updateContentPixmap();
     if (m_clipShapeChanged) {
         updateShape();
@@ -174,40 +170,20 @@ void BaseCompWindow::updateContentPixmap() {
     XDamageSubtract(display(), m_damage, None, None);
 #endif  // HAVE_XDAMAGE
 
-    // You may sometimes get a cluster of X errors, which begin with a BadMatch
-    // in XCompositeNameWindowPixmap in this function. That error is raised
-    // whenever XCompositeNameWindowPixmap tries to access the contents of an
-    // unmapped window.
-    //
-    // Why does the compositor try to access contents of an unmapped window?
-    // The reason is the way the X server sends events to the client
-    // applications. If a window is unmapped, the client will get a damage
-    // event, followed by an unmap event. Sometimes there is a gap between the
-    // two and sometimes the compositor will attempt to redraw the screen in
-    // that gap. Since at that point the window is unmapped, but the compositor
-    // is not aware of it, the errors are thrown.
-    //
-    // Why not just check for window's map state using XGetWindowAttributes?
-    // Well, I tried it and this error condition *still* occurs, although not
-    // as often. On the plus side, this only happens when several windows are
-    // being mapped/unmapped in quick succession (going through the menu bar,
-    // for example), so it shouldn't be overly noticeable. It can probably be
-    // fixed properly, but for the time being it is too much trouble for its
-    // worth. You are welcome to give this issue a shot, if you want to.
-    //
-    // TODO: Fix this.
+    XGrabServer(display());
 
-    m_contentPixmap = None;
-    m_contentPixmap = XCompositeNameWindowPixmap(display(), window());
-}
+    XWindowAttributes xwa;
+    if (XGetWindowAttributes(display(), window(), &xwa)) {
+        if (xwa.map_state == IsViewable) {
+            if (m_contentPixmap) {
+                XFreePixmap(display(), m_contentPixmap);
+                m_contentPixmap = None;
+            }
+            m_contentPixmap = XCompositeNameWindowPixmap(display(), window());
+        }
+    }
 
-
-//--- OTHER FUNCTIONS --------------------------------------------------
-
-// Checks whether the current window is bad.
-bool BaseCompWindow::isWindowBad() {
-    static XWindowAttributes xwa;
-    return (!XGetWindowAttributes(display(), window(), &xwa));
+    XUngrabServer(display());
 }
 
 

@@ -66,10 +66,6 @@ const OpenGLScreen &OpenGLWindow::openGLScreen() const {
 
 // Updates the window's contents.
 void OpenGLWindow::updateContents() {
-    if (isWindowBad()) {
-        return;
-    }
-
     updateContentPixmap();
     if (contentPixmap()) {
         m_contentTexPartition->setPixmap(contentPixmap(), false, realWidth(), realHeight(), depth());

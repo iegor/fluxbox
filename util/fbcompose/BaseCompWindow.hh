@@ -186,12 +186,6 @@ namespace FbCompositor {
         virtual void updateShape();
 
 
-        //--- OTHER FUNCTIONS --------------------------------------------------
-
-        /** Checks whether the current window is bad. */
-        bool isWindowBad();
-
-
     private:
         //--- CONSTRUCTORS -----------------------------------------------------
 

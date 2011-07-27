@@ -52,10 +52,6 @@ XRenderWindow::~XRenderWindow() { }
 
 // Update the window's contents.
 void XRenderWindow::updateContents() {
-    if (isWindowBad()) {
-        return;
-    }
-
     updateContentPixmap();
     if (contentPixmap()) {
         XRenderPictureAttributes pa;
