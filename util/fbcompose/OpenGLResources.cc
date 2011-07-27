@@ -133,18 +133,20 @@ OpenGL2DTexture::~OpenGL2DTexture() {
 void OpenGL2DTexture::setPixmap(Pixmap pixmap, bool managePixmap, int width, int height, bool forceDirect) {
     bind();
 
+    if (m_pixmap != pixmap) {
 #ifdef GLXEW_EXT_texture_from_pixmap
-    if ((m_pixmap != pixmap) && m_glxPixmap) {
-        glXReleaseTexImageEXT(m_display, m_glxPixmap, GLX_BACK_LEFT_EXT);
-        glXDestroyPixmap(m_display, m_glxPixmap);
-        m_glxPixmap = 0;
-    }
+        if (m_glxPixmap) {
+            glXReleaseTexImageEXT(m_display, m_glxPixmap, GLX_BACK_LEFT_EXT);
+            glXDestroyPixmap(m_display, m_glxPixmap);
+            m_glxPixmap = 0;
+        }
 #endif  // GLXEW_EXT_texture_from_pixmap
 
-    if (m_pixmapManaged && m_pixmap) {
-        XFreePixmap(m_display, m_pixmap);
+        if (m_pixmapManaged && m_pixmap) {
+            XFreePixmap(m_display, m_pixmap);
+            m_pixmap = pixmap;
+        }
     }
-    m_pixmap = pixmap;
 
     m_height = height;
     m_pixmapManaged = managePixmap;

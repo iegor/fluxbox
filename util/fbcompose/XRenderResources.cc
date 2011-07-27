@@ -55,26 +55,32 @@ XRenderPicture::~XRenderPicture() {
 
 // Associate the picture with the given pixmap.
 void XRenderPicture::setPixmap(Pixmap pixmap, bool managePixmap, XRenderPictureAttributes pa, long paMask) {
-    freeResources();
+    if (m_drawable != pixmap) {
+        freeResources();
 
-    m_drawable = pixmap;
-    m_gc = XCreateGC(m_display, pixmap, 0, NULL);
+        m_drawable = pixmap;
+        m_gc = XCreateGC(m_display, pixmap, 0, NULL);
+
+        m_picture = XRenderCreatePicture(m_display, pixmap, m_pictFormat, paMask, &pa);
+        XRenderSetPictureFilter(m_display, m_picture, m_pictFilter, NULL, 0);
+    }
+
     m_resourcesManaged = managePixmap;
-
-    m_picture = XRenderCreatePicture(m_display, pixmap, m_pictFormat, paMask, &pa);
-    XRenderSetPictureFilter(m_display, m_picture, m_pictFilter, NULL, 0);
 }
 
 // Associate the picture with the given window.
 void XRenderPicture::setWindow(Window window, XRenderPictureAttributes pa, long paMask) {
-    freeResources();
+    if (m_drawable != window) {
+        freeResources();
 
-    m_drawable = window;
-    m_gc = XCreateGC(m_display, window, 0, NULL);
+        m_drawable = window;
+        m_gc = XCreateGC(m_display, window, 0, NULL);
+
+        m_picture = XRenderCreatePicture(m_display, window, m_pictFormat, paMask, &pa);
+        XRenderSetPictureFilter(m_display, m_picture, m_pictFilter, NULL, 0);
+    }
+
     m_resourcesManaged = false;
-
-    m_picture = XRenderCreatePicture(m_display, window, m_pictFormat, paMask, &pa);
-    XRenderSetPictureFilter(m_display, m_picture, m_pictFilter, NULL, 0);
 }
 
 
@@ -91,10 +97,8 @@ void XRenderPicture::freeResources() {
         m_gc = None;
     }
 
-    if (m_resourcesManaged) {
-        if (m_drawable) {
-            XFreePixmap(m_display, m_drawable);     // Windows will never be managed.
-            m_drawable = None;
-        }
+    if (m_resourcesManaged && m_drawable) {
+        XFreePixmap(m_display, m_drawable);     // Windows will never be managed.
+        m_drawable = None;
     }
 }
