@@ -22,6 +22,7 @@
 
 
 #include "CompositorConfig.hh"
+
 #include "Logging.hh"
 
 #ifdef USE_XRENDER_COMPOSITING
@@ -31,6 +32,7 @@
 #include <algorithm>
 #include <iostream>
 #include <sstream>
+
 #include <cstdlib>
 
 using namespace FbCompositor;
@@ -208,7 +210,7 @@ void CompositorConfig::processArguments() {
         } else if (loggingLevel == 2) {
             Logger::setLoggingLevel(LOG_LEVEL_DEBUG);
         } else if (loggingLevel >= 3) {
-            Logger::setLoggingLevel(LOG_LEVEL_VERBOSE_DEBUG);
+            Logger::setLoggingLevel(LOG_LEVEL_DEBUG_DUMP);
         }
     }
 }

@@ -24,7 +24,9 @@
 #ifndef FBCOMPOSITOR_COMPOSITORCONFIG_HH
 #define FBCOMPOSITOR_COMPOSITORCONFIG_HH
 
-#include "config.h"
+#ifdef HAVE_CONFIG_H
+    #include "config.h"
+#endif  // HAVE_CONFIG_H
 
 #include "Enumerations.hh"
 #include "Exceptions.hh"
@@ -38,10 +40,6 @@
 
 
 namespace FbCompositor {
-
-    class CompositorConfig;
-    class ConfigException;
-
 
     /**
      * Handles the compositor's configuration.
@@ -75,9 +73,6 @@ namespace FbCompositor {
         /** \returns the refresh rate. */
         int framesPerSecond() const;
 
-        /** \returns plugins and their arguments. */
-        const std::vector< std::pair< FbTk::FbString, std::vector<FbTk::FbString> > > &plugins() const;
-
         /** \returns the selected rendering mode. */
         RenderingMode renderingMode() const;
 
@@ -91,6 +86,16 @@ namespace FbCompositor {
         /** \returns the XRender picture filter. */
         const char *xRenderPictFilter() const;
 #endif  // USE_XRENDER_COMPOSITING
+
+
+        /** \returns the number of available plugins. */
+        int pluginCount() const;
+
+        /** \returns the name of the given plugin. */
+        const FbTk::FbString &pluginName(int pluginId) const;
+
+        /** \returns the arguments to the given plugin. */
+        const std::vector<FbTk::FbString> &pluginArgs(int pluginId) const;
 
 
         //--- CONVENIENCE FUNCTIONS --------------------------------------------
@@ -162,9 +167,25 @@ namespace FbCompositor {
         return m_framesPerSecond;
     }
 
-    // Returns plugins and their arguments.
-    inline const std::vector< std::pair< FbTk::FbString, std::vector<FbTk::FbString> > > &CompositorConfig::plugins() const {
-        return m_plugins;
+    // Returns the arguments to the given plugin.
+    inline const std::vector<FbTk::FbString> &CompositorConfig::pluginArgs(int pluginId) const {
+        if ((pluginId < 0) || (pluginId >= pluginCount())) {
+            throw IndexException("Out of bounds index in CompositorConfig::pluginArgs.");
+        }
+        return m_plugins[pluginId].second;
+    }
+
+    // Returns the number of available plugins.
+    inline int CompositorConfig::pluginCount() const {
+        return (int)(m_plugins.size());
+    }
+
+    // Returns the name of the given plugin.
+    inline const FbTk::FbString &CompositorConfig::pluginName(int pluginId) const {
+        if ((pluginId < 0) || (pluginId >= pluginCount())) {
+            throw IndexException("Out of bounds index in CompositorConfig::pluginName.");
+        }
+        return m_plugins[pluginId].first;
     }
 
     // Returns the rendering mode.

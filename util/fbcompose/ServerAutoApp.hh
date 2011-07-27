@@ -58,12 +58,6 @@ namespace FbCompositor {
 
 
     private:
-        //--- CONSTANTS --------------------------------------------------------
-
-        /** How many microseconds to sleep before restarting the event loop. */
-        static const int SLEEP_TIME;
-
-
         //--- CONSTRUCTORS -----------------------------------------------------
 
         /** Copy constructor. */

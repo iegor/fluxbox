@@ -69,7 +69,6 @@ namespace FbCompositor {
         } else {
             os << "Unknown";
         }
-
         return os;
     }
 

@@ -24,10 +24,7 @@
 #ifndef FBCOMPOSITOR_BASEPLUGIN_HH
 #define FBCOMPOSITOR_BASEPLUGIN_HH
 
-#include "config.h"
-
 #include "Enumerations.hh"
-#include "Exceptions.hh"
 
 #include "FbTk/FbString.hh"
 
@@ -39,9 +36,7 @@
 namespace FbCompositor {
 
     class BaseCompWindow;
-    class BasePlugin;
     class BaseScreen;
-    class InitException;
 
 
     /**
@@ -117,6 +112,9 @@ namespace FbCompositor {
 
         /** Copy constructor. */
         BasePlugin(const BasePlugin&);
+
+        /** Assignment operator. */
+        BasePlugin &operator=(const BasePlugin&);
 
 
         //--- INTERNAL VARIABLES -----------------------------------------------

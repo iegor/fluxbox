@@ -21,6 +21,10 @@
 // THE SOFTWARE.
 
 
+#ifdef HAVE_CONFIG_H
+    #include "config.h"
+#endif  // HAVE_CONFIG_H
+
 #include "ServerAutoApp.hh"
 
 #include "Atoms.hh"
@@ -37,8 +41,8 @@
 #else
 #ifdef HAVE_TIME_H
     #include <time.h>
-#endif
-#endif
+#endif  // HAVE_TIME_H
+#endif  // HAVE_CTIME
 
 using namespace FbCompositor;
 
@@ -46,7 +50,7 @@ using namespace FbCompositor;
 //--- CONSTANTS ----------------------------------------------------------------
 
 // How many microseconds to sleep before restarting the event loop.
-const int ServerAutoApp::SLEEP_TIME = 10000;
+const int SLEEP_TIME = 10000;
 
 
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
@@ -85,7 +89,7 @@ void ServerAutoApp::initComposite() {
     }
     if ((majorVer < 0) || ((majorVer == 0) && (minorVer < 1))) {
         std::stringstream ss;
-        ss << "Unsupported Composite extension version (required >=0.1, got "
+        ss << "Unsupported Composite extension version found (required >=0.1, got "
            << majorVer << "." << minorVer << ").";
         throw InitException(ss.str());
     }
@@ -94,6 +98,7 @@ void ServerAutoApp::initComposite() {
 // Prepare screens.
 void ServerAutoApp::initScreens() {
     int screenCount = XScreenCount(display());
+
     for (int i = 0; i < screenCount; i++) {
         XCompositeRedirectSubwindows(display(), XRootWindow(display(), i), CompositeRedirectAutomatic);
 

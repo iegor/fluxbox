@@ -91,12 +91,6 @@ namespace FbCompositor {
 
 
     private:
-        //--- CONSTANTS --------------------------------------------------------
-
-        /** The accuracy of the timer (1.0 = 1 second). */
-        static const double EPSILON;
-
-
         //--- INTERNAL FUNTIONS ------------------------------------------------
 
         /** \returns the difference in time between two timevals. */

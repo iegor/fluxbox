@@ -21,8 +21,14 @@
 // THE SOFTWARE.
 
 
+#ifdef HAVE_CONFIG_H
+    #include "config.h"
+#endif  // HAVE_CONFIG_H
+
 #include "BaseScreen.hh"
 
+#include "Atoms.hh"
+#include "BasePlugin.hh"
 #include "CompositorConfig.hh"
 #include "Logging.hh"
 #include "Utility.hh"
@@ -66,7 +72,6 @@ BaseScreen::BaseScreen(int screenNumber, PluginType pluginType, const Compositor
     m_screenNumber(screenNumber),
     m_rootWindow(*this, XRootWindow(m_display, m_screenNumber)) {
 
-    // Set up properties.
     m_activeWindowXID = None;
     m_currentWorkspace = m_rootWindow.singlePropertyValue<long>(Atoms::workspaceAtom(), 0);
     m_workspaceCount = m_rootWindow.singlePropertyValue<long>(Atoms::workspaceCountAtom(), 1);
@@ -76,19 +81,16 @@ BaseScreen::BaseScreen(int screenNumber, PluginType pluginType, const Compositor
     m_wmSetRootWindowPixmap = true;
     updateRootWindowPixmap();
 
-    // Set up plugins.
-    for(size_t i = 0; i < config.plugins().size(); i++) {
-        m_pluginManager.createPluginObject(config.plugins()[i].first, config.plugins()[i].second);
+    for(int i = 0; i < config.pluginCount(); i++) {
+        m_pluginManager.createPluginObject(config.pluginName(i), config.pluginArgs(i));
     }
 
-    // Set up root window.
     long eventMask = PropertyChangeMask | StructureNotifyMask | SubstructureNotifyMask;
     m_rootWindow.setEventMask(eventMask);
 
     XCompositeRedirectSubwindows(m_display, m_rootWindow.window(), CompositeRedirectManual);
 
-    // Initial head init.
-    initHeads(Heads_One);
+    updateHeads(Heads_One);
 }
 
 // Destructor.
@@ -102,35 +104,6 @@ BaseScreen::~BaseScreen() {
 
 
 //--- OTHER INITIALIZATION -----------------------------------------------------
-
-// Initializes heads on the current screen.
-void BaseScreen::initHeads(HeadMode headMode) {
-    m_heads.clear();
-
-#ifdef XINERAMA
-    if (headMode == Heads_Xinerama) {
-        int nHeads;
-        XineramaScreenInfo *xHeads = XineramaQueryScreens(display(), &nHeads);  // Are the screens in order?
-
-        m_heads.reserve(nHeads);
-        for (int i = 0; i < nHeads; i++) {
-            XRectangle h = { xHeads[i].x_org, xHeads[i].y_org, xHeads[i].width, xHeads[i].height };
-            m_heads.push_back(h);
-        }
-
-        if (xHeads) {
-            XFree(xHeads);
-        }
-    } else
-#endif  // XINERAMA
-
-    if (headMode == Heads_One) {
-        XRectangle h = { 0, 0, rootWindow().width(), rootWindow().height() };
-        m_heads.push_back(h);
-    } else {
-        throw InitException("Unknown screen head mode given.");
-    }
-}
 
 // Initializes all of the windows on the screen.
 void BaseScreen::initWindows() {
@@ -191,17 +164,17 @@ void BaseScreen::createWindow(Window window) {
             throw WindowException(ss.str());
         }
 
-        if (newWindow->depth() == 0) {
-            delete newWindow;
-            return;     // If the window is already destroyed.
-        }
-
         newWindow->setEventMask(PropertyChangeMask);
         m_windows.push_back(newWindow);
 
+        if (newWindow->depth() == 0) {      // If the window is already destroyed, do not render it.
+            newWindow->setIgnored(true);
+        }
         if (isWindowIgnored(window)) {
             newWindow->setIgnored(true);
-        } else {
+        } 
+        
+        if (!newWindow->isIgnored()) {
             BasePlugin *plugin = NULL;
             forEachPlugin(i, plugin) {
                 plugin->windowCreated(*newWindow);
@@ -276,7 +249,6 @@ void BaseScreen::reconfigureWindow(const XConfigureEvent &event) {
         forEachPlugin(i, plugin) {
             plugin->windowReconfigured(m_rootWindow);
         }
-
         return;
     }
 
@@ -347,9 +319,9 @@ void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
         } else if (property == Atoms::reconfigureRectAtom()) {
             updateReconfigureRect();
         } else if (property == Atoms::workspaceAtom()) {
-            m_currentWorkspace = m_rootWindow.singlePropertyValue<long>(Atoms::workspaceAtom(), 0);
+            updateCurrentWorkspace();
         } else if (property == Atoms::workspaceCountAtom()) {
-            m_workspaceCount = m_rootWindow.singlePropertyValue<long>(Atoms::workspaceCountAtom(), 1);
+            updateWorkspaceCount();
         }
 
         std::vector<Atom> rootPixmapAtoms = Atoms::rootPixmapAtoms();
@@ -387,7 +359,7 @@ void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
 
 
 // Marks a particular window as ignored.
-void BaseScreen::addWindowToIgnoreList(Window window) {
+void BaseScreen::ignoreWindow(Window window) {
     if (isWindowIgnored(window)) {
         return;
     }
@@ -412,6 +384,35 @@ bool BaseScreen::isWindowManaged(Window window) {
 
 
 //--- SCREEN MANIPULATION ------------------------------------------------------
+
+// Reconfigure heads on the current screen.
+void BaseScreen::updateHeads(HeadMode headMode) {
+    m_heads.clear();
+
+#ifdef XINERAMA
+    if (headMode == Heads_Xinerama) {
+        int nHeads;
+        XineramaScreenInfo *xHeads = XineramaQueryScreens(display(), &nHeads);
+
+        m_heads.reserve(nHeads);
+        for (int i = 0; i < nHeads; i++) {
+            XRectangle head = { xHeads[i].x_org, xHeads[i].y_org, xHeads[i].width, xHeads[i].height };
+            m_heads.push_back(head);
+        }
+
+        if (xHeads) {
+            XFree(xHeads);
+        }
+    } else
+#endif  // XINERAMA
+
+    if (headMode == Heads_One) {
+        XRectangle head = { 0, 0, rootWindow().width(), rootWindow().height() };
+        m_heads.push_back(head);
+    } else {
+        throw InitException("Unknown screen head mode given.");
+    }
+}
 
 // Notifies the screen of the background change.
 void BaseScreen::setRootPixmapChanged() {
@@ -449,6 +450,11 @@ void BaseScreen::updateActiveWindow() {
     }
 }
 
+// Update the current workspace index.
+void BaseScreen::updateCurrentWorkspace() {
+    m_currentWorkspace = m_rootWindow.singlePropertyValue<long>(Atoms::workspaceAtom(), 0);
+}
+
 // Update stored reconfigure rectangle.
 void BaseScreen::updateReconfigureRect() {
     std::vector<long> data = m_rootWindow.propertyValue<long>(Atoms::reconfigureRectAtom());
@@ -483,6 +489,11 @@ void BaseScreen::updateRootWindowPixmap(Pixmap newPixmap) {
                                                rootWindow().height(), 0x00000000);
         m_wmSetRootWindowPixmap = false;
     }
+}
+
+// Update the number of workspaces.
+void BaseScreen::updateWorkspaceCount() {
+    m_workspaceCount = m_rootWindow.singlePropertyValue<long>(Atoms::workspaceCountAtom(), 1);
 }
 
 

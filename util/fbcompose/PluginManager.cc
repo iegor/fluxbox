@@ -21,8 +21,15 @@
 // THE SOFTWARE.
 
 
+#ifdef HAVE_CONFIG_H
+    #include "config.h"
+#endif  // HAVE_CONFIG_H
+
 #include "PluginManager.hh"
 
+#include "BasePlugin.hh"
+#include "BaseScreen.hh"
+#include "Exceptions.hh"
 #include "Logging.hh"
 
 #include <algorithm>
@@ -44,7 +51,7 @@ PluginManager::PluginManager(PluginType pluginType, const BaseScreen &screen) :
 // Destructor.
 PluginManager::~PluginManager() {
     for (size_t i = 0; i < m_pluginObjects.size(); i++) {
-        delete m_pluginObjects[i];      // Let's hope delete is not overriden. TODO: Fix.
+        delete m_pluginObjects[i];
     }
 
     std::map<FbTk::FbString, PluginLibData>::iterator it = m_pluginLibs.begin();
@@ -91,17 +98,17 @@ void PluginManager::loadPlugin(FbTk::FbString name) {
     }
     if (!handle) {
         std::stringstream ss;
-        ss << "Could not find/load plugin " << name << ".";
+        ss << "Could not find/load plugin \"" << name << "\".";
         throw PluginException(ss.str());
     }
 
-    // Check for the correct plugin type
+    // Check for the correct plugin type.
     objUnion.voidPtr = getLibraryObject(handle, "pluginType", name.c_str(), "type function");
     PluginTypeFunction typeFunc = objUnion.pluginTypeFunc;
 
     if ((*(typeFunc))() != m_pluginType) {
         std::stringstream ss;
-        ss << "Plugin " << name << " is of the wrong type.";
+        ss << "Plugin \"" << name << "\" is of the wrong type.";
         throw PluginException(ss.str());
     }
 
@@ -120,7 +127,7 @@ void PluginManager::unloadPlugin(FbTk::FbString name) {
 
     if (it == m_pluginLibs.end()) {
         std::stringstream ss;
-        ss << "Plugin " << name << " is not loaded (unloadPlugin).";
+        ss << "Plugin \"" << name << "\" is not loaded (unloadPlugin).";
         throw PluginException(ss.str());
     } else {
         unloadPlugin(it);
@@ -173,7 +180,7 @@ void *PluginManager::getLibraryObject(void *handle, const char *objectName, cons
     if (error) {
         dlclose(handle);    // TODO: Should this be done here?
         std::stringstream ss;
-        ss << "Error in loading " << verboseObjectName << " for " << pluginName << " plugin: " << error;
+        ss << "Error in loading " << verboseObjectName << " for \"" << pluginName << "\" plugin: " << error;
         throw PluginException(ss.str());
     } else {
         return rawObject;

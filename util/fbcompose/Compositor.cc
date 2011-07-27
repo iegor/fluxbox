@@ -27,6 +27,7 @@
 
 #include "Compositor.hh"
 
+#include "Atoms.hh"
 #include "BaseScreen.hh"
 #include "CompositorConfig.hh"
 #include "Logging.hh"
@@ -125,7 +126,7 @@ Compositor::Compositor(const CompositorConfig &config) :
             break;
         }
 
-        m_screens[i]->addWindowToIgnoreList(cmSelectionOwner);
+        m_screens[i]->ignoreWindow(cmSelectionOwner);
     }
 
     initHeads();
@@ -254,7 +255,7 @@ void Compositor::initHeads() {
 #endif  // XINERAMA
 
     for (size_t i = 0; i < m_screens.size(); i++) {
-        m_screens[i]->initHeads(headMode);
+        m_screens[i]->updateHeads(headMode);
     }
 }
 
@@ -357,11 +358,11 @@ void Compositor::eventLoop() {
             }
             XSync(display(), False);
 
-            fbLog_vDebug << m_screens.size() << " screen(s) available." << std::endl;
+            fbLog_debugDump << m_screens.size() << " screen(s) available." << std::endl;
             for (size_t i = 0; i < m_screens.size(); i++) {
-                fbLog_vDebug << *m_screens[i];
+                fbLog_debugDump << *m_screens[i];
             }
-            fbLog_vDebug << "======================================" << std::endl;
+            fbLog_debugDump << "======================================" << std::endl;
         } else {
             nanosleep(&sleepTimespec, NULL);
         }

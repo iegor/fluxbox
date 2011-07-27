@@ -40,8 +40,8 @@ Pixmap FbCompositor::createSolidPixmap(Display *display, Window rootWindow, int 
 }
 
 // Computes the highest power of two that equals or is less than the given value.
-// Warning: assuming signed 32 bit integers.
-int FbCompositor::largestSmallerPow2(int value) {
+// Assumption: signed 32 bit integers.
+int FbCompositor::largestSmallerPowerOf2(int value) {
     int power = 30;
     while (!(value & (1 << power)) && (power >= 0)) {
         power--;

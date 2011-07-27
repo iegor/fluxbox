@@ -21,8 +21,9 @@
 // THE SOFTWARE.
 
 
-#include "Logging.hh"
 #include "TickTracker.hh"
+
+#include "Logging.hh"
 
 using namespace FbCompositor;
 
@@ -30,7 +31,7 @@ using namespace FbCompositor;
 //--- CONSTANTS ----------------------------------------------------------------
 
 // The accuracy of the timer (1.0 = 1 second).
-const double TickTracker::EPSILON = 1e-6;
+const double EPSILON = 1e-6;
 
 
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------

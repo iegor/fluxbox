@@ -24,11 +24,7 @@
 #ifndef FBCOMPOSITOR_PLUGINMANAGER_HH
 #define FBCOMPOSITOR_PLUGINMANAGER_HH
 
-#include "config.h"
-
-#include "BasePlugin.hh"
 #include "Enumerations.hh"
-#include "Exceptions.hh"
 
 #include "FbTk/FbString.hh"
 
@@ -40,9 +36,6 @@ namespace FbCompositor {
 
     class BasePlugin;
     class BaseScreen;
-    class InitException;
-    class PluginException;
-    class PluginManager;
 
 
     //--- TYPEDEFS -------------------------------------------------------------

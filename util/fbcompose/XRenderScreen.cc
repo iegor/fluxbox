@@ -97,8 +97,8 @@ void XRenderScreen::initRenderingSurface() {
     XFixesSetWindowShapeRegion(display(), m_renderingWindow, ShapeInput, 0, 0, emptyRegion);
     XFixesDestroyRegion(display(), emptyRegion);
 
-    addWindowToIgnoreList(compOverlay);
-    addWindowToIgnoreList(m_renderingWindow);
+    ignoreWindow(compOverlay);
+    ignoreWindow(m_renderingWindow);
 
     // Create an XRender picture for the rendering window.
     XRenderPictureAttributes pa;

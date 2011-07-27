@@ -24,12 +24,8 @@
 #ifndef FBCOMPOSITOR_SCREEN_HH
 #define FBCOMPOSITOR_SCREEN_HH
 
-#include "config.h"
-
-#include "Atoms.hh"
 #include "BaseCompWindow.hh"
 #include "Enumerations.hh"
-#include "Exceptions.hh"
 #include "PluginManager.hh"
 
 #include <X11/Xlib.h>
@@ -41,24 +37,24 @@
 
 namespace FbCompositor {
 
-    class BaseCompWindow;
     class BaseScreen;
     class CompositorConfig;
-    class InitException;
-    class PluginException;
-    class PluginManager;
 
+
+    //--- SUPPORTING FUNCTIONS -------------------------------------------------
 
     /** << output stream operator for the BaseScreen class. */
     std::ostream &operator<<(std::ostream& out, const BaseScreen& s);
 
 
+    //--- BASE CLASS FOR SCREENS -----------------------------------------------
+
     /**
      * Base class for screen managing classes.
      */
     class BaseScreen {
-
         //--- FRIEND OPERATORS -------------------------------------------------
+
         friend std::ostream &operator<<(std::ostream& out, const BaseScreen& s);
 
     public:
@@ -72,9 +68,6 @@ namespace FbCompositor {
 
 
         //--- OTHER INITIALIZATION ---------------------------------------------
-
-        /** Initializes heads on the current screen. */
-        void initHeads(HeadMode headMode);
 
         /** Initializes all of the windows on the screen. */
         void initWindows();
@@ -106,7 +99,7 @@ namespace FbCompositor {
         /** \returns screen's number. */
         int screenNumber() const;
 
-        /** \returns the index of the currently active workspace. */
+        /** \returns the number of workspaces on this screen. */
         int workspaceCount() const;
 
 
@@ -144,13 +137,17 @@ namespace FbCompositor {
 
 
         /** Marks a particular window as ignored. */
-        void addWindowToIgnoreList(Window window);
+        void ignoreWindow(Window window);
 
         /** Checks whether a given window is managed by the current screen. */
         bool isWindowManaged(Window window);
 
 
         //--- SCREEN MANIPULATION ----------------------------------------------
+
+        /** Updates heads on the current screen. */
+        void updateHeads(HeadMode headMode);
+
 
         /** Notifies the screen of a background change. */
         virtual void setRootPixmapChanged();
@@ -198,16 +195,22 @@ namespace FbCompositor {
         BaseScreen(const BaseScreen&);
 
 
-        //--- CONVENIENCE PROPERTY UPDATE FUNCTIONS ----------------------------
+        //--- PROPERTY UPDATE FUNCTIONS ----------------------------------------
 
         /** Update stored active window. */
         void updateActiveWindow();
+
+        /** Update the current workspace index. */
+        void updateCurrentWorkspace();
 
         /** Update stored reconfigure rectangle. */
         void updateReconfigureRect();
 
         /** Update stored root window pixmap. */
         void updateRootWindowPixmap(Pixmap newPixmap = None);
+
+        /** Update the number of workspaces. */
+        void updateWorkspaceCount();
 
 
         //--- CONVENIENCE FUNCTIONS --------------------------------------------
@@ -270,7 +273,7 @@ namespace FbCompositor {
         /** Pixmap, containing the desktop background. */
         Pixmap m_rootWindowPixmap;
 
-        /** Whether the background pixmap is set by the window manager. */
+        /** Whether the background pixmap is set by the window manager or this class. */
         bool m_wmSetRootWindowPixmap;
     };
 
@@ -342,7 +345,7 @@ namespace FbCompositor {
         return m_wmSetRootWindowPixmap;
     }
 
-    // Returns the index of the currently active workspace.
+    // Returns the number of workspaces on this screen.
     inline int BaseScreen::workspaceCount() const {
         return m_workspaceCount;
     }

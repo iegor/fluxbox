@@ -23,7 +23,6 @@
 
 #include "BasePlugin.hh"
 
-#include "BaseCompWindow.hh"
 #include "BaseScreen.hh"
 
 using namespace FbCompositor;
@@ -77,8 +76,8 @@ void BasePlugin::windowUnmapped(const BaseCompWindow &/*window*/) { }
 
 //--- SCREEN CHANGES -----------------------------------------------------------
 
-// Notifies the screen of a background change.
+// Notifies the plugin of a background change.
 void BasePlugin::setRootPixmapChanged() { }
 
-// Notifies the screen of a root window change.
+// Notifies the plugin of a root window change.
 void BasePlugin::setRootWindowSizeChanged() { }

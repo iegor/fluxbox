@@ -239,8 +239,8 @@ void OpenGLScreen::initRenderingSurface() {
     XFixesSetWindowShapeRegion(display(), m_renderingWindow, ShapeInput, 0, 0, emptyRegion);
     XFixesDestroyRegion(display(), emptyRegion);
 
-    addWindowToIgnoreList(compOverlay);
-    addWindowToIgnoreList(m_renderingWindow);
+    ignoreWindow(compOverlay);
+    ignoreWindow(m_renderingWindow);
 
     // Creating a GLX handle for the above window.
     m_glxRenderingWindow = glXCreateWindow(display(), m_fbConfig, m_renderingWindow, NULL);
@@ -291,7 +291,7 @@ void OpenGLScreen::finishRenderingInit() {
 void OpenGLScreen::findMaxTextureSize() {
     GLint texSize;
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &texSize);
-    texSize = (GLint)(largestSmallerPow2((int)(texSize)));
+    texSize = (GLint)(largestSmallerPowerOf2((int)(texSize)));
 
     while (texSize > 0) {
         GLint width;
