@@ -21,6 +21,10 @@
 // THE SOFTWARE.
 
 
+#ifdef HAVE_CONFIG_H
+    #include "config.h"
+#endif  // HAVE_CONFIG_H
+
 #include "Compositor.hh"
 
 #include "BaseScreen.hh"
@@ -30,6 +34,7 @@
 #include "XRenderScreen.hh"
 
 #ifdef USE_OPENGL_COMPOSITING
+    #include <GL/glxew.h>
     #include <GL/glx.h>
 #endif  // USE_OPENGL_COMPOSITING
 
@@ -62,8 +67,17 @@ using namespace FbCompositor;
 
 //--- CONSTANTS ----------------------------------------------------------------
 
-// How many microseconds to sleep before restarting the event loop.
-const int Compositor::SLEEP_TIME = 5000;
+/** Length of the error buffer in X error handler. */
+const int ERROR_BUFFER_LENGTH = 128;
+
+/** Name of the relevant error database with X error messages in X error handler. */
+const char ERROR_DB_TEXT_NAME[] = "XRequest";
+
+/** Default name for unknown requests in X error handler. */
+const char REQUEST_NAME_UNKNOWN_MESSAGE[] = "<UNKNOWN>";
+
+/** How many microseconds to sleep before restarting the event loop. */
+const int SLEEP_TIME = 5000;
 
 
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
@@ -76,42 +90,36 @@ Compositor::Compositor(const CompositorConfig &config) :
         XSynchronize(display(), True);
     }
 
-    // Set rendering mode.
     if (config.renderingMode() == RM_ServerAuto) {
         throw InitException("Compositor class does not provide the serverauto renderer.");
     }
     m_renderingMode = config.renderingMode();
 
-    // Set X error handler.
     if (config.showXErrors()) {
         XSetErrorHandler(&printXError);
     } else {
         XSetErrorHandler(&ignoreXError);
     }
 
-    // Initialize extensions.
     initAllExtensions();
 
-    // Initialize screens.
     int screenCount = XScreenCount(display());
     m_screens.reserve(screenCount);
+
     for (int i = 0; i < screenCount; i++) {
         Window cmSelectionOwner = getCMSelectionOwnership(i);
 
         switch (m_renderingMode) {
-
 #ifdef USE_OPENGL_COMPOSITING
         case RM_OpenGL :
             m_screens.push_back(new OpenGLScreen(i, config));
             break;
 #endif  // USE_OPENGL_COMPOSITING
-
 #ifdef USE_XRENDER_COMPOSITING
         case RM_XRender :
             m_screens.push_back(new XRenderScreen(i, config));
             break;
 #endif  // USE_XRENDER_COMPOSITING
-
         default :
             throw InitException("Unknown rendering mode selected.");
             break;
@@ -125,14 +133,11 @@ Compositor::Compositor(const CompositorConfig &config) :
         m_screens[i]->initWindows();
     }
 
-    // Set up the main timer.
     m_timer.setTickSize(1000000 / config.framesPerSecond());
     m_timer.start();
 
-    // Finish.
     XFlush(display());
 
-    // Set up other handlers.
     signal(SIGINT, handleSignal);
     signal(SIGTERM, handleSignal);
 }
@@ -225,7 +230,7 @@ void Compositor::initExtension(const char *extensionName, QueryExtensionFunction
         *errorBase = -1;
 
         std::stringstream ss;
-        ss << "Unsupported " << extensionName << " extension version (required >=" << minMajorVer
+        ss << "Unsupported " << extensionName << " extension version found (required >=" << minMajorVer
            << "." << minMinorVer << ", got " << majorVer << "." << minorVer << ").";
         throw InitException(ss.str());
     }
@@ -269,7 +274,6 @@ void Compositor::eventLoop() {
     timespec sleepTimespec = { 0, SLEEP_TIME * 1000 };
 
     while (!done()) {
-        // Handle incoming X events.
         while (XPending(display())) {
             XNextEvent(display(), &event);
 
@@ -347,7 +351,6 @@ void Compositor::eventLoop() {
             }
         }
 
-        // Redraw the screens.
         if (m_timer.newElapsedTicks()) {
             for (size_t i = 0; i < m_screens.size(); i++) {
                 m_screens[i]->renderScreen();
@@ -370,15 +373,14 @@ void Compositor::eventLoop() {
 
 // Locates the screen an event affects. Returns -1 on failure.
 int Compositor::screenOfEvent(const XEvent &event) {
-    for (size_t i = 0; i < m_screens.size(); i++) {
-        if (event.xany.window == m_screens[i]->rootWindow().window()) {
-            return i;
-        }
-    }
-
-    for (size_t i = 0; i < m_screens.size(); i++) {
-        if (m_screens[i]->isWindowManaged(event.xany.window)) {
-            return i;
+    if (m_screens.size() == 1) {
+        return 0;
+    } else {
+        for (size_t i = 0; i < m_screens.size(); i++) {
+            if ((event.xany.window == m_screens[i]->rootWindow().window())
+                    || (m_screens[i]->isWindowManaged(event.xany.window))) {
+                return i;
+            }
         }
     }
 
@@ -403,27 +405,18 @@ int FbCompositor::ignoreXError(Display * /*display*/, XErrorEvent * /*error*/) {
 
 // Custom X error handler (print, continue).
 int FbCompositor::printXError(Display *display, XErrorEvent *error) {
-    // Constants.
-    static const int ERROR_BUFFER_LENGTH = 128;
-    static const char ERROR_DB_TEXT_NAME[] = "XRequest";
-    static const char REQUEST_NAME_UNKNOWN_MESSAGE[] = "<UNKNOWN>";
-
-    // Other static variables.
     static std::stringstream ss;
+    ss.str("");
 
-    // Get the error message.
     char errorText[ERROR_BUFFER_LENGTH];
     XGetErrorText(display, error->error_code, errorText, ERROR_BUFFER_LENGTH);
 
-    // Get the name of the offending request.
-    ss.str("");
     ss << int(error->request_code);
 
     char requestName[ERROR_BUFFER_LENGTH];
     XGetErrorDatabaseText(display, (char*)(ERROR_DB_TEXT_NAME), (char*)(ss.str().c_str()),
                           (char*)(REQUEST_NAME_UNKNOWN_MESSAGE), requestName, ERROR_BUFFER_LENGTH);
 
-    // Print the message
     fbLog_warn << "X Error: " << errorText << " in " << requestName << " request, errorCode="
                << std::dec << int(error->error_code) << ", majorOpCode=" << int(error->request_code)
                << ", minorOpCode=" << int(error->minor_code) << ", resourceId=" << std::hex

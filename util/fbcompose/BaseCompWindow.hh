@@ -24,10 +24,11 @@
 #ifndef FBCOMPOSITOR_WINDOW_HH
 #define FBCOMPOSITOR_WINDOW_HH
 
-#include "config.h"
+#ifdef HAVE_CONFIG_H
+    #include "config.h"
+#endif  // HAVE_CONFIG_H
 
 #include "Enumerations.hh"
-#include "Exceptions.hh"
 
 #include "FbTk/FbWindow.hh"
 
@@ -42,20 +43,24 @@
 
 namespace FbCompositor {
 
-    class BaseCompWindow;
     class BaseScreen;
+    class BaseCompWindow;
 
+
+    //--- SUPPORTING FUNCTIONS -------------------------------------------------
 
     /** << output stream operator for the BaseCompWindow class. */
     std::ostream &operator<<(std::ostream& out, const BaseCompWindow& window);
 
 
+    //--- BASE WINDOW CLASS ----------------------------------------------------
+
     /**
      * Base class for composited windows.
      */
     class BaseCompWindow : public FbTk::FbWindow {
-
         //--- FRIEND OPERATORS -------------------------------------------------
+
         friend std::ostream &operator<<(std::ostream& out, const BaseCompWindow& window);
 
     public:
@@ -79,8 +84,8 @@ namespace FbCompositor {
         /** \returns whether the window is damaged or not. */
         bool isDamaged() const;
 
-        /** \returns whether the window should be ignored by the renderers or not. */
-        bool isRenderable() const;
+        /** \returns whether the window is ignored or not. */
+        bool isIgnored() const;
 
         /** \returns whether the screen is mapped or not. */
         bool isMapped() const;
@@ -101,7 +106,7 @@ namespace FbCompositor {
         int windowClass() const;
 
 
-        /** \returns the window's dimensions as an XRectangle. */
+        /** \returns the window's dimensions as an XRectangle (borders factored in). */
         XRectangle dimensions() const;
 
         /** \returns the window's height with borders factored in. */
@@ -141,7 +146,7 @@ namespace FbCompositor {
         virtual void updateContents();
 
         /** Update window's geometry. */
-        virtual void updateGeometry(const XConfigureEvent &event);
+        virtual void updateGeometry();
 
         /** Update window's property. */
         virtual void updateProperty(Atom property, int state);
@@ -150,8 +155,8 @@ namespace FbCompositor {
         /** Set the clip shape as changed. */
         void setClipShapeChanged();
 
-        /** Sets window's renderable flag. */
-        void setRenderable(bool renderable);
+        /** Sets window's ignore flag. */
+        void setIgnored(bool ignoreStatus);
 
 
     protected:
@@ -169,6 +174,9 @@ namespace FbCompositor {
         /** \returns the rectangles that make up the clip shape. */
         XRectangle *clipShapeRects() const;
 
+
+        /** \returns whether the window has been remapped since the last update. */
+        bool isRemapped() const;
 
         /** \returns whether the window has been resized since the last update. */
         bool isResized() const;
@@ -196,14 +204,21 @@ namespace FbCompositor {
         BaseCompWindow &operator=(const BaseCompWindow&);
 
 
-        //--- INTERNAL FUNCTIONS -----------------------------------------------
+        //--- PROPERTY UPDATE FUNCTIONS ----------------------------------------
+
+        /** Updates window's alpha. */
+        void updateAlpha();
+
+        /** Updates the type of the window. */
+        void updateWindowType();
+
+
+        //--- CONVENIENCE FUNCTIONS --------------------------------------------
 
         /** Returns the raw contents of a property. */
         bool rawPropertyData(Atom propertyAtom, Atom propertyType,
                              unsigned long *itemCount_return, unsigned char **data_return);
 
-        /** Updates the type of the window. */
-        void updateWindowType();
 
 
         //--- WINDOW ATTRIBUTES ------------------------------------------------
@@ -240,7 +255,10 @@ namespace FbCompositor {
         bool m_isDamaged;
 
         /** Shows whether the window should be ignored by the renderers or not. */
-        bool m_isRenderable;
+        bool m_isIgnored;
+
+        /** Shows whether the window has been remapped since the last update. */
+        bool m_isRemapped;
 
         /** Shows whether the window has been resized since the last update. */
         bool m_isResized;
@@ -292,7 +310,7 @@ namespace FbCompositor {
         return m_contentPixmap;
     }
 
-    // Returns the window's dimensions as an XRectangle.
+    // Returns the window's dimensions as an XRectangle (borders factored in).
     inline XRectangle BaseCompWindow::dimensions() const {
         XRectangle dim = { x(), y(), realWidth(), realHeight() };
         return dim;
@@ -303,14 +321,19 @@ namespace FbCompositor {
         return m_isDamaged;
     }
 
-    // Returns whether the window should be ignored by the renderers or not.
-    inline bool BaseCompWindow::isRenderable() const {
-        return m_isRenderable;
+    // Returns whether the window is ignored or not.
+    inline bool BaseCompWindow::isIgnored() const {
+        return m_isIgnored;
     }
 
     // Returns whether the window is mapped or not.
     inline bool BaseCompWindow::isMapped() const {
         return m_isMapped;
+    }
+
+    // Returns whether the window has been remapped since the last update.
+    inline bool BaseCompWindow::isRemapped() const {
+        return m_isRemapped;
     }
 
     // Returns whether the window has been resized since the last update.
@@ -323,9 +346,9 @@ namespace FbCompositor {
         return m_screen;
     }
 
-    // Sets the window's renderable flag.
-    inline void BaseCompWindow::setRenderable(bool renderable) {
-        m_isRenderable = renderable;
+    // Sets the window's ignore flag.
+    inline void BaseCompWindow::setIgnored(bool ignoreStatus) {
+        m_isIgnored = ignoreStatus;
     }
 
     // Returns the window's height with borders factored in.

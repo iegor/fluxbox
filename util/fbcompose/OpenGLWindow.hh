@@ -86,7 +86,7 @@ namespace FbCompositor {
         void updateContents();
 
         /** Updates window's geometry. */
-        void updateGeometry(const XConfigureEvent &event);
+        void updateGeometry();
 
         /** Updates the window's shape. */
         void updateShape();

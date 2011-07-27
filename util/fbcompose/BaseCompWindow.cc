@@ -43,14 +43,12 @@ BaseCompWindow::BaseCompWindow(const BaseScreen &screen, Window windowXID) :
     FbTk::FbWindow(windowXID),
     m_screen(screen) {
 
-    m_alpha = singlePropertyValue<long>(Atoms::opacityAtom(), 0xff) & 0xff;
-    m_isRenderable = true;
-
     XWindowAttributes xwa;
     XGetWindowAttributes(display(), window(), &xwa);
 
     m_class = xwa.c_class;
     m_isMapped = (xwa.map_state != IsUnmapped);
+    m_isRemapped = true;
     m_isResized = true;
     m_visual = xwa.visual;
 
@@ -58,6 +56,8 @@ BaseCompWindow::BaseCompWindow(const BaseScreen &screen, Window windowXID) :
     m_clipShapeRects = 0;
     m_clipShapeRectCount = 0;
     m_clipShapeRectOrder = Unsorted;
+
+    m_isIgnored = false;
 
 #ifdef HAVE_XDAMAGE
     if (m_class == InputOutput) {
@@ -69,6 +69,7 @@ BaseCompWindow::BaseCompWindow(const BaseScreen &screen, Window windowXID) :
 
     m_contentPixmap = None;
 
+    updateAlpha();
     updateWindowType();
 }
 
@@ -94,6 +95,7 @@ void BaseCompWindow::addDamage() {
 // Mark the window as mapped.
 void BaseCompWindow::setMapped() {
     m_isMapped = true;
+    m_isRemapped = true;
 }
 
 // Mark the window as unmapped.
@@ -102,6 +104,8 @@ void BaseCompWindow::setUnmapped() {
 }
 
 // Update the window's contents.
+// Note: this is an example implementation of this function. You should fully
+// override it in derived classes.
 void BaseCompWindow::updateContents() {
     updateContentPixmap();
     if (m_clipShapeChanged) {
@@ -112,7 +116,7 @@ void BaseCompWindow::updateContents() {
 }
 
 // Update window's geometry.
-void BaseCompWindow::updateGeometry(const XConfigureEvent &/*event*/) {
+void BaseCompWindow::updateGeometry() {
     unsigned int oldBorderWidth = borderWidth();
     unsigned int oldHeight = height();
     unsigned int oldWidth = width();
@@ -132,6 +136,7 @@ void BaseCompWindow::updateShape() {
     }
     m_clipShapeRects = XShapeGetRectangles(display(), window(), ShapeClip, &m_clipShapeRectCount, &m_clipShapeRectOrder);
 
+    // We have to adjust the size here to account for borders.
     for (int i = 0; i < m_clipShapeRectCount; i++) {
         m_clipShapeRects[i].height = std::min(m_clipShapeRects[i].height + 2 * borderWidth(), realHeight());
         m_clipShapeRects[i].width = std::min(m_clipShapeRects[i].width + 2 * borderWidth(), realWidth());
@@ -141,7 +146,7 @@ void BaseCompWindow::updateShape() {
 // Update window's property.
 void BaseCompWindow::updateProperty(Atom property, int /*state*/) {
     if (property == Atoms::opacityAtom()) {
-        m_alpha = singlePropertyValue<long>(Atoms::opacityAtom(), 0xff) & 0xff;
+        updateAlpha();
     } else if (property == Atoms::windowTypeAtom()) {
         updateWindowType();
     }
@@ -160,6 +165,7 @@ void BaseCompWindow::setClipShapeChanged() {
 void BaseCompWindow::clearDamage() {
     m_clipShapeChanged = false;
     m_isDamaged = false;
+    m_isRemapped = false;
     m_isResized = false;
 }
 
@@ -170,24 +176,47 @@ void BaseCompWindow::updateContentPixmap() {
     XDamageSubtract(display(), m_damage, None, None);
 #endif  // HAVE_XDAMAGE
 
-    XGrabServer(display());
+    if (m_isResized || m_isRemapped) {
+        XGrabServer(display());
 
-    XWindowAttributes xwa;
-    if (XGetWindowAttributes(display(), window(), &xwa)) {
-        if (xwa.map_state == IsViewable) {
-            if (m_contentPixmap) {
-                XFreePixmap(display(), m_contentPixmap);
-                m_contentPixmap = None;
+        XWindowAttributes xwa;
+        if (XGetWindowAttributes(display(), window(), &xwa)) {
+            if (xwa.map_state == IsViewable) {
+                if (m_contentPixmap) {
+                    XFreePixmap(display(), m_contentPixmap);
+                    m_contentPixmap = None;
+                }
+                m_contentPixmap = XCompositeNameWindowPixmap(display(), window());
             }
-            m_contentPixmap = XCompositeNameWindowPixmap(display(), window());
         }
+        XUngrabServer(display());
     }
-
-    XUngrabServer(display());
 }
 
 
-//--- INTERNAL FUNCTIONS -------------------------------------------------------
+//--- PROPERTY UPDATE FUNCTIONS ----------------------------------------
+
+// Updates window's alpha.
+void BaseCompWindow::updateAlpha() {
+    m_alpha = singlePropertyValue<long>(Atoms::opacityAtom(), 0xff) & 0xff;
+}
+
+// Updates the type of the window.
+void BaseCompWindow::updateWindowType() {
+    static std::vector< std::pair<Atom, WindowType> > typeList = Atoms::windowTypeAtomList();
+    Atom rawType = singlePropertyValue<Atom>(Atoms::windowTypeAtom(), None);
+
+    m_type = WinType_Normal;
+    for (size_t i = 0; i < typeList.size(); i++) {
+        if (rawType == typeList[i].first) {
+            m_type = typeList[i].second;
+            break;
+        }
+    }
+}
+
+
+//--- CONVENIENCE FUNCTIONS ----------------------------------------------------
 
 // Reads and returns raw property contents.
 bool BaseCompWindow::rawPropertyData(Atom propertyAtom, Atom propertyType,
@@ -206,20 +235,6 @@ bool BaseCompWindow::rawPropertyData(Atom propertyAtom, Atom propertyType,
     return false;
 }
 
-// Updates the type of the window.
-void BaseCompWindow::updateWindowType() {
-    static std::vector< std::pair<Atom, WindowType> > typeList = Atoms::windowTypeAtomList();
-    Atom rawType = singlePropertyValue<Atom>(Atoms::windowTypeAtom(), None);
-
-    m_type = WinType_Normal;
-    for (size_t i = 0; i < typeList.size(); i++) {
-        if (rawType == typeList[i].first) {
-            m_type = typeList[i].second;
-            break;
-        }
-    }
-}
-
 
 //--- OPERATORS ----------------------------------------------------------------
 
@@ -228,6 +243,6 @@ std::ostream &FbCompositor::operator<<(std::ostream& out, const BaseCompWindow& 
     out << "Window " << std::hex << w.window() << ": Geometry[" << std::dec << w.x()
         << "," << w.y() << "," << w.width() << "," << w.height() << " " << w.borderWidth()
         << "] Depth=" << w.depth() << " Type=" << w.type() << " Map=" << w.isMapped()
-        << " Dmg=" << w.isDamaged() << " Show=" << w.isRenderable();
+        << " Dmg=" << w.isDamaged() << " Ignore=" << w.isIgnored();
     return out;
 }

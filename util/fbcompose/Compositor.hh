@@ -24,7 +24,6 @@
 #ifndef FBCOMPOSITOR_COMPOSITOR_HH
 #define FBCOMPOSITOR_COMPOSITOR_HH
 
-#include "config.h"
 
 #include "Enumerations.hh"
 #include "Exceptions.hh"
@@ -40,11 +39,7 @@
 namespace FbCompositor {
 
     class BaseScreen;
-    class Compositor;
     class CompositorConfig;
-    class InitException;
-    class RuntimeException;
-    class TickTracker;
 
 
     //--- TYPEDEFS -------------------------------------------------------------
@@ -55,6 +50,8 @@ namespace FbCompositor {
     /** A pointer to an X query version function. */
     typedef Status (*QueryVersionFunction)(Display*, int*, int*);
 
+
+    //--- MAIN COMPOSITOR CLASS ------------------------------------------------
 
     /**
      * Main class for the compositor.
@@ -74,18 +71,6 @@ namespace FbCompositor {
         ~Compositor();
 
 
-        //--- ACCESSORS --------------------------------------------------------
-
-        /** \returns The number of available screens. */
-        int screenCount() const;
-
-        /** \returns the reference to a particular screen. */
-        BaseScreen &getScreen(int screenNumber);
-
-        /** \returns the application's rendering mode. */
-        RenderingMode renderingMode() const;
-
-
         //--- EVENT LOOP -------------------------------------------------------
 
         /** Enters the event loop. */
@@ -93,12 +78,6 @@ namespace FbCompositor {
 
 
     private:
-        //--- CONSTANTS --------------------------------------------------------
-
-        /** How many microseconds to sleep before restarting the event loop. */
-        static const int SLEEP_TIME;
-
-
         //--- CONSTRUCTORS -----------------------------------------------------
 
         /** Copy constructor. */
@@ -200,38 +179,6 @@ namespace FbCompositor {
 
     /** Custom X error handler (print, continue). */
     int printXError(Display *display, XErrorEvent *error);
-
-
-    //--- OTHER FUNCTIONS ------------------------------------------------------
-
-    /** \returns a properly type cast pointer to the app object. */
-    Compositor *compositorInstance();
-
-
-    //--- INLINE FUNCTIONS -----------------------------------------------------
-
-    // Returns a properly type cast pointer to the app object.
-    inline Compositor *compositorInstance() {
-        return dynamic_cast<Compositor*>(FbTk::App::instance());
-    }
-
-    // Returns a particular screen.
-    inline BaseScreen &Compositor::getScreen(int screenNumber) {
-        if ((screenNumber < 0) || (screenNumber >= screenCount())) {
-            throw RuntimeException("getScreen(int) was given an out of bounds index.");
-        }
-        return *(m_screens[screenNumber]);
-    }
-
-    // Returns the rendering mode.
-    inline RenderingMode Compositor::renderingMode() const {
-        return m_renderingMode;
-    }
-
-    // Returns the number of screens.
-    inline int Compositor::screenCount() const {
-        return m_screens.size();
-    }
 }
 
 

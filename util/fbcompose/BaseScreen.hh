@@ -219,7 +219,7 @@ namespace FbCompositor {
         Window getParentWindow(Window window);
 
         /** \returns an iterator of m_windows that points to the given window. */
-        std::list<BaseCompWindow*>::iterator getWindowIterator(Window windowXID);
+        std::list<BaseCompWindow*>::iterator getWindowIterator(Window window);
         
         /** \returns whether the given window is in the ignore list. */
         bool isWindowIgnored(Window window);

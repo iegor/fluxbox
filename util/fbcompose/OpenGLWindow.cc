@@ -79,8 +79,8 @@ void OpenGLWindow::updateContents() {
 }
 
 // Updates window's geometry.
-void OpenGLWindow::updateGeometry(const XConfigureEvent &event) {
-    BaseCompWindow::updateGeometry(event);
+void OpenGLWindow::updateGeometry() {
+    BaseCompWindow::updateGeometry();
     updateWindowPos();
 }
 

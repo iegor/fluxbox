@@ -369,7 +369,7 @@ void OpenGLScreen::initPlugins() {
 
 // Renews the background texture.
 void OpenGLScreen::updateBackgroundTexture() {
-    m_backgroundTexture->setPixmap(rootWindowPixmap(), rootWindow().width(), rootWindow().height(), true);
+    m_backgroundTexture->setPixmap(rootWindowPixmap(), false, rootWindow().width(), rootWindow().height(), true);
     m_backgroundChanged = false;
 }
 
@@ -415,7 +415,7 @@ void OpenGLScreen::renderScreen() {
     // Render the windows.
     std::list<BaseCompWindow*>::const_iterator it = allWindows().begin();
     while (it != allWindows().end()) {
-        if ((*it)->isRenderable() && (*it)->isMapped()) {
+        if (!(*it)->isIgnored() && (*it)->isMapped()) {
             renderWindow(*(dynamic_cast<OpenGLWindow*>(*it)));
         }
         ++it;

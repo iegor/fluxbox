@@ -165,7 +165,7 @@ void BaseScreen::circulateWindow(Window window, int place) {
             m_windows.push_front(curWindow);
         }
 
-        if (curWindow->isRenderable()) {
+        if (!curWindow->isIgnored()) {
             BasePlugin *plugin = NULL;
             forEachPlugin(i, plugin) {
                 plugin->windowCirculated(*curWindow, place);
@@ -200,7 +200,7 @@ void BaseScreen::createWindow(Window window) {
         m_windows.push_back(newWindow);
 
         if (isWindowIgnored(window)) {
-            newWindow->setRenderable(false);
+            newWindow->setIgnored(true);
         } else {
             BasePlugin *plugin = NULL;
             forEachPlugin(i, plugin) {
@@ -218,7 +218,7 @@ void BaseScreen::damageWindow(Window window) {
     if (it != m_windows.end()) {
         (*it)->addDamage();
 
-        if ((*it)->isRenderable()) {
+        if (!(*it)->isIgnored()) {
             BasePlugin *plugin = NULL;
             forEachPlugin(i, plugin) {
                 plugin->windowDamaged(**it);
@@ -235,7 +235,7 @@ void BaseScreen::damageWindow(Window window) {
 void BaseScreen::destroyWindow(Window window) {
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
     if (it != m_windows.end()) {
-        if ((*it)->isRenderable()) {
+        if (!(*it)->isIgnored()) {
             BasePlugin *plugin = NULL;
             forEachPlugin(i, plugin) {
                 plugin->windowDestroyed(**it);
@@ -255,7 +255,7 @@ void BaseScreen::mapWindow(Window window) {
     if (it != m_windows.end()) {
         (*it)->setMapped();
 
-        if ((*it)->isRenderable()) {
+        if (!(*it)->isIgnored()) {
             BasePlugin *plugin = NULL;
             forEachPlugin(i, plugin) {
                 plugin->windowMapped(**it);
@@ -269,7 +269,7 @@ void BaseScreen::mapWindow(Window window) {
 // Updates window's configuration.
 void BaseScreen::reconfigureWindow(const XConfigureEvent &event) {
     if (event.window == m_rootWindow.window()) {
-        m_rootWindow.updateGeometry(event);
+        m_rootWindow.updateGeometry();
         setRootWindowSizeChanged();
 
         BasePlugin *plugin = NULL;
@@ -282,10 +282,10 @@ void BaseScreen::reconfigureWindow(const XConfigureEvent &event) {
 
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(event.window);
     if (it != m_windows.end()) {
-        (*it)->updateGeometry(event);
+        (*it)->updateGeometry();
         restackWindow(it, event.above);
 
-        if ((*it)->isRenderable()) {
+        if (!(*it)->isIgnored()) {
             BasePlugin *plugin = NULL;
             forEachPlugin(i, plugin) {
                 plugin->windowReconfigured(**it);
@@ -311,7 +311,7 @@ void BaseScreen::updateShape(Window window) {
     if (it != m_windows.end()) {
         (*it)->setClipShapeChanged();
 
-        if ((*it)->isRenderable()) {
+        if (!(*it)->isIgnored()) {
             BasePlugin *plugin = NULL;
             forEachPlugin(i, plugin) {
                 plugin->windowShapeChanged(**it);
@@ -328,7 +328,7 @@ void BaseScreen::unmapWindow(Window window) {
     if (it != m_windows.end()) {
         (*it)->setUnmapped();
 
-        if ((*it)->isRenderable()) {
+        if (!(*it)->isIgnored()) {
             BasePlugin *plugin = NULL;
             forEachPlugin(i, plugin) {
                 plugin->windowUnmapped(**it);
@@ -371,7 +371,7 @@ void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
         if (it != m_windows.end()) {
             (*it)->updateProperty(property, state);
 
-            if ((*it)->isRenderable()) {
+            if (!(*it)->isIgnored()) {
                 BasePlugin *plugin = NULL;
                 forEachPlugin(i, plugin) {
                     plugin->windowPropertyChanged(**it, property, state);
@@ -394,7 +394,7 @@ void BaseScreen::addWindowToIgnoreList(Window window) {
 
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
     if (it != m_windows.end()) {
-        (*it)->setRenderable(true);
+        (*it)->setIgnored(true);
 
         BasePlugin *plugin = NULL;
         forEachPlugin(i, plugin) {
