@@ -26,8 +26,6 @@
 
 
 #include "BasePlugin.hh"
-#include "Enumerations.hh"
-#include "Exceptions.hh"
 #include "OpenGLResources.hh"
 #include "OpenGLShaders.hh"
 
@@ -43,9 +41,7 @@
 
 namespace FbCompositor {
 
-    class BasePlugin;
     class BaseScreen;
-    class InitException;
     class OpenGLScreen;
     class OpenGLWindow;
 
@@ -99,16 +95,16 @@ namespace FbCompositor {
         //--- RENDERING ACTIONS ------------------------------------------------
 
         /** Pre background rendering actions. */
-        virtual void preBackgroundRenderActions();
+        virtual void preBackgroundRenderActions(int partId);
 
         /** Post background rendering actions. */
-        virtual void postBackgroundRenderActions();
+        virtual void postBackgroundRenderActions(int partId);
 
         /** Pre reconfigure rectangle rendering actions. */
-        virtual void preReconfigureRectRenderActions(XRectangle reconfigureRect);
+        virtual void preRecRectRenderActions(XRectangle recRect);
 
         /** Post reconfigure rectangle rendering actions. */
-        virtual void postReconfigureRectRenderActions(XRectangle reconfigureRect);
+        virtual void postRecRectRenderActions(XRectangle recRect);
 
 
         /** Extra rendering job before window rendering. */

@@ -23,21 +23,20 @@
 
 #include "OpenGLPlugin.hh"
 
+#include "Exceptions.hh"
 #include "OpenGLScreen.hh"
 #include "OpenGLWindow.hh"
 
 using namespace FbCompositor;
 
 
-namespace {
-    //--- CONSTANTS ------------------------------------------------------------
+//--- CONSTANTS ----------------------------------------------------------------
 
-    /** Null rendering job. */
-    static const OpenGLRenderingJob NULL_JOB = {
-        OpenGLBufferPtr(), OpenGLBufferPtr(), OpenGLBufferPtr(),
-        OpenGL2DTexturePtr(), OpenGL2DTexturePtr(), -1.0
-    };
-}
+/** Null rendering job. */
+const OpenGLRenderingJob NULL_JOB = {
+    OpenGLBufferPtr(), OpenGLBufferPtr(), OpenGLBufferPtr(),
+    OpenGL2DTexturePtr(), OpenGL2DTexturePtr(), -1.0
+};
 
 
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
@@ -69,16 +68,16 @@ const OpenGLScreen &OpenGLPlugin::openGLScreen() const {
 //--- PLUGIN ACTIONS -----------------------------------------------------------
 
 // Pre background rendering actions.
-void OpenGLPlugin::preBackgroundRenderActions() { }
+void OpenGLPlugin::preBackgroundRenderActions(int /*partId*/) { }
 
 // Post background rendering actions.
-void OpenGLPlugin::postBackgroundRenderActions() { }
+void OpenGLPlugin::postBackgroundRenderActions(int /*partId*/) { }
 
 // Pre window rendering actions.
-void OpenGLPlugin::preReconfigureRectRenderActions(XRectangle /*reconfigureRect*/) { }
+void OpenGLPlugin::preRecRectRenderActions(XRectangle /*recRect*/) { }
 
 // Post window rendering actions.
-void OpenGLPlugin::postReconfigureRectRenderActions(XRectangle /*reconfigureRect*/) { }
+void OpenGLPlugin::postRecRectRenderActions(XRectangle /*recRect*/) { }
 
 
 // Extra rendering job before window rendering.

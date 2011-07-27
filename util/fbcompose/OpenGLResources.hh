@@ -156,7 +156,7 @@ namespace FbCompositor {
 
         //--- MUTATORS ---------------------------------------------------------
 
-        /** Bind the texture to its target. */
+        /** Bind the texture to GL_TEXTURE_2D. */
         void bind();
 
         /** Sets the texture's contents to the given pixmap. */
@@ -174,6 +174,9 @@ namespace FbCompositor {
 
 
         //--- INTERNALS --------------------------------------------------------
+
+        /** Whether this object manages the pixmap. */
+        bool m_pixmapManaged;
 
         /** Pixmap of the texture's contents. */
         Pixmap m_pixmap;

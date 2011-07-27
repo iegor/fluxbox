@@ -26,13 +26,12 @@
 
 
 #include "BaseScreen.hh"
-#include "Exceptions.hh"
 #include "OpenGLPlugin.hh"
 #include "OpenGLShaders.hh"
+#include "OpenGLTexPartitioner.hh"
 #include "OpenGLWindow.hh"
 
 #include <GL/glxew.h>
-#include <GL/glew.h>
 #include <GL/glx.h>
 
 
@@ -40,9 +39,6 @@ namespace FbCompositor {
 
     class BaseCompWindow;
     class CompositorConfig;
-    class InitException;
-    class OpenGLScreen;
-    class OpenGLWindow;
 
 
     /**
@@ -163,6 +159,7 @@ namespace FbCompositor {
         /** Render a particular window onto the screen. */
         void renderWindow(OpenGLWindow &window);
 
+
         /** Execute a given rendering job. */
         void executeRenderingJob(OpenGLRenderingJob job);
 
@@ -198,10 +195,13 @@ namespace FbCompositor {
         //--- DESKTOP BACKGROUND RELATED ---------------------------------------
 
         /** The background texture. */
-        OpenGL2DTexturePtr m_backgroundTexture;
+        OpenGL2DTexturePartitionPtr m_bgTexture;
+
+        /** Position buffers of the background texture partitions. */
+        std::vector<OpenGLBufferPtr> m_bgPosBuffers;
 
         /** Whether the background changed since the last update. */
-        bool m_backgroundChanged;
+        bool m_bgChanged;
 
 
         //--- DEFAULT OPENGL ELEMENTS ------------------------------------------
@@ -226,10 +226,10 @@ namespace FbCompositor {
         //--- RESIZE FRAME RELATED ---------------------------------------------
 
         /** The reconfigure rectangle element buffer. */
-        OpenGLBufferPtr m_reconfigureRectElementBuffer;
+        OpenGLBufferPtr m_recRectElementBuffer;
 
         /** The reconfigure rectangle primitive position array buffer. */
-        OpenGLBufferPtr m_reconfigureRectLinePosBuffer;
+        OpenGLBufferPtr m_recRectLinePosBuffer;
 
 
         //--- OTHER VARIABLES --------------------------------------------------

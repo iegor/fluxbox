@@ -145,3 +145,19 @@ std::vector<XRectangle> FbCompositor::partitionSpace(int x, int y, int width, in
 
     return partitions;
 }
+
+// Partitions space directly to buffers.
+std::vector<OpenGLBufferPtr> FbCompositor::partitionSpaceToBuffers(const OpenGLScreen &screen,
+        int x, int y, int width, int height) {
+
+    std::vector<XRectangle> spacePart = partitionSpace(x, y, width, height, screen.maxTextureSize());
+    std::vector<OpenGLBufferPtr> buffers;
+
+    for (size_t i = 0; i < spacePart.size(); i++) {
+        OpenGLBufferPtr buffer(new OpenGLBuffer(screen, GL_ARRAY_BUFFER));
+        buffer->bufferPosRectangle(screen.rootWindow().width(), screen.rootWindow().height(), spacePart[i]);
+        buffers.push_back(buffer);
+    }
+
+    return buffers;
+}

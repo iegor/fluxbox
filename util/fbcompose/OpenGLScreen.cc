@@ -25,6 +25,7 @@
 
 #include "CompositorConfig.hh"
 #include "Logging.hh"
+#include "Exceptions.hh"
 #include "OpenGLResources.hh"
 #include "OpenGLUtility.hh"
 #include "Utility.hh"
@@ -58,61 +59,57 @@ using namespace FbCompositor;
 
 //--- CONSTANTS ----------------------------------------------------------------
 
-namespace {
-
-    /** The preferred framebuffer configuration. */
-    static const int PREFERRED_FBCONFIG_ATTRIBUTES[] = {
-        GLX_RENDER_TYPE, GLX_RGBA_BIT,
-        GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT | GLX_PIXMAP_BIT,
-        GLX_DOUBLEBUFFER, GL_TRUE,
-        GLX_RED_SIZE, 8,
-        GLX_GREEN_SIZE, 8,
-        GLX_BLUE_SIZE, 8,
-        GLX_ALPHA_SIZE, 8,
+/** The preferred framebuffer configuration. */
+const int PREFERRED_FBCONFIG_ATTRIBUTES[] = {
+    GLX_RENDER_TYPE, GLX_RGBA_BIT,
+    GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT | GLX_PIXMAP_BIT,
+    GLX_DOUBLEBUFFER, GL_TRUE,
+    GLX_RED_SIZE, 8,
+    GLX_GREEN_SIZE, 8,
+    GLX_BLUE_SIZE, 8,
+    GLX_ALPHA_SIZE, 8,
 #ifdef GLXEW_EXT_texture_from_pixmap
-        GLX_BIND_TO_TEXTURE_RGBA_EXT, GL_TRUE,
+    GLX_BIND_TO_TEXTURE_RGBA_EXT, GL_TRUE,
 #endif  // GLXEW_EXT_texture_from_pixmap
-        None
-    };
+    None
+};
 
-    /** The fallback framebuffer configuration. */
-    static const int FALLBACK_FBCONFIG_ATTRIBUTES[] = {
-        GLX_RENDER_TYPE, GLX_RGBA_BIT,
-        GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT | GLX_PIXMAP_BIT,
-        GLX_DOUBLEBUFFER, GL_FALSE,
-        GLX_RED_SIZE, 8,
-        GLX_GREEN_SIZE, 8,
-        GLX_BLUE_SIZE, 8,
-        GLX_ALPHA_SIZE, 8,
+/** The fallback framebuffer configuration. */
+const int FALLBACK_FBCONFIG_ATTRIBUTES[] = {
+    GLX_RENDER_TYPE, GLX_RGBA_BIT,
+    GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT | GLX_PIXMAP_BIT,
+    GLX_DOUBLEBUFFER, GL_FALSE,
+    GLX_RED_SIZE, 8,
+    GLX_GREEN_SIZE, 8,
+    GLX_BLUE_SIZE, 8,
+    GLX_ALPHA_SIZE, 8,
 #ifdef GLXEW_EXT_texture_from_pixmap
-        GLX_BIND_TO_TEXTURE_RGBA_EXT, GL_TRUE,
+    GLX_BIND_TO_TEXTURE_RGBA_EXT, GL_TRUE,
 #endif  // GLXEW_EXT_texture_from_pixmap
-        None
-    };
+    None
+};
 
 
-    /** Default element array for texture rendering. */
-    static const GLushort DEFAULT_ELEMENT_ARRAY[] = {
-        0, 1, 2, 3
-    };
+/** Default element array for texture rendering. */
+const GLushort DEFAULT_ELEMENT_ARRAY[] = {
+    0, 1, 2, 3
+};
 
-    /** Default primitive position array for texture rendering. */
-    static const GLfloat DEFAULT_PRIM_POS_ARRAY[] = {
-        -1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0
-    };
+/** Default primitive position array for texture rendering. */
+const GLfloat DEFAULT_PRIM_POS_ARRAY[] = {
+    -1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0
+};
 
-    /** Default texture position array for texture rendering. */
-    static const GLfloat DEFAULT_TEX_POS_ARRAY[] = {
-        0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0
-    };
+/** Default texture position array for texture rendering. */
+const GLfloat DEFAULT_TEX_POS_ARRAY[] = {
+    0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0
+};
 
 
-    /** Element array for drawing the reconfigure rectangle. */
-    static const GLushort RECONFIGURE_RECT_ELEMENT_ARRAY[] = {
-        0, 1, 2, 3, 0
-    };
-
-}
+/** Element array for drawing the reconfigure rectangle. */
+const GLushort RECONFIGURE_RECT_ELEMENT_ARRAY[] = {
+    0, 1, 2, 3, 0
+};
 
 
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
@@ -121,7 +118,7 @@ namespace {
 OpenGLScreen::OpenGLScreen(int screenNumber, const CompositorConfig &config) :
     BaseScreen(screenNumber, Plugin_OpenGL, config) {
 
-    m_backgroundChanged = true;
+    m_bgChanged = true;
     m_rootWindowChanged = false;
 
     earlyInitGLXPointers();
@@ -149,7 +146,7 @@ OpenGLScreen::~OpenGLScreen() {
 // Notifies the screen of the background change.
 void OpenGLScreen::setRootPixmapChanged() {
     BaseScreen::setRootPixmapChanged();
-    m_backgroundChanged = true;
+    m_bgChanged = true;
 }
 
 // Notifies the screen of a root window change.
@@ -255,7 +252,6 @@ void OpenGLScreen::initRenderingSurface() {
 void OpenGLScreen::initGlew() {
     glXMakeCurrent(display(), m_glxRenderingWindow, m_glxContext);
 
-    // Initialize GLEW.
     GLenum glewErr = glewInit();
     if(glewErr != GLEW_OK) {
         std::stringstream ss;
@@ -263,7 +259,6 @@ void OpenGLScreen::initGlew() {
         throw InitException(ss.str());
     }
 
-    // Check for an appropriate OpenGL version.
     if (!GLEW_VERSION_2_1) {
         throw InitException("OpenGL 2.1 not available.");
     }
@@ -307,7 +302,11 @@ void OpenGLScreen::findMaxTextureSize() {
     }
 
     m_maxTextureSize = (int)(texSize);
-    fbLog_info << "Maximum OpenGL texture size: " << m_maxTextureSize << ". Just so you know." << std::endl;
+    if ((m_maxTextureSize < (int)(rootWindow().width()))
+            || (m_maxTextureSize < (int)(rootWindow().height()))) {
+        fbLog_warn << "Maximum supported OpenGL texture size on this machine is less than one "
+                   << "of the root window's dimensions. There may be a performance hit." << std::endl;
+    }
 }
 
 // Creates OpenGL resources.
@@ -328,16 +327,20 @@ void OpenGLScreen::createResources() {
 
 
     // Reconfigure rectangle position buffer.
-    m_reconfigureRectLinePosBuffer = new OpenGLBuffer(*this, GL_ARRAY_BUFFER);
+    m_recRectLinePosBuffer = new OpenGLBuffer(*this, GL_ARRAY_BUFFER);
 
     // Reconfigure rectangle element buffer.
-    m_reconfigureRectElementBuffer = new OpenGLBuffer(*this, GL_ELEMENT_ARRAY_BUFFER);
-    m_reconfigureRectElementBuffer->bufferData(sizeof(RECONFIGURE_RECT_ELEMENT_ARRAY),
-                                               (const GLvoid*)(RECONFIGURE_RECT_ELEMENT_ARRAY), GL_STATIC_DRAW);
+    m_recRectElementBuffer = new OpenGLBuffer(*this, GL_ELEMENT_ARRAY_BUFFER);
+    m_recRectElementBuffer->bufferData(sizeof(RECONFIGURE_RECT_ELEMENT_ARRAY),
+                                       (const GLvoid*)(RECONFIGURE_RECT_ELEMENT_ARRAY), GL_STATIC_DRAW);
 
 
     // Background texture.
-    m_backgroundTexture = new OpenGL2DTexture(*this, true);
+    m_bgTexture = new OpenGL2DTexturePartition(*this, true);
+
+    // Background texture partition buffers.
+    m_bgPosBuffers = partitionSpaceToBuffers(*this, 0, 0, rootWindow().width(), rootWindow().height());
+
 
     // Plain black texture.
     pixmap = createSolidPixmap(display(), rootWindow().window(), 1, 1, 0x00000000);
@@ -369,8 +372,13 @@ void OpenGLScreen::initPlugins() {
 
 // Renews the background texture.
 void OpenGLScreen::updateBackgroundTexture() {
-    m_backgroundTexture->setPixmap(rootWindowPixmap(), false, rootWindow().width(), rootWindow().height(), true);
-    m_backgroundChanged = false;
+    int depth = rootWindow().depth();
+    if (wmSetRootWindowPixmap()) {
+        depth = 32;
+    }
+
+    m_bgTexture->setPixmap(rootWindowPixmap(), false, rootWindow().width(), rootWindow().height(), depth);
+    m_bgChanged = false;
 }
 
 // React to the geometry change of the root window.
@@ -383,6 +391,7 @@ void OpenGLScreen::updateOnRootWindowResize() {
         ++it;
     }
 
+    m_bgPosBuffers = partitionSpaceToBuffers(*this, 0, 0, rootWindow().width(), rootWindow().height());
     m_rootWindowChanged = false;
 }
 
@@ -400,19 +409,15 @@ BaseCompWindow *OpenGLScreen::createWindowObject(Window window) {
 
 // Renders the screen's contents.
 void OpenGLScreen::renderScreen() {
-    // React to root window changes.
     if (m_rootWindowChanged) {
         updateOnRootWindowResize();
     }
 
-    // Prepare for rendering.
     glXMakeCurrent(display(), m_glxRenderingWindow, m_glxContext);
     m_shaderProgram->use();
 
-    // Render desktop background.
     renderBackground();
 
-    // Render the windows.
     std::list<BaseCompWindow*>::const_iterator it = allWindows().begin();
     while (it != allWindows().end()) {
         if (!(*it)->isIgnored() && (*it)->isMapped()) {
@@ -421,15 +426,12 @@ void OpenGLScreen::renderScreen() {
         ++it;
     }
 
-    // Render the reconfigure rectangle.
     if ((reconfigureRectangle().width != 0) && (reconfigureRectangle().height != 0)) {
         renderReconfigureRect();
     }
 
-    // Execute any extra jobs plugins may request.
     renderExtraJobs();
 
-    // Finish.
     glFlush();
     if (m_haveDoubleBuffering) {
         glXSwapBuffers(display(), m_glxRenderingWindow);
@@ -441,19 +443,21 @@ void OpenGLScreen::renderScreen() {
 void OpenGLScreen::renderBackground() {
     OpenGLPlugin *plugin = NULL;
 
-    // Update desktop background texture.
-    if (m_backgroundChanged) {
+    if (m_bgChanged) {
         updateBackgroundTexture();
     }
 
-    // Render it.
-    forEachPlugin(i, plugin) {
-        plugin->preBackgroundRenderActions();
-    }
-    render(GL_TRIANGLE_STRIP, m_defaultPrimPosBuffer, m_defaultTexCoordBuffer, m_backgroundTexture,
-           m_defaultTexCoordBuffer, m_whiteTexture, m_defaultElementBuffer, 4, 1.0);
-    forEachPlugin(i, plugin) {
-        plugin->postBackgroundRenderActions();
+    for (size_t i = 0; i < m_bgTexture->partitions().size(); i++) {
+        forEachPlugin(j, plugin) {
+            plugin->preBackgroundRenderActions(i);
+        }
+        render(GL_TRIANGLE_STRIP, m_bgPosBuffers[i],
+               m_defaultTexCoordBuffer, m_bgTexture->partitions()[i].texture,
+               m_defaultTexCoordBuffer, m_whiteTexture,
+               m_defaultElementBuffer, 4, 1.0);
+        forEachPlugin(j, plugin) {
+            plugin->postBackgroundRenderActions(i);
+        }
     }
 }
 
@@ -480,25 +484,25 @@ void OpenGLScreen::renderReconfigureRect() {
 
     // Convert reconfigure rectangle to OpenGL coordinates.
     GLfloat xLow, xHigh, yLow, yHigh;
-    toOpenGLCoordinates(rootWindow().width(), rootWindow().height(),
-                        reconfigureRectangle().x, reconfigureRectangle().y,
-                        reconfigureRectangle().width, reconfigureRectangle().height,
-                        &xLow, &xHigh, &yLow, &yHigh);
+    toOpenGLCoords(rootWindow().width(), rootWindow().height(),
+                   reconfigureRectangle().x, reconfigureRectangle().y,
+                   reconfigureRectangle().width, reconfigureRectangle().height,
+                   &xLow, &xHigh, &yLow, &yHigh);
     GLfloat linePosArray[] = { xLow, yLow, xHigh, yLow, xHigh, yHigh, xLow, yHigh };
 
-    m_reconfigureRectLinePosBuffer->bufferData(sizeof(linePosArray), (const GLvoid*)(linePosArray), GL_STATIC_DRAW);
+    m_recRectLinePosBuffer->bufferData(sizeof(linePosArray), (const GLvoid*)(linePosArray), GL_STATIC_DRAW);
 
     // Render it.
     glEnable(GL_COLOR_LOGIC_OP);
     glLogicOp(GL_XOR);
 
     forEachPlugin(i, plugin) {
-        plugin->preReconfigureRectRenderActions(reconfigureRectangle());
+        plugin->preRecRectRenderActions(reconfigureRectangle());
     }
-    render(GL_LINE_STRIP, m_reconfigureRectLinePosBuffer, m_defaultTexCoordBuffer, m_whiteTexture,
-           m_defaultTexCoordBuffer, m_whiteTexture, m_reconfigureRectElementBuffer, 5, 1.0);
+    render(GL_LINE_STRIP, m_recRectLinePosBuffer, m_defaultTexCoordBuffer, m_whiteTexture,
+           m_defaultTexCoordBuffer, m_whiteTexture, m_recRectElementBuffer, 5, 1.0);
     forEachPlugin(i, plugin) {
-        plugin->postReconfigureRectRenderActions(reconfigureRectangle());
+        plugin->postRecRectRenderActions(reconfigureRectangle());
     }
 
     glDisable(GL_COLOR_LOGIC_OP);

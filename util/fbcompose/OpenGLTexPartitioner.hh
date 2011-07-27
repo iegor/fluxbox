@@ -93,7 +93,7 @@ namespace FbCompositor {
         //--- ACCESSORS --------------------------------------------------------
 
         /** \returns the partitions of the current texture. */
-        std::vector<TexturePart> partitions() const;
+        const std::vector<TexturePart> &partitions() const;
 
 
         /** \returns the full height of the current texture. */
@@ -160,7 +160,7 @@ namespace FbCompositor {
     }
 
     // Returns the partitions of the current texture.
-    inline std::vector<TexturePart> OpenGL2DTexturePartition::partitions() const {
+    inline const std::vector<TexturePart> &OpenGL2DTexturePartition::partitions() const {
         return m_partitions;
     }
 
@@ -173,6 +173,10 @@ namespace FbCompositor {
     /** Space partitioning function. */
     std::vector<XRectangle> partitionSpace(int x, int y, int width, int height, int maxPartitionSize,
                                            int *unitWidth_return = 0, int *unitHeight_return = 0);
+
+    /** Partitions space directly to buffers. */
+    std::vector<OpenGLBufferPtr> partitionSpaceToBuffers(const OpenGLScreen &screen, int x, int y,
+                                                         int width, int height);
 
 
     //--- TYPEDEFS -------------------------------------------------------------

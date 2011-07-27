@@ -63,6 +63,7 @@ OpenGLBuffer::~OpenGLBuffer() {
     glDeleteBuffers(1, &m_buffer);
 }
 
+
 //------- MUTATORS -------------------------------------------------------------
 
 // Sets the buffer's contents to be the rectangle's coordinates on the screen.
@@ -70,7 +71,7 @@ void OpenGLBuffer::bufferPosRectangle(int screenWidth, int screenHeight, XRectan
     static GLfloat xLow, xHigh, yLow, yHigh;
     static GLfloat tempPosArray[8];
 
-    toOpenGLCoordinates(screenWidth, screenHeight, rect, &xLow, &xHigh, &yLow, &yHigh);
+    toOpenGLCoords(screenWidth, screenHeight, rect, &xLow, &xHigh, &yLow, &yHigh);
 
     tempPosArray[0] = tempPosArray[4] = xLow;
     tempPosArray[2] = tempPosArray[6] = xHigh;
@@ -79,6 +80,7 @@ void OpenGLBuffer::bufferPosRectangle(int screenWidth, int screenHeight, XRectan
     
     bufferData(sizeof(tempPosArray), (const GLvoid*)(tempPosArray), GL_STATIC_DRAW);
 }
+
 
 //--- OPENGL TEXTURE WRAPPER ---------------------------------------------------
 
@@ -91,6 +93,7 @@ OpenGL2DTexture::OpenGL2DTexture(const OpenGLScreen &screen, bool swizzleAlphaTo
     m_display = (Display*)(screen.display());
     m_glxPixmap = 0;
     m_pixmap = None;
+    m_pixmapManaged = false;
 
     glGenTextures(1, &m_texture);
     bind();
@@ -114,10 +117,11 @@ OpenGL2DTexture::OpenGL2DTexture(const OpenGLScreen &screen, bool swizzleAlphaTo
 // Destructor.
 OpenGL2DTexture::~OpenGL2DTexture() {
     glDeleteTextures(1, &m_texture);
+
     if (m_glxPixmap) {
         glXDestroyPixmap(m_display, m_glxPixmap);
     }
-    if (m_pixmap) {
+    if (m_pixmapManaged && m_pixmap) {
         XFreePixmap(m_display, m_pixmap);
     }
 }
@@ -128,31 +132,28 @@ OpenGL2DTexture::~OpenGL2DTexture() {
 // Sets the texture's contents to the given pixmap.
 void OpenGL2DTexture::setPixmap(Pixmap pixmap, bool managePixmap, int width, int height, bool forceDirect) {
     bind();
-    m_height = height;
-    m_width = width;
-
-    if (m_pixmap) {
-        XFreePixmap(m_display, m_pixmap);
-        m_pixmap = None;
-    }
-    if (managePixmap) {
-        m_pixmap = pixmap;
-    }
 
 #ifdef GLXEW_EXT_texture_from_pixmap
-    if (m_glxPixmap) {
+    if ((m_pixmap != pixmap) && m_glxPixmap) {
         glXReleaseTexImageEXT(m_display, m_glxPixmap, GLX_BACK_LEFT_EXT);
         glXDestroyPixmap(m_display, m_glxPixmap);
         m_glxPixmap = 0;
     }
+#endif  // GLXEW_EXT_texture_from_pixmap
 
+    if (m_pixmapManaged && m_pixmap) {
+        XFreePixmap(m_display, m_pixmap);
+    }
+    m_pixmap = pixmap;
+
+    m_height = height;
+    m_pixmapManaged = managePixmap;
+    m_width = width;
+
+#ifdef GLXEW_EXT_texture_from_pixmap
     if (!forceDirect) {
-        m_glxPixmap = glXCreatePixmap(m_display, m_screen.fbConfig(), pixmap, TEX_PIXMAP_ATTRIBUTES);
-
         if (!m_glxPixmap) {
-            fbLog_info << "Could not create GLX pixmap for pixmap to texture conversion." << std::endl;
-            return;
-        } else {
+            m_glxPixmap = glXCreatePixmap(m_display, m_screen.fbConfig(), m_pixmap, TEX_PIXMAP_ATTRIBUTES);
             glXBindTexImageEXT(m_display, m_glxPixmap, GLX_BACK_LEFT_EXT, NULL);
         }
     } else 

@@ -29,7 +29,7 @@ using namespace FbCompositor;
 //--- FUNCTIONS ----------------------------------------------------------------
 
 // Converts screen coordinates to OpenGL coordinates.
-void FbCompositor::toOpenGLCoordinates(int screenWidth, int screenHeight, int x, int y, int width, int height,
+void FbCompositor::toOpenGLCoords(int screenWidth, int screenHeight, int x, int y, int width, int height,
                                        GLfloat *xLow_return, GLfloat *xHigh_return, GLfloat *yLow_return,
                                        GLfloat *yHigh_return) {
     *xLow_return  = ((x * 2.0) / screenWidth) - 1.0;
@@ -39,9 +39,9 @@ void FbCompositor::toOpenGLCoordinates(int screenWidth, int screenHeight, int x,
 }
 
 // Converts screen coordinates to OpenGL coordinates. */
-void FbCompositor::toOpenGLCoordinates(int screenWidth, int screenHeight, XRectangle rect,
+void FbCompositor::toOpenGLCoords(int screenWidth, int screenHeight, XRectangle rect,
                                        GLfloat *xLow_return, GLfloat *xHigh_return, GLfloat *yLow_return,
                                        GLfloat *yHigh_return) {
-    toOpenGLCoordinates(screenWidth, screenHeight, rect.x, rect.y, rect.width, rect.height,
+    toOpenGLCoords(screenWidth, screenHeight, rect.x, rect.y, rect.width, rect.height,
                         xLow_return, xHigh_return, yLow_return, yHigh_return);
 }

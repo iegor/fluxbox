@@ -36,12 +36,12 @@ namespace FbCompositor {
     //--- FUNCTIONS ------------------------------------------------------------
 
     /** Converts screen coordinates to OpenGL coordinates. */
-    void toOpenGLCoordinates(int screenWidth, int screenHeight, int x, int y, int width, int height,
-                             GLfloat *xLow_return, GLfloat *xHigh_return, GLfloat *yLow_return, GLfloat *yHigh_return);
+    void toOpenGLCoords(int screenWidth, int screenHeight, int x, int y, int width, int height,
+                        GLfloat *xLow_return, GLfloat *xHigh_return, GLfloat *yLow_return, GLfloat *yHigh_return);
 
     /** Converts screen coordinates to OpenGL coordinates. */
-    void toOpenGLCoordinates(int screenWidth, int screenHeight, XRectangle rect,
-                             GLfloat *xLow_return, GLfloat *xHigh_return, GLfloat *yLow_return, GLfloat *yHigh_return);
+    void toOpenGLCoords(int screenWidth, int screenHeight, XRectangle rect,
+                        GLfloat *xLow_return, GLfloat *xHigh_return, GLfloat *yLow_return, GLfloat *yHigh_return);
 
 }
 

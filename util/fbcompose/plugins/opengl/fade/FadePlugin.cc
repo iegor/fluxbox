@@ -24,6 +24,7 @@
 #include "FadePlugin.hh"
 
 #include "BaseScreen.hh"
+#include "Exceptions.hh"
 #include "OpenGLScreen.hh"
 
 #include <algorithm>
@@ -32,23 +33,21 @@
 using namespace FbCompositor;
 
 
-namespace {
-    //--- SHADER SOURCES -------------------------------------------------------
+//--- SHADER SOURCES -----------------------------------------------------------
 
-    /** Plugin's fragment shader source. */
-    static const GLchar FRAGMENT_SHADER[] = "\
-        uniform float fade_Alpha;                                            \n\
+/** Plugin's fragment shader source. */
+const GLchar FRAGMENT_SHADER[] = "\
+    uniform float fade_Alpha;                                                \n\
                                                                              \n\
-        void fade() {                                                        \n\
-            gl_FragColor *= vec4(1.0, 1.0, 1.0, fade_Alpha);                 \n\
-        }                                                                    \n\
-    ";
+    void fade() {                                                            \n\
+        gl_FragColor *= vec4(1.0, 1.0, 1.0, fade_Alpha);                     \n\
+    }                                                                        \n\
+";
 
-    /** Plugin's vertex shader source. */
-    static const GLchar VERTEX_SHADER[] = "\
-        void fade() { }                                                      \n\
-    ";
-}
+/** Plugin's vertex shader source. */
+const GLchar VERTEX_SHADER[] = "\
+    void fade() { }                                                          \n\
+";
 
 
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
@@ -166,12 +165,12 @@ void FadePlugin::windowUnmapped(const BaseCompWindow &window) {
 //--- RENDERING ACTIONS --------------------------------------------------------
 
 // Pre background rendering actions.
-void FadePlugin::preBackgroundRenderActions() {
+void FadePlugin::preBackgroundRenderActions(int /*partId*/) {
     glUniform1f(alphaUniformPos, 1.0);
 }
 
 // Pre window rendering actions.
-void FadePlugin::preReconfigureRectRenderActions(XRectangle /*reconfigureRect*/) {
+void FadePlugin::preRecRectRenderActions(XRectangle /*recRect*/) {
     glUniform1f(alphaUniformPos, 1.0);
 }
 

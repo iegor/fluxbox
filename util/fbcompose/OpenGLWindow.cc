@@ -109,12 +109,5 @@ void OpenGLWindow::updateShape() {
 
 // Updates the window position vertex array.
 void OpenGLWindow::updateWindowPos() {
-    std::vector<XRectangle> spacePart = partitionSpace(x(), y(), realWidth(), realHeight(), openGLScreen().maxTextureSize());
-    while (spacePart.size() > m_windowPosBuffers.size()) {
-        m_windowPosBuffers.push_back(OpenGLBufferPtr(new OpenGLBuffer(openGLScreen(), GL_ARRAY_BUFFER)));
-    }
-
-    for (size_t i = 0; i < spacePart.size(); i++) {
-        m_windowPosBuffers[i]->bufferPosRectangle(screen().rootWindow().width(), screen().rootWindow().height(), spacePart[i]);
-    }
+    m_windowPosBuffers = partitionSpaceToBuffers(openGLScreen(), x(), y(), realWidth(), realHeight());
 }

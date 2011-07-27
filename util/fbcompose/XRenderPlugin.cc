@@ -31,12 +31,10 @@ using namespace FbCompositor;
 
 //--- CONSTANTS ----------------------------------------------------------------
 
-namespace {
-    /** Null rendering job. */
-    static const XRenderRenderingJob NULL_JOB = {
-            PictOpClear, XRenderPicturePtr(), XRenderPicturePtr(), 0, 0, 0, 0, 0, 0, 0, 0
-    };
-}
+/** Null rendering job. */
+const XRenderRenderingJob NULL_JOB = {
+        PictOpClear, XRenderPicturePtr(), XRenderPicturePtr(), 0, 0, 0, 0, 0, 0, 0, 0
+};
 
 
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------

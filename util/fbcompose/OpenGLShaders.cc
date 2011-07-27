@@ -23,6 +23,7 @@
 
 #include "OpenGLShaders.hh"
 
+#include "Exceptions.hh"
 #include "Logging.hh"
 #include "OpenGLPlugin.hh"
 
@@ -31,68 +32,66 @@
 using namespace FbCompositor;
 
 
-namespace {
-    //--- CONSTANTS ------------------------------------------------------------
+//--- CONSTANTS ----------------------------------------------------------------
 
-    /** Size of the info log buffer. */
-    static const int INFO_LOG_BUFFER_SIZE = 256;
+/** Size of the info log buffer. */
+const int INFO_LOG_BUFFER_SIZE = 256;
 
 
-    //--- VERTEX SHADER SOURCE -------------------------------------------------
+//--- VERTEX SHADER SOURCE -----------------------------------------------------
 
-    /** Head of the vertex shader source code. */
-    static const GLchar VERTEX_SHADER_HEAD[] = "\
-        #version 120                                                         \n\
+/** Head of the vertex shader source code. */
+const GLchar VERTEX_SHADER_HEAD[] = "\
+    #version 120                                                             \n\
                                                                              \n\
-        attribute vec2 fb_InitMainTexCoord;                                  \n\
-        attribute vec2 fb_InitPrimPos;                                       \n\
-        attribute vec2 fb_InitShapeTexCoord;                                 \n\
+    attribute vec2 fb_InitMainTexCoord;                                      \n\
+    attribute vec2 fb_InitPrimPos;                                           \n\
+    attribute vec2 fb_InitShapeTexCoord;                                     \n\
                                                                              \n\
-        varying vec2 fb_MainTexCoord;                                        \n\
-        varying vec2 fb_ShapeTexCoord;                                       \n\
-    ";
+    varying vec2 fb_MainTexCoord;                                            \n\
+    varying vec2 fb_ShapeTexCoord;                                           \n\
+";
 
-    /** Middle of the vertex shader source code. */
-    static const GLchar VERTEX_SHADER_MIDDLE[] = "\
-        void main() {                                                        \n\
-            gl_Position = vec4(fb_InitPrimPos, 0.0, 1.0);                    \n\
-            fb_MainTexCoord = fb_InitMainTexCoord;                           \n\
-            fb_ShapeTexCoord = fb_InitShapeTexCoord;                         \n\
-    ";
+/** Middle of the vertex shader source code. */
+const GLchar VERTEX_SHADER_MIDDLE[] = "\
+    void main() {                                                            \n\
+        gl_Position = vec4(fb_InitPrimPos, 0.0, 1.0);                        \n\
+        fb_MainTexCoord = fb_InitMainTexCoord;                               \n\
+        fb_ShapeTexCoord = fb_InitShapeTexCoord;                             \n\
+";
 
-    /** Tail of the vertex shader source code. */
-    static const GLchar VERTEX_SHADER_TAIL[] = "\
-        }                                                                    \n\
-    ";
+/** Tail of the vertex shader source code. */
+const GLchar VERTEX_SHADER_TAIL[] = "\
+    }                                                                        \n\
+";
 
 
-    //--- FRAGMENT SHADER SOURCE -----------------------------------------------
+//--- FRAGMENT SHADER SOURCE ---------------------------------------------------
 
-    /** Head of the fragment shader source code. */
-    static const GLchar FRAGMENT_SHADER_HEAD[] = "\
-        #version 120                                                         \n\
+/** Head of the fragment shader source code. */
+const GLchar FRAGMENT_SHADER_HEAD[] = "\
+    #version 120                                                             \n\
                                                                              \n\
-        uniform float fb_Alpha;                                              \n\
-        uniform sampler2D fb_MainTexture;                                    \n\
-        uniform sampler2D fb_ShapeTexture;                                   \n\
+    uniform float fb_Alpha;                                                  \n\
+    uniform sampler2D fb_MainTexture;                                        \n\
+    uniform sampler2D fb_ShapeTexture;                                       \n\
                                                                              \n\
-        varying vec2 fb_MainTexCoord;                                        \n\
-        varying vec2 fb_ShapeTexCoord;                                       \n\
-    ";
+    varying vec2 fb_MainTexCoord;                                            \n\
+    varying vec2 fb_ShapeTexCoord;                                           \n\
+";
 
-    /** Middle of the fragment shader source code. */
-    static const GLchar FRAGMENT_SHADER_MIDDLE[] = "\
-        void main() {                                                        \n\
-            gl_FragColor = texture2D(fb_MainTexture, fb_MainTexCoord)        \n\
-                           * texture2D(fb_ShapeTexture, fb_ShapeTexCoord)    \n\
-                           * vec4(1.0, 1.0, 1.0, fb_Alpha);                  \n\
-    ";
+/** Middle of the fragment shader source code. */
+const GLchar FRAGMENT_SHADER_MIDDLE[] = "\
+    void main() {                                                            \n\
+        gl_FragColor = texture2D(fb_MainTexture, fb_MainTexCoord)            \n\
+                       * texture2D(fb_ShapeTexture, fb_ShapeTexCoord)        \n\
+                       * vec4(1.0, 1.0, 1.0, fb_Alpha);                      \n\
+";
 
-    /** Tail of the fragment shader source code. */
-    static const GLchar FRAGMENT_SHADER_TAIL[] = "\
-        }                                                                    \n\
-    ";
-}
+/** Tail of the fragment shader source code. */
+const GLchar FRAGMENT_SHADER_TAIL[] = "\
+    }                                                                        \n\
+";
 
 
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------

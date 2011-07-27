@@ -26,7 +26,6 @@
 
 
 #include "Enumerations.hh"
-#include "Exceptions.hh"
 #include "OpenGLPlugin.hh"
 #include "OpenGLResources.hh"
 #include "OpenGLTexPartitioner.hh"
@@ -46,11 +45,7 @@
 namespace FbCompositor {
 
     class BaseScreen;
-    class FadePlugin;
-    class InitException;
-    class OpenGLPlugin;
     class OpenGLWindow;
-    class TickTracker;
 
 
     /**
@@ -101,10 +96,10 @@ namespace FbCompositor {
         //--- RENDERING ACTIONS ------------------------------------------------
 
         /** Pre background rendering actions. */
-        void preBackgroundRenderActions();
+        void preBackgroundRenderActions(int partId);
 
         /** Pre window rendering actions. */
-        void preReconfigureRectRenderActions(XRectangle reconfigureRect);
+        void preRecRectRenderActions(XRectangle recRect);
 
         /** Pre window rendering actions. */
         void preWindowRenderActions(const OpenGLWindow &window, int partId);
