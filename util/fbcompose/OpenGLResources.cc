@@ -144,12 +144,13 @@ void OpenGL2DTexture::setPixmap(Pixmap pixmap, bool managePixmap, int width, int
 
         if (m_pixmapManaged && m_pixmap) {
             XFreePixmap(m_display, m_pixmap);
-            m_pixmap = pixmap;
+            m_pixmap = None;
         }
     }
 
     m_height = height;
     m_pixmapManaged = managePixmap;
+    m_pixmap = pixmap;
     m_width = width;
 
 #ifdef GLXEW_EXT_texture_from_pixmap
