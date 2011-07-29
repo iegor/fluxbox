@@ -21,7 +21,13 @@
 // THE SOFTWARE.
 
 
-#include "Compositor.hh"
+#ifdef HAVE_CONFIG_H
+    #include "config.h"
+#endif  // HAVE_CONFIG_H
+
+#ifndef SERVERAUTO_COMPOSITING_ONLY
+    #include "Compositor.hh"
+#endif  // SERVERAUTO_COMPOSITING_ONLY
 #include "CompositorConfig.hh"
 #include "Enumerations.hh"
 #include "Exceptions.hh"
@@ -55,10 +61,13 @@ int main(int argc, char **argv) {
         if (config.renderingMode() == RM_ServerAuto) {
             ServerAutoApp app(config);
             app.eventLoop();
-        } else {
+        }
+#ifndef SERVERAUTO_COMPOSITING_ONLY
+        else {
             Compositor app(config);
             app.eventLoop();
         }
+#endif  // SERVERAUTO_COMPOSITING_ONLY
     } catch (const ConfigException &e) {
         std::cerr << e.what() << std::endl;
         CompositorConfig::printShortHelp(std::cerr);

@@ -228,7 +228,7 @@ if test "x$enableval" = "xyes" -a "x$BUILD_FBCOMPOSE" = "xtrue"; then
                  [AC_DEFINE(HAVE_XRENDER,[1],[Define to 1 if you have XRender.])],
                  [AC_MSG_ERROR([Could not find X render extension.])])
     AC_CHECK_LIB([Xfixes],[XFixesCreateRegion],
-                 [AC_DEFINE(SHAPE,[1],[Define to 1 if you have XFixes.])],
+                 [AC_DEFINE(HAVE_XFIXES,[1],[Define to 1 if you have XFixes.])],
                  [AC_MSG_ERROR([Could not find X fixes extension.])])
     AC_CHECK_LIB([Xext],[XShapeCombineShape],
                  [AC_DEFINE(SHAPE,[1],[Define to 1 if you have SHAPE.])],
@@ -266,7 +266,7 @@ if test "x$enableval" = "xyes" -a "x$BUILD_FBCOMPOSE" = "xtrue"; then
                  [AC_DEFINE(HAVE_XRENDER,[1],[Define to 1 if you have XRender.])],
                  [AC_MSG_ERROR([Could not find X render extension.])])
     AC_CHECK_LIB([Xfixes],[XFixesCreateRegion],
-                 [AC_DEFINE(SHAPE,[1],[Define to 1 if you have XFixes.])],
+                 [AC_DEFINE(HAVE_XFIXES,[1],[Define to 1 if you have XFixes.])],
                  [AC_MSG_ERROR([Could not find X fixes extension.])])
     AC_CHECK_LIB([Xext],[XShapeCombineShape],
                  [AC_DEFINE(SHAPE,[1],[Define to 1 if you have SHAPE.])],
@@ -279,6 +279,14 @@ else
     OPENGL_COMPOSITING=false
 fi
 AM_CONDITIONAL(OPENGL_COMPOSITING, test x$OPENGL_COMPOSITING = xtrue)
+
+if test x$OPENGL_COMPOSITING = xfalse -a x$XRENDER_COMPOSITING = xfalse; then
+    AM_CONDITIONAL(SERVERAUTO_COMPOSITING_ONLY, true)
+    AC_DEFINE(SERVERAUTO_COMPOSITING_ONLY,[1],
+              [Set to 1 only if both OPENGL_COMPOSITING and XRENDER_COMPOSITING are undefined or 0.])
+else
+    AM_CONDITIONAL(SERVERAUTO_COMPOSITING_ONLY, false)
+fi
 
 AM_ICONV
 AS_IF([test x$am_cv_proto_iconv_arg1 = "xconst"], [

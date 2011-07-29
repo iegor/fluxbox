@@ -20,6 +20,19 @@
 
 bin_PROGRAMS += fbcompose
 
+if SERVERAUTO_COMPOSITING_ONLY
+fbcompose_main_SOURCES = \
+	util/fbcompose/BaseCompWindow.hh util/fbcompose/BaseCompWindow.cc \
+	util/fbcompose/BasePlugin.hh util/fbcompose/BasePlugin.cc \
+	util/fbcompose/BaseScreen.hh util/fbcompose/BaseScreen.cc \
+	util/fbcompose/Compositor.hh util/fbcompose/Compositor.cc \
+	util/fbcompose/PluginManager.hh util/fbcompose/PluginManager.cc \
+	util/fbcompose/TickTracker.hh util/fbcompose/TickTracker.cc \
+	util/fbcompose/Utility.hh util/fbcompose/Utility.cc
+else
+fbcompose_main_SOURCES =
+endif # SERVERAUTO_COMPOSITING_ONLY
+
 if OPENGL_COMPOSITING
 fbcompose_opengl_SOURCES = \
 	util/fbcompose/OpenGLPlugin.hh util/fbcompose/OpenGLPlugin.cc \
@@ -58,18 +71,12 @@ fbcompose_CXXFLAGS = \
 fbcompose_SOURCES = \
 	util/fbcompose/main.cc \
 	util/fbcompose/Atoms.hh util/fbcompose/Atoms.cc \
-	util/fbcompose/BaseCompWindow.hh util/fbcompose/BaseCompWindow.cc \
-	util/fbcompose/BasePlugin.hh util/fbcompose/BasePlugin.cc \
-	util/fbcompose/BaseScreen.hh util/fbcompose/BaseScreen.cc \
-	util/fbcompose/Compositor.hh util/fbcompose/Compositor.cc \
 	util/fbcompose/CompositorConfig.hh util/fbcompose/CompositorConfig.cc \
 	util/fbcompose/Enumerations.hh \
 	util/fbcompose/Exceptions.hh \
 	util/fbcompose/Logging.hh util/fbcompose/Logging.cc \
-	util/fbcompose/PluginManager.hh util/fbcompose/PluginManager.cc \
 	util/fbcompose/ServerAutoApp.hh util/fbcompose/ServerAutoApp.cc \
-	util/fbcompose/TickTracker.hh util/fbcompose/TickTracker.cc \
-	util/fbcompose/Utility.hh util/fbcompose/Utility.cc \
+    ${fbcompose_main_SOURCES} \
 	${fbcompose_opengl_SOURCES} \
 	${fbcompose_xrender_SOURCES}
 

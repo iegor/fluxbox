@@ -59,13 +59,11 @@ BaseCompWindow::BaseCompWindow(const BaseScreen &screen, Window windowXID) :
 
     m_isIgnored = false;
 
-#ifdef HAVE_XDAMAGE
     if (m_class == InputOutput) {
         m_damage = XDamageCreate(display(), window(), XDamageReportNonEmpty);
     } else {
         m_damage = 0;
     }
-#endif  // HAVE_XDAMAGE
 
     m_contentPixmap = None;
 
@@ -171,10 +169,8 @@ void BaseCompWindow::clearDamage() {
 
 // Updates the window's content pixmap.
 void BaseCompWindow::updateContentPixmap() {
-#ifdef HAVE_XDAMAGE
     // We must reset the damage here, otherwise we may miss damage events.
     XDamageSubtract(display(), m_damage, None, None);
-#endif  // HAVE_XDAMAGE
 
     if (m_isResized || m_isRemapped) {
         XGrabServer(display());

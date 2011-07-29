@@ -24,18 +24,12 @@
 #ifndef FBCOMPOSITOR_WINDOW_HH
 #define FBCOMPOSITOR_WINDOW_HH
 
-#ifdef HAVE_CONFIG_H
-    #include "config.h"
-#endif  // HAVE_CONFIG_H
-
 #include "Enumerations.hh"
 
 #include "FbTk/FbWindow.hh"
 
 #include <X11/Xlib.h>
-#ifdef HAVE_XDAMAGE
-    #include <X11/extensions/Xdamage.h>
-#endif  // HAVE_XDAMAGE
+#include <X11/extensions/Xdamage.h>
 
 #include <iosfwd>
 #include <vector>
@@ -246,10 +240,8 @@ namespace FbCompositor {
         /** Window's content pixmap. */
         Pixmap m_contentPixmap;
 
-#ifdef HAVE_XDAMAGE
         /** Window's damage object. */
         Damage m_damage;
-#endif  // HAVE_XDAMAGE
 
         /** Shows whether the window is damaged. */
         bool m_isDamaged;
