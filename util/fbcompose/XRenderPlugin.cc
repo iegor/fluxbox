@@ -29,14 +29,6 @@
 using namespace FbCompositor;
 
 
-//--- CONSTANTS ----------------------------------------------------------------
-
-/** Null rendering job. */
-const XRenderRenderingJob NULL_JOB = {
-        PictOpClear, XRenderPicturePtr(), XRenderPicturePtr(), 0, 0, 0, 0, 0, 0, 0, 0
-};
-
-
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Costructor.
@@ -57,49 +49,42 @@ const XRenderScreen &XRenderPlugin::xrenderScreen() const {
 }
 
 
-//--- PLUGIN ACTIONS -----------------------------------------------------------
+//--- RENDERING ACTIONS --------------------------------------------------------
 
-// Extra background rendering job.
-XRenderRenderingJob XRenderPlugin::extraBackgroundRenderingJob() {
-    return NULL_JOB;
+// Rectangles that the plugin wishes to damage.
+std::vector<XRectangle> XRenderPlugin::damagedAreas() {
+    return std::vector<XRectangle>();
 }
 
-// Reconfigure rectangle rendering options.
-void XRenderPlugin::reconfigureRectRenderActions(XRectangle &/*rect_return*/, GC /*gc*/) { }
 
-
-// Extra pre window rendering job.
-XRenderRenderingJob XRenderPlugin::extraPreWindowRenderingJob(const XRenderWindow &/*window*/) {
-    return NULL_JOB;
+// Post background rendering actions and jobs.
+std::vector<XRenderRenderingJob> XRenderPlugin::postBackgroundRenderingActions() {
+    return std::vector<XRenderRenderingJob>();
 }
 
-// Window rendering options.
+
+// Pre window rendering actions and jobs.
+std::vector<XRenderRenderingJob> XRenderPlugin::preWindowRenderingActions(const XRenderWindow &/*window*/) {
+    return std::vector<XRenderRenderingJob>();
+}
+
+// Window rendering job initialization.
 void XRenderPlugin::windowRenderingJobInit(const XRenderWindow &/*window*/, XRenderRenderingJob &/*job*/) { }
 
-// Window rendering job cleanup.
-void XRenderPlugin::windowRenderingJobCleanup(const XRenderWindow &/*window*/) { }
-
-// Extra post window rendering job.
-XRenderRenderingJob XRenderPlugin::extraPostWindowRenderingJob(const XRenderWindow &/*window*/) {
-    return NULL_JOB;
+// Post window rendering actions and jobs.
+std::vector<XRenderRenderingJob> XRenderPlugin::postWindowRenderingActions(const XRenderWindow &/*window*/) {
+    return std::vector<XRenderRenderingJob>();
 }
 
 
-// Called before the extra rendering jobs are executed.
-void XRenderPlugin::preExtraRenderingActions() { }
+// Reconfigure rectangle rendering job initialization.
+void XRenderPlugin::recRectRenderingJobInit(XRectangle &/*rect_return*/, GC /*gc*/) { }
 
-// Returns the number of extra rendering jobs the plugin will do.
-int XRenderPlugin::extraRenderingJobCount() {
-    return 0;
+
+// Extra rendering actions and jobs.
+std::vector<XRenderRenderingJob> XRenderPlugin::extraRenderingActions() {
+    return std::vector<XRenderRenderingJob>();
 }
 
-// Initialize the specified extra rendering job.
-XRenderRenderingJob XRenderPlugin::extraRenderingJobInit(int /*jobId*/) {
-    return NULL_JOB;
-}
-
-// Clean up after an extra rendering job.
-void XRenderPlugin::extraRenderingJobCleanup(int /*jobId*/) { }
-
-// Called after the extra rendering jobs are executed.
+// Post extra rendering actions.
 void XRenderPlugin::postExtraRenderingActions() { }

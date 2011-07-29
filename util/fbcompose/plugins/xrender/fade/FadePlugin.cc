@@ -51,13 +51,11 @@ FadePlugin::~FadePlugin() { }
 
 // Called, whenever a window becomes ignored.
 void FadePlugin::windowBecameIgnored(const BaseCompWindow &window) {
-    // Remove the window's positive fade, if any.
     std::map<Window, PosFadeData>::iterator posIt = m_positiveFades.find(window.window());
     if (posIt != m_positiveFades.end()) {
         m_positiveFades.erase(posIt);
     } 
 
-    // Remove the window's negative fade, if any.
     std::vector<NegFadeData>::iterator negIt = m_negativeFades.begin();
     while (negIt != m_negativeFades.end()) {
         if (negIt->windowId == window.window()) {
@@ -72,7 +70,6 @@ void FadePlugin::windowBecameIgnored(const BaseCompWindow &window) {
 void FadePlugin::windowMapped(const BaseCompWindow &window) {
     PosFadeData fade;
 
-    // Is the window being faded out?
     std::vector<NegFadeData>::iterator it = m_negativeFades.begin();
     while (true) {
         if (it == m_negativeFades.end()) {
@@ -89,11 +86,10 @@ void FadePlugin::windowMapped(const BaseCompWindow &window) {
         }
     }
 
-    // Initialize the remaining fields.
+    fade.dimensions = window.dimensions();
     fade.timer.setTickSize(250000 / 255);
     fade.timer.start();
 
-    // Track the fade.
     m_positiveFades.insert(std::make_pair(window.window(), fade));
 }
 
@@ -102,7 +98,6 @@ void FadePlugin::windowUnmapped(const BaseCompWindow &window) {
     const XRenderWindow &xrWindow = dynamic_cast<const XRenderWindow&>(window);
     NegFadeData fade;
 
-    // Is the window being faded in?
     std::map<Window, PosFadeData>::iterator it = m_positiveFades.find(window.window());
     if (it != m_positiveFades.end()) {
         fade.fadeAlpha = it->second.fadeAlpha;
@@ -113,22 +108,49 @@ void FadePlugin::windowUnmapped(const BaseCompWindow &window) {
         fade.fadePicture = new XRenderPicture(xrenderScreen(), m_fadePictFormat, xrenderScreen().pictFilter());
     }
 
-    // Initialize the remaining fields.
-    fade.contentPicture = xrWindow.contentPicture();
     fade.dimensions = xrWindow.dimensions();
     fade.maskPicture = xrWindow.maskPicture();
-    fade.origAlpha = xrWindow.alpha();
     fade.windowId = xrWindow.window();
+
+    fade.job.operation = PictOpOver;
+    fade.job.sourcePicture = xrWindow.contentPicture();
+    fade.job.sourceX = 0;
+    fade.job.sourceY = 0;
+    fade.job.maskX = 0;
+    fade.job.maskY = 0;
+    fade.job.destinationX = xrWindow.x();
+    fade.job.destinationY = xrWindow.y();
+    fade.job.width = xrWindow.realWidth();
+    fade.job.height = xrWindow.realHeight();
 
     fade.timer.setTickSize(250000 / 255);
     fade.timer.start();
 
-    // Track the fade.
     m_negativeFades.push_back(fade);
 }
 
 
 //--- RENDERING ACTIONS --------------------------------------------------------
+
+// Rectangles that the plugin wishes to damage.
+std::vector<XRectangle> FadePlugin::damagedAreas() {
+    std::vector<XRectangle> rects;
+
+    std::map<Window, PosFadeData>::iterator posIt = m_positiveFades.begin();
+    while (posIt != m_positiveFades.end()) {
+        rects.push_back(posIt->second.dimensions);
+        ++posIt;
+    }
+
+    std::vector<NegFadeData>::iterator negIt = m_negativeFades.begin();
+    while (negIt != m_negativeFades.end()) {
+        rects.push_back(negIt->dimensions);
+        ++negIt;
+    }
+
+    return rects;
+}
+
 
 // Window rendering job initialization.
 void FadePlugin::windowRenderingJobInit(const XRenderWindow &window, XRenderRenderingJob &job) {
@@ -156,67 +178,55 @@ void FadePlugin::windowRenderingJobInit(const XRenderWindow &window, XRenderRend
     }
 }
 
-// Window rendering job cleanup.
-void FadePlugin::windowRenderingJobCleanup(const XRenderWindow &window) {
-    std::map<Window, PosFadeData>::iterator it = m_positiveFades.find(window.window());
-    if (it != m_positiveFades.end()) {
-        if (it->second.fadeAlpha >= 255) {
-            m_positiveFades.erase(it);
-        }
-    }
-}
+// Extra rendering actions and jobs.
+std::vector<XRenderRenderingJob> FadePlugin::extraRenderingActions() {
+    std::vector<XRenderRenderingJob> extraJobs;
 
-
-// Returns the number of extra rendering jobs the plugin will do.
-int FadePlugin::extraRenderingJobCount() {
-    return m_negativeFades.size();
-}
-
-// Initialize the specified extra rendering job.
-XRenderRenderingJob FadePlugin::extraRenderingJobInit(int jobId) {
-    NegFadeData &curFade = m_negativeFades[jobId];
-
-    // Set up the fade mask.
-    int newTicks;
-    try {
-        newTicks = curFade.timer.newElapsedTicks();
-    } catch (const TimeException &e) {
-        newTicks = 255;
-    }
-
-    if ((newTicks > 0) || (curFade.fadePicture->pictureHandle() == None)) {
-        curFade.fadeAlpha -= newTicks;
-        if (curFade.fadeAlpha < 0) {
-            curFade.fadeAlpha = 0;
+    for (size_t i = 0; i < m_negativeFades.size(); i++) {
+        int newTicks;
+        try {
+            newTicks = m_negativeFades[i].timer.newElapsedTicks();
+        } catch (const TimeException &e) {
+            newTicks = 255;
         }
 
-        createFadedMask(curFade.fadeAlpha, curFade.maskPicture, curFade.dimensions, curFade.fadePicture);
+        if ((newTicks > 0) || (m_negativeFades[i].fadePicture->pictureHandle() == None)) {
+            m_negativeFades[i].fadeAlpha -= newTicks;
+            if (m_negativeFades[i].fadeAlpha < 0) {
+                m_negativeFades[i].fadeAlpha = 0;
+            }
+
+            createFadedMask(m_negativeFades[i].fadeAlpha, m_negativeFades[i].maskPicture,
+                            m_negativeFades[i].dimensions, m_negativeFades[i].fadePicture);
+        }
+
+        m_negativeFades[i].job.maskPicture = m_negativeFades[i].fadePicture;
+        extraJobs.push_back(m_negativeFades[i].job);
     }
 
-    // Return the job.
-    XRenderRenderingJob extraJob;
-    extraJob.operation = PictOpOver;
-    extraJob.sourcePicture = curFade.contentPicture;
-    extraJob.maskPicture = curFade.fadePicture;
-    extraJob.sourceX = 0;
-    extraJob.sourceY = 0;
-    extraJob.maskX = 0;
-    extraJob.maskY = 0;
-    extraJob.destinationX = curFade.dimensions.x;
-    extraJob.destinationY = curFade.dimensions.y;
-    extraJob.width = curFade.dimensions.width;
-    extraJob.height = curFade.dimensions.height;
-    return extraJob;
+    return extraJobs;
 }
 
 // Called after the extra rendering jobs are executed.
 void FadePlugin::postExtraRenderingActions() {
-    std::vector<NegFadeData>::iterator it = m_negativeFades.begin();
-    while (it != m_negativeFades.end()) {
-        if (it->fadeAlpha <= 0) {
-            it = m_negativeFades.erase(it);
+    std::map<Window, PosFadeData>::iterator posIt = m_positiveFades.begin();
+    std::map<Window, PosFadeData>::iterator posIt2;
+    while (posIt != m_positiveFades.end()) {
+        if (posIt->second.fadeAlpha >= 255) {
+            posIt2 = posIt;
+            ++posIt;
+            m_positiveFades.erase(posIt2);
         } else {
-            ++it;
+            ++posIt;
+        }
+    }
+
+    std::vector<NegFadeData>::iterator negIt = m_negativeFades.begin();
+    while (negIt != m_negativeFades.end()) {
+        if (negIt->fadeAlpha <= 0) {
+            negIt = m_negativeFades.erase(negIt);
+        } else {
+            ++negIt;
         }
     }
 }

@@ -87,39 +87,32 @@ namespace FbCompositor {
 
         //--- RENDERING ACTIONS ------------------------------------------------
 
-        /** Extra background rendering job. */
-        virtual XRenderRenderingJob extraBackgroundRenderingJob();
-
-        /** Reconfigure rectangle rendering options. */
-        virtual void reconfigureRectRenderActions(XRectangle &rect_return, GC gc);
+        /** Rectangles that the plugin wishes to damage. */
+        virtual std::vector<XRectangle> damagedAreas();
 
 
-        /** Extra pre window rendering job. */
-        virtual XRenderRenderingJob extraPreWindowRenderingJob(const XRenderWindow &window);
+        /** Post background rendering actions and jobs. */
+        virtual std::vector<XRenderRenderingJob> postBackgroundRenderingActions();
+
+
+        /** Pre window rendering actions and jobs. */
+        virtual std::vector<XRenderRenderingJob> preWindowRenderingActions(const XRenderWindow &window);
 
         /** Window rendering job initialization. */
         virtual void windowRenderingJobInit(const XRenderWindow &window, XRenderRenderingJob &job);
 
-        /** Window rendering job cleanup. */
-        virtual void windowRenderingJobCleanup(const XRenderWindow &window);
-
-        /** Extra post window rendering job. */
-        virtual XRenderRenderingJob extraPostWindowRenderingJob(const XRenderWindow &window);
+        /** Post window rendering actions and jobs. */
+        virtual std::vector<XRenderRenderingJob> postWindowRenderingActions(const XRenderWindow &window);
 
 
-        /** Called before the extra rendering jobs are executed. */
-        virtual void preExtraRenderingActions();
+        /** Reconfigure rectangle rendering job initialization. */
+        virtual void recRectRenderingJobInit(XRectangle &rect_return, GC gc);
 
-        /** \returns the number of extra rendering jobs the plugin will do. */
-        virtual int extraRenderingJobCount();
 
-        /** Initialize the specified extra rendering job. */
-        virtual XRenderRenderingJob extraRenderingJobInit(int jobId);
+        /** Extra rendering actions and jobs. */
+        virtual std::vector<XRenderRenderingJob> extraRenderingActions();
 
-        /** Clean up after an extra rendering job. */
-        virtual void extraRenderingJobCleanup(int jobId);
-
-        /** Called after the extra rendering jobs are executed. */
+        /** Post extra rendering actions. */
         virtual void postExtraRenderingActions();
     };
 }

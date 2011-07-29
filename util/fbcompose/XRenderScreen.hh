@@ -99,6 +99,12 @@ namespace FbCompositor {
 
         //--- RENDERING FUNCTIONS ----------------------------------------------
 
+        /** Clips the backbuffer picture to damaged area. */
+        void clipBackBufferToDamage();
+
+        /** Perform a rendering job on the back buffer picture. */
+        void executeRenderingJob(XRenderRenderingJob job);
+
         /** Render the desktop wallpaper. */
         void renderBackground();
 
@@ -110,9 +116,6 @@ namespace FbCompositor {
 
         /** Render a particular window onto the screen. */
         void renderWindow(XRenderWindow &window);
-
-        /** Perform a rendering job on the back buffer picture. */
-        void renderToBackBuffer(XRenderRenderingJob job);
 
         /** Swap back and front buffers. */
         void swapBuffers();

@@ -178,15 +178,10 @@ void XRenderScreen::updateBackgroundPicture() {
 
 // Renders the screen's contents.
 void XRenderScreen::renderScreen() {
-    // Limit rendering to damaged areas only.
-    XserverRegion damagedArea = damagedScreenArea();
-    XFixesSetPictureClipRegion(display(), m_backBufferPicture->pictureHandle(), 0, 0, damagedArea);
-    XFixesDestroyRegion(display(), damagedArea);
+    clipBackBufferToDamage();
 
-    // Render desktop background.
     renderBackground();
 
-    // Render windows.
     std::list<BaseCompWindow*>::const_iterator it = allWindows().begin();
     while (it != allWindows().end()) {
         if (!(*it)->isIgnored() && (*it)->isMapped()) {
@@ -195,16 +190,45 @@ void XRenderScreen::renderScreen() {
         ++it;
     }
 
-    // Render reconfigure rectangle.
     if ((reconfigureRectangle().width != 0) && (reconfigureRectangle().height != 0)) {
         renderReconfigureRect();
     }
     
-    // Perform any extra rendering jobs from plugins.
     renderExtraJobs();
 
-    // Swap buffers.
     swapBuffers();
+}
+
+// Clips the backbuffer picture to damaged area.
+void XRenderScreen::clipBackBufferToDamage() {
+    XRenderPlugin *plugin = NULL;
+
+    std::vector<XRectangle> pluginDamageRects;
+    forEachPlugin(i, plugin) {
+        std::vector<XRectangle> rects = plugin->damagedAreas();
+        for (size_t j = 0; j < rects.size(); j++) {
+            pluginDamageRects.push_back(rects[j]);
+        }
+    }
+    XserverRegion pluginDamage = XFixesCreateRegion(display(), (XRectangle*)(pluginDamageRects.data()), pluginDamageRects.size());
+
+    XserverRegion allDamage = damagedScreenArea();
+    XFixesUnionRegion(display(), allDamage, allDamage, pluginDamage);
+
+    XFixesSetPictureClipRegion(display(), m_backBufferPicture->pictureHandle(), 0, 0, allDamage);
+
+    XFixesDestroyRegion(display(), allDamage);
+    XFixesDestroyRegion(display(), pluginDamage);
+}
+
+// Perform a rendering job on the back buffer picture.
+void XRenderScreen::executeRenderingJob(XRenderRenderingJob job) {
+    if (job.operation != PictOpClear) {
+        XRenderComposite(display(), job.operation,
+                         job.sourcePicture->pictureHandle(), job.maskPicture->pictureHandle(),
+                         m_backBufferPicture->pictureHandle(), job.sourceX, job.sourceY,
+                         job.maskX, job.maskY, job.destinationX, job.destinationY, job.width, job.height);
+    }
 }
 
 // Render the desktop wallpaper.
@@ -219,13 +243,15 @@ void XRenderScreen::renderBackground() {
     XRenderComposite(display(), PictOpSrc, m_rootPicture->pictureHandle(), None, m_backBufferPicture->pictureHandle(),
                      0, 0, 0, 0, 0, 0, rootWindow().width(), rootWindow().height());
 
-    // Additional rendering of desktop.
+    // Additional rendering actions.
     XRenderPlugin *plugin = NULL;
     XRenderRenderingJob job;
     
     forEachPlugin(i, plugin) {
-        job = plugin->extraBackgroundRenderingJob();
-        renderToBackBuffer(job);
+        std::vector<XRenderRenderingJob> jobs = plugin->postBackgroundRenderingActions();
+        for (size_t j = 0; j < jobs.size(); j++) {
+            executeRenderingJob(jobs[j]);
+        }
     }
 }
 
@@ -235,14 +261,10 @@ void XRenderScreen::renderExtraJobs() {
     XRenderRenderingJob job;
 
     forEachPlugin(i, plugin) {
-        plugin->preExtraRenderingActions();
-
-        for (int j = 0; j < plugin->extraRenderingJobCount(); j++) {
-            job = plugin->extraRenderingJobInit(j);
-            renderToBackBuffer(job);
-            plugin->extraRenderingJobCleanup(j);
+        std::vector<XRenderRenderingJob> jobs = plugin->extraRenderingActions();
+        for (size_t j = 0; j < jobs.size(); j++) {
+            executeRenderingJob(jobs[j]);
         }
-
         plugin->postExtraRenderingActions();
     }
 }
@@ -257,7 +279,7 @@ void XRenderScreen::renderReconfigureRect() {
     XSetLineAttributes(display(), m_backBufferPicture->gcHandle(), 1, LineSolid, CapNotLast, JoinMiter);
 
     forEachPlugin(i, plugin) {
-        plugin->reconfigureRectRenderActions(rect, m_backBufferPicture->gcHandle());
+        plugin->recRectRenderingJobInit(rect, m_backBufferPicture->gcHandle());
     }
     XDrawRectangles(display(), m_backBufferPicture->drawableHandle(),
                     m_backBufferPicture->gcHandle(), &rect, 1);
@@ -273,13 +295,15 @@ void XRenderScreen::renderWindow(XRenderWindow &window) {
         window.updateContents();
     }
 
-    // Extra rendering jobs before the window is drawn.
+    // Extra rendering actions before window is drawn.
     forEachPlugin(i, plugin) {
-        job = plugin->extraPreWindowRenderingJob(window);
-        renderToBackBuffer(job);
+        std::vector<XRenderRenderingJob> jobs = plugin->preWindowRenderingActions(window);
+        for (size_t j = 0; j < jobs.size(); j++) {
+            executeRenderingJob(jobs[j]);
+        }
     }
 
-    // Render the window.
+    // Draw the window.
     job.operation = PictOpOver;
     job.sourcePicture = window.contentPicture();
     job.maskPicture = window.maskPicture();
@@ -295,25 +319,14 @@ void XRenderScreen::renderWindow(XRenderWindow &window) {
     forEachPlugin(i, plugin) {
         plugin->windowRenderingJobInit(window, job);
     }
-    renderToBackBuffer(job);
-    forEachPlugin(i, plugin) {
-        plugin->windowRenderingJobCleanup(window);
-    }
+    executeRenderingJob(job);
 
-    // Extra rendering jobs after the window is drawn.
+    // Extra rendering actions after window is drawn.
     forEachPlugin(i, plugin) {
-        job = plugin->extraPostWindowRenderingJob(window);
-        renderToBackBuffer(job);
-    }
-}
-
-// Perform a rendering job on the back buffer picture.
-void XRenderScreen::renderToBackBuffer(XRenderRenderingJob job) {
-    if (job.operation != PictOpClear) {
-        XRenderComposite(display(), job.operation,
-                         job.sourcePicture->pictureHandle(), job.maskPicture->pictureHandle(),
-                         m_backBufferPicture->pictureHandle(), job.sourceX, job.sourceY,
-                         job.maskX, job.maskY, job.destinationX, job.destinationY, job.width, job.height);
+        std::vector<XRenderRenderingJob> jobs = plugin->postWindowRenderingActions(window);
+        for (size_t j = 0; j < jobs.size(); j++) {
+            executeRenderingJob(jobs[j]);
+        }
     }
 }
 

@@ -85,20 +85,18 @@ namespace FbCompositor {
 
         //--- RENDERING ACTIONS ------------------------------------------------
 
+        /** Rectangles that the plugin wishes to damage. */
+        std::vector<XRectangle> damagedAreas();
+
+
         /** Window rendering job initialization. */
         void windowRenderingJobInit(const XRenderWindow &window, XRenderRenderingJob &job);
 
-        /** Window rendering job cleanup. */
-        void windowRenderingJobCleanup(const XRenderWindow &window);
 
+        /** Extra rendering actions and jobs. */
+        std::vector<XRenderRenderingJob> extraRenderingActions();
 
-        /** \returns the number of extra rendering jobs the plugin will do. */
-        int extraRenderingJobCount();
-
-        /** Initialize the specified extra rendering job. */
-        XRenderRenderingJob extraRenderingJobInit(int jobId);
-
-        /** Called after the extra rendering jobs are executed. */
+        /** Post extra rendering actions. */
         void postExtraRenderingActions();
 
 
@@ -120,6 +118,7 @@ namespace FbCompositor {
 
         /** Holds the data about positive fades. */
         struct PosFadeData {
+            XRectangle dimensions;          ///< Window's dimensions.
             int fadeAlpha;                  ///< Window's relative fade alpha.
             XRenderPicturePtr fadePicture;  ///< Picture of the faded window.
             TickTracker timer;              ///< Timer that tracks the current fade.
@@ -132,11 +131,10 @@ namespace FbCompositor {
         /** Holds the data about positive fades. */
         struct NegFadeData {
             Window windowId;                    ///< ID of the window that is being faded.
-            int origAlpha;                      ///< Window's original opacity.
-            XRenderPicturePtr contentPicture;   ///< Window's contents.
+            XRenderRenderingJob job;            ///< Rendering job, associated with this fade.
             XRenderPicturePtr maskPicture;      ///< Window's shape mask.
-            XRectangle dimensions;              ///< Window's dimensions.
 
+            XRectangle dimensions;              ///< Window's dimensions.
             int fadeAlpha;                      ///< Window's relative fade alpha.
             XRenderPicturePtr fadePicture;      ///< Picture of the faded window.
             TickTracker timer;                  ///< Timer that tracks the current fade.
