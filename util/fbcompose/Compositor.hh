@@ -106,6 +106,9 @@ namespace FbCompositor {
 
         //--- INTERNAL FUNCTIONS -----------------------------------------------
 
+        /** \returns the exposed area in a XExposeEvent as an XRectangle. */
+        XRectangle getExposedRect(const XExposeEvent &event);
+
         /** Locates the screen an event affects. Returns -1 on failure. */
         int screenOfEvent(const XEvent &event);
 

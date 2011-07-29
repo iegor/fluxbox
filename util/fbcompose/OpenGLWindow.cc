@@ -41,7 +41,7 @@ using namespace FbCompositor;
 
 // Constructor.
 OpenGLWindow::OpenGLWindow(const OpenGLScreen &screen, Window windowXID) :
-    BaseCompWindow((const BaseScreen&)(screen), windowXID) {
+    BaseCompWindow((const BaseScreen&)(screen), windowXID, false) {
 
     m_contentTexPartition = new OpenGL2DTexturePartition(screen, true);
     m_shapeTexPartition = new OpenGL2DTexturePartition(screen, false);

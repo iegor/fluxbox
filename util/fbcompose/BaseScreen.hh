@@ -28,6 +28,7 @@
 #include "Enumerations.hh"
 #include "PluginManager.hh"
 
+#include <X11/extensions/Xfixes.h>
 #include <X11/Xlib.h>
 
 #include <iosfwd>
@@ -112,7 +113,7 @@ namespace FbCompositor {
         void createWindow(Window window);
 
         /** Damages a window on this screen. */
-        void damageWindow(Window window);
+        void damageWindow(Window window, XRectangle area);
 
         /** Destroys a window on this screen. */
         void destroyWindow(Window window);
@@ -145,6 +146,9 @@ namespace FbCompositor {
 
         //--- SCREEN MANIPULATION ----------------------------------------------
 
+        /** Removes all accumulated damage from the screen. */
+        void clearScreenDamage();
+
         /** Updates heads on the current screen. */
         void updateHeads(HeadMode headMode);
 
@@ -167,6 +171,9 @@ namespace FbCompositor {
 
         /** \returns the list of windows on the screen. */
         const std::list<BaseCompWindow*> &allWindows() const;
+
+        /** \returns the damaged screen area. */
+        XserverRegion damagedScreenArea();
 
         /** \returns the plugin manager. */
         const PluginManager &pluginManager() const;
@@ -213,7 +220,19 @@ namespace FbCompositor {
         void updateWorkspaceCount();
 
 
-        //--- CONVENIENCE FUNCTIONS --------------------------------------------
+        //--- SCREEN DAMAGE FUNCTIONS ------------------------------------------
+
+        /** Damages the reconfigure rectangle on the screen. */
+        void damageReconfigureRect();
+
+        /** Damages the given rectangle on the screen. */
+        void damageScreenArea(XRectangle area);
+
+        /** Damages the area taken by the given window. */
+        void damageWindowArea(BaseCompWindow *window, XRectangle area);
+
+
+        //--- INTERNAL FUNCTIONS -----------------------------------------------
 
         /** \returns the first managed ancestor of a window. */
         std::list<BaseCompWindow*>::iterator getFirstManagedAncestorIterator(Window window);
@@ -232,6 +251,9 @@ namespace FbCompositor {
 
 
         //--- MAIN SCREEN DATA -------------------------------------------------
+
+        /** A list of damaged rectangles on the screen. */
+        std::vector<XRectangle> m_damagedRects;
 
         /** Current connection to the X server. */
         Display *m_display;

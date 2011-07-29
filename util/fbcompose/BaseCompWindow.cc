@@ -39,7 +39,7 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-BaseCompWindow::BaseCompWindow(const BaseScreen &screen, Window windowXID) :
+BaseCompWindow::BaseCompWindow(const BaseScreen &screen, Window windowXID, bool trackDamageDeltas) :
     FbTk::FbWindow(windowXID),
     m_screen(screen) {
 
@@ -60,7 +60,11 @@ BaseCompWindow::BaseCompWindow(const BaseScreen &screen, Window windowXID) :
     m_isIgnored = false;
 
     if (m_class == InputOutput) {
-        m_damage = XDamageCreate(display(), window(), XDamageReportNonEmpty);
+        if (trackDamageDeltas) {
+            m_damage = XDamageCreate(display(), window(), XDamageReportDeltaRectangles);
+        } else {
+            m_damage = XDamageCreate(display(), window(), XDamageReportNonEmpty);
+        }
     } else {
         m_damage = 0;
     }

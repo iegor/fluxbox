@@ -70,7 +70,7 @@ BaseScreen::BaseScreen(int screenNumber, PluginType pluginType, const Compositor
     m_display(FbTk::App::instance()->display()),
     m_pluginManager(pluginType, *this),
     m_screenNumber(screenNumber),
-    m_rootWindow(*this, XRootWindow(m_display, m_screenNumber)) {
+    m_rootWindow(*this, XRootWindow(m_display, m_screenNumber), false) {
 
     m_activeWindowXID = None;
     m_currentWorkspace = m_rootWindow.singlePropertyValue<long>(Atoms::workspaceAtom(), 0);
@@ -139,6 +139,8 @@ void BaseScreen::circulateWindow(Window window, int place) {
         }
 
         if (!curWindow->isIgnored()) {
+            damageScreenArea((*it)->dimensions());
+
             BasePlugin *plugin = NULL;
             forEachPlugin(i, plugin) {
                 plugin->windowCirculated(*curWindow, place);
@@ -175,6 +177,8 @@ void BaseScreen::createWindow(Window window) {
         } 
         
         if (!newWindow->isIgnored()) {
+            damageScreenArea(newWindow->dimensions());
+
             BasePlugin *plugin = NULL;
             forEachPlugin(i, plugin) {
                 plugin->windowCreated(*newWindow);
@@ -186,12 +190,14 @@ void BaseScreen::createWindow(Window window) {
 }
 
 // Damages a window on this screen.
-void BaseScreen::damageWindow(Window window) {
+void BaseScreen::damageWindow(Window window, XRectangle area) {
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
     if (it != m_windows.end()) {
         (*it)->addDamage();
 
         if (!(*it)->isIgnored()) {
+            damageWindowArea((*it), area);
+
             BasePlugin *plugin = NULL;
             forEachPlugin(i, plugin) {
                 plugin->windowDamaged(**it);
@@ -209,6 +215,8 @@ void BaseScreen::destroyWindow(Window window) {
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
     if (it != m_windows.end()) {
         if (!(*it)->isIgnored()) {
+            damageScreenArea((*it)->dimensions());
+
             BasePlugin *plugin = NULL;
             forEachPlugin(i, plugin) {
                 plugin->windowDestroyed(**it);
@@ -229,6 +237,8 @@ void BaseScreen::mapWindow(Window window) {
         (*it)->setMapped();
 
         if (!(*it)->isIgnored()) {
+            damageScreenArea((*it)->dimensions());
+
             BasePlugin *plugin = NULL;
             forEachPlugin(i, plugin) {
                 plugin->windowMapped(**it);
@@ -254,10 +264,16 @@ void BaseScreen::reconfigureWindow(const XConfigureEvent &event) {
 
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(event.window);
     if (it != m_windows.end()) {
+        if (!(*it)->isIgnored()) {
+            damageScreenArea((*it)->dimensions());
+        }
+
         (*it)->updateGeometry();
         restackWindow(it, event.above);
 
         if (!(*it)->isIgnored()) {
+            damageScreenArea((*it)->dimensions());
+
             BasePlugin *plugin = NULL;
             forEachPlugin(i, plugin) {
                 plugin->windowReconfigured(**it);
@@ -284,6 +300,8 @@ void BaseScreen::updateShape(Window window) {
         (*it)->setClipShapeChanged();
 
         if (!(*it)->isIgnored()) {
+            damageScreenArea((*it)->dimensions());
+
             BasePlugin *plugin = NULL;
             forEachPlugin(i, plugin) {
                 plugin->windowShapeChanged(**it);
@@ -301,6 +319,8 @@ void BaseScreen::unmapWindow(Window window) {
         (*it)->setUnmapped();
 
         if (!(*it)->isIgnored()) {
+            damageScreenArea((*it)->dimensions());
+
             BasePlugin *plugin = NULL;
             forEachPlugin(i, plugin) {
                 plugin->windowUnmapped(**it);
@@ -317,7 +337,9 @@ void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
         if (property == Atoms::activeWindowAtom()) {
             updateActiveWindow();
         } else if (property == Atoms::reconfigureRectAtom()) {
+            damageReconfigureRect();    // Previous rectangle can be removed.
             updateReconfigureRect();
+            damageReconfigureRect();    // New rectangle can be drawn.
         } else if (property == Atoms::workspaceAtom()) {
             updateCurrentWorkspace();
         } else if (property == Atoms::workspaceCountAtom()) {
@@ -344,6 +366,10 @@ void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
             (*it)->updateProperty(property, state);
 
             if (!(*it)->isIgnored()) {
+                if (property == Atoms::opacityAtom()) {
+                    damageScreenArea((*it)->dimensions());
+                }
+
                 BasePlugin *plugin = NULL;
                 forEachPlugin(i, plugin) {
                     plugin->windowPropertyChanged(**it, property, state);
@@ -384,6 +410,11 @@ bool BaseScreen::isWindowManaged(Window window) {
 
 
 //--- SCREEN MANIPULATION ------------------------------------------------------
+
+// Removes all accumulated damage from the screen.
+void BaseScreen::clearScreenDamage() {
+    m_damagedRects.clear();
+}
 
 // Reconfigure heads on the current screen.
 void BaseScreen::updateHeads(HeadMode headMode) {
@@ -431,7 +462,15 @@ void BaseScreen::setRootWindowSizeChanged() {
 }
 
 
-//--- CONVENIENCE PROPERTY UPDATE FUNCTIONS ------------------------------------
+//--- ACCESSORS ----------------------------------------------------------------
+
+// Returns the damaged screen area.
+XserverRegion BaseScreen::damagedScreenArea() {
+    return XFixesCreateRegion(display(), (XRectangle*)(m_damagedRects.data()), m_damagedRects.size());
+}
+
+
+//--- PROPERTY UPDATE FUNCTIONS ------------------------------------------------
 
 // Update stored active window.
 void BaseScreen::updateActiveWindow() {
@@ -497,7 +536,32 @@ void BaseScreen::updateWorkspaceCount() {
 }
 
 
-//--- CONVENIENCE FUNCTIONS ----------------------------------------------------
+//--- SCREEN DAMAGE FUNCTIONS --------------------------------------------------
+
+// Damages the reconfigure rectangle on the screen.
+void BaseScreen::damageReconfigureRect() {
+    XRectangle rect = m_reconfigureRect;
+    rect.width++;
+    rect.height++;
+    damageScreenArea(rect);
+}
+
+// Damages the given rectangle on the screen.
+void BaseScreen::damageScreenArea(XRectangle area) {
+    m_damagedRects.push_back(area);
+}
+
+// Damages the area taken by the given window.
+void BaseScreen::damageWindowArea(BaseCompWindow *window, XRectangle area) {
+    area.x += window->x();
+    area.y += window->y();
+    area.height = std::min(area.height + 1, (int)(window->realHeight()));
+    area.width = std::min(area.width + 1, (int)(window->realWidth()));
+    damageScreenArea(area);
+}
+
+
+//--- INTERNAL FUNCTIONS -------------------------------------------------------
 
 // Returns the parent of a given window.
 Window BaseScreen::getParentWindow(Window window) {

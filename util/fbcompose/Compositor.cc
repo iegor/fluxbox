@@ -307,6 +307,11 @@ void Compositor::eventLoop() {
                 fbLog_debug << "DestroyNotify on " << std::hex << event.xdestroywindow.window << std::endl;
                 break;
 
+            case Expose :
+                m_screens[eventScreen]->damageWindow(event.xexpose.window, getExposedRect(event.xexpose));
+                fbLog_debug << "Expose on " << std::hex << event.xexpose.window << std::endl;
+                break;
+
             case GravityNotify :
                 fbLog_debug << "GravityNotify on " << std::hex << event.xgravity.window << std::endl;
                 break;
@@ -336,7 +341,7 @@ void Compositor::eventLoop() {
             default :
                 if (event.type == (m_damageEventBase + XDamageNotify)) {
                     XDamageNotifyEvent damageEvent = eventUnion.eventXDamageNotify;
-                    m_screens[eventScreen]->damageWindow(damageEvent.drawable);
+                    m_screens[eventScreen]->damageWindow(damageEvent.drawable, damageEvent.area);
                     fbLog_debug << "DamageNotify on " << std::hex << damageEvent.drawable << std::endl;
 
                 } else if (event.type == (m_shapeEventBase + ShapeNotify)) {
@@ -355,6 +360,7 @@ void Compositor::eventLoop() {
         if (m_timer.newElapsedTicks()) {
             for (size_t i = 0; i < m_screens.size(); i++) {
                 m_screens[i]->renderScreen();
+                m_screens[i]->clearScreenDamage();
             }
             XSync(display(), False);
 
@@ -371,6 +377,12 @@ void Compositor::eventLoop() {
 
 
 //--- INTERNAL FUNCTIONS -----------------------------------------------
+
+// Returns the exposed area in a XExposeEvent as an XRectangle.
+XRectangle Compositor::getExposedRect(const XExposeEvent &event) {
+    XRectangle rect = { event.x, event.y, event.width, event.height };
+    return rect;
+}
 
 // Locates the screen an event affects. Returns -1 on failure.
 int Compositor::screenOfEvent(const XEvent &event) {

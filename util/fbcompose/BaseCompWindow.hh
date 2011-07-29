@@ -61,7 +61,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        BaseCompWindow(const BaseScreen &screen, Window windowXID);
+        BaseCompWindow(const BaseScreen &screen, Window windowXID, bool trackDamageDeltas);
 
         /** Destructor. */
         virtual ~BaseCompWindow();

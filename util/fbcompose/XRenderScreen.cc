@@ -178,6 +178,11 @@ void XRenderScreen::updateBackgroundPicture() {
 
 // Renders the screen's contents.
 void XRenderScreen::renderScreen() {
+    // Limit rendering to damaged areas only.
+    XserverRegion damagedArea = damagedScreenArea();
+    XFixesSetPictureClipRegion(display(), m_backBufferPicture->pictureHandle(), 0, 0, damagedArea);
+    XFixesDestroyRegion(display(), damagedArea);
+
     // Render desktop background.
     renderBackground();
 
