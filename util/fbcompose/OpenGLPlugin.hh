@@ -29,6 +29,7 @@
 #include "OpenGLResources.hh"
 #include "OpenGLShaders.hh"
 
+#include "FbTk/Command.hh"
 #include "FbTk/FbString.hh"
 
 #include <GL/glew.h>
@@ -36,6 +37,7 @@
 
 #include <X11/Xlib.h>
 
+#include <algorithm>
 #include <vector>
 
 
@@ -44,6 +46,34 @@ namespace FbCompositor {
     class BaseScreen;
     class OpenGLScreen;
     class OpenGLWindow;
+
+
+    //--- SUPPORTING STRUCTURES AND CLASSES ------------------------------------
+
+    /** Rendering job initialization functor.  */
+    typedef FbTk::Command<void> InitAction;
+
+    /**
+     * Null initialization action.
+     */
+    class NullInitAction : public InitAction {
+    public :
+        virtual ~NullInitAction() { }
+        void execute() { }
+    };
+
+
+    /** Rendering job cleanup functor. */
+    typedef FbTk::Command<void> CleanupAction;
+
+    /** 
+     * Null cleanup action.
+     */
+    class NullCleanupAction : public CleanupAction {
+    public :
+        virtual ~NullCleanupAction() { }
+        void execute() { }
+    };
 
 
     /**
@@ -56,8 +86,13 @@ namespace FbCompositor {
         OpenGL2DTexturePtr shapeTexture;        ///< Shape texture.
         OpenGL2DTexturePtr mainTexture;         ///< Main texture.
         GLfloat alpha;                          ///< Alpha value.
+
+        InitAction *initAction;                 ///< Rendering job initialization.
+        CleanupAction *cleanupAction;           ///< Rendering job cleanup.
     };
 
+
+    //--- OPENGL PLUGIN BASE CLASS ---------------------------------------------
 
     /**
      * Plugin for OpenGL renderer.
@@ -94,46 +129,45 @@ namespace FbCompositor {
 
         //--- RENDERING ACTIONS ------------------------------------------------
 
-        /** Pre background rendering actions. */
-        virtual void preBackgroundRenderActions(int partId);
+        /** Background rendering initialization. */
+        virtual void backgroundRenderInit(int partId);
+
+        /** Background rendering cleanup. */
+        virtual void backgroundRenderCleanup(int partId);
 
         /** Post background rendering actions. */
-        virtual void postBackgroundRenderActions(int partId);
-
-        /** Pre reconfigure rectangle rendering actions. */
-        virtual void preRecRectRenderActions(XRectangle recRect);
-
-        /** Post reconfigure rectangle rendering actions. */
-        virtual void postRecRectRenderActions(XRectangle recRect);
+        virtual std::vector<OpenGLRenderingJob> postBackgroundRenderActions();
 
 
-        /** Extra rendering job before window rendering. */
-        virtual OpenGLRenderingJob extraPreWindowRenderJob(const OpenGLWindow &window);
+        /** Pre window rendering actions and jobs. */
+        virtual std::vector<OpenGLRenderingJob> preWindowRenderActions(const OpenGLWindow &window);
 
-        /** Pre window rendering actions. */
-        virtual void preWindowRenderActions(const OpenGLWindow &window, int partId);
+        /** Window rendering initialization. */
+        virtual void windowRenderInit(const OpenGLWindow &window, int partId);
 
-        /** Post window rendering actions. */
-        virtual void postWindowRenderActions(const OpenGLWindow &window, int partId);
+        /** Window rendering cleanup. */
+        virtual void windowRenderCleanup(const OpenGLWindow &window, int partId);
 
-        /** Extra rendering job after window rendering. */
-        virtual OpenGLRenderingJob extraPostWindowRenderJob(const OpenGLWindow &window);
+        /** Post window rendering actions and jobs. */
+        virtual std::vector<OpenGLRenderingJob> postWindowRenderActions(const OpenGLWindow &window);
 
 
-        /** Called before the extra rendering jobs are executed. */
-        virtual void preExtraRenderingActions();
+        /** Reconfigure rectangle rendering initialization. */
+        virtual void recRectRenderInit(XRectangle recRect);
 
-        /** \returns the number of extra rendering jobs the plugin will do. */
-        virtual int extraRenderingJobCount();
+        /** Reconfigure rectangle rendering cleanup. */
+        virtual void recRectRenderCleanup(XRectangle recRect);
 
-        /** Initialize the specified extra rendering job. */
-        virtual OpenGLRenderingJob extraRenderingJobInit(int jobId);
 
-        /** Clean up after an extra rendering job. */
-        virtual void extraRenderingJobCleanup(int jobId);
+        /** Extra rendering actions and jobs. */
+        virtual std::vector<OpenGLRenderingJob> extraRenderingActions();
 
-        /** Called after the extra rendering jobs are executed. */
+        /** Post extra rendering actions. */
         virtual void postExtraRenderingActions();
+
+
+        /** Null rendering job initialization. */
+        virtual void nullRenderInit();
     };
 }
 

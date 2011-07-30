@@ -47,6 +47,8 @@ namespace FbCompositor {
     class RenderingException;
 
 
+    //--- SUPPORTING STRUCTURES AND CLASSES ------------------------------------
+
     /**
      * A rendering job.
      */
@@ -64,6 +66,8 @@ namespace FbCompositor {
         int height;                         ///< Height of the picture to render.
     };
 
+
+    //--- XRENDER PLUGIN BASE CLASS --------------------------------------------
 
     /**
      * Plugin for XRender renderer.

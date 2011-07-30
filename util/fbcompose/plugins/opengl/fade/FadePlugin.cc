@@ -65,7 +65,7 @@ FadePlugin::~FadePlugin() { }
 
 // Initialize OpenGL-specific code.
 void FadePlugin::initOpenGL(OpenGLShaderProgramPtr shaderProgram) {
-    alphaUniformPos = shaderProgram->getUniformLocation("fade_Alpha");
+    m_alphaUniformPos = shaderProgram->getUniformLocation("fade_Alpha");
 }
 
 
@@ -164,18 +164,13 @@ void FadePlugin::windowUnmapped(const BaseCompWindow &window) {
 
 //--- RENDERING ACTIONS --------------------------------------------------------
 
-// Pre background rendering actions.
-void FadePlugin::preBackgroundRenderActions(int /*partId*/) {
-    glUniform1f(alphaUniformPos, 1.0);
+// Background rendering initialization.
+void FadePlugin::backgroundRenderInit(int /*partId*/) {
+    glUniform1f(m_alphaUniformPos, 1.0);
 }
 
-// Pre window rendering actions.
-void FadePlugin::preRecRectRenderActions(XRectangle /*recRect*/) {
-    glUniform1f(alphaUniformPos, 1.0);
-}
-
-// Pre window rendering actions.
-void FadePlugin::preWindowRenderActions(const OpenGLWindow &window, int /*partId*/) {
+// Window rendering initialization.
+void FadePlugin::windowRenderInit(const OpenGLWindow &window, int /*partId*/) {
     std::map<Window, PosFadeData>::iterator it = m_positiveFades.find(window.window());
     if (it != m_positiveFades.end()) {
         try {
@@ -185,49 +180,53 @@ void FadePlugin::preWindowRenderActions(const OpenGLWindow &window, int /*partId
         }
         
         if (it->second.fadeAlpha >= 255) {
-            glUniform1f(alphaUniformPos, 1.0);
+            glUniform1f(m_alphaUniformPos, 1.0);
             m_positiveFades.erase(it);
         } else {
-            glUniform1f(alphaUniformPos, (it->second.fadeAlpha / 255.0));
+            glUniform1f(m_alphaUniformPos, (it->second.fadeAlpha / 255.0));
         }
     } else {
-        glUniform1f(alphaUniformPos, 1.0);
+        glUniform1f(m_alphaUniformPos, 1.0);
     }
 }
 
-
-// Returns the number of extra rendering jobs the plugin will do.
-int FadePlugin::extraRenderingJobCount() {
-    return m_negativeFades.size();
+// Reconfigure rectangle rendering initialization.
+void FadePlugin::recRectRenderInit(XRectangle /*recRect*/) {
+    glUniform1f(m_alphaUniformPos, 1.0);
 }
 
-// Initialize the specified extra rendering job.
-OpenGLRenderingJob FadePlugin::extraRenderingJobInit(int jobId) {
-    NegFadeData &curFade = m_negativeFades[jobId];
 
-    try {
-        curFade.fadeAlpha -= curFade.timer.newElapsedTicks();
-    } catch (const TimeException &e) {
-        curFade.fadeAlpha = 0;
+// Extra rendering actions and jobs.
+std::vector<OpenGLRenderingJob> FadePlugin::extraRenderingActions() {
+    std::vector<OpenGLRenderingJob> jobs;
+
+    for (size_t i = 0; i < m_negativeFades.size(); i++) {
+        try {
+            m_negativeFades[i].fadeAlpha -= m_negativeFades[i].timer.newElapsedTicks();
+        } catch (const TimeException &e) {
+            m_negativeFades[i].fadeAlpha = 0;
+        }
+
+        if (m_negativeFades[i].fadeAlpha <= 0) {
+            m_negativeFades[i].fadeAlpha = 0;
+        }
+
+        OpenGLRenderingJob job;
+        job.primPosBuffer = m_negativeFades[i].windowPosBuffer;
+        job.mainTexCoordBuffer = openGLScreen().defaultTexCoordBuffer();
+        job.mainTexture = m_negativeFades[i].contentTexture;
+        job.shapeTexCoordBuffer = openGLScreen().defaultTexCoordBuffer();
+        job.shapeTexture = m_negativeFades[i].shapeTexture;
+        job.alpha = m_negativeFades[i].origAlpha / 255.0;
+        job.initAction = new FadeInitAction(m_alphaUniformPos, m_negativeFades[i].fadeAlpha / 255.0);
+        job.cleanupAction = new NullCleanupAction();
+        jobs.push_back(job);
     }
 
-    if (curFade.fadeAlpha <= 0) {
-        glUniform1f(alphaUniformPos, 0.0);
-    } else {
-        glUniform1f(alphaUniformPos, (curFade.fadeAlpha / 255.0));
-    }
-
-    OpenGLRenderingJob extraJob;
-    extraJob.primPosBuffer = curFade.windowPosBuffer;
-    extraJob.mainTexCoordBuffer = openGLScreen().defaultTexCoordBuffer();
-    extraJob.mainTexture = curFade.contentTexture;
-    extraJob.shapeTexCoordBuffer = openGLScreen().defaultTexCoordBuffer();
-    extraJob.shapeTexture = curFade.shapeTexture;
-    extraJob.alpha = curFade.origAlpha / 255.0;
-    return extraJob;
+    return jobs;
 }
 
-// Called after the extra rendering jobs are executed.
+// Post extra rendering actions.
 void FadePlugin::postExtraRenderingActions() {
     std::vector<NegFadeData>::iterator it = m_negativeFades.begin();
     while (it != m_negativeFades.end()) {
@@ -237,6 +236,12 @@ void FadePlugin::postExtraRenderingActions() {
             ++it;
         }
     }
+}
+
+
+// Null rendering job initialization.
+void FadePlugin::nullRenderInit() {
+    glUniform1f(m_alphaUniformPos, 1.0);
 }
 
 

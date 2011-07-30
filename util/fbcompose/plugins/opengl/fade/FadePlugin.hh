@@ -95,31 +95,48 @@ namespace FbCompositor {
 
         //--- RENDERING ACTIONS ------------------------------------------------
 
-        /** Pre background rendering actions. */
-        void preBackgroundRenderActions(int partId);
+        /** Background rendering initialization. */
+        void backgroundRenderInit(int partId);
 
-        /** Pre window rendering actions. */
-        void preRecRectRenderActions(XRectangle recRect);
+        /** Window rendering initialization. */
+        void windowRenderInit(const OpenGLWindow &window, int partId);
 
-        /** Pre window rendering actions. */
-        void preWindowRenderActions(const OpenGLWindow &window, int partId);
+        /** Reconfigure rectangle rendering initialization. */
+        void recRectRenderInit(XRectangle recRect);
 
 
-        /** \returns the number of extra rendering jobs the plugin will do. */
-        int extraRenderingJobCount();
+        /** Extra rendering actions and jobs. */
+        std::vector<OpenGLRenderingJob> extraRenderingActions();
 
-        /** Initialize the specified extra rendering job. */
-        OpenGLRenderingJob extraRenderingJobInit(int jobId);
-
-        /** Called after the extra rendering jobs are executed. */
+        /** Post extra rendering actions. */
         void postExtraRenderingActions();
 
 
+        /** Null rendering job initialization. */
+        void nullRenderInit();
+
+
     private :
+        //--- PLUGIN RENDERING ACTIONS -----------------------------------------
+
+        /**
+         * Fade initialization functor.
+         */
+        class FadeInitAction : public InitAction {
+        public :
+            FadeInitAction(GLuint uniform, GLfloat alpha) : m_alpha(alpha), m_uniform(uniform) { }
+            void execute() { glUniform1f(m_uniform, m_alpha); }
+            void setAlpha(GLfloat alpha) { m_alpha = alpha; }
+        private :
+            GLfloat m_alpha;
+            GLuint m_uniform;
+        };
+
+
         //--- GENERAL RENDERING VARIABLES --------------------------------------
 
         /** Location of the fade_Alpha uniform. */
-        GLuint alphaUniformPos;
+        GLuint m_alphaUniformPos;
 
 
         //--- FADE SPECIFIC ----------------------------------------------------

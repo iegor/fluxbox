@@ -30,15 +30,6 @@
 using namespace FbCompositor;
 
 
-//--- CONSTANTS ----------------------------------------------------------------
-
-/** Null rendering job. */
-const OpenGLRenderingJob NULL_JOB = {
-    OpenGLBufferPtr(), OpenGLBufferPtr(), OpenGLBufferPtr(),
-    OpenGL2DTexturePtr(), OpenGL2DTexturePtr(), -1.0
-};
-
-
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Costructor.
@@ -65,53 +56,52 @@ const OpenGLScreen &OpenGLPlugin::openGLScreen() const {
 }
 
 
-//--- PLUGIN ACTIONS -----------------------------------------------------------
+//--- RENDERING ACTIONS --------------------------------------------------------
 
-// Pre background rendering actions.
-void OpenGLPlugin::preBackgroundRenderActions(int /*partId*/) { }
+// Background rendering initialization.
+void OpenGLPlugin::backgroundRenderInit(int /*partId*/) { }
+
+// Background rendering cleanup.
+void OpenGLPlugin::backgroundRenderCleanup(int /*partId*/) { }
 
 // Post background rendering actions.
-void OpenGLPlugin::postBackgroundRenderActions(int /*partId*/) { }
-
-// Pre window rendering actions.
-void OpenGLPlugin::preRecRectRenderActions(XRectangle /*recRect*/) { }
-
-// Post window rendering actions.
-void OpenGLPlugin::postRecRectRenderActions(XRectangle /*recRect*/) { }
-
-
-// Extra rendering job before window rendering.
-OpenGLRenderingJob OpenGLPlugin::extraPreWindowRenderJob(const OpenGLWindow &/*window*/) {
-    return NULL_JOB;
-}
-
-// Pre window rendering actions.
-void OpenGLPlugin::preWindowRenderActions(const OpenGLWindow &/*window*/, int /*partId*/) { }
-
-// Post window rendering actions.
-void OpenGLPlugin::postWindowRenderActions(const OpenGLWindow &/*window*/, int /*partId*/) { }
-
-// Extra rendering job after window rendering.
-OpenGLRenderingJob OpenGLPlugin::extraPostWindowRenderJob(const OpenGLWindow &/*window*/) {
-    return NULL_JOB;
+std::vector<OpenGLRenderingJob> OpenGLPlugin::postBackgroundRenderActions() {
+    return std::vector<OpenGLRenderingJob>();
 }
 
 
-// Called before the extra rendering jobs are executed.
-void OpenGLPlugin::preExtraRenderingActions() { }
-
-// Returns the number of extra rendering jobs the plugin will do.
-int OpenGLPlugin::extraRenderingJobCount() {
-    return 0;
+// Pre window rendering actions and jobs.
+std::vector<OpenGLRenderingJob> OpenGLPlugin::preWindowRenderActions(const OpenGLWindow &/*window*/) {
+    return std::vector<OpenGLRenderingJob>();
 }
 
-// Initialize the specified extra rendering job.
-OpenGLRenderingJob OpenGLPlugin::extraRenderingJobInit(int /*jobId*/) {
-    return NULL_JOB;
+// Window rendering initialization.
+void OpenGLPlugin::windowRenderInit(const OpenGLWindow &/*window*/, int /*partId*/) { }
+
+// Window rendering cleanup.
+void OpenGLPlugin::windowRenderCleanup(const OpenGLWindow &/*window*/, int /*partId*/) { }
+
+// Post window rendering actions and jobs.
+std::vector<OpenGLRenderingJob> OpenGLPlugin::postWindowRenderActions(const OpenGLWindow &/*window*/) {
+    return std::vector<OpenGLRenderingJob>();
 }
 
-// Clean up after an extra rendering job.
-void OpenGLPlugin::extraRenderingJobCleanup(int /*jobId*/) { }
 
-// Called after the extra rendering jobs are executed.
+// Reconfigure rectangle rendering initialization.
+void OpenGLPlugin::recRectRenderInit(XRectangle /*recRect*/) { }
+
+// Reconfigure rectangle rendering cleanup.
+void OpenGLPlugin::recRectRenderCleanup(XRectangle /*recRect*/) { }
+
+
+// Extra rendering actions and jobs.
+std::vector<OpenGLRenderingJob> OpenGLPlugin::extraRenderingActions() {
+    return std::vector<OpenGLRenderingJob>();
+}
+
+// Post extra rendering actions.
 void OpenGLPlugin::postExtraRenderingActions() { }
+
+
+// Null rendering job initialization.
+void OpenGLPlugin::nullRenderInit() { }

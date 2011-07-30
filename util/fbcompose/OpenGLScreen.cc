@@ -443,38 +443,56 @@ void OpenGLScreen::renderScreen() {
 void OpenGLScreen::renderBackground() {
     OpenGLPlugin *plugin = NULL;
 
+    // Update background texture if needed.
     if (m_bgChanged) {
         updateBackgroundTexture();
     }
 
+    // Render background.
     for (size_t i = 0; i < m_bgTexture->partitions().size(); i++) {
         forEachPlugin(j, plugin) {
-            plugin->preBackgroundRenderActions(i);
+            plugin->backgroundRenderInit(i);
         }
         render(GL_TRIANGLE_STRIP, m_bgPosBuffers[i],
                m_defaultTexCoordBuffer, m_bgTexture->partitions()[i].texture,
                m_defaultTexCoordBuffer, m_whiteTexture,
                m_defaultElementBuffer, 4, 1.0);
         forEachPlugin(j, plugin) {
-            plugin->postBackgroundRenderActions(i);
+            plugin->backgroundRenderCleanup(i);
         }
+    }
+
+    // Execute extra post background rendering jobs.
+    forEachPlugin(i, plugin) {
+        plugin->nullRenderInit();
+    }
+    forEachPlugin(i, plugin) {
+        std::vector<OpenGLRenderingJob> jobs = plugin->postBackgroundRenderActions();
+        for (size_t j = 0; j < jobs.size(); j++) {
+            jobs[j].initAction->execute();
+            executeRenderingJob(jobs[j]);
+            jobs[j].cleanupAction->execute();
+        }
+        plugin->nullRenderInit();
     }
 }
 
 // Perform extra rendering jobs from plugins.
 void OpenGLScreen::renderExtraJobs() {
     OpenGLPlugin *plugin = NULL;
-    OpenGLRenderingJob renderJob;
 
     forEachPlugin(i, plugin) {
-        plugin->preExtraRenderingActions();
-
-        for (int j = 0; j < plugin->extraRenderingJobCount(); j++) {
-            renderJob = plugin->extraRenderingJobInit(j);
-            executeRenderingJob(renderJob);
-            plugin->extraRenderingJobCleanup(j);
+        plugin->nullRenderInit();
+    }
+    forEachPlugin(i, plugin) {
+        std::vector<OpenGLRenderingJob> jobs = plugin->extraRenderingActions();
+        for (size_t j = 0; j < jobs.size(); j++) {
+            jobs[j].initAction->execute();
+            executeRenderingJob(jobs[j]);
+            jobs[j].cleanupAction->execute();
         }
         plugin->postExtraRenderingActions();
+        plugin->nullRenderInit();
     }
 }
 
@@ -497,12 +515,12 @@ void OpenGLScreen::renderReconfigureRect() {
     glLogicOp(GL_XOR);
 
     forEachPlugin(i, plugin) {
-        plugin->preRecRectRenderActions(reconfigureRectangle());
+        plugin->recRectRenderInit(reconfigureRectangle());
     }
     render(GL_LINE_STRIP, m_recRectLinePosBuffer, m_defaultTexCoordBuffer, m_whiteTexture,
            m_defaultTexCoordBuffer, m_whiteTexture, m_recRectElementBuffer, 5, 1.0);
     forEachPlugin(i, plugin) {
-        plugin->postRecRectRenderActions(reconfigureRectangle());
+        plugin->recRectRenderCleanup(reconfigureRectangle());
     }
 
     glDisable(GL_COLOR_LOGIC_OP);
@@ -520,30 +538,47 @@ void OpenGLScreen::renderWindow(OpenGLWindow &window) {
 
     // Extra rendering jobs before a window is drawn.
     forEachPlugin(i, plugin) {
-        renderJob = plugin->extraPreWindowRenderJob(window);
-        executeRenderingJob(renderJob);
+        plugin->nullRenderInit();
+    }
+    forEachPlugin(i, plugin) {
+        std::vector<OpenGLRenderingJob> jobs = plugin->preWindowRenderActions(window);
+        for (size_t j = 0; j < jobs.size(); j++) {
+            jobs[j].initAction->execute();
+            executeRenderingJob(jobs[j]);
+            jobs[j].cleanupAction->execute();
+        }
+        plugin->nullRenderInit();
     }
 
     // Render it.
     for (int i = 0; i < window.partitionCount(); i++) {
         forEachPlugin(j, plugin) {
-            plugin->preWindowRenderActions(window, i);
+            plugin->windowRenderInit(window, i);
         }
         render(GL_TRIANGLE_STRIP, window.partitionPosBuffer(i),
                m_defaultTexCoordBuffer, window.contentTexturePartition(i),
                m_defaultTexCoordBuffer, window.shapeTexturePartition(i),
                m_defaultElementBuffer, 4, window.alpha() / 255.0);
         forEachPlugin(j, plugin) {
-            plugin->postWindowRenderActions(window, i);
+            plugin->windowRenderCleanup(window, i);
         }
     }
 
     // Extra rendering jobs after a window is drawn.
     forEachPlugin(i, plugin) {
-        renderJob = plugin->extraPostWindowRenderJob(window);
-        executeRenderingJob(renderJob);
+        plugin->nullRenderInit();
+    }
+    forEachPlugin(i, plugin) {
+        std::vector<OpenGLRenderingJob> jobs = plugin->postWindowRenderActions(window);
+        for (size_t j = 0; j < jobs.size(); j++) {
+            jobs[j].initAction->execute();
+            executeRenderingJob(jobs[j]);
+            jobs[j].cleanupAction->execute();
+        }
+        plugin->nullRenderInit();
     }
 }
+
 
 // Execute a given rendering job.
 void OpenGLScreen::executeRenderingJob(OpenGLRenderingJob job) {
@@ -554,7 +589,6 @@ void OpenGLScreen::executeRenderingJob(OpenGLRenderingJob job) {
                m_defaultElementBuffer, 4, job.alpha);
     }
 }
-
 
 // A function to render something onto the screen.
 void OpenGLScreen::render(GLenum renderingMode, OpenGLBufferPtr primPosBuffer,
