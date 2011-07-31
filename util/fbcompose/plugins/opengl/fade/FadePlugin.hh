@@ -48,6 +48,49 @@ namespace FbCompositor {
     class OpenGLWindow;
 
 
+    //--- SHADER INITIALIZER ---------------------------------------------------
+
+    /**
+     * Fade shader initializer.
+     */
+    class FadeShaderInitializer : public OpenGLShaderInitializer {
+    public :
+        /** Default constructor. */
+        FadeShaderInitializer() : m_alphaUniform(0), m_alpha(0.0) { }
+
+        /** Constructor. */
+        FadeShaderInitializer(GLuint alphaUniform, GLfloat alpha) :
+            m_alphaUniform(alphaUniform), m_alpha(alpha) { }
+
+        /** Destructor. */
+        ~FadeShaderInitializer() { }
+
+        /** Initialization code. */
+        void execute() {
+            glUniform1f(m_alphaUniform, m_alpha);
+        }
+
+        /** Alpha mutator. */
+        void setAlpha(GLfloat alpha) {
+            m_alpha = alpha;
+        }
+
+        /** Uniform mutator. */
+        void setUniform(GLuint alphaUniform) {
+            m_alphaUniform = alphaUniform;
+        }
+
+    private :
+        /** Uniform location of the alpha value. */
+        GLuint m_alphaUniform;
+
+        /** Alpha value to set. */
+        GLfloat m_alpha;
+    };
+
+
+    //--- MAIN PLUGIN CLASS ----------------------------------------------------
+
     /**
      * A simple plugin that provides window fades.
      */
@@ -102,11 +145,11 @@ namespace FbCompositor {
         void windowRenderInit(const OpenGLWindow &window, int partId);
 
         /** Reconfigure rectangle rendering initialization. */
-        void recRectRenderInit(XRectangle recRect);
+        void recRectRenderInit(const XRectangle &recRect);
 
 
         /** Extra rendering actions and jobs. */
-        std::vector<OpenGLRenderingJob> extraRenderingActions();
+        const std::vector<OpenGLRenderingJob> &extraRenderingActions();
 
         /** Post extra rendering actions. */
         void postExtraRenderingActions();
@@ -117,26 +160,17 @@ namespace FbCompositor {
 
 
     private :
-        //--- PLUGIN RENDERING ACTIONS -----------------------------------------
-
-        /**
-         * Fade initialization functor.
-         */
-        class FadeInitAction : public InitAction {
-        public :
-            FadeInitAction(GLuint uniform, GLfloat alpha) : m_alpha(alpha), m_uniform(uniform) { }
-            void execute() { glUniform1f(m_uniform, m_alpha); }
-            void setAlpha(GLfloat alpha) { m_alpha = alpha; }
-        private :
-            GLfloat m_alpha;
-            GLuint m_uniform;
-        };
-
-
         //--- GENERAL RENDERING VARIABLES --------------------------------------
 
         /** Location of the fade_Alpha uniform. */
         GLuint m_alphaUniformPos;
+
+
+        /** Main fade initialization object. */
+        FadeShaderInitializer m_shaderInitializer;
+
+        /** A vector, containing the extra rendering jobs. */
+        std::vector<OpenGLRenderingJob> m_extraJobs;
 
 
         //--- FADE SPECIFIC ----------------------------------------------------
@@ -151,16 +185,12 @@ namespace FbCompositor {
         std::map<Window, PosFadeData> m_positiveFades;
 
 
-        /** Holds the data about positive fades. */
+        /** Holds the data about negative fades. */
         struct NegFadeData {
-            Window windowId;                    ///< ID of the window being faded.
-            int origAlpha;                      ///< Window's original opacity.
-            OpenGL2DTexturePtr contentTexture;  ///< Window's contents.
-            OpenGL2DTexturePtr shapeTexture;    ///< Window's shape.
-            OpenGLBufferPtr windowPosBuffer;    ///< Window position buffer.
-
-            int fadeAlpha;                      ///< Window's fade relative alpha.
-            TickTracker timer;                  ///< Timer that tracks the current fade.
+            OpenGLRenderingJob job;     ///< The associated rendering job.
+            int fadeAlpha;              ///< Window's fade relative alpha.
+            TickTracker timer;          ///< Timer that tracks the current fade.
+            Window windowId;            ///< ID of the window being faded.
         };
 
         /** A list of disappearing (negative) fades. */

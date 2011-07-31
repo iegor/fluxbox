@@ -65,14 +65,16 @@ void OpenGLPlugin::backgroundRenderInit(int /*partId*/) { }
 void OpenGLPlugin::backgroundRenderCleanup(int /*partId*/) { }
 
 // Post background rendering actions.
-std::vector<OpenGLRenderingJob> OpenGLPlugin::postBackgroundRenderActions() {
-    return std::vector<OpenGLRenderingJob>();
+const std::vector<OpenGLRenderingJob> &OpenGLPlugin::postBackgroundRenderActions() {
+    static std::vector<OpenGLRenderingJob> jobs;
+    return jobs;
 }
 
 
 // Pre window rendering actions and jobs.
-std::vector<OpenGLRenderingJob> OpenGLPlugin::preWindowRenderActions(const OpenGLWindow &/*window*/) {
-    return std::vector<OpenGLRenderingJob>();
+const std::vector<OpenGLRenderingJob> &OpenGLPlugin::preWindowRenderActions(const OpenGLWindow &/*window*/) {
+    static std::vector<OpenGLRenderingJob> jobs;
+    return jobs;
 }
 
 // Window rendering initialization.
@@ -82,21 +84,23 @@ void OpenGLPlugin::windowRenderInit(const OpenGLWindow &/*window*/, int /*partId
 void OpenGLPlugin::windowRenderCleanup(const OpenGLWindow &/*window*/, int /*partId*/) { }
 
 // Post window rendering actions and jobs.
-std::vector<OpenGLRenderingJob> OpenGLPlugin::postWindowRenderActions(const OpenGLWindow &/*window*/) {
-    return std::vector<OpenGLRenderingJob>();
+const std::vector<OpenGLRenderingJob> &OpenGLPlugin::postWindowRenderActions(const OpenGLWindow &/*window*/) {
+    static std::vector<OpenGLRenderingJob> jobs;
+    return jobs;
 }
 
 
 // Reconfigure rectangle rendering initialization.
-void OpenGLPlugin::recRectRenderInit(XRectangle /*recRect*/) { }
+void OpenGLPlugin::recRectRenderInit(const XRectangle &/*recRect*/) { }
 
 // Reconfigure rectangle rendering cleanup.
-void OpenGLPlugin::recRectRenderCleanup(XRectangle /*recRect*/) { }
+void OpenGLPlugin::recRectRenderCleanup(const XRectangle &/*recRect*/) { }
 
 
 // Extra rendering actions and jobs.
-std::vector<OpenGLRenderingJob> OpenGLPlugin::extraRenderingActions() {
-    return std::vector<OpenGLRenderingJob>();
+const std::vector<OpenGLRenderingJob> &OpenGLPlugin::extraRenderingActions() {
+    static std::vector<OpenGLRenderingJob> jobs;
+    return jobs;
 }
 
 // Post extra rendering actions.

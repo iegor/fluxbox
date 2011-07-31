@@ -160,8 +160,11 @@ namespace FbCompositor {
         void renderWindow(OpenGLWindow &window);
 
 
+        /** Execute multiple rendering jobs. */
+        void executeMultipleJobs(OpenGLPlugin *plugin, const std::vector<OpenGLRenderingJob> &jobs);
+
         /** Execute a given rendering job. */
-        void executeRenderingJob(OpenGLRenderingJob job);
+        void executeRenderingJob(const OpenGLRenderingJob &job);
 
         /** Render something onto the screen. */
         void render(GLenum renderingMode, OpenGLBufferPtr primPosBuffer,

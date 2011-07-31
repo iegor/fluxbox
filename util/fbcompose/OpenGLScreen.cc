@@ -345,13 +345,13 @@ void OpenGLScreen::createResources() {
     // Plain black texture.
     pixmap = createSolidPixmap(display(), rootWindow().window(), 1, 1, 0x00000000);
     m_blackTexture = new OpenGL2DTexture(*this, false);
-    m_blackTexture->setPixmap(pixmap, 1, 1, true);
+    m_blackTexture->setPixmap(pixmap, false, 1, 1, true);
     XFreePixmap(display(), pixmap);
 
     // Plain white texture.
     pixmap = createSolidPixmap(display(), rootWindow().window(), 1, 1, 0xffffffff);
     m_whiteTexture = new OpenGL2DTexture(*this, false);
-    m_whiteTexture->setPixmap(pixmap, 1, 1, true);
+    m_whiteTexture->setPixmap(pixmap, false, 1, 1, true);
     XFreePixmap(display(), pixmap);
 
 
@@ -373,7 +373,7 @@ void OpenGLScreen::initPlugins() {
 // Renews the background texture.
 void OpenGLScreen::updateBackgroundTexture() {
     int depth = rootWindow().depth();
-    if (wmSetRootWindowPixmap()) {
+    if (!wmSetRootWindowPixmap()) {
         depth = 32;
     }
 
@@ -409,15 +409,19 @@ BaseCompWindow *OpenGLScreen::createWindowObject(Window window) {
 
 // Renders the screen's contents.
 void OpenGLScreen::renderScreen() {
+    // React to root window changes.
     if (m_rootWindowChanged) {
         updateOnRootWindowResize();
     }
 
+    // Set up the rendering context.
     glXMakeCurrent(display(), m_glxRenderingWindow, m_glxContext);
     m_shaderProgram->use();
 
+    // Render background.
     renderBackground();
 
+    // Render windows.
     std::list<BaseCompWindow*>::const_iterator it = allWindows().begin();
     while (it != allWindows().end()) {
         if (!(*it)->isIgnored() && (*it)->isMapped()) {
@@ -426,12 +430,15 @@ void OpenGLScreen::renderScreen() {
         ++it;
     }
 
+    // Render reconfigure rectangle.
     if ((reconfigureRectangle().width != 0) && (reconfigureRectangle().height != 0)) {
         renderReconfigureRect();
     }
 
+    // Execute any extra jobs from plugins.
     renderExtraJobs();
 
+    // Finish.
     glFlush();
     if (m_haveDoubleBuffering) {
         glXSwapBuffers(display(), m_glxRenderingWindow);
@@ -467,13 +474,7 @@ void OpenGLScreen::renderBackground() {
         plugin->nullRenderInit();
     }
     forEachPlugin(i, plugin) {
-        std::vector<OpenGLRenderingJob> jobs = plugin->postBackgroundRenderActions();
-        for (size_t j = 0; j < jobs.size(); j++) {
-            jobs[j].initAction->execute();
-            executeRenderingJob(jobs[j]);
-            jobs[j].cleanupAction->execute();
-        }
-        plugin->nullRenderInit();
+        executeMultipleJobs(plugin, plugin->postBackgroundRenderActions());
     }
 }
 
@@ -485,14 +486,8 @@ void OpenGLScreen::renderExtraJobs() {
         plugin->nullRenderInit();
     }
     forEachPlugin(i, plugin) {
-        std::vector<OpenGLRenderingJob> jobs = plugin->extraRenderingActions();
-        for (size_t j = 0; j < jobs.size(); j++) {
-            jobs[j].initAction->execute();
-            executeRenderingJob(jobs[j]);
-            jobs[j].cleanupAction->execute();
-        }
+        executeMultipleJobs(plugin, plugin->extraRenderingActions());
         plugin->postExtraRenderingActions();
-        plugin->nullRenderInit();
     }
 }
 
@@ -501,14 +496,7 @@ void OpenGLScreen::renderReconfigureRect() {
     OpenGLPlugin *plugin = NULL;
 
     // Convert reconfigure rectangle to OpenGL coordinates.
-    GLfloat xLow, xHigh, yLow, yHigh;
-    toOpenGLCoords(rootWindow().width(), rootWindow().height(),
-                   reconfigureRectangle().x, reconfigureRectangle().y,
-                   reconfigureRectangle().width, reconfigureRectangle().height,
-                   &xLow, &xHigh, &yLow, &yHigh);
-    GLfloat linePosArray[] = { xLow, yLow, xHigh, yLow, xHigh, yHigh, xLow, yHigh };
-
-    m_recRectLinePosBuffer->bufferData(sizeof(linePosArray), (const GLvoid*)(linePosArray), GL_STATIC_DRAW);
+    m_recRectLinePosBuffer->bufferPosRectangle(rootWindow().width(), rootWindow().height(), reconfigureRectangle());
 
     // Render it.
     glEnable(GL_COLOR_LOGIC_OP);
@@ -529,7 +517,6 @@ void OpenGLScreen::renderReconfigureRect() {
 // A function to render a particular window onto the screen.
 void OpenGLScreen::renderWindow(OpenGLWindow &window) {
     OpenGLPlugin *plugin = NULL;
-    OpenGLRenderingJob renderJob;
 
     // Update window's contents.
     if (window.isDamaged()) {
@@ -541,13 +528,7 @@ void OpenGLScreen::renderWindow(OpenGLWindow &window) {
         plugin->nullRenderInit();
     }
     forEachPlugin(i, plugin) {
-        std::vector<OpenGLRenderingJob> jobs = plugin->preWindowRenderActions(window);
-        for (size_t j = 0; j < jobs.size(); j++) {
-            jobs[j].initAction->execute();
-            executeRenderingJob(jobs[j]);
-            jobs[j].cleanupAction->execute();
-        }
-        plugin->nullRenderInit();
+        executeMultipleJobs(plugin, plugin->preWindowRenderActions(window));
     }
 
     // Render it.
@@ -569,24 +550,26 @@ void OpenGLScreen::renderWindow(OpenGLWindow &window) {
         plugin->nullRenderInit();
     }
     forEachPlugin(i, plugin) {
-        std::vector<OpenGLRenderingJob> jobs = plugin->postWindowRenderActions(window);
-        for (size_t j = 0; j < jobs.size(); j++) {
-            jobs[j].initAction->execute();
-            executeRenderingJob(jobs[j]);
-            jobs[j].cleanupAction->execute();
-        }
-        plugin->nullRenderInit();
+        executeMultipleJobs(plugin, plugin->postWindowRenderActions(window));
     }
 }
 
 
+// Execute multiple rendering jobs.
+void OpenGLScreen::executeMultipleJobs(OpenGLPlugin *plugin, const std::vector<OpenGLRenderingJob> &jobs) {
+    for (size_t i = 0; i < jobs.size(); i++) {
+        executeRenderingJob(jobs[i]);
+    }
+    plugin->nullRenderInit();
+}
+
 // Execute a given rendering job.
-void OpenGLScreen::executeRenderingJob(OpenGLRenderingJob job) {
+void OpenGLScreen::executeRenderingJob(const OpenGLRenderingJob &job) {
     if ((job.alpha >= 0.0) && (job.alpha <= 1.0)) {
-        render(GL_TRIANGLE_STRIP, job.primPosBuffer,
-               job.mainTexCoordBuffer, job.mainTexture,
-               job.shapeTexCoordBuffer, job.shapeTexture,
-               m_defaultElementBuffer, 4, job.alpha);
+        job.shaderInit->execute();
+        render(GL_TRIANGLE_STRIP, job.primPosBuffer, job.mainTexCoordBuffer, job.mainTexture,
+               job.shapeTexCoordBuffer, job.shapeTexture, m_defaultElementBuffer, 4, job.alpha);
+        job.shaderDeinit->execute();
     }
 }
 

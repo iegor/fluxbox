@@ -25,7 +25,8 @@
 #define FBCOMPOSITOR_OPENGLSHADERS_HH
 
 
-#include "RefCount.hh"
+#include "FbTk/Command.hh"
+#include "FbTk/RefCount.hh"
 
 #include <GL/glew.h>
 #include <GL/gl.h>
@@ -36,6 +37,39 @@
 namespace FbCompositor {
 
     class BasePlugin;
+
+
+    //--- SHADER INITIALIZERS --------------------------------------------------
+
+    /** Rendering job initialization functor.  */
+    typedef FbTk::Command<void> OpenGLShaderInitializer;
+
+    /**
+     * Null initialization action.
+     */
+    class NullInitializer : public OpenGLShaderInitializer {
+    public :
+        virtual ~NullInitializer() { }
+        void execute() { }
+    };
+
+
+    //--- SHADER DEINITIALIZERS ------------------------------------------------
+
+    /** Rendering job cleanup functor. */
+    typedef FbTk::Command<void> OpenGLShaderDeinitializer;
+
+    /** 
+     * Null cleanup action.
+     */
+    class NullDeinitializer : public OpenGLShaderDeinitializer {
+    public :
+        virtual ~NullDeinitializer() { }
+        void execute() { }
+    };
+
+
+    //--- SHADER PROGRAM WRAPPER -----------------------------------------------
 
     /**
      * OpenGL shader program wrapper.

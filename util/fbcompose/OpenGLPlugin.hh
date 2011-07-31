@@ -29,7 +29,6 @@
 #include "OpenGLResources.hh"
 #include "OpenGLShaders.hh"
 
-#include "FbTk/Command.hh"
 #include "FbTk/FbString.hh"
 
 #include <GL/glew.h>
@@ -37,7 +36,6 @@
 
 #include <X11/Xlib.h>
 
-#include <algorithm>
 #include <vector>
 
 
@@ -48,47 +46,21 @@ namespace FbCompositor {
     class OpenGLWindow;
 
 
-    //--- SUPPORTING STRUCTURES AND CLASSES ------------------------------------
-
-    /** Rendering job initialization functor.  */
-    typedef FbTk::Command<void> InitAction;
-
-    /**
-     * Null initialization action.
-     */
-    class NullInitAction : public InitAction {
-    public :
-        virtual ~NullInitAction() { }
-        void execute() { }
-    };
-
-
-    /** Rendering job cleanup functor. */
-    typedef FbTk::Command<void> CleanupAction;
-
-    /** 
-     * Null cleanup action.
-     */
-    class NullCleanupAction : public CleanupAction {
-    public :
-        virtual ~NullCleanupAction() { }
-        void execute() { }
-    };
-
+    //--- RENDERING JOB INFORMATION --------------------------------------------
 
     /**
      * Information about an extra rendering job.
      */
     struct OpenGLRenderingJob {
-        OpenGLBufferPtr primPosBuffer;          ///< Primitive's position buffer.
-        OpenGLBufferPtr mainTexCoordBuffer;     ///< Main texture's position buffer.
-        OpenGLBufferPtr shapeTexCoordBuffer;    ///< Shape texture's position buffer.
-        OpenGL2DTexturePtr shapeTexture;        ///< Shape texture.
-        OpenGL2DTexturePtr mainTexture;         ///< Main texture.
-        GLfloat alpha;                          ///< Alpha value.
+        OpenGLBufferPtr primPosBuffer;              ///< Primitive's position buffer.
+        OpenGLBufferPtr mainTexCoordBuffer;         ///< Main texture's position buffer.
+        OpenGLBufferPtr shapeTexCoordBuffer;        ///< Shape texture's position buffer.
+        OpenGL2DTexturePtr mainTexture;             ///< Main texture.
+        OpenGL2DTexturePtr shapeTexture;            ///< Shape texture.
+        GLfloat alpha;                              ///< Rendering's alpha.
 
-        InitAction *initAction;                 ///< Rendering job initialization.
-        CleanupAction *cleanupAction;           ///< Rendering job cleanup.
+        OpenGLShaderInitializer *shaderInit;        ///< Shader initializer.
+        OpenGLShaderDeinitializer *shaderDeinit;    ///< Shader deinitializer.
     };
 
 
@@ -136,11 +108,11 @@ namespace FbCompositor {
         virtual void backgroundRenderCleanup(int partId);
 
         /** Post background rendering actions. */
-        virtual std::vector<OpenGLRenderingJob> postBackgroundRenderActions();
+        virtual const std::vector<OpenGLRenderingJob> &postBackgroundRenderActions();
 
 
         /** Pre window rendering actions and jobs. */
-        virtual std::vector<OpenGLRenderingJob> preWindowRenderActions(const OpenGLWindow &window);
+        virtual const std::vector<OpenGLRenderingJob> &preWindowRenderActions(const OpenGLWindow &window);
 
         /** Window rendering initialization. */
         virtual void windowRenderInit(const OpenGLWindow &window, int partId);
@@ -149,18 +121,18 @@ namespace FbCompositor {
         virtual void windowRenderCleanup(const OpenGLWindow &window, int partId);
 
         /** Post window rendering actions and jobs. */
-        virtual std::vector<OpenGLRenderingJob> postWindowRenderActions(const OpenGLWindow &window);
+        virtual const std::vector<OpenGLRenderingJob> &postWindowRenderActions(const OpenGLWindow &window);
 
 
         /** Reconfigure rectangle rendering initialization. */
-        virtual void recRectRenderInit(XRectangle recRect);
+        virtual void recRectRenderInit(const XRectangle &recRect);
 
         /** Reconfigure rectangle rendering cleanup. */
-        virtual void recRectRenderCleanup(XRectangle recRect);
+        virtual void recRectRenderCleanup(const XRectangle &recRect);
 
 
         /** Extra rendering actions and jobs. */
-        virtual std::vector<OpenGLRenderingJob> extraRenderingActions();
+        virtual const std::vector<OpenGLRenderingJob> &extraRenderingActions();
 
         /** Post extra rendering actions. */
         virtual void postExtraRenderingActions();
