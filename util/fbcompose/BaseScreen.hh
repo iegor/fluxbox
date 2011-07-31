@@ -113,7 +113,7 @@ namespace FbCompositor {
         void createWindow(Window window);
 
         /** Damages a window on this screen. */
-        void damageWindow(Window window, XRectangle area);
+        void damageWindow(Window window, const XRectangle &area);
 
         /** Destroys a window on this screen. */
         void destroyWindow(Window window);
@@ -226,7 +226,7 @@ namespace FbCompositor {
         void damageReconfigureRect();
 
         /** Damages the given rectangle on the screen. */
-        void damageScreenArea(XRectangle area);
+        void damageScreenArea(const XRectangle &area);
 
         /** Damages the area taken by the given window. */
         void damageWindowArea(BaseCompWindow *window, XRectangle area);
@@ -251,9 +251,6 @@ namespace FbCompositor {
 
 
         //--- MAIN SCREEN DATA -------------------------------------------------
-
-        /** A list of damaged rectangles on the screen. */
-        std::vector<XRectangle> m_damagedRects;
 
         /** Current connection to the X server. */
         Display *m_display;
@@ -290,7 +287,12 @@ namespace FbCompositor {
         int m_workspaceCount;
 
 
-        //--- DESKTOP BACKGROUND-RELATED ---------------------------------------
+        /** A list of damaged rectangles on the screen. */
+        std::vector<XRectangle> m_damagedScreenRects;
+
+        /** Damaged screen region. */
+        XserverRegion m_screenDamage;
+
 
         /** Pixmap, containing the desktop background. */
         Pixmap m_rootWindowPixmap;

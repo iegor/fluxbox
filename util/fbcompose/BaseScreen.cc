@@ -72,6 +72,8 @@ BaseScreen::BaseScreen(int screenNumber, PluginType pluginType, const Compositor
     m_screenNumber(screenNumber),
     m_rootWindow(*this, XRootWindow(m_display, m_screenNumber), false) {
 
+    m_screenDamage = XFixesCreateRegion(display(), NULL, 0);
+
     m_activeWindowXID = None;
     m_currentWorkspace = m_rootWindow.singlePropertyValue<long>(Atoms::workspaceAtom(), 0);
     m_workspaceCount = m_rootWindow.singlePropertyValue<long>(Atoms::workspaceCountAtom(), 1);
@@ -95,6 +97,10 @@ BaseScreen::BaseScreen(int screenNumber, PluginType pluginType, const Compositor
 
 // Destructor.
 BaseScreen::~BaseScreen() {
+    if (m_screenDamage) {
+        XFixesDestroyRegion(display(), m_screenDamage);
+    }
+
     std::list<BaseCompWindow*>::iterator it = m_windows.begin();
     while (it != m_windows.end()) {
         delete *it;
@@ -190,7 +196,7 @@ void BaseScreen::createWindow(Window window) {
 }
 
 // Damages a window on this screen.
-void BaseScreen::damageWindow(Window window, XRectangle area) {
+void BaseScreen::damageWindow(Window window, const XRectangle &area) {
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
     if (it != m_windows.end()) {
         (*it)->addDamage();
@@ -413,7 +419,7 @@ bool BaseScreen::isWindowManaged(Window window) {
 
 // Removes all accumulated damage from the screen.
 void BaseScreen::clearScreenDamage() {
-    m_damagedRects.clear();
+    m_damagedScreenRects.clear();
 }
 
 // Reconfigure heads on the current screen.
@@ -466,7 +472,8 @@ void BaseScreen::setRootWindowSizeChanged() {
 
 // Returns the damaged screen area.
 XserverRegion BaseScreen::damagedScreenArea() {
-    return XFixesCreateRegion(display(), (XRectangle*)(m_damagedRects.data()), m_damagedRects.size());
+    XFixesSetRegion(display(), m_screenDamage, (XRectangle*)(m_damagedScreenRects.data()), m_damagedScreenRects.size());
+    return m_screenDamage;
 }
 
 
@@ -547,8 +554,8 @@ void BaseScreen::damageReconfigureRect() {
 }
 
 // Damages the given rectangle on the screen.
-void BaseScreen::damageScreenArea(XRectangle area) {
-    m_damagedRects.push_back(area);
+void BaseScreen::damageScreenArea(const XRectangle &area) {
+    m_damagedScreenRects.push_back(area);
 }
 
 // Damages the area taken by the given window.

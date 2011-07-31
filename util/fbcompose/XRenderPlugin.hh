@@ -92,21 +92,21 @@ namespace FbCompositor {
         //--- RENDERING ACTIONS ------------------------------------------------
 
         /** Rectangles that the plugin wishes to damage. */
-        virtual std::vector<XRectangle> damagedAreas();
+        virtual const std::vector<XRectangle> &damagedAreas();
 
 
         /** Post background rendering actions and jobs. */
-        virtual std::vector<XRenderRenderingJob> postBackgroundRenderingActions();
+        virtual const std::vector<XRenderRenderingJob> &postBackgroundRenderingActions();
 
 
         /** Pre window rendering actions and jobs. */
-        virtual std::vector<XRenderRenderingJob> preWindowRenderingActions(const XRenderWindow &window);
+        virtual const std::vector<XRenderRenderingJob> &preWindowRenderingActions(const XRenderWindow &window);
 
         /** Window rendering job initialization. */
         virtual void windowRenderingJobInit(const XRenderWindow &window, XRenderRenderingJob &job);
 
         /** Post window rendering actions and jobs. */
-        virtual std::vector<XRenderRenderingJob> postWindowRenderingActions(const XRenderWindow &window);
+        virtual const std::vector<XRenderRenderingJob> &postWindowRenderingActions(const XRenderWindow &window);
 
 
         /** Reconfigure rectangle rendering job initialization. */
@@ -114,7 +114,7 @@ namespace FbCompositor {
 
 
         /** Extra rendering actions and jobs. */
-        virtual std::vector<XRenderRenderingJob> extraRenderingActions();
+        virtual const std::vector<XRenderRenderingJob> &extraRenderingActions();
 
         /** Post extra rendering actions. */
         virtual void postExtraRenderingActions();

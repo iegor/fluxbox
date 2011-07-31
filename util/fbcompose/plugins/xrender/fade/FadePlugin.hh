@@ -86,7 +86,7 @@ namespace FbCompositor {
         //--- RENDERING ACTIONS ------------------------------------------------
 
         /** Rectangles that the plugin wishes to damage. */
-        std::vector<XRectangle> damagedAreas();
+        const std::vector<XRectangle> &damagedAreas();
 
 
         /** Window rendering job initialization. */
@@ -94,7 +94,7 @@ namespace FbCompositor {
 
 
         /** Extra rendering actions and jobs. */
-        std::vector<XRenderRenderingJob> extraRenderingActions();
+        const std::vector<XRenderRenderingJob> &extraRenderingActions();
 
         /** Post extra rendering actions. */
         void postExtraRenderingActions();
@@ -105,13 +105,20 @@ namespace FbCompositor {
 
         /** \returns the faded mask picture for the given window fade. */
         void createFadedMask(int alpha, XRenderPicturePtr mask, XRectangle dimensions,
-                             XRenderPicturePtr &fadePicture_return);
+                             XRenderPicturePtr fadePicture_return);
 
 
         //--- GENERAL RENDERING VARIABLES --------------------------------------
 
         /** PictFormat for fade pictures. */
         XRenderPictFormat *m_fadePictFormat;
+
+
+        /** Vector, containing the areas that the plugin wishes to paint. */
+        std::vector<XRectangle> m_damagedAreas;
+        
+        /** Vector, containing the plugin's extra rendering jobs. */
+        std::vector<XRenderRenderingJob> m_extraJobs;
 
 
         //--- FADE SPECIFIC ----------------------------------------------------

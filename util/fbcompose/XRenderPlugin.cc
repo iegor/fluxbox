@@ -52,28 +52,32 @@ const XRenderScreen &XRenderPlugin::xrenderScreen() const {
 //--- RENDERING ACTIONS --------------------------------------------------------
 
 // Rectangles that the plugin wishes to damage.
-std::vector<XRectangle> XRenderPlugin::damagedAreas() {
-    return std::vector<XRectangle>();
+const std::vector<XRectangle> &XRenderPlugin::damagedAreas() {
+    static std::vector<XRectangle> damage;
+    return damage;
 }
 
 
 // Post background rendering actions and jobs.
-std::vector<XRenderRenderingJob> XRenderPlugin::postBackgroundRenderingActions() {
-    return std::vector<XRenderRenderingJob>();
+const std::vector<XRenderRenderingJob> &XRenderPlugin::postBackgroundRenderingActions() {
+    static std::vector<XRenderRenderingJob> jobs;
+    return jobs;
 }
 
 
 // Pre window rendering actions and jobs.
-std::vector<XRenderRenderingJob> XRenderPlugin::preWindowRenderingActions(const XRenderWindow &/*window*/) {
-    return std::vector<XRenderRenderingJob>();
+const std::vector<XRenderRenderingJob> &XRenderPlugin::preWindowRenderingActions(const XRenderWindow &/*window*/) {
+    static std::vector<XRenderRenderingJob> jobs;
+    return jobs;
 }
 
 // Window rendering job initialization.
 void XRenderPlugin::windowRenderingJobInit(const XRenderWindow &/*window*/, XRenderRenderingJob &/*job*/) { }
 
 // Post window rendering actions and jobs.
-std::vector<XRenderRenderingJob> XRenderPlugin::postWindowRenderingActions(const XRenderWindow &/*window*/) {
-    return std::vector<XRenderRenderingJob>();
+const std::vector<XRenderRenderingJob> &XRenderPlugin::postWindowRenderingActions(const XRenderWindow &/*window*/) {
+    static std::vector<XRenderRenderingJob> jobs;
+    return jobs;
 }
 
 
@@ -82,8 +86,9 @@ void XRenderPlugin::recRectRenderingJobInit(XRectangle &/*rect_return*/, GC /*gc
 
 
 // Extra rendering actions and jobs.
-std::vector<XRenderRenderingJob> XRenderPlugin::extraRenderingActions() {
-    return std::vector<XRenderRenderingJob>();
+const std::vector<XRenderRenderingJob> &XRenderPlugin::extraRenderingActions() {
+    static std::vector<XRenderRenderingJob> jobs;
+    return jobs;
 }
 
 // Post extra rendering actions.

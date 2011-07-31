@@ -30,6 +30,7 @@
 #include "XRenderPlugin.hh"
 #include "XRenderResources.hh"
 
+#include <X11/extensions/Xfixes.h>
 #include <X11/extensions/Xrender.h>
 #include <X11/Xlib.h>
 
@@ -103,7 +104,7 @@ namespace FbCompositor {
         void clipBackBufferToDamage();
 
         /** Perform a rendering job on the back buffer picture. */
-        void executeRenderingJob(XRenderRenderingJob job);
+        void executeRenderingJob(const XRenderRenderingJob &job);
 
         /** Render the desktop wallpaper. */
         void renderBackground();
@@ -131,6 +132,13 @@ namespace FbCompositor {
 
         /** The picture of the rendering window. */
         XRenderPicturePtr m_renderingPicture;
+
+
+        /** A container for rectangle, damaged by plugins. */
+        std::vector<XRectangle> m_pluginDamageRects;
+
+        /** Screen region, damaged by plugins. */
+        XserverRegion m_pluginDamage;
 
 
         /** The picture of the root window. */

@@ -133,22 +133,22 @@ void FadePlugin::windowUnmapped(const BaseCompWindow &window) {
 //--- RENDERING ACTIONS --------------------------------------------------------
 
 // Rectangles that the plugin wishes to damage.
-std::vector<XRectangle> FadePlugin::damagedAreas() {
-    std::vector<XRectangle> rects;
+const std::vector<XRectangle> &FadePlugin::damagedAreas() {
+    m_damagedAreas.clear();     // TODO: Stop recreating vector's contents.
 
     std::map<Window, PosFadeData>::iterator posIt = m_positiveFades.begin();
     while (posIt != m_positiveFades.end()) {
-        rects.push_back(posIt->second.dimensions);
+        m_damagedAreas.push_back(posIt->second.dimensions);
         ++posIt;
     }
 
     std::vector<NegFadeData>::iterator negIt = m_negativeFades.begin();
     while (negIt != m_negativeFades.end()) {
-        rects.push_back(negIt->dimensions);
+        m_damagedAreas.push_back(negIt->dimensions);
         ++negIt;
     }
 
-    return rects;
+    return m_damagedAreas;
 }
 
 
@@ -179,8 +179,8 @@ void FadePlugin::windowRenderingJobInit(const XRenderWindow &window, XRenderRend
 }
 
 // Extra rendering actions and jobs.
-std::vector<XRenderRenderingJob> FadePlugin::extraRenderingActions() {
-    std::vector<XRenderRenderingJob> extraJobs;
+const std::vector<XRenderRenderingJob> &FadePlugin::extraRenderingActions() {
+    m_extraJobs.clear();    // TODO: Stop recreating vector's contents.
 
     for (size_t i = 0; i < m_negativeFades.size(); i++) {
         int newTicks;
@@ -201,21 +201,18 @@ std::vector<XRenderRenderingJob> FadePlugin::extraRenderingActions() {
         }
 
         m_negativeFades[i].job.maskPicture = m_negativeFades[i].fadePicture;
-        extraJobs.push_back(m_negativeFades[i].job);
+        m_extraJobs.push_back(m_negativeFades[i].job);
     }
 
-    return extraJobs;
+    return m_extraJobs;
 }
 
 // Called after the extra rendering jobs are executed.
 void FadePlugin::postExtraRenderingActions() {
     std::map<Window, PosFadeData>::iterator posIt = m_positiveFades.begin();
-    std::map<Window, PosFadeData>::iterator posIt2;
     while (posIt != m_positiveFades.end()) {
         if (posIt->second.fadeAlpha >= 255) {
-            posIt2 = posIt;
-            ++posIt;
-            m_positiveFades.erase(posIt2);
+            m_positiveFades.erase(posIt++);
         } else {
             ++posIt;
         }
@@ -236,7 +233,7 @@ void FadePlugin::postExtraRenderingActions() {
 
 // Returns the faded mask picture for the given window fade.
 void FadePlugin::createFadedMask(int alpha, XRenderPicturePtr mask, XRectangle dimensions,
-                                 XRenderPicturePtr &fadePicture_return) {
+                                 XRenderPicturePtr fadePicture_return) {
     Pixmap fadePixmap = createSolidPixmap(display(), screen().rootWindow().window(),
                                           dimensions.width, dimensions.height, alpha * 0x01010101);
     fadePicture_return->setPixmap(fadePixmap, true);

@@ -57,12 +57,18 @@ XRenderScreen::XRenderScreen(int screenNumber, const CompositorConfig &config):
     BaseScreen(screenNumber, Plugin_XRender, config),
     m_pictFilter(config.xRenderPictFilter()) {
 
+    m_pluginDamage = XFixesCreateRegion(display(), NULL, 0);
+
     initRenderingSurface();
     updateBackgroundPicture();
 }
 
 // Destructor.
 XRenderScreen::~XRenderScreen() {
+    if (m_pluginDamage) {
+        XFixesDestroyRegion(display(), m_pluginDamage);
+    }
+
     XUnmapWindow(display(), m_renderingWindow);
     XDestroyWindow(display(), m_renderingWindow);
 }
@@ -203,26 +209,21 @@ void XRenderScreen::renderScreen() {
 void XRenderScreen::clipBackBufferToDamage() {
     XRenderPlugin *plugin = NULL;
 
-    std::vector<XRectangle> pluginDamageRects;
+    m_pluginDamageRects.clear();
     forEachPlugin(i, plugin) {
-        std::vector<XRectangle> rects = plugin->damagedAreas();
-        for (size_t j = 0; j < rects.size(); j++) {
-            pluginDamageRects.push_back(rects[j]);
-        }
+        const std::vector<XRectangle> &windowDamage = plugin->damagedAreas();
+        m_pluginDamageRects.insert(m_pluginDamageRects.end(), windowDamage.begin(), windowDamage.end());
     }
-    XserverRegion pluginDamage = XFixesCreateRegion(display(), (XRectangle*)(pluginDamageRects.data()), pluginDamageRects.size());
+    XFixesSetRegion(display(), m_pluginDamage, (XRectangle*)(m_pluginDamageRects.data()), m_pluginDamageRects.size());
 
     XserverRegion allDamage = damagedScreenArea();
-    XFixesUnionRegion(display(), allDamage, allDamage, pluginDamage);
+    XFixesUnionRegion(display(), allDamage, allDamage, m_pluginDamage);
 
     XFixesSetPictureClipRegion(display(), m_backBufferPicture->pictureHandle(), 0, 0, allDamage);
-
-    XFixesDestroyRegion(display(), allDamage);
-    XFixesDestroyRegion(display(), pluginDamage);
 }
 
 // Perform a rendering job on the back buffer picture.
-void XRenderScreen::executeRenderingJob(XRenderRenderingJob job) {
+void XRenderScreen::executeRenderingJob(const XRenderRenderingJob &job) {
     if (job.operation != PictOpClear) {
         XRenderComposite(display(), job.operation,
                          job.sourcePicture->pictureHandle(), job.maskPicture->pictureHandle(),
