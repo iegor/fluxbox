@@ -178,7 +178,7 @@ void *PluginManager::getLibraryObject(void *handle, const char *objectName, cons
     const char *error = dlerror();
 
     if (error) {
-        dlclose(handle);    // TODO: Should this be done here?
+        dlclose(handle);
         std::stringstream ss;
         ss << "Error in loading " << verboseObjectName << " for \"" << pluginName << "\" plugin: " << error;
         throw PluginException(ss.str());

@@ -23,6 +23,7 @@
 
 #include "CompositorConfig.hh"
 
+#include "Constants.hh"
 #include "Logging.hh"
 
 #ifdef USE_XRENDER_COMPOSITING
@@ -267,6 +268,6 @@ void CompositorConfig::printShortHelp(std::ostream &os) {
 
 // Output version information.
 void CompositorConfig::printVersion(std::ostream &os) {
-    os << "Fluxbox compositor %VERSION%" << std::endl       // TODO: Compositor version.
+    os << "Fluxbox compositor " << APP_VERSION << std::endl
        << "Copyright (c) 2011 Gediminas Liktaras" << std::endl;
 }

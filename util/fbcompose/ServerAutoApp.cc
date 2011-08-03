@@ -29,6 +29,7 @@
 
 #include "Atoms.hh"
 #include "CompositorConfig.hh"
+#include "Constants.hh"
 
 #include <X11/extensions/Xcomposite.h>
 #include <X11/Xlib.h>
@@ -43,6 +44,8 @@
     #include <time.h>
 #endif  // HAVE_TIME_H
 #endif  // HAVE_CTIME
+
+#include <csignal>
 
 using namespace FbCompositor;
 
@@ -66,6 +69,9 @@ ServerAutoApp::ServerAutoApp(const CompositorConfig &config) :
     initScreens();
 
     XFlush(display());
+
+    signal(SIGINT, handleSignal_ServerAuto);
+    signal(SIGTERM, handleSignal_ServerAuto);
 }
 
 // Destructor.
@@ -109,9 +115,8 @@ void ServerAutoApp::initScreens() {
             throw InitException("Another compositing manager is running.");
         }
 
-        // TODO: Better way of obtaining program's name in SetWMProperties.
         curOwner = XCreateSimpleWindow(display(), XRootWindow(display(), i), -10, -10, 1, 1, 0, None, None);
-        XmbSetWMProperties(display(), curOwner, "fbcompose", "fbcompose", NULL, 0, NULL, NULL, NULL);
+        XmbSetWMProperties(display(), curOwner, APP_NAME, APP_NAME, NULL, 0, NULL, NULL, NULL);
         XSetSelectionOwner(display(), cmAtom, curOwner, CurrentTime);
     }
 }
@@ -124,5 +129,15 @@ void ServerAutoApp::eventLoop() {
     timespec sleepTimespec = { 0, SLEEP_TIME * 1000 };
     while (!done()) {
         nanosleep(&sleepTimespec, NULL);
+    }
+}
+
+
+//--- VARIOUS HANDLERS ---------------------------------------------------------
+
+// Custom signal handler for ServerAuto mode.
+void FbCompositor::handleSignal_ServerAuto(int sig) {
+    if ((sig == SIGINT) || (sig == SIGTERM)) {
+        FbTk::App::instance()->end();
     }
 }

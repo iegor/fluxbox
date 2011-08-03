@@ -55,7 +55,6 @@ BaseCompWindow::BaseCompWindow(const BaseScreen &screen, Window windowXID, bool 
     m_clipShapeChanged = true;
     m_clipShapeRects = 0;
     m_clipShapeRectCount = 0;
-    m_clipShapeRectOrder = Unsorted;
 
     m_isIgnored = false;
 
@@ -132,11 +131,13 @@ void BaseCompWindow::updateGeometry() {
 
 // Update the window's clip shape.
 void BaseCompWindow::updateShape() {
+    int rectOrder;
+
     if (m_clipShapeRects) {
         XFree(m_clipShapeRects);
         m_clipShapeRects = NULL;
     }
-    m_clipShapeRects = XShapeGetRectangles(display(), window(), ShapeClip, &m_clipShapeRectCount, &m_clipShapeRectOrder);
+    m_clipShapeRects = XShapeGetRectangles(display(), window(), ShapeClip, &m_clipShapeRectCount, &rectOrder);
 
     // We have to adjust the size here to account for borders.
     for (int i = 0; i < m_clipShapeRectCount; i++) {

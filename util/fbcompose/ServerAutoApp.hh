@@ -75,6 +75,10 @@ namespace FbCompositor {
         /** Prepare screens. */
         void initScreens();
     };
+
+
+    // Custom signal handler for ServerAuto mode.
+    void handleSignal_ServerAuto(int sig);
 }
 
 

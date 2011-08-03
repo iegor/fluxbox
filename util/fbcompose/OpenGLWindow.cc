@@ -41,7 +41,7 @@ using namespace FbCompositor;
 
 // Constructor.
 OpenGLWindow::OpenGLWindow(const OpenGLScreen &screen, Window windowXID) :
-    BaseCompWindow((const BaseScreen&)(screen), windowXID, false) {
+    BaseCompWindow(static_cast<const BaseScreen&>(screen), windowXID, false) {
 
     m_contentTexPartition = new OpenGL2DTexturePartition(screen, true);
     m_shapeTexPartition = new OpenGL2DTexturePartition(screen, false);
@@ -98,7 +98,6 @@ void OpenGLWindow::updateShape() {
     XFillRectangle(display(), shapePixmap, gc, 0, 0, realWidth(), realHeight());
 
     XSetForeground(display(), gc, 0xffffffff);
-    // TODO: Fix rectangle ordering mismatch.
     XSetClipRectangles(display(), gc, 0, 0, clipShapeRects(), clipShapeRectCount(), Unsorted);
     XFillRectangle(display(), shapePixmap, gc, 0, 0, realWidth(), realHeight());
 

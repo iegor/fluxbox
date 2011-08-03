@@ -162,9 +162,6 @@ namespace FbCompositor {
         /** \returns the number of rectangles that make up the clip shape. */
         int clipShapeRectCount() const;
 
-        /** \returns the ordering of rectangles that make up the clip shape. */
-        int clipShapeRectOrder() const;
-
         /** \returns the rectangles that make up the clip shape. */
         XRectangle *clipShapeRects() const;
 
@@ -259,9 +256,6 @@ namespace FbCompositor {
         /** The number of rectangles of window's clip shape. */
         int m_clipShapeRectCount;
 
-        /** The ordering of window clip shape rectangles. */
-        int m_clipShapeRectOrder;
-
         /** Rectangles, that make up the window's clip shape. */
         XRectangle *m_clipShapeRects;
 
@@ -285,11 +279,6 @@ namespace FbCompositor {
     // Returns the number of rectangles that make up the clip shape.
     inline int BaseCompWindow::clipShapeRectCount() const {
         return m_clipShapeRectCount;
-    }
-
-    // Returns the ordering of rectangles that make up the clip shape.
-    inline int BaseCompWindow::clipShapeRectOrder() const {
-        return m_clipShapeRectOrder;
     }
 
     // Returns the rectangles that make up the clip shape.

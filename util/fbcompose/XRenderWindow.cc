@@ -34,7 +34,7 @@ using namespace FbCompositor;
 
 // Constructor.
 XRenderWindow::XRenderWindow(const XRenderScreen &screen, Window windowXID, const char *pictFilter) :
-    BaseCompWindow((const BaseScreen&)(screen), windowXID, false),
+    BaseCompWindow(static_cast<const BaseScreen&>(screen), windowXID, false),
     m_pictFilter(pictFilter) {
 
     XRenderPictFormat *contentPictFormat = XRenderFindVisualFormat(display(), visual());

@@ -108,7 +108,6 @@ int TickTracker::totalElapsedTicks() {
         throw TimeException("Cannot obtain the current time.");
     }
 
-    // TODO: Make sure it reacts to time changes appropriately (especially backwards).
     return tickDifference(now, m_startTime);
 }
 

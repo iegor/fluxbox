@@ -104,11 +104,11 @@ OpenGLShaderProgram::OpenGLShaderProgram(const std::vector<BasePlugin*> &plugins
     ss.str("");
     ss << VERTEX_SHADER_HEAD;
     for (size_t i = 0; i < plugins.size(); i++) {
-        ss << ((OpenGLPlugin*)(plugins[i]))->vertexShader() << "\n";
+        ss << (dynamic_cast<OpenGLPlugin*>(plugins[i]))->vertexShader() << "\n";
     }
     ss << VERTEX_SHADER_MIDDLE;
     for (size_t i = 0; i < plugins.size(); i++) {
-        ss << ((OpenGLPlugin*)(plugins[i]))->pluginName() << "();\n";
+        ss << (dynamic_cast<OpenGLPlugin*>(plugins[i]))->pluginName() << "();\n";
     }
     ss << VERTEX_SHADER_TAIL;
     m_vertexShader = createShader(GL_VERTEX_SHADER, ss.str().length(), ss.str().c_str());
@@ -117,11 +117,11 @@ OpenGLShaderProgram::OpenGLShaderProgram(const std::vector<BasePlugin*> &plugins
     ss.str("");
     ss << FRAGMENT_SHADER_HEAD;
     for (size_t i = 0; i < plugins.size(); i++) {
-        ss << ((OpenGLPlugin*)(plugins[i]))->fragmentShader() << "\n";
+        ss << (dynamic_cast<OpenGLPlugin*>(plugins[i]))->fragmentShader() << "\n";
     }
     ss << FRAGMENT_SHADER_MIDDLE;
     for (size_t i = 0; i < plugins.size(); i++) {
-        ss << ((OpenGLPlugin*)(plugins[i]))->pluginName() << "();\n";
+        ss << (dynamic_cast<OpenGLPlugin*>(plugins[i]))->pluginName() << "();\n";
     }
     ss << FRAGMENT_SHADER_TAIL;
     m_fragmentShader = createShader(GL_FRAGMENT_SHADER, ss.str().length(), ss.str().c_str());
