@@ -108,25 +108,27 @@ void FadePlugin::windowUnmapped(const BaseCompWindow &window) {
         fade.fadePicture = new XRenderPicture(xrenderScreen(), m_fadePictFormat, xrenderScreen().pictFilter());
     }
 
-    fade.dimensions = xrWindow.dimensions();
-    fade.maskPicture = xrWindow.maskPicture();
-    fade.windowId = xrWindow.window();
+    if (xrWindow.contentPicture()->pictureHandle() != None) {
+        fade.dimensions = xrWindow.dimensions();
+        fade.maskPicture = xrWindow.maskPicture();
+        fade.windowId = xrWindow.window();
 
-    fade.job.operation = PictOpOver;
-    fade.job.sourcePicture = xrWindow.contentPicture();
-    fade.job.sourceX = 0;
-    fade.job.sourceY = 0;
-    fade.job.maskX = 0;
-    fade.job.maskY = 0;
-    fade.job.destinationX = xrWindow.x();
-    fade.job.destinationY = xrWindow.y();
-    fade.job.width = xrWindow.realWidth();
-    fade.job.height = xrWindow.realHeight();
+        fade.job.operation = PictOpOver;
+        fade.job.sourcePicture = xrWindow.contentPicture();
+        fade.job.sourceX = 0;
+        fade.job.sourceY = 0;
+        fade.job.maskX = 0;
+        fade.job.maskY = 0;
+        fade.job.destinationX = xrWindow.x();
+        fade.job.destinationY = xrWindow.y();
+        fade.job.width = xrWindow.realWidth();
+        fade.job.height = xrWindow.realHeight();
 
-    fade.timer.setTickSize(250000 / 255);
-    fade.timer.start();
+        fade.timer.setTickSize(250000 / 255);
+        fade.timer.start();
 
-    m_negativeFades.push_back(fade);
+        m_negativeFades.push_back(fade);
+    }
 }
 
 
@@ -174,7 +176,9 @@ void FadePlugin::windowRenderingJobInit(const XRenderWindow &window, XRenderRend
             createFadedMask(curFade.fadeAlpha, window.maskPicture(), window.dimensions(), curFade.fadePicture);
         }
 
-        job.maskPicture = curFade.fadePicture;
+        if (curFade.fadePicture->pictureHandle() != None) {
+            job.maskPicture = curFade.fadePicture;
+        }
     }
 }
 
@@ -200,8 +204,10 @@ const std::vector<XRenderRenderingJob> &FadePlugin::extraRenderingActions() {
                             m_negativeFades[i].dimensions, m_negativeFades[i].fadePicture);
         }
 
-        m_negativeFades[i].job.maskPicture = m_negativeFades[i].fadePicture;
-        m_extraJobs.push_back(m_negativeFades[i].job);
+        if (m_negativeFades[i].fadePicture->pictureHandle() != None) {
+            m_negativeFades[i].job.maskPicture = m_negativeFades[i].fadePicture;
+            m_extraJobs.push_back(m_negativeFades[i].job);
+        }
     }
 
     return m_extraJobs;
@@ -234,6 +240,10 @@ void FadePlugin::postExtraRenderingActions() {
 // Returns the faded mask picture for the given window fade.
 void FadePlugin::createFadedMask(int alpha, XRenderPicturePtr mask, XRectangle dimensions,
                                  XRenderPicturePtr fadePicture_return) {
+    if (mask->pictureHandle() == None) {
+        return;
+    }
+
     Pixmap fadePixmap = createSolidPixmap(display(), screen().rootWindow().window(),
                                           dimensions.width, dimensions.height, alpha * 0x01010101);
     fadePicture_return->setPixmap(fadePixmap, true);

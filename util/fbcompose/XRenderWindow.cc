@@ -92,7 +92,7 @@ void XRenderWindow::updateShape() {
 
 // Update the window's mask picture.
 void XRenderWindow::updateMaskPicture() {
-    if (!m_maskPicture || isResized()) {
+    if ((m_maskPicture->pictureHandle() == None) || isResized()) {
         Pixmap maskPixmap = XCreatePixmap(display(), window(), realWidth(), realHeight(), 32);
         m_maskPicture->setPixmap(maskPixmap, true);
     }

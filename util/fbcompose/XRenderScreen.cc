@@ -296,6 +296,13 @@ void XRenderScreen::renderWindow(XRenderWindow &window) {
         window.updateContents();
     }
 
+    // This might happen if the window is mapped and unmapped in the same
+    // frame, but the compositor hasn't received the unmap event yet.
+    if ((window.contentPicture()->pictureHandle() == None)
+            || (window.maskPicture()->pictureHandle() == None)) {
+        return;
+    }
+
     // Extra rendering actions before window is drawn.
     forEachPlugin(i, plugin) {
         std::vector<XRenderRenderingJob> jobs = plugin->preWindowRenderingActions(window);

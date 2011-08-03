@@ -182,11 +182,13 @@ void BaseCompWindow::updateContentPixmap() {
         XWindowAttributes xwa;
         if (XGetWindowAttributes(display(), window(), &xwa)) {
             if (xwa.map_state == IsViewable) {
-                if (m_contentPixmap) {
-                    XFreePixmap(display(), m_contentPixmap);
-                    m_contentPixmap = None;
+                Pixmap newPixmap = XCompositeNameWindowPixmap(display(), window());
+                if (newPixmap) {
+                    if (m_contentPixmap) {
+                        XFreePixmap(display(), m_contentPixmap);
+                    }
+                    m_contentPixmap = newPixmap;
                 }
-                m_contentPixmap = XCompositeNameWindowPixmap(display(), window());
             }
         }
         XUngrabServer(display());
