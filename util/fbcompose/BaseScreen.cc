@@ -74,10 +74,11 @@ BaseScreen::BaseScreen(int screenNumber, PluginType pluginType, const Compositor
 
     m_screenDamage = XFixesCreateRegion(display(), NULL, 0);
 
-    m_activeWindowXID = None;
-    m_currentWorkspace = m_rootWindow.singlePropertyValue<long>(Atoms::workspaceAtom(), 0);
-    m_workspaceCount = m_rootWindow.singlePropertyValue<long>(Atoms::workspaceCountAtom(), 1);
+    updateActiveWindow();
+    updateCurrentIconbarItem();
+    updateCurrentWorkspace();
     updateReconfigureRect();
+    updateWorkspaceCount();
 
     m_rootWindowPixmap = None;
     m_wmSetRootWindowPixmap = true;
@@ -342,10 +343,12 @@ void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
     if ((window == m_rootWindow.window()) && (property != None) && (state == PropertyNewValue)) {
         if (property == Atoms::activeWindowAtom()) {
             updateActiveWindow();
+        } else if (property == Atoms::currentIconbarItemAtom()) {
+            updateCurrentIconbarItem();
         } else if (property == Atoms::reconfigureRectAtom()) {
-            damageReconfigureRect();    // Previous rectangle can be removed.
+            damageReconfigureRect();    // Damage, so that previous rectangle can be removed.
             updateReconfigureRect();
-            damageReconfigureRect();    // New rectangle can be drawn.
+            damageReconfigureRect();    // Damage, so that new rectangle can be drawn.
         } else if (property == Atoms::workspaceAtom()) {
             updateCurrentWorkspace();
         } else if (property == Atoms::workspaceCountAtom()) {
@@ -451,6 +454,7 @@ void BaseScreen::updateHeads(HeadMode headMode) {
     }
 }
 
+
 // Notifies the screen of the background change.
 void BaseScreen::setRootPixmapChanged() {
     BasePlugin *plugin = NULL;
@@ -494,6 +498,11 @@ void BaseScreen::updateActiveWindow() {
             m_activeWindowXID = None;
         }
     }
+}
+
+// Update the current iconbar item.
+void BaseScreen::updateCurrentIconbarItem() {
+    m_currentIconbarItem = m_rootWindow.singlePropertyValue<Window>(Atoms::currentIconbarItemAtom(), None);
 }
 
 // Update the current workspace index.

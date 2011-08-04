@@ -26,8 +26,13 @@
 
 #include <X11/Xlib.h>
 
+#include <algorithm>
+
 
 namespace FbCompositor {
+
+    class BaseScreen;
+
 
     //--- MACROS ---------------------------------------------------------------
 
@@ -42,6 +47,9 @@ namespace FbCompositor {
 
     /** Computes the highest power of two that equals or is less than the given value. */
     int largestSmallerPowerOf2(int value);
+
+    /** \returns the location of the mouse pointer. */
+    std::pair<int, int> mousePointerLocation(const BaseScreen &screen);
 
 }
 

@@ -47,6 +47,12 @@ Atom Atoms::compositingSelectionAtom(int screenNumber) {
     return XInternAtom(FbTk::App::instance()->display(), ss.str().c_str(), False);
 }
 
+// Returns the _FLUXBOX_CURRENT_ICONBAR_ITEM atom.
+Atom Atoms::currentIconbarItemAtom() {
+    static Atom atom = XInternAtom(FbTk::App::instance()->display(), "_FLUXBOX_CURRENT_ICONBAR_ITEM", False);
+    return atom;
+}
+
 // Returns the _NET_WM_WINDOW_OPACITY atom.
 Atom Atoms::opacityAtom() {
     static Atom atom = XInternAtom(FbTk::App::instance()->display(), "_NET_WM_WINDOW_OPACITY", False);

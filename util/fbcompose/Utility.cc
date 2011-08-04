@@ -23,6 +23,8 @@
 
 #include "Utility.hh"
 
+#include "BaseScreen.hh"
+
 
 //--- FUNCTIONS ----------------------------------------------------------------
 
@@ -52,4 +54,15 @@ int FbCompositor::largestSmallerPowerOf2(int value) {
     } else {
         return (1 << power);
     }
+}
+
+// Returns the location of the mouse pointer.
+std::pair<int, int> FbCompositor::mousePointerLocation(const BaseScreen &screen) {
+    static Window rootWin, childWin;
+    static int rootX, rootY, childX, childY;
+    static unsigned int mask;
+
+    XQueryPointer((Display*)(screen.display()), screen.rootWindow().window(),
+                  &rootWin, &childWin, &rootX, &rootY, &childX, &childY, &mask);
+    return std::make_pair(rootX, rootY);
 }

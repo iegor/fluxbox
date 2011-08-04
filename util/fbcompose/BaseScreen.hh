@@ -31,6 +31,7 @@
 #include <X11/extensions/Xfixes.h>
 #include <X11/Xlib.h>
 
+#include <algorithm>
 #include <iosfwd>
 #include <list>
 #include <vector>
@@ -76,12 +77,6 @@ namespace FbCompositor {
 
         //--- ACCESSORS --------------------------------------------------------
 
-        /** \returns the active window XID. */
-        Window activeWindow() const;
-
-        /** \returns the index of the current workspace. */
-        int currentWorkspace() const;
-
         /** \returns the current connection to the X server. */
         Display *display();
 
@@ -96,6 +91,16 @@ namespace FbCompositor {
 
         /** \returns screen's root window (const version). */
         const BaseCompWindow &rootWindow() const;
+
+
+        /** \returns the active window XID. */
+        Window activeWindow() const;
+
+        /** \returns the XID of the current iconbar item. */
+        Window currentIconbarItem() const;
+
+        /** \returns the index of the current workspace. */
+        int currentWorkspace() const;
 
         /** \returns screen's number. */
         int screenNumber() const;
@@ -207,6 +212,9 @@ namespace FbCompositor {
         /** Update stored active window. */
         void updateActiveWindow();
 
+        /** Update the current iconbar item. */
+        void updateCurrentIconbarItem();
+
         /** Update the current workspace index. */
         void updateCurrentWorkspace();
 
@@ -277,6 +285,9 @@ namespace FbCompositor {
         /** XID of the active window. */
         Window m_activeWindowXID;
 
+        /** XID of the current iconbar item. */
+        Window m_currentIconbarItem;
+
         /** The index of the current workspace. */
         int m_currentWorkspace;
 
@@ -312,6 +323,11 @@ namespace FbCompositor {
     // Returns all of screen's windows.
     inline const std::list<BaseCompWindow*> &BaseScreen::allWindows() const {
         return m_windows;
+    }
+
+    // Returns the XID of the current iconbar item.
+    inline Window BaseScreen::currentIconbarItem() const {
+        return m_currentIconbarItem;
     }
 
     // Returns the index of the current workspace.
