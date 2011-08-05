@@ -225,8 +225,10 @@ void XRenderScreen::clipBackBufferToDamage() {
 // Perform a rendering job on the back buffer picture.
 void XRenderScreen::executeRenderingJob(const XRenderRenderingJob &job) {
     if (job.operation != PictOpClear) {
-        XRenderComposite(display(), job.operation,
-                         job.sourcePicture->pictureHandle(), job.maskPicture->pictureHandle(),
+        Picture source = ((job.sourcePicture) ? (job.sourcePicture->pictureHandle()) : (None));
+        Picture mask = ((job.maskPicture) ? (job.maskPicture->pictureHandle()) : (None));
+
+        XRenderComposite(display(), job.operation, source, mask,
                          m_backBufferPicture->pictureHandle(), job.sourceX, job.sourceY,
                          job.maskX, job.maskY, job.destinationX, job.destinationY, job.width, job.height);
     }

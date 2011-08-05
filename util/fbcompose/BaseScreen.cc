@@ -486,23 +486,25 @@ XserverRegion BaseScreen::damagedScreenArea() {
 // Update stored active window.
 void BaseScreen::updateActiveWindow() {
     Window activeWindow = m_rootWindow.singlePropertyValue<Window>(Atoms::activeWindowAtom(), None);
+    std::list<BaseCompWindow*>::iterator it = getFirstManagedAncestorIterator(activeWindow);
 
-    if (!activeWindow) {
-        m_activeWindowXID = None;
+    if (it != m_windows.end()) {
+        m_activeWindowXID = (*it)->window();
     } else {
-        std::list<BaseCompWindow*>::iterator it = getFirstManagedAncestorIterator(activeWindow);
-
-        if (it != m_windows.end()) {
-            m_activeWindowXID = (*it)->window();
-        } else {
-            m_activeWindowXID = None;
-        }
+        m_activeWindowXID = None;
     }
 }
 
 // Update the current iconbar item.
 void BaseScreen::updateCurrentIconbarItem() {
-    m_currentIconbarItem = m_rootWindow.singlePropertyValue<Window>(Atoms::currentIconbarItemAtom(), None);
+    Window currentItem = m_rootWindow.singlePropertyValue<Window>(Atoms::currentIconbarItemAtom(), None);
+    std::list<BaseCompWindow*>::iterator it = getFirstManagedAncestorIterator(currentItem);
+
+    if (it != m_windows.end()) {
+        m_currentIconbarItem = (*it)->window();
+    } else {
+        m_currentIconbarItem = None;
+    }
 }
 
 // Update the current workspace index.

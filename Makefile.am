@@ -87,6 +87,7 @@ include util/fbcompose/plugins/opengl/fade/Makemodule.am
 endif
 if XRENDER_COMPOSITING
 include util/fbcompose/plugins/xrender/fade/Makemodule.am
+include util/fbcompose/plugins/xrender/preview/Makemodule.am
 endif
 endif # BUILD_FBCOMPOSE
 

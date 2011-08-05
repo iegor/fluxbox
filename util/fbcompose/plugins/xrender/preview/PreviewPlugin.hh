@@ -1,4 +1,4 @@
-/** FadePlugin.hh file for the fluxbox compositor. */
+/** PreviewPlugin.hh file for the fluxbox compositor. */
 
 // Copyright (c) 2011 Gediminas Liktaras (gliktaras at gmail dot com)
 //
@@ -21,12 +21,11 @@
 // THE SOFTWARE.
 
 
-#ifndef FBCOMPOSITOR_PLUGIN_XRENDER_FADE_FADEPLUGIN_HH
-#define FBCOMPOSITOR_PLUGIN_XRENDER_FADE_FADEPLUGIN_HH
+#ifndef FBCOMPOSITOR_PLUGIN_XRENDER_PREVIEW_PREVIEWPLUGIN_HH
+#define FBCOMPOSITOR_PLUGIN_XRENDER_PREVIEW_PREVIEWPLUGIN_HH
 
 
 #include "Enumerations.hh"
-#include "Exceptions.hh"
 #include "TickTracker.hh"
 #include "XRenderPlugin.hh"
 #include "XRenderResources.hh"
@@ -48,17 +47,17 @@ namespace FbCompositor {
 
 
     /**
-     * A simple plugin that provides window fades for XRender renderer.
+     * Provides window preview feature for the iconbar.
      */
-    class FadePlugin : public XRenderPlugin {
+    class PreviewPlugin : public XRenderPlugin {
     public :
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        FadePlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args);
+        PreviewPlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args);
 
         /** Destructor. */
-        ~FadePlugin();
+        ~PreviewPlugin();
 
 
         //--- ACCESSORS --------------------------------------------------------
@@ -69,14 +68,11 @@ namespace FbCompositor {
 
         //--- WINDOW EVENT CALLBACKS -------------------------------------------
 
-        /** Called, whenever a window becomes ignored. */
-        void windowBecameIgnored(const BaseCompWindow &window);
+        /** Called, whenever a new window is created. */
+        void windowCreated(const BaseCompWindow &window);
 
-        /** Called, whenever a window is mapped. */
-        void windowMapped(const BaseCompWindow &window);
-
-        /** Called, whenever a window is unmapped. */
-        void windowUnmapped(const BaseCompWindow &window);
+        /** Called, whenever a window is destroyed. */
+        void windowDestroyed(const BaseCompWindow &window);
 
 
         //--- RENDERING ACTIONS ------------------------------------------------
@@ -84,75 +80,49 @@ namespace FbCompositor {
         /** Rectangles that the plugin wishes to damage. */
         const std::vector<XRectangle> &damagedAreas();
 
-
-        /** Window rendering job initialization. */
-        void windowRenderingJobInit(const XRenderWindow &window, XRenderRenderingJob &job);
-
-
         /** Extra rendering actions and jobs. */
         const std::vector<XRenderRenderingJob> &extraRenderingActions();
 
-        /** Post extra rendering actions. */
-        void postExtraRenderingActions();
-
 
     private :
-        //--- INTERNAL FUNCTIONS -----------------------------------------------
-
-        /** \returns the faded mask picture for the given window fade. */
-        void createFadedMask(int alpha, XRenderPicturePtr mask, XRectangle dimensions,
-                             XRenderPicturePtr fadePicture_return);
-
-
         //--- GENERAL RENDERING VARIABLES --------------------------------------
-
-        /** PictFormat for fade pictures. */
-        XRenderPictFormat *m_fadePictFormat;
-
 
         /** Vector, containing the areas that the plugin wishes to paint. */
         std::vector<XRectangle> m_damagedAreas;
-        
+
         /** Vector, containing the plugin's extra rendering jobs. */
         std::vector<XRenderRenderingJob> m_extraJobs;
 
 
-        //--- FADE SPECIFIC ----------------------------------------------------
+        /** Preview window's mask. */
+        XRenderPicturePtr m_maskPicture;
 
-        /** Holds the data about positive fades. */
-        struct PosFadeData {
-            XRectangle dimensions;          ///< Window's dimensions.
-            int fadeAlpha;                  ///< Window's relative fade alpha.
-            XRenderPicturePtr fadePicture;  ///< Picture of the faded window.
-            TickTracker timer;              ///< Timer that tracks the current fade.
+        /** Previously modified rectangle. */
+        XRectangle m_previousDamage;
+
+        /** Timer that signals when the preview window should appear. */
+        TickTracker m_tickTracker;
+
+
+        //--- PREVIEW WINDOW DATA ----------------------------------------------
+
+        /** Holds data about the preview window. */
+        struct PreviewWindowData {
+            const XRenderWindow &window;
+            XRenderPicturePtr previewPicture;
+            XRectangle dimensions;
         };
 
-        /** A list of appearing (positive) fades. */
-        std::map<Window, PosFadeData> m_positiveFades;
-
-
-        /** Holds the data about positive fades. */
-        struct NegFadeData {
-            Window windowId;                    ///< ID of the window that is being faded.
-            XRenderRenderingJob job;            ///< Rendering job, associated with this fade.
-            XRenderPicturePtr maskPicture;      ///< Window's shape mask.
-
-            XRectangle dimensions;              ///< Window's dimensions.
-            int fadeAlpha;                      ///< Window's relative fade alpha.
-            XRenderPicturePtr fadePicture;      ///< Picture of the faded window.
-            TickTracker timer;                  ///< Timer that tracks the current fade.
-        };
-
-        /** A list of disappearing (negative) fades. */
-        std::vector<NegFadeData> m_negativeFades;
+        /** A list of potential preview windows. */
+        std::map<Window, PreviewWindowData> m_previewData;
     };
 
 
     //--- INLINE FUNCTIONS -----------------------------------------------------
 
     // Returns the name of the plugin.
-    inline const char *FadePlugin::pluginName() const {
-        return "fade";
+    inline const char *PreviewPlugin::pluginName() const {
+        return "preview";
     }
 }
 
@@ -166,4 +136,4 @@ extern "C" FbCompositor::BasePlugin *createPlugin(const FbCompositor::BaseScreen
 extern "C" FbCompositor::PluginType pluginType();
 
 
-#endif  // FBCOMPOSITOR_PLUGIN_XRENDER_FADE_FADEPLUGIN_HH
+#endif  // FBCOMPOSITOR_PLUGIN_XRENDER_PREVIEW_PREVIEWPLUGIN_HH
