@@ -50,6 +50,8 @@ namespace FbCompositor {
      * Provides window preview feature for the iconbar.
      */
     class PreviewPlugin : public XRenderPlugin {
+        struct PreviewWindowData;
+
     public :
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
@@ -85,6 +87,12 @@ namespace FbCompositor {
 
 
     private :
+        //--- INTERNAL FUNCTIONS -----------------------------------------------
+
+        /** Update the preview window data. */
+        void updatePreviewData(PreviewWindowData &data);
+
+
         //--- GENERAL RENDERING VARIABLES --------------------------------------
 
         /** Vector, containing the areas that the plugin wishes to paint. */
@@ -112,9 +120,8 @@ namespace FbCompositor {
 
         /** Holds data about the preview window. */
         struct PreviewWindowData {
-            const XRenderWindow &window;
-            XRenderPicturePtr previewPicture;
-            XRectangle dimensions;
+            const XRenderWindow &window;    ///< The corresponding window object.
+            XRenderRenderingJob job;        ///< Rendering job of this preview object.
         };
 
         /** A list of potential preview windows. */

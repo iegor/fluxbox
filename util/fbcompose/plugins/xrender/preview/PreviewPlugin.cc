@@ -80,10 +80,15 @@ PreviewPlugin::~PreviewPlugin() { }
 void PreviewPlugin::windowCreated(const BaseCompWindow &window) {
     const XRenderWindow &xrWindow = dynamic_cast<const XRenderWindow&>(window);
 
-    XRenderPictFormat *pictFormat = XRenderFindVisualFormat(display(), xrWindow.visual());
-    PreviewWindowData winData = { xrWindow,
-                                  XRenderPicturePtr(new XRenderPicture(xrenderScreen(), pictFormat, FilterBest)),
-                                  XRectangle() };
+    XRenderPictFormat *pictFormat = XRenderFindStandardFormat(display(), PictStandardARGB32);
+    XRenderPicturePtr thumbnail(new XRenderPicture(xrenderScreen(), pictFormat, FilterBest));
+
+    Pixmap thumbPixmap = createSolidPixmap(display(), window.window(), MAX_PREVIEW_WIDTH, MAX_PREVIEW_HEIGHT);
+    thumbnail->setPixmap(thumbPixmap, true);
+
+    XRenderRenderingJob job = { PictOpOver, thumbnail, m_maskPicture, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+    PreviewWindowData winData = { xrWindow, job };
     m_previewData.insert(std::make_pair(xrWindow.window(), winData));
 }
 
@@ -111,27 +116,23 @@ const std::vector<XRectangle> &PreviewPlugin::damagedAreas() {
         Window curWindow = it->first;
         PreviewWindowData &curPreview = it->second;
 
-        if ((m_previousWindow != curWindow) && (curPreview.window.contentPicture()->pictureHandle())) {
+        if ((m_previousWindow != curWindow)
+                && (curPreview.window.contentPicture()->pictureHandle())
+                && (curPreview.window.maskPicture()->pictureHandle())) {
             m_previousWindow = curWindow;
-
-            curPreview.previewPicture->setPixmap(curPreview.window.contentPixmap(), false);
-
-            double scaleFactor = 1.0;
-            scaleFactor = std::max(scaleFactor, curPreview.window.realWidth() / double(MAX_PREVIEW_WIDTH));
-            scaleFactor = std::max(scaleFactor, curPreview.window.realHeight() / double(MAX_PREVIEW_HEIGHT));
-            curPreview.previewPicture->scalePicture(scaleFactor, scaleFactor);
-
-            curPreview.dimensions.width = static_cast<int>(curPreview.window.realWidth() * scaleFactor);
-            curPreview.dimensions.height = static_cast<int>(curPreview.window.realHeight() * scaleFactor);
+            updatePreviewData(curPreview);
         }
 
         int mousePosX, mousePosY;
         mousePointerLocation(screen(), mousePosX, mousePosY);
-        curPreview.dimensions.x = mousePosX;
-        curPreview.dimensions.y = mousePosY;
+        curPreview.job.destinationX = mousePosX;
+        curPreview.job.destinationY = mousePosY;
 
-        m_damagedAreas.push_back(curPreview.dimensions);
-        m_previousDamage = curPreview.dimensions;
+        XRectangle curDamage = { curPreview.job.destinationX, curPreview.job.destinationY,
+                                 curPreview.job.width, curPreview.job.height };
+        m_damagedAreas.push_back(curDamage);
+        m_previousDamage = curDamage;
+
         if (!m_tickTracker.isRunning()) {
             m_tickTracker.start();
         }
@@ -153,24 +154,40 @@ const std::vector<XRenderRenderingJob> &PreviewPlugin::extraRenderingActions() {
     if (it != m_previewData.end()) {
         PreviewWindowData &curPreview = it->second;
 
-        if ((curPreview.previewPicture->pictureHandle()) && (m_tickTracker.totalElapsedTicks() > 0)) {
-            XRenderRenderingJob job;
-            job.operation = PictOpOver;
-            job.sourcePicture = curPreview.previewPicture;
-            job.maskPicture = m_maskPicture;
-            job.sourceX = 0;
-            job.sourceY = 0;
-            job.maskX = 0;
-            job.maskY = 0;
-            job.destinationX = curPreview.dimensions.x;
-            job.destinationY = curPreview.dimensions.y;
-            job.width = curPreview.dimensions.width;
-            job.height = curPreview.dimensions.height;
-            m_extraJobs.push_back(job);
+        if ((curPreview.job.sourcePicture->pictureHandle()) && (m_tickTracker.totalElapsedTicks() > 0)) {
+            m_extraJobs.push_back(curPreview.job);
         }
     }
 
     return m_extraJobs;
+}
+
+
+//--- INTERNAL FUNCTIONS -------------------------------------------------------
+
+// Update the preview window data.
+void PreviewPlugin::updatePreviewData(PreviewWindowData &data) {
+    double scaleFactor = 1.0;
+    scaleFactor = std::max(scaleFactor, data.window.realWidth() / double(MAX_PREVIEW_WIDTH));
+    scaleFactor = std::max(scaleFactor, data.window.realHeight() / double(MAX_PREVIEW_HEIGHT));
+
+    int thumbWidth = static_cast<int>(data.window.realWidth() * scaleFactor);
+    int thumbHeight = static_cast<int>(data.window.realHeight() * scaleFactor);
+
+    data.window.contentPicture()->scalePicture(scaleFactor, scaleFactor);
+    data.window.maskPicture()->scalePicture(scaleFactor, scaleFactor);
+
+    XRenderComposite(display(), PictOpSrc,
+                     data.window.contentPicture()->pictureHandle(), 
+                     data.window.maskPicture()->pictureHandle(),
+                     data.job.sourcePicture->pictureHandle(),
+                     0, 0, 0, 0, 0, 0, thumbWidth, thumbHeight);
+
+    data.window.contentPicture()->resetPictureTransform();
+    data.window.maskPicture()->resetPictureTransform();
+
+    data.job.width = thumbWidth;
+    data.job.height = thumbHeight;
 }
 
 

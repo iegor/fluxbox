@@ -71,6 +71,7 @@ namespace FbCompositor {
         /** Set a new PictFormat. */
         void setPictFormat(XRenderPictFormat *pictFormat);
 
+
         /** Associate the picture with the given pixmap. */
         void setPixmap(Pixmap pixmap, bool managePixmap, XRenderPictureAttributes pa = XRenderPictureAttributes(), long paMask = 0);
 
