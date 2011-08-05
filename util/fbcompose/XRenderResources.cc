@@ -84,6 +84,32 @@ void XRenderPicture::setWindow(Window window, XRenderPictureAttributes pa, long 
 }
 
 
+// Reset the picture's transformation matrix.
+void XRenderPicture::resetPictureTransform() {
+    XTransform transform = { {
+        { XDoubleToFixed(1.0), XDoubleToFixed(0.0), XDoubleToFixed(0.0) },
+        { XDoubleToFixed(0.0), XDoubleToFixed(1.0), XDoubleToFixed(0.0) },
+        { XDoubleToFixed(0.0), XDoubleToFixed(0.0), XDoubleToFixed(1.0) }
+    } };
+    setPictureTransform(transform);
+}
+
+// Scale the picture by the given inverse quotients.
+void XRenderPicture::scalePicture(double xFactorInv, double yFactorInv) {
+    XTransform transform = { {
+        { XDoubleToFixed(xFactorInv), XDoubleToFixed(0.0), XDoubleToFixed(0.0) },
+        { XDoubleToFixed(0.0), XDoubleToFixed(yFactorInv), XDoubleToFixed(0.0) },
+        { XDoubleToFixed(0.0), XDoubleToFixed(0.0), XDoubleToFixed(1.0) }
+    } };
+    setPictureTransform(transform);
+}
+
+// Set the picture's transformation matrix.
+void XRenderPicture::setPictureTransform(const XTransform &transform) {
+    XRenderSetPictureTransform(m_display, m_picture, (XTransform*)(&transform));
+}
+
+
 //--- OTHER FUNCTIONS ----------------------------------------------------------
 
 // Free held resources, if any.

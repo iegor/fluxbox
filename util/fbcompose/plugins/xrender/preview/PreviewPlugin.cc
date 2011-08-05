@@ -44,7 +44,7 @@ const int MAX_PREVIEW_HEIGHT = 150;
 const int MAX_PREVIEW_WIDTH = 150;
 
 /** Transparency of the preview window. */
-const int PREVIEW_ALPHA = 200;
+const unsigned int PREVIEW_ALPHA = 200;
 
 /** Time in microseconds until the preview window is shown. */
 const int SLEEP_TIME = 500000;
@@ -56,8 +56,15 @@ const int SLEEP_TIME = 500000;
 PreviewPlugin::PreviewPlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args) :
     XRenderPlugin(screen, args) {
 
+    unsigned long maskColor = 0x01010101 * PREVIEW_ALPHA;
+    Pixmap maskPixmap = createSolidPixmap(display(), screen.rootWindow().window(), MAX_PREVIEW_WIDTH, MAX_PREVIEW_HEIGHT, maskColor);
+    XRenderPictFormat *pictFormat = XRenderFindStandardFormat(display(), PictStandardARGB32);
+    m_maskPicture = new XRenderPicture(xrenderScreen(), pictFormat, FilterFast);
+    m_maskPicture->setPixmap(maskPixmap, true);
+
     m_previousDamage.width = 0;
     m_previousDamage.height = 0;
+    m_previousWindow = None;
 
     m_tickTracker.setTickSize(SLEEP_TIME);
 }
@@ -101,33 +108,29 @@ const std::vector<XRectangle> &PreviewPlugin::damagedAreas() {
 
     std::map<Window, PreviewWindowData>::iterator it = m_previewData.find(screen().currentIconbarItem());
     if (it != m_previewData.end()) {
+        Window curWindow = it->first;
         PreviewWindowData &curPreview = it->second;
 
-        curPreview.previewPicture->setPixmap(curPreview.window.contentPicture()->drawableHandle(), false);
+        if ((m_previousWindow != curWindow) && (curPreview.window.contentPicture()->pictureHandle())) {
+            m_previousWindow = curWindow;
 
-        double scale = 1.0;
-        scale = std::max(scale, curPreview.window.realWidth() / double(MAX_PREVIEW_WIDTH));
-        scale = std::max(scale, curPreview.window.realHeight() / double(MAX_PREVIEW_HEIGHT));
+            curPreview.previewPicture->setPixmap(curPreview.window.contentPixmap(), false);
 
-        XTransform picTransform = {{
-            { XDoubleToFixed(scale), XDoubleToFixed(0), XDoubleToFixed(0) },
-            { XDoubleToFixed(0), XDoubleToFixed(scale), XDoubleToFixed(0) },
-            { XDoubleToFixed(0), XDoubleToFixed(0), XDoubleToFixed(1.0) }
-        }};
-        XRenderSetPictureTransform(display(), curPreview.previewPicture->pictureHandle(), &picTransform);
+            double scaleFactor = 1.0;
+            scaleFactor = std::max(scaleFactor, curPreview.window.realWidth() / double(MAX_PREVIEW_WIDTH));
+            scaleFactor = std::max(scaleFactor, curPreview.window.realHeight() / double(MAX_PREVIEW_HEIGHT));
+            curPreview.previewPicture->scalePicture(scaleFactor, scaleFactor);
 
-        std::pair<int, int> mousePos = mousePointerLocation(screen());
-        curPreview.dimensions.x = mousePos.first;
-        curPreview.dimensions.y = mousePos.second;
-        curPreview.dimensions.width = MAX_PREVIEW_WIDTH;
-        curPreview.dimensions.height = MAX_PREVIEW_HEIGHT;
+            curPreview.dimensions.width = static_cast<int>(curPreview.window.realWidth() * scaleFactor);
+            curPreview.dimensions.height = static_cast<int>(curPreview.window.realHeight() * scaleFactor);
+        }
+
+        int mousePosX, mousePosY;
+        mousePointerLocation(screen(), mousePosX, mousePosY);
+        curPreview.dimensions.x = mousePosX;
+        curPreview.dimensions.y = mousePosY;
+
         m_damagedAreas.push_back(curPreview.dimensions);
-
-        Pixmap maskPixmap = createSolidPixmap(display(), screen().rootWindow().window(), MAX_PREVIEW_WIDTH, MAX_PREVIEW_HEIGHT, 0xcfcfcfcf);
-        XRenderPictFormat *pictFormat = XRenderFindStandardFormat(display(), PictStandardARGB32);
-        m_maskPicture = new XRenderPicture(xrenderScreen(), pictFormat, FilterFast);
-        m_maskPicture->setPixmap(maskPixmap, true);
-
         m_previousDamage = curPreview.dimensions;
         if (!m_tickTracker.isRunning()) {
             m_tickTracker.start();
@@ -135,6 +138,7 @@ const std::vector<XRectangle> &PreviewPlugin::damagedAreas() {
     } else {
         m_previousDamage.width = 0;
         m_previousDamage.height = 0;
+        m_previousWindow = None;
         m_tickTracker.stop();
     }
 

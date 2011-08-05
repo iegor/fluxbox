@@ -97,11 +97,15 @@ namespace FbCompositor {
         /** Preview window's mask. */
         XRenderPicturePtr m_maskPicture;
 
+        /** Timer that signals when the preview window should appear. */
+        TickTracker m_tickTracker;
+
+
         /** Previously modified rectangle. */
         XRectangle m_previousDamage;
 
-        /** Timer that signals when the preview window should appear. */
-        TickTracker m_tickTracker;
+        /** Previously drawn preview window. */
+        Window m_previousWindow;
 
 
         //--- PREVIEW WINDOW DATA ----------------------------------------------

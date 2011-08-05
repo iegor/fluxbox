@@ -49,7 +49,7 @@ namespace FbCompositor {
     int largestSmallerPowerOf2(int value);
 
     /** \returns the location of the mouse pointer. */
-    std::pair<int, int> mousePointerLocation(const BaseScreen &screen);
+    void mousePointerLocation(const BaseScreen &screen, int &rootX_return, int &rootY_return);
 
 }
 

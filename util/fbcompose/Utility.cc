@@ -57,12 +57,11 @@ int FbCompositor::largestSmallerPowerOf2(int value) {
 }
 
 // Returns the location of the mouse pointer.
-std::pair<int, int> FbCompositor::mousePointerLocation(const BaseScreen &screen) {
+void FbCompositor::mousePointerLocation(const BaseScreen &screen, int &rootX_return, int &rootY_return) {
     static Window rootWin, childWin;
-    static int rootX, rootY, childX, childY;
+    static int childX, childY;
     static unsigned int mask;
 
     XQueryPointer((Display*)(screen.display()), screen.rootWindow().window(),
-                  &rootWin, &childWin, &rootX, &rootY, &childX, &childY, &mask);
-    return std::make_pair(rootX, rootY);
+                  &rootWin, &childWin, &rootX_return, &rootY_return, &childX, &childY, &mask);
 }

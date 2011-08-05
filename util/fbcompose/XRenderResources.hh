@@ -78,6 +78,15 @@ namespace FbCompositor {
         void setWindow(Window window, XRenderPictureAttributes pa = XRenderPictureAttributes(), long paMask = 0);
 
 
+        /** Reset the picture's transformation matrix. */
+        void resetPictureTransform();
+
+        /** Scale the picture by the given inverse quotients. */
+        void scalePicture(double xFactorInv, double yFactorInv);
+
+        /** Set the picture's transformation matrix. */
+        void setPictureTransform(const XTransform &transform);
+
     private:
         //--- CONSTRUCTORS -----------------------------------------------------
 

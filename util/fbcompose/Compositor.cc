@@ -132,6 +132,7 @@ Compositor::Compositor(const CompositorConfig &config) :
 
     initHeads();
     for (size_t i = 0; i < m_screens.size(); i++) {
+        m_screens[i]->initPlugins(config);
         m_screens[i]->initWindows();
     }
 

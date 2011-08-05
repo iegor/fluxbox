@@ -66,7 +66,7 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-BaseScreen::BaseScreen(int screenNumber, PluginType pluginType, const CompositorConfig &config) :
+BaseScreen::BaseScreen(int screenNumber, PluginType pluginType, const CompositorConfig &/*config*/) :
     m_display(FbTk::App::instance()->display()),
     m_pluginManager(pluginType, *this),
     m_screenNumber(screenNumber),
@@ -83,10 +83,6 @@ BaseScreen::BaseScreen(int screenNumber, PluginType pluginType, const Compositor
     m_rootWindowPixmap = None;
     m_wmSetRootWindowPixmap = true;
     updateRootWindowPixmap();
-
-    for(int i = 0; i < config.pluginCount(); i++) {
-        m_pluginManager.createPluginObject(config.pluginName(i), config.pluginArgs(i));
-    }
 
     long eventMask = PropertyChangeMask | StructureNotifyMask | SubstructureNotifyMask;
     m_rootWindow.setEventMask(eventMask);
@@ -111,6 +107,13 @@ BaseScreen::~BaseScreen() {
 
 
 //--- OTHER INITIALIZATION -----------------------------------------------------
+
+// Initializes the screen's plugins.
+void BaseScreen::initPlugins(const CompositorConfig &config) {
+    for(int i = 0; i < config.pluginCount(); i++) {
+        m_pluginManager.createPluginObject(config.pluginName(i), config.pluginArgs(i));
+    }
+}
 
 // Initializes all of the windows on the screen.
 void BaseScreen::initWindows() {
