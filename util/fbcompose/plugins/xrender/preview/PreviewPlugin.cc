@@ -120,13 +120,10 @@ const std::vector<XRectangle> &PreviewPlugin::damagedAreas() {
                 && (curPreview.window.contentPicture()->pictureHandle())
                 && (curPreview.window.maskPicture()->pictureHandle())) {
             m_previousWindow = curWindow;
-            updatePreviewData(curPreview);
+            updatePreviewWindowData(curPreview);
         }
 
-        int mousePosX, mousePosY;
-        mousePointerLocation(screen(), mousePosX, mousePosY);
-        curPreview.job.destinationX = mousePosX;
-        curPreview.job.destinationY = mousePosY;
+        updatePreviewWindowPos(curPreview);
 
         XRectangle curDamage = { curPreview.job.destinationX, curPreview.job.destinationY,
                                  curPreview.job.width, curPreview.job.height };
@@ -166,28 +163,62 @@ const std::vector<XRenderRenderingJob> &PreviewPlugin::extraRenderingActions() {
 //--- INTERNAL FUNCTIONS -------------------------------------------------------
 
 // Update the preview window data.
-void PreviewPlugin::updatePreviewData(PreviewWindowData &data) {
+void PreviewPlugin::updatePreviewWindowData(PreviewWindowData &winPreview) {
     double scaleFactor = 1.0;
-    scaleFactor = std::max(scaleFactor, data.window.realWidth() / double(MAX_PREVIEW_WIDTH));
-    scaleFactor = std::max(scaleFactor, data.window.realHeight() / double(MAX_PREVIEW_HEIGHT));
+    scaleFactor = std::max(scaleFactor, winPreview.window.realWidth() / double(MAX_PREVIEW_WIDTH));
+    scaleFactor = std::max(scaleFactor, winPreview.window.realHeight() / double(MAX_PREVIEW_HEIGHT));
 
-    int thumbWidth = static_cast<int>(data.window.realWidth() * scaleFactor);
-    int thumbHeight = static_cast<int>(data.window.realHeight() * scaleFactor);
+    int thumbWidth = static_cast<int>(winPreview.window.realWidth() / scaleFactor);
+    int thumbHeight = static_cast<int>(winPreview.window.realHeight() / scaleFactor);
 
-    data.window.contentPicture()->scalePicture(scaleFactor, scaleFactor);
-    data.window.maskPicture()->scalePicture(scaleFactor, scaleFactor);
+    winPreview.window.contentPicture()->scalePicture(scaleFactor, scaleFactor);
+    winPreview.window.maskPicture()->scalePicture(scaleFactor, scaleFactor);
 
     XRenderComposite(display(), PictOpSrc,
-                     data.window.contentPicture()->pictureHandle(), 
-                     data.window.maskPicture()->pictureHandle(),
-                     data.job.sourcePicture->pictureHandle(),
+                     winPreview.window.contentPicture()->pictureHandle(), 
+                     winPreview.window.maskPicture()->pictureHandle(),
+                     winPreview.job.sourcePicture->pictureHandle(),
                      0, 0, 0, 0, 0, 0, thumbWidth, thumbHeight);
 
-    data.window.contentPicture()->resetPictureTransform();
-    data.window.maskPicture()->resetPictureTransform();
+    winPreview.window.contentPicture()->resetPictureTransform();
+    winPreview.window.maskPicture()->resetPictureTransform();
 
-    data.job.width = thumbWidth;
-    data.job.height = thumbHeight;
+    winPreview.job.width = thumbWidth;
+    winPreview.job.height = thumbHeight;
+}
+
+// Update the preview window position.
+// TODO: Place the preview window on the edge of the toolbar.
+// TODO: Left/Right toolbar orientations.
+void PreviewPlugin::updatePreviewWindowPos(PreviewWindowData &winPreview) {
+    int mousePosX, mousePosY;
+    mousePointerLocation(screen(), mousePosX, mousePosY);
+
+    if (screen().heads().size() > 0) {
+        XRectangle curHead = screen().heads()[0];
+
+        for (size_t i = 1; i < screen().heads().size(); i++) {
+            XRectangle head = screen().heads()[i];
+            if ((mousePosX >= head.x) && (mousePosY >= head.y)
+                    && (mousePosX < (head.x + head.width))
+                    && (mousePosY < (head.y + head.height))) {
+                curHead = head;
+                break;
+            }
+        }
+
+        winPreview.job.destinationX = mousePosX - (winPreview.job.width / 2);
+
+        int midHead = curHead.y + (curHead.height / 2);
+        if (mousePosY < midHead) {
+            winPreview.job.destinationY = mousePosY + 10;
+        } else {
+            winPreview.job.destinationY = mousePosY - winPreview.job.height - 10;
+        }
+    } else {    // But what IF.
+        winPreview.job.destinationX = mousePosX - (winPreview.job.width / 2);
+        winPreview.job.destinationY = mousePosY + 10;
+    }
 }
 
 

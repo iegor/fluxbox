@@ -90,7 +90,10 @@ namespace FbCompositor {
         //--- INTERNAL FUNCTIONS -----------------------------------------------
 
         /** Update the preview window data. */
-        void updatePreviewData(PreviewWindowData &data);
+        void updatePreviewWindowData(PreviewWindowData &winPreview);
+
+        /** Update the preview window position. */
+        void updatePreviewWindowPos(PreviewWindowData &winPreview);
 
 
         //--- GENERAL RENDERING VARIABLES --------------------------------------
