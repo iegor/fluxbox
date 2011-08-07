@@ -83,7 +83,7 @@ namespace FbCompositor {
         GLXFBConfig fbConfig() const;
 
         /** \returns maximum supported texture size. */
-        int maxTextureSize() const;
+        unsigned int maxTextureSize() const;
 
 
         //--- SCREEN MANIPULATION ----------------------------------------------
@@ -241,7 +241,7 @@ namespace FbCompositor {
         bool m_haveDoubleBuffering;
 
         /** Maximum texture size. */
-        int m_maxTextureSize;
+        unsigned int m_maxTextureSize;
     };
 
 
@@ -278,7 +278,7 @@ namespace FbCompositor {
     }
 
     // Returns maximum supported texture size.
-    inline int OpenGLScreen::maxTextureSize() const {
+    inline unsigned int OpenGLScreen::maxTextureSize() const {
         return m_maxTextureSize;
     }
 
