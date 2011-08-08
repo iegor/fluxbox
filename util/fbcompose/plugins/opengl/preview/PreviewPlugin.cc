@@ -154,8 +154,10 @@ void PreviewPlugin::updatePreviewWindow(PreviewWindowData &winPreview) {
     XRectangle thumbDim;
 
     // Find thumbnail's width and height.
-    int fullThumbWidth = std::min(winPreview.window.realWidth(), openGLScreen().maxTextureSize());
-    int fullThumbHeight = std::min(winPreview.window.realHeight(), openGLScreen().maxTextureSize());
+    int fullThumbWidth = std::min(static_cast<int>(winPreview.window.realWidth()),
+                                  openGLScreen().maxTextureSize());
+    int fullThumbHeight = std::min(static_cast<int>(winPreview.window.realHeight()),
+                                   openGLScreen().maxTextureSize());
 
     double scaleFactor = 1.0;
     scaleFactor = std::max(scaleFactor, fullThumbWidth / double(MAX_PREVIEW_WIDTH));
@@ -186,7 +188,7 @@ void PreviewPlugin::updatePreviewWindow(PreviewWindowData &winPreview) {
         thumbDim.x = mousePosX - thumbDim.width / 2;
 
         int midHead = curHead.y + (curHead.height / 2);
-        if (thumbDim.y < midHead) {
+        if (mousePosY < midHead) {
             thumbDim.y = mousePosY + 10;
         } else {
             thumbDim.y = mousePosY - thumbDim.height - 10;
