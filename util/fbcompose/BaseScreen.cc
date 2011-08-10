@@ -650,8 +650,7 @@ void BaseScreen::restackWindow(std::list<BaseCompWindow*>::iterator &windowIt, W
     std::list<BaseCompWindow*>::iterator it = getFirstManagedAncestorIterator(above);
     if (it != m_windows.end()) {
         ++it;
-        m_windows.insert(it, window);
-        windowIt = it;
+        windowIt = m_windows.insert(it, window);
     } else {    // Window is just above root.
         m_windows.push_front(window);
         windowIt = m_windows.begin();

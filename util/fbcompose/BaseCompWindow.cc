@@ -72,6 +72,8 @@ BaseCompWindow::BaseCompWindow(const BaseScreen &screen, Window windowXID, bool 
 
     updateAlpha();
     updateWindowType();
+
+    XShapeSelectInput(display(), windowXID, ShapeNotifyMask);
 }
 
 // Destructor.
@@ -105,8 +107,8 @@ void BaseCompWindow::setUnmapped() {
 }
 
 // Update the window's contents.
-// Note: this is an example implementation of this function. You should fully
-// override it in derived classes.
+// Note: this is an example implementation of this function. You should not
+// call this version at any time and override it in derived classes.
 void BaseCompWindow::updateContents() {
     updateContentPixmap();
     if (m_clipShapeChanged) {
