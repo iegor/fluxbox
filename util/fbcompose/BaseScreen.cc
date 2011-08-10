@@ -74,8 +74,8 @@ BaseScreen::BaseScreen(int screenNumber, PluginType pluginType, const Compositor
 
     m_screenDamage = XFixesCreateRegion(display(), NULL, 0);
 
-    updateActiveWindow();
-    updateCurrentIconbarItem();
+    m_activeWindowXID = None;
+    m_currentIconbarItem = None;
     updateCurrentWorkspace();
     updateReconfigureRect();
     updateWorkspaceCount();
@@ -130,6 +130,9 @@ void BaseScreen::initWindows() {
     if (children) {
         XFree(children);
     }
+
+    updateActiveWindow();
+    updateCurrentIconbarItem();
 }
 
 
@@ -149,7 +152,7 @@ void BaseScreen::circulateWindow(Window window, int place) {
         }
 
         if (!curWindow->isIgnored()) {
-            damageScreenArea((*it)->dimensions());
+            damageWholeWindowArea(*it);
 
             BasePlugin *plugin = NULL;
             forEachPlugin(i, plugin) {
@@ -225,7 +228,7 @@ void BaseScreen::destroyWindow(Window window) {
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
     if (it != m_windows.end()) {
         if (!(*it)->isIgnored()) {
-            damageScreenArea((*it)->dimensions());
+            damageWholeWindowArea(*it);
 
             BasePlugin *plugin = NULL;
             forEachPlugin(i, plugin) {
@@ -247,7 +250,7 @@ void BaseScreen::mapWindow(Window window) {
         (*it)->setMapped();
 
         if (!(*it)->isIgnored()) {
-            damageScreenArea((*it)->dimensions());
+            damageWholeWindowArea(*it);
 
             BasePlugin *plugin = NULL;
             forEachPlugin(i, plugin) {
@@ -275,14 +278,14 @@ void BaseScreen::reconfigureWindow(const XConfigureEvent &event) {
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(event.window);
     if (it != m_windows.end()) {
         if (!(*it)->isIgnored()) {
-            damageScreenArea((*it)->dimensions());
+            damageWholeWindowArea(*it);
         }
 
         (*it)->updateGeometry();
         restackWindow(it, event.above);
 
         if (!(*it)->isIgnored()) {
-            damageScreenArea((*it)->dimensions());
+            damageWholeWindowArea(*it);
 
             BasePlugin *plugin = NULL;
             forEachPlugin(i, plugin) {
@@ -310,7 +313,7 @@ void BaseScreen::updateShape(Window window) {
         (*it)->setClipShapeChanged();
 
         if (!(*it)->isIgnored()) {
-            damageScreenArea((*it)->dimensions());
+            damageWholeWindowArea(*it);
 
             BasePlugin *plugin = NULL;
             forEachPlugin(i, plugin) {
@@ -329,7 +332,7 @@ void BaseScreen::unmapWindow(Window window) {
         (*it)->setUnmapped();
 
         if (!(*it)->isIgnored()) {
-            damageScreenArea((*it)->dimensions());
+            damageWholeWindowArea(*it);
 
             BasePlugin *plugin = NULL;
             forEachPlugin(i, plugin) {
@@ -379,7 +382,7 @@ void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
 
             if (!(*it)->isIgnored()) {
                 if (property == Atoms::opacityAtom()) {
-                    damageScreenArea((*it)->dimensions());
+                    damageWholeWindowArea(*it);
                 }
 
                 BasePlugin *plugin = NULL;
@@ -545,8 +548,7 @@ void BaseScreen::updateRootWindowPixmap(Pixmap newPixmap) {
 
     if (!m_rootWindowPixmap) {
         fbLog_info << "Cannot find background pixmap, using plain black." << std::endl;
-        m_rootWindowPixmap = createSolidPixmap(display(), rootWindow().window(), rootWindow().width(),
-                                               rootWindow().height(), 0x00000000);
+        m_rootWindowPixmap = createSolidPixmap(*this, rootWindow().width(), rootWindow().height(), 0x00000000);
         m_wmSetRootWindowPixmap = false;
     }
 }
@@ -561,24 +563,29 @@ void BaseScreen::updateWorkspaceCount() {
 
 // Damages the reconfigure rectangle on the screen.
 void BaseScreen::damageReconfigureRect() {
-    XRectangle rect = m_reconfigureRect;
-    rect.width++;
-    rect.height++;
-    damageScreenArea(rect);
+    damageScreenArea(m_reconfigureRect);
 }
 
 // Damages the given rectangle on the screen.
-void BaseScreen::damageScreenArea(const XRectangle &area) {
+void BaseScreen::damageScreenArea(XRectangle area) {
+    area.height = std::min(area.height + 1, static_cast<int>(rootWindow().height()));
+    area.width = std::min(area.width + 1, static_cast<int>(rootWindow().width()));
     m_damagedScreenRects.push_back(area);
 }
 
-// Damages the area taken by the given window.
+// Damages the area in the given window.
 void BaseScreen::damageWindowArea(BaseCompWindow *window, XRectangle area) {
     area.x += window->x();
     area.y += window->y();
-    area.height = std::min(area.height + 1, (int)(window->realHeight()));
-    area.width = std::min(area.width + 1, (int)(window->realWidth()));
     damageScreenArea(area);
+}
+
+// Damages the area taken by the given window.
+void BaseScreen::damageWholeWindowArea(BaseCompWindow *window) {
+    XRectangle area = { window->x(), window->y(), window->realWidth() + 2, window->realHeight() + 2 };
+    area.height = std::min(area.height, static_cast<short unsigned int>(rootWindow().height()));
+    area.width = std::min(area.width, static_cast<short unsigned int>(rootWindow().width()));
+    m_damagedScreenRects.push_back(area);
 }
 
 

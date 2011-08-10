@@ -244,8 +244,7 @@ void FadePlugin::createFadedMask(int alpha, XRenderPicturePtr mask, XRectangle d
         return;
     }
 
-    Pixmap fadePixmap = createSolidPixmap(display(), screen().rootWindow().window(),
-                                          dimensions.width, dimensions.height, alpha * 0x01010101);
+    Pixmap fadePixmap = createSolidPixmap(screen(), dimensions.width, dimensions.height, alpha * 0x01010101);
     fadePicture_return->setPixmap(fadePixmap, true);
 
     XRenderComposite(display(), PictOpIn, mask->pictureHandle(), None, fadePicture_return->pictureHandle(),

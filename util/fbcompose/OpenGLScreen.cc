@@ -343,13 +343,13 @@ void OpenGLScreen::createResources() {
 
 
     // Plain black texture.
-    pixmap = createSolidPixmap(display(), rootWindow().window(), 1, 1, 0x00000000);
+    pixmap = createSolidPixmap(*this, 1, 1, 0x00000000);
     m_blackTexture = new OpenGL2DTexture(*this, false);
     m_blackTexture->setPixmap(pixmap, false, 1, 1, true);
     XFreePixmap(display(), pixmap);
 
     // Plain white texture.
-    pixmap = createSolidPixmap(display(), rootWindow().window(), 1, 1, 0xffffffff);
+    pixmap = createSolidPixmap(*this, 1, 1, 0xffffffff);
     m_whiteTexture = new OpenGL2DTexture(*this, false);
     m_whiteTexture->setPixmap(pixmap, false, 1, 1, true);
     XFreePixmap(display(), pixmap);

@@ -237,10 +237,13 @@ namespace FbCompositor {
         void damageReconfigureRect();
 
         /** Damages the given rectangle on the screen. */
-        void damageScreenArea(const XRectangle &area);
+        void damageScreenArea(XRectangle area);
+
+        /** Damages the area in the given window. */
+        void damageWindowArea(BaseCompWindow *window, XRectangle area);
 
         /** Damages the area taken by the given window. */
-        void damageWindowArea(BaseCompWindow *window, XRectangle area);
+        void damageWholeWindowArea(BaseCompWindow *window);
 
 
         //--- INTERNAL FUNCTIONS -----------------------------------------------

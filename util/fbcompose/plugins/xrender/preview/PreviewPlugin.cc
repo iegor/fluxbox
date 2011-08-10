@@ -57,7 +57,7 @@ PreviewPlugin::PreviewPlugin(const BaseScreen &screen, const std::vector<FbTk::F
     XRenderPlugin(screen, args) {
 
     unsigned long maskColor = 0x01010101 * PREVIEW_ALPHA;
-    Pixmap maskPixmap = createSolidPixmap(display(), screen.rootWindow().window(), MAX_PREVIEW_WIDTH, MAX_PREVIEW_HEIGHT, maskColor);
+    Pixmap maskPixmap = createSolidPixmap(screen, MAX_PREVIEW_WIDTH, MAX_PREVIEW_HEIGHT, maskColor);
     XRenderPictFormat *pictFormat = XRenderFindStandardFormat(display(), PictStandardARGB32);
     m_maskPicture = new XRenderPicture(xrenderScreen(), pictFormat, FilterFast);
     m_maskPicture->setPixmap(maskPixmap, true);
@@ -83,7 +83,7 @@ void PreviewPlugin::windowCreated(const BaseCompWindow &window) {
     XRenderPictFormat *pictFormat = XRenderFindStandardFormat(display(), PictStandardARGB32);
     XRenderPicturePtr thumbnail(new XRenderPicture(xrenderScreen(), pictFormat, FilterBest));
 
-    Pixmap thumbPixmap = createSolidPixmap(display(), window.window(), MAX_PREVIEW_WIDTH, MAX_PREVIEW_HEIGHT);
+    Pixmap thumbPixmap = createSolidPixmap(screen(), MAX_PREVIEW_WIDTH, MAX_PREVIEW_HEIGHT);
     thumbnail->setPixmap(thumbPixmap, true);
 
     XRenderRenderingJob job = { PictOpOver, thumbnail, m_maskPicture, 0, 0, 0, 0, 0, 0, 0, 0 };

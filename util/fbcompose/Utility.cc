@@ -29,9 +29,11 @@
 //--- FUNCTIONS ----------------------------------------------------------------
 
 // Creates a new pixmap, filled with the specified color.
-Pixmap FbCompositor::createSolidPixmap(Display *display, Window rootWindow, int width,
+Pixmap FbCompositor::createSolidPixmap(const BaseScreen &screen, int width,
                                        int height, unsigned long color) {
-    Pixmap pixmap = XCreatePixmap(display, rootWindow, width, height, 32);
+    Display *display = (Display*)(screen.display());
+
+    Pixmap pixmap = XCreatePixmap(display, screen.rootWindow().window(), width, height, 32);
 
     GC gc = XCreateGC(display, pixmap, 0, NULL);
     XSetForeground(display, gc, color);
