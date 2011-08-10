@@ -72,10 +72,10 @@ namespace FbCompositor {
         //--- OTHER INITIALIZATION ---------------------------------------------
 
         /** Initializes the screen's plugins. */
-        void initPlugins(const CompositorConfig &config);
+        virtual void initPlugins(const CompositorConfig &config);
 
         /** Initializes all of the windows on the screen. */
-        void initWindows();
+        virtual void initWindows();
 
 
         //--- ACCESSORS --------------------------------------------------------

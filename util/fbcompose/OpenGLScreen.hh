@@ -55,6 +55,12 @@ namespace FbCompositor {
         ~OpenGLScreen();
 
 
+        //--- OTHER INITIALIZATION ---------------------------------------------
+
+        /** Initializes the screen's plugins. */
+        void initPlugins(const CompositorConfig &config);
+
+
         //--- DEFAULT OPENGL OBJECT ACCESSORS ----------------------------------
 
         /** \returns the default element buffer (rectangle, corners in order of NW, NE, SW, SE). */

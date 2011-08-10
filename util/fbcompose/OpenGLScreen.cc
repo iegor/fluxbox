@@ -141,21 +141,6 @@ OpenGLScreen::~OpenGLScreen() {
 }
 
 
-//--- SCREEN MANIPULATION ----------------------------------------------
-
-// Notifies the screen of the background change.
-void OpenGLScreen::setRootPixmapChanged() {
-    BaseScreen::setRootPixmapChanged();
-    m_bgChanged = true;
-}
-
-// Notifies the screen of a root window change.
-void OpenGLScreen::setRootWindowSizeChanged() {
-    BaseScreen::setRootWindowSizeChanged();
-    m_rootWindowChanged = true;
-}
-
-
 //--- INITIALIZATION FUNCTIONS -------------------------------------------------
 
 // Early initialization of GLX functions.
@@ -353,10 +338,6 @@ void OpenGLScreen::createResources() {
     m_whiteTexture = new OpenGL2DTexture(*this, false);
     m_whiteTexture->setPixmap(pixmap, false, 1, 1, true);
     XFreePixmap(display(), pixmap);
-
-
-    // Shader program.
-    m_shaderProgram = new OpenGLShaderProgram(pluginManager().plugins());
 }
 
 // Finish plugin initialization.
@@ -365,6 +346,30 @@ void OpenGLScreen::initPlugins() {
     forEachPlugin(i, plugin) {
         plugin->initOpenGL(m_shaderProgram);
     }
+}
+
+
+//--- OTHER INITIALIZATION -----------------------------------------------------
+
+// Initializes the screen's plugins.
+void OpenGLScreen::initPlugins(const CompositorConfig &config) {
+    BaseScreen::initPlugins(config);
+    m_shaderProgram = new OpenGLShaderProgram(pluginManager().plugins());
+}
+
+
+//--- SCREEN MANIPULATION ------------------------------------------------------
+
+// Notifies the screen of the background change.
+void OpenGLScreen::setRootPixmapChanged() {
+    BaseScreen::setRootPixmapChanged();
+    m_bgChanged = true;
+}
+
+// Notifies the screen of a root window change.
+void OpenGLScreen::setRootWindowSizeChanged() {
+    BaseScreen::setRootWindowSizeChanged();
+    m_rootWindowChanged = true;
 }
 
 
