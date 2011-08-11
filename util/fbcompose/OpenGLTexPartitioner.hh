@@ -84,7 +84,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        OpenGL2DTexturePartition(const OpenGLScreen &screen, bool swizzleAlphaToOne);
+        OpenGL2DTexturePartition(const OpenGLScreen &screen, bool swizzle_alpha_to_one);
 
         /** Destructor. */
         ~OpenGL2DTexturePartition();
@@ -106,7 +106,7 @@ namespace FbCompositor {
         //--- MUTATORS ---------------------------------------------------------
 
         /** Sets the texture's contents to the given pixmap. */
-        void setPixmap(Pixmap pixmap, bool managePixmap, int width, int height, int depth);
+        void setPixmap(Pixmap pixmap, bool manage_pixmap, int width, int height, int depth);
 
 
     private:
@@ -122,10 +122,10 @@ namespace FbCompositor {
         //--- INTERNALS --------------------------------------------------------
 
         /** Maximum supported texture size. */
-        int m_maxTextureSize;
+        int m_max_texture_size;
 
         /** Whether alpha channel should be swizzled to one. */
-        bool m_swizzleAlphaToOne;
+        bool m_swizzle_alpha_to_one;
 
         
         /** Partitions of the texture. */
@@ -136,10 +136,10 @@ namespace FbCompositor {
 
 
         /** Full texture height. */
-        int m_fullHeight;
+        int m_full_height;
 
         /** Full texture width. */
-        int m_fullWidth;
+        int m_full_width;
 
 
         /** Current connection to the X server. */
@@ -151,12 +151,12 @@ namespace FbCompositor {
 
     // Returns the full height of the current texture.
     inline int OpenGL2DTexturePartition::fullHeight() const {
-        return m_fullHeight;
+        return m_full_height;
     }
 
     // Returns the full width of the current texture.
     inline int OpenGL2DTexturePartition::fullWidth() const {
-        return m_fullWidth;
+        return m_full_width;
     }
 
     // Returns the partitions of the current texture.
@@ -168,11 +168,11 @@ namespace FbCompositor {
     //--- SUPPORTING FUNCTIONS -------------------------------------------------
 
     /** Returns the border bitfield of the given partition. */
-    unsigned int getBorderBitfield(int unitWidth, int unitHeight, int x, int y);
+    unsigned int getBorderBitfield(int unit_width, int unit_height, int x, int y);
 
     /** Space partitioning function. */
     std::vector<XRectangle> partitionSpace(int x, int y, int width, int height, int maxPartitionSize,
-                                           int *unitWidth_return = 0, int *unitHeight_return = 0);
+                                           int *unit_width_return = 0, int *unit_height_return = 0);
 
     /** Partitions space directly to buffers. */
     std::vector<OpenGLBufferPtr> partitionSpaceToBuffers(const OpenGLScreen &screen, int x, int y,

@@ -54,7 +54,7 @@ XRenderPicture::~XRenderPicture() {
 //------- MUTATORS -------------------------------------------------------------
 
 // Associate the picture with the given pixmap.
-void XRenderPicture::setPixmap(Pixmap pixmap, bool managePixmap, XRenderPictureAttributes pa, long paMask) {
+void XRenderPicture::setPixmap(Pixmap pixmap, bool manage_pixmap, XRenderPictureAttributes pa, long paMask) {
     if (m_drawable != pixmap) {
         freeResources();
 
@@ -65,7 +65,7 @@ void XRenderPicture::setPixmap(Pixmap pixmap, bool managePixmap, XRenderPictureA
         XRenderSetPictureFilter(m_display, m_picture, m_pictFilter, NULL, 0);
     }
 
-    m_resourcesManaged = managePixmap;
+    m_resourcesManaged = manage_pixmap;
 }
 
 // Associate the picture with the given window.

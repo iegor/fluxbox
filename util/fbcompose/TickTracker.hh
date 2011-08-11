@@ -103,7 +103,7 @@ namespace FbCompositor {
         //--- PRIVATE VARIABLES ------------------------------------------------
 
         /** Whether the timer is running or not. */
-        bool m_isRunning;
+        bool m_is_running;
 
         /** Time the timer was started. */
         timeval m_startTime;
@@ -125,7 +125,7 @@ namespace FbCompositor {
 
     // Returns whether the timer is running.
     inline bool TickTracker::isRunning() const {
-        return m_isRunning;
+        return m_is_running;
     }
 
     // Returns the tick size.

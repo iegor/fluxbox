@@ -127,42 +127,42 @@ namespace FbCompositor {
         //--- INITIALIZATION FUNCTIONS -----------------------------------------
 
         /** Creates a shader. */
-        GLuint createShader(GLenum shaderType, GLint sourceLength, const GLchar *source);
+        GLuint createShader(GLenum shader_type, GLint source_length, const GLchar *source);
 
         /** Creates a shader program. */
-        GLuint createShaderProgram(GLuint vertexShader, GLuint fragmentShader);
+        GLuint createShaderProgram(GLuint vertex_shader, GLuint fragment_shader);
 
 
         //--- MAIN VARIABLES ---------------------------------------------------
 
         /** The vertex shader. */
-        GLuint m_vertexShader;
+        GLuint m_vertex_shader;
 
         /** The fragment shader. */
-        GLuint m_fragmentShader;
+        GLuint m_fragment_shader;
         
         /** The shader program. */
-        GLuint m_shaderProgram;
+        GLuint m_shader_program;
 
 
         /** Location of the fb_InitMainTexCoord attribute. */
-        GLuint m_mainTexCoordAttrib;
+        GLuint m_main_tex_coord_attrib;
 
         /** Location of the fb_InitPrimPos attribute. */
-        GLuint m_primPosAttrib;
+        GLuint m_prim_pos_attrib;
 
         /** Location of the fb_InitShapeTexCoord attribute. */
-        GLuint m_shapeTexCoordAttrib;
+        GLuint m_shape_tex_coord_attrib;
 
 
         /** Location of the fb_Alpha uniform. */
-        GLuint m_alphaUniform;
+        GLuint m_alpha_uniform;
         
         /** Location of the fb_MainTexture uniform. */
-        GLuint m_mainTexUniform;
+        GLuint m_main_tex_uniform;
 
         /** Location of the fb_ShapeTexture uniform. */
-        GLuint m_shapeTexUniform;
+        GLuint m_shape_tex_uniform;
     };
 
 
@@ -170,52 +170,52 @@ namespace FbCompositor {
 
     // Returns location of the fb_Alpha uniform.
     inline GLuint OpenGLShaderProgram::alphaUniform() const {
-        return m_alphaUniform;
+        return m_alpha_uniform;
     }
 
     // Returns location of the given attribute.
     inline GLuint OpenGLShaderProgram::getAttributeLocation(const char *attribName) {
-        return glGetAttribLocation(m_shaderProgram, attribName);
+        return glGetAttribLocation(m_shader_program, attribName);
     }
 
     // Returns location of the given uniform.
     inline GLuint OpenGLShaderProgram::getUniformLocation(const char *uniformName) {
-        return glGetUniformLocation(m_shaderProgram, uniformName);
+        return glGetUniformLocation(m_shader_program, uniformName);
     }
 
     // Returns location of the fb_InitMainTexCoord attribute.
     inline GLuint OpenGLShaderProgram::mainTexCoordAttrib() const {
-        return m_mainTexCoordAttrib;
+        return m_main_tex_coord_attrib;
     }
 
     // Returns location of the fb_MainTexture uniform.
     inline GLuint OpenGLShaderProgram::mainTexUniform() const {
-        return m_mainTexUniform;
+        return m_main_tex_uniform;
     }
 
     // Returns location of the fb_InitPrimPos attribute.
     inline GLuint OpenGLShaderProgram::primPosAttrib() const {
-        return m_primPosAttrib;
+        return m_prim_pos_attrib;
     }
 
     // Returns the handle to the shader program.
     inline GLuint OpenGLShaderProgram::programHandle() const {
-        return m_shaderProgram;
+        return m_shader_program;
     }
 
     // Returns location of the fb_InitShapeTexCoord attribute.
     inline GLuint OpenGLShaderProgram::shapeTexCoordAttrib() const {
-        return m_shapeTexCoordAttrib;
+        return m_shape_tex_coord_attrib;
     }
 
     // Returns location of the fb_ShapeTexture uniform.
     inline GLuint OpenGLShaderProgram::shapeTexUniform() const {
-        return m_shapeTexUniform;
+        return m_shape_tex_uniform;
     }
 
     // Uses the current shader program.
     inline void OpenGLShaderProgram::use() {
-        glUseProgram(m_shaderProgram);
+        glUseProgram(m_shader_program);
     }
 
 

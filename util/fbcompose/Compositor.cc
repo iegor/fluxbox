@@ -95,7 +95,7 @@ Compositor::Compositor(const CompositorConfig &config) :
     if (config.renderingMode() == RM_ServerAuto) {
         throw InitException("Compositor class does not provide the serverauto renderer.");
     }
-    m_renderingMode = config.renderingMode();
+    m_rendering_mode = config.renderingMode();
 
     if (config.showXErrors()) {
         XSetErrorHandler(&printXError);
@@ -105,13 +105,13 @@ Compositor::Compositor(const CompositorConfig &config) :
 
     initAllExtensions();
 
-    int screenCount = XScreenCount(display());
-    m_screens.reserve(screenCount);
+    int screen_count = XScreenCount(display());
+    m_screens.reserve(screen_count);
 
-    for (int i = 0; i < screenCount; i++) {
-        Window cmSelectionOwner = getCMSelectionOwnership(i);
+    for (int i = 0; i < screen_count; i++) {
+        Window cm_selection_owner = getCMSelectionOwnership(i);
 
-        switch (m_renderingMode) {
+        switch (m_rendering_mode) {
 #ifdef USE_OPENGL_COMPOSITING
         case RM_OpenGL :
             m_screens.push_back(new OpenGLScreen(i, config));
@@ -127,7 +127,7 @@ Compositor::Compositor(const CompositorConfig &config) :
             break;
         }
 
-        m_screens[i]->ignoreWindow(cmSelectionOwner);
+        m_screens[i]->ignoreWindow(cm_selection_owner);
     }
 
     initHeads();
@@ -158,41 +158,41 @@ Compositor::~Compositor() {
 //--- INITIALIZATION FUNCTIONS -----------------------------------------
 
 // Acquires the ownership of compositing manager selections.
-Window Compositor::getCMSelectionOwnership(int screenNumber) {
-    Atom cmAtom = Atoms::compositingSelectionAtom(screenNumber);
+Window Compositor::getCMSelectionOwnership(int screen_number) {
+    Atom cm_atom = Atoms::compositingSelectionAtom(screen_number);
 
-    Window curOwner = XGetSelectionOwner(display(), cmAtom);
-    if (curOwner != None) {
+    Window cur_owner = XGetSelectionOwner(display(), cm_atom);
+    if (cur_owner != None) {
         // TODO: More detailed message - what is the other program?
         throw InitException("Another compositing manager is running.");
     }
 
-    curOwner = XCreateSimpleWindow(display(), XRootWindow(display(), screenNumber), -10, -10, 1, 1, 0, None, None);
-    XmbSetWMProperties(display(), curOwner, APP_NAME, APP_NAME, NULL, 0, NULL, NULL, NULL);
-    XSetSelectionOwner(display(), cmAtom, curOwner, CurrentTime);
+    cur_owner = XCreateSimpleWindow(display(), XRootWindow(display(), screen_number), -10, -10, 1, 1, 0, None, None);
+    XmbSetWMProperties(display(), cur_owner, APP_NAME, APP_NAME, NULL, 0, NULL, NULL, NULL);
+    XSetSelectionOwner(display(), cm_atom, cur_owner, CurrentTime);
 
-    return curOwner;
+    return cur_owner;
 }
 
 // Initializes X's extensions.
 void Compositor::initAllExtensions() {
 #ifdef USE_OPENGL_COMPOSITING
-    if (m_renderingMode == RM_OpenGL) {
-        initExtension("GLX", &glXQueryExtension, &glXQueryVersion, 1, 3, &m_glxEventBase, &m_glxErrorBase);
-        initExtension("XComposite", &XCompositeQueryExtension, &XCompositeQueryVersion, 0, 4, &m_compositeEventBase, &m_compositeErrorBase);
-        initExtension("XDamage", &XDamageQueryExtension, &XDamageQueryVersion, 1, 0, &m_damageEventBase, &m_damageErrorBase);
-        initExtension("XFixes", &XFixesQueryExtension, &XFixesQueryVersion, 2, 0, &m_fixesEventBase, &m_fixesErrorBase);
-        initExtension("XShape", &XShapeQueryExtension, &XShapeQueryVersion, 1, 1, &m_shapeEventBase, &m_shapeErrorBase);
+    if (m_rendering_mode == RM_OpenGL) {
+        initExtension("GLX", &glXQueryExtension, &glXQueryVersion, 1, 3, m_glx_event_base, m_glx_error_base);
+        initExtension("XComposite", &XCompositeQueryExtension, &XCompositeQueryVersion, 0, 4, m_composite_event_base, m_composite_error_base);
+        initExtension("XDamage", &XDamageQueryExtension, &XDamageQueryVersion, 1, 0, m_damage_event_base, m_damage_error_base);
+        initExtension("XFixes", &XFixesQueryExtension, &XFixesQueryVersion, 2, 0, m_fixes_event_base, m_fixes_error_base);
+        initExtension("XShape", &XShapeQueryExtension, &XShapeQueryVersion, 1, 1, m_shape_event_base, m_shape_error_base);
     } else
 #endif  // USE_OPENGL_COMPOSITING
 
 #ifdef USE_XRENDER_COMPOSITING
-    if (m_renderingMode == RM_XRender) {
-        initExtension("XComposite", &XCompositeQueryExtension, &XCompositeQueryVersion, 0, 4, &m_compositeEventBase, &m_compositeErrorBase);
-        initExtension("XDamage", &XDamageQueryExtension, &XDamageQueryVersion, 1, 0, &m_damageEventBase, &m_damageErrorBase);
-        initExtension("XFixes", &XFixesQueryExtension, &XFixesQueryVersion, 2, 0, &m_fixesEventBase, &m_fixesErrorBase);
-        initExtension("XRender", &XRenderQueryExtension, &XRenderQueryVersion, 0, 1, &m_renderEventBase, &m_renderErrorBase);
-        initExtension("XShape", &XShapeQueryExtension, &XShapeQueryVersion, 1, 1, &m_shapeEventBase, &m_shapeErrorBase);
+    if (m_rendering_mode == RM_XRender) {
+        initExtension("XComposite", &XCompositeQueryExtension, &XCompositeQueryVersion, 0, 4, m_composite_event_base, m_composite_error_base);
+        initExtension("XDamage", &XDamageQueryExtension, &XDamageQueryVersion, 1, 0, m_damage_event_base, m_damage_error_base);
+        initExtension("XFixes", &XFixesQueryExtension, &XFixesQueryVersion, 2, 0, m_fixes_event_base, m_fixes_error_base);
+        initExtension("XRender", &XRenderQueryExtension, &XRenderQueryVersion, 0, 1, m_render_event_base, m_render_error_base);
+        initExtension("XShape", &XShapeQueryExtension, &XShapeQueryVersion, 1, 1, m_shape_event_base, m_shape_error_base);
     } else
 #endif  // USE_XRENDER_COMPOSITING
 
@@ -200,63 +200,63 @@ void Compositor::initAllExtensions() {
 }
 
 // Initializes a particular X server extension.
-void Compositor::initExtension(const char *extensionName, QueryExtensionFunction extensionFunc,
-                               QueryVersionFunction versionFunc, const int minMajorVer, const int minMinorVer,
-                               int *eventBase, int *errorBase) {
-    int majorVer;
-    int minorVer;
+void Compositor::initExtension(const char *extension_name, QueryExtensionFunction extension_func,
+                               QueryVersionFunction version_func, const int min_major_ver, const int min_minor_ver,
+                               int &event_base, int &error_base) {
+    int major_ver;
+    int minor_ver;
 
     // Check that the extension exists.
-    if (!(*extensionFunc)(display(), eventBase, errorBase)) {
-        *eventBase = -1;
-        *errorBase = -1;
+    if (!(*extension_func)(display(), &event_base, &error_base)) {
+        event_base = -1;
+        error_base = -1;
 
         std::stringstream ss;
-        ss << extensionName << " extension not found.";
+        ss << extension_name << " extension not found.";
         throw InitException(ss.str());
     }
 
     // Get extension version.
-    if (!(*versionFunc)(display(), &majorVer, &minorVer)) {
-        *eventBase = -1;
-        *errorBase = -1;
+    if (!(*version_func)(display(), &major_ver, &minor_ver)) {
+        event_base = -1;
+        error_base = -1;
 
         std::stringstream ss;
-        ss << "Could not query the version of " << extensionName << " extension.";
+        ss << "Could not query the version of " << extension_name << " extension.";
         throw InitException(ss.str());
     }
 
     // Make sure the extension version is at least what we require.
-    if ((majorVer < minMajorVer) || ((majorVer == minMajorVer) && (minorVer < minMinorVer))) {
-        *eventBase = -1;
-        *errorBase = -1;
+    if ((major_ver < min_major_ver) || ((major_ver == min_major_ver) && (minor_ver < min_minor_ver))) {
+        event_base = -1;
+        error_base = -1;
 
         std::stringstream ss;
-        ss << "Unsupported " << extensionName << " extension version found (required >=" << minMajorVer
-           << "." << minMinorVer << ", got " << majorVer << "." << minorVer << ").";
+        ss << "Unsupported " << extension_name << " extension version found (required >=" << min_major_ver
+           << "." << min_minor_ver << ", got " << major_ver << "." << minor_ver << ").";
         throw InitException(ss.str());
     }
 }
 
 // Initializes monitor heads on every screen.
 void Compositor::initHeads() {
-    HeadMode headMode = Heads_One;
+    HeadMode head_mode = Heads_One;
 
 #ifdef XINERAMA
     try {
-        initExtension("Xinerama", &XineramaQueryExtension, &XCompositeQueryVersion, 0, 0, &m_xineramaEventBase, &m_xineramaErrorBase);
+        initExtension("Xinerama", &XineramaQueryExtension, &XCompositeQueryVersion, 0, 0, m_xinerama_event_base, m_xinerama_error_base);
         if (XineramaIsActive(display())) {
-            headMode = Heads_Xinerama;
+            head_mode = Heads_Xinerama;
         }
     } catch (const InitException &e) { }
 
-    if (headMode != Heads_Xinerama) {
+    if (head_mode != Heads_Xinerama) {
         fbLog_warn << "Could not initialize Xinerama." << std::endl;
     }
 #endif  // XINERAMA
 
     for (size_t i = 0; i < m_screens.size(); i++) {
-        m_screens[i]->updateHeads(headMode);
+        m_screens[i]->updateHeads(head_mode);
     }
 }
 
@@ -266,21 +266,21 @@ void Compositor::initHeads() {
 // The event loop.
 void Compositor::eventLoop() {
     union {
-        XEvent eventX;
-        XDamageNotifyEvent eventXDamageNotify;
-        XShapeEvent eventXShape;
-    } eventUnion;
-    XEvent &event = eventUnion.eventX;
+        XEvent event_x;
+        XDamageNotifyEvent event_x_damage_notify;
+        XShapeEvent event_x_shape;
+    } event_union;
+    XEvent &event = event_union.event_x;
 
-    int eventScreen;
-    timespec sleepTimespec = { 0, SLEEP_TIME * 1000 };
+    int event_screen;
+    timespec sleep_timespec = { 0, SLEEP_TIME * 1000 };
 
     while (!done()) {
         while (XPending(display())) {
             XNextEvent(display(), &event);
 
-            eventScreen = screenOfEvent(event);
-            if (eventScreen < 0) {
+            event_screen = screenOfEvent(event);
+            if (event_screen < 0) {
                 fbLog_info << "Event " << std::dec << event.xany.serial << " (window " << std::hex << event.xany.window
                            << ", type " << std::dec << event.xany.type << ") does not affect any managed windows, skipping."
                            << std::endl;
@@ -289,27 +289,27 @@ void Compositor::eventLoop() {
 
             switch (event.type) {
             case CirculateNotify :
-                m_screens[eventScreen]->circulateWindow(event.xcirculate.window, event.xcirculate.place);
+                m_screens[event_screen]->circulateWindow(event.xcirculate.window, event.xcirculate.place);
                 fbLog_debug << "CirculateNotify on " << std::hex << event.xcirculate.window << std::endl;
                 break;
 
             case ConfigureNotify :
-                m_screens[eventScreen]->reconfigureWindow(event.xconfigure);
+                m_screens[event_screen]->reconfigureWindow(event.xconfigure);
                 fbLog_debug << "ConfigureNotify on " << std::hex << event.xconfigure.window << std::endl;
                 break;
 
             case CreateNotify :
-                m_screens[eventScreen]->createWindow(event.xcreatewindow.window);
+                m_screens[event_screen]->createWindow(event.xcreatewindow.window);
                 fbLog_debug << "CreateNotify on " << std::hex << event.xcreatewindow.window << std::endl;
                 break;
 
             case DestroyNotify :
-                m_screens[eventScreen]->destroyWindow(event.xdestroywindow.window);
+                m_screens[event_screen]->destroyWindow(event.xdestroywindow.window);
                 fbLog_debug << "DestroyNotify on " << std::hex << event.xdestroywindow.window << std::endl;
                 break;
 
             case Expose :
-                m_screens[eventScreen]->damageWindow(event.xexpose.window, getExposedRect(event.xexpose));
+                m_screens[event_screen]->damageWindow(event.xexpose.window, getExposedRect(event.xexpose));
                 fbLog_debug << "Expose on " << std::hex << event.xexpose.window << std::endl;
                 break;
 
@@ -318,41 +318,41 @@ void Compositor::eventLoop() {
                 break;
 
             case MapNotify :
-                m_screens[eventScreen]->mapWindow(event.xmap.window);
+                m_screens[event_screen]->mapWindow(event.xmap.window);
                 fbLog_debug << "MapNotify on " << std::hex << event.xmap.window << std::endl;
                 break;
 
             case PropertyNotify :
-                m_screens[eventScreen]->updateWindowProperty(event.xproperty.window, event.xproperty.atom, event.xproperty.state);
+                m_screens[event_screen]->updateWindowProperty(event.xproperty.window, event.xproperty.atom, event.xproperty.state);
                 fbLog_debug << "PropertyNotify on " << std::hex << event.xproperty.window << " ("
-                           << XGetAtomName(display(), event.xproperty.atom) << ")" << std::endl;
+                            << XGetAtomName(display(), event.xproperty.atom) << ")" << std::endl;
                 break;
 
             case ReparentNotify :
-                m_screens[eventScreen]->reparentWindow(event.xreparent.window, event.xreparent.parent);
+                m_screens[event_screen]->reparentWindow(event.xreparent.window, event.xreparent.parent);
                 fbLog_debug << "ReparentNotify on " << std::hex << event.xreparent.window << " (parent "
-                           << event.xreparent.parent << ")" << std::endl;
+                            << event.xreparent.parent << ")" << std::endl;
                 break;
 
             case UnmapNotify :
-                m_screens[eventScreen]->unmapWindow(event.xunmap.window);
+                m_screens[event_screen]->unmapWindow(event.xunmap.window);
                 fbLog_debug << "UnmapNotify on " << std::hex << event.xunmap.window << std::endl;
                 break;
 
             default :
-                if (event.type == (m_damageEventBase + XDamageNotify)) {
-                    XDamageNotifyEvent damageEvent = eventUnion.eventXDamageNotify;
-                    m_screens[eventScreen]->damageWindow(damageEvent.drawable, damageEvent.area);
+                if (event.type == (m_damage_event_base + XDamageNotify)) {
+                    XDamageNotifyEvent damageEvent = event_union.event_x_damage_notify;
+                    m_screens[event_screen]->damageWindow(damageEvent.drawable, damageEvent.area);
                     fbLog_debug << "DamageNotify on " << std::hex << damageEvent.drawable << std::endl;
 
-                } else if (event.type == (m_shapeEventBase + ShapeNotify)) {
-                    XShapeEvent shapeEvent = eventUnion.eventXShape;
-                    m_screens[eventScreen]->updateShape(shapeEvent.window);
+                } else if (event.type == (m_shape_event_base + ShapeNotify)) {
+                    XShapeEvent shapeEvent = event_union.event_x_shape;
+                    m_screens[event_screen]->updateShape(shapeEvent.window);
                     fbLog_debug << "ShapeNotify on " << std::hex << shapeEvent.window << std::endl;
 
                 } else {
-                    fbLog_info << "Other event " << std::dec << event.xany.type << " received on screen "
-                               << eventScreen << " and window " << std::hex << event.xany.window << std::endl;
+                    fbLog_debug << "Other event " << std::dec << event.xany.type << " received on screen "
+                                << event_screen << " and window " << std::hex << event.xany.window << std::endl;
                 }
                 break;
             }
@@ -371,7 +371,7 @@ void Compositor::eventLoop() {
             }
             fbLog_debugDump << "======================================" << std::endl;
         } else {
-            nanosleep(&sleepTimespec, NULL);
+            nanosleep(&sleep_timespec, NULL);
         }
     }
 }
@@ -422,16 +422,16 @@ int FbCompositor::printXError(Display *display, XErrorEvent *error) {
     static std::stringstream ss;
     ss.str("");
 
-    char errorText[ERROR_BUFFER_LENGTH];
-    XGetErrorText(display, error->error_code, errorText, ERROR_BUFFER_LENGTH);
+    char error_text[ERROR_BUFFER_LENGTH];
+    XGetErrorText(display, error->error_code, error_text, ERROR_BUFFER_LENGTH);
 
     ss << int(error->request_code);
 
-    char requestName[ERROR_BUFFER_LENGTH];
+    char request_name[ERROR_BUFFER_LENGTH];
     XGetErrorDatabaseText(display, (char*)(ERROR_DB_TEXT_NAME), (char*)(ss.str().c_str()),
-                          (char*)(REQUEST_NAME_UNKNOWN_MESSAGE), requestName, ERROR_BUFFER_LENGTH);
+                          (char*)(REQUEST_NAME_UNKNOWN_MESSAGE), request_name, ERROR_BUFFER_LENGTH);
 
-    fbLog_warn << "X Error: " << errorText << " in " << requestName << " request, errorCode="
+    fbLog_warn << "X Error: " << error_text << " in " << request_name << " request, errorCode="
                << std::dec << int(error->error_code) << ", majorOpCode=" << int(error->request_code)
                << ", minorOpCode=" << int(error->minor_code) << ", resourceId=" << std::hex
                << error->resourceid << "." << std::endl;

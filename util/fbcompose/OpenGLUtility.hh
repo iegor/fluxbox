@@ -33,15 +33,18 @@
 
 namespace FbCompositor {
 
+    class BaseScreen;
+
+
     //--- FUNCTIONS ------------------------------------------------------------
 
     /** Converts screen coordinates to OpenGL coordinates. */
-    void toOpenGLCoords(int screenWidth, int screenHeight, int x, int y, int width, int height,
-                        GLfloat *xLow_return, GLfloat *xHigh_return, GLfloat *yLow_return, GLfloat *yHigh_return);
+    void toOpenGLCoords(int screen_width, int screen_height, int x, int y, int width, int height,
+                        GLfloat *x_low_return, GLfloat *x_high_return, GLfloat *y_low_return, GLfloat *y_high_return);
 
     /** Converts screen coordinates to OpenGL coordinates. */
-    void toOpenGLCoords(int screenWidth, int screenHeight, XRectangle rect,
-                        GLfloat *xLow_return, GLfloat *xHigh_return, GLfloat *yLow_return, GLfloat *yHigh_return);
+    void toOpenGLCoords(int screen_width, int screen_height, XRectangle rect,
+                        GLfloat *x_low_return, GLfloat *x_high_return, GLfloat *y_low_return, GLfloat *y_high_return);
 
 }
 

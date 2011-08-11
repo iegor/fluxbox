@@ -73,7 +73,7 @@ namespace FbCompositor {
 
 
         /** Associate the picture with the given pixmap. */
-        void setPixmap(Pixmap pixmap, bool managePixmap, XRenderPictureAttributes pa = XRenderPictureAttributes(), long paMask = 0);
+        void setPixmap(Pixmap pixmap, bool manage_pixmap, XRenderPictureAttributes pa = XRenderPictureAttributes(), long paMask = 0);
 
         /** Associate the picture with the given window. */
         void setWindow(Window window, XRenderPictureAttributes pa = XRenderPictureAttributes(), long paMask = 0);

@@ -120,7 +120,7 @@ namespace FbCompositor {
 
 
         /** Fetch the value of the next command line argument, advance iterator. */
-        FbTk::FbString getNextOption(std::vector<FbTk::FbString>::iterator &it, const char *errorMessage);
+        FbTk::FbString getNextOption(std::vector<FbTk::FbString>::iterator &it, const char *error_message);
 
 
         //--- PRIVATE VARIABLES ------------------------------------------------
@@ -130,25 +130,25 @@ namespace FbCompositor {
 
 
         /** Selected rendering mode. */
-        RenderingMode m_renderingMode;
+        RenderingMode m_rendering_mode;
 
 #ifdef USE_XRENDER_COMPOSITING
         /** XRender picture filter. */
-        FbTk::FbString m_xRenderPictFilter;
+        FbTk::FbString m_xrender_pict_filter;
 #endif  // USE_XRENDER_COMPOSITING
 
 
         /** The name of the display we want to use. */
-        FbTk::FbString m_displayName;
+        FbTk::FbString m_display_name;
 
         /** The refresh rate. */
-        int m_framesPerSecond;
+        int m_frames_per_second;
 
         /** Plugins and their arguments. */
         std::vector< std::pair< FbTk::FbString, std::vector<FbTk::FbString> > > m_plugins;
 
         /** Whether the X errors should be printed. */
-        bool m_showXErrors;
+        bool m_show_x_errors;
 
         /* Whether the compositor should synchronize with the X server. */
         bool m_synchronize;
@@ -159,12 +159,12 @@ namespace FbCompositor {
 
     // Returns the display name.
     inline const FbTk::FbString &CompositorConfig::displayName() const {
-        return m_displayName;
+        return m_display_name;
     }
 
     // Returns the refresh rate.
     inline int CompositorConfig::framesPerSecond() const {
-        return m_framesPerSecond;
+        return m_frames_per_second;
     }
 
     // Returns the arguments to the given plugin.
@@ -190,12 +190,12 @@ namespace FbCompositor {
 
     // Returns the rendering mode.
     inline RenderingMode CompositorConfig::renderingMode() const {
-        return m_renderingMode;
+        return m_rendering_mode;
     }
 
     // Returns whether the X errors should be printed.
     inline bool CompositorConfig::showXErrors() const {
-        return m_showXErrors;
+        return m_show_x_errors;
     }
 
     // Returns whether the compositor should synchronize with the X server.
@@ -206,7 +206,7 @@ namespace FbCompositor {
 #ifdef USE_XRENDER_COMPOSITING
     // Returns the XRender picture filter.
     inline const char *CompositorConfig::xRenderPictFilter() const {
-        return m_xRenderPictFilter.c_str();
+        return m_xrender_pict_filter.c_str();
     }
 #endif  // USE_XRENDER_COMPOSITING
 }

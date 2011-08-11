@@ -63,7 +63,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        BaseScreen(int screenNumber, PluginType pluginType, const CompositorConfig &config);
+        BaseScreen(int screen_number, PluginType plugin_type, const CompositorConfig &config);
 
         /** Destructor. */
         virtual ~BaseScreen();
@@ -158,7 +158,7 @@ namespace FbCompositor {
         void clearScreenDamage();
 
         /** Updates heads on the current screen. */
-        void updateHeads(HeadMode headMode);
+        void updateHeads(HeadMode head_mode);
 
 
         /** Notifies the screen of a background change. */
@@ -225,7 +225,7 @@ namespace FbCompositor {
         void updateReconfigureRect();
 
         /** Update stored root window pixmap. */
-        void updateRootWindowPixmap(Pixmap newPixmap = None);
+        void updateRootWindowPixmap(Pixmap new_pixmap = None);
 
         /** Update the number of workspaces. */
         void updateWorkspaceCount();
@@ -273,49 +273,49 @@ namespace FbCompositor {
         std::vector<XRectangle> m_heads;
 
         /** Windows that should be ignored. */
-        std::vector<Window> m_ignoreList;
+        std::vector<Window> m_ignore_list;
 
         /** Plugin manager for this screen. */
-        PluginManager m_pluginManager;
+        PluginManager m_plugin_manager;
 
         /** Screen's number. */
-        int m_screenNumber;
+        int m_screen_number;
 
         /** Screen's root window. */
-        BaseCompWindow m_rootWindow;
+        BaseCompWindow m_root_window;
 
         /** Screen's windows. */
         std::list<BaseCompWindow*> m_windows;
 
 
         /** XID of the active window. */
-        Window m_activeWindowXID;
+        Window m_active_window_xid;
 
         /** XID of the current iconbar item. */
-        Window m_currentIconbarItem;
+        Window m_current_iconbar_item;
 
         /** The index of the current workspace. */
-        int m_currentWorkspace;
+        int m_current_workspace;
 
         /** The current reconfigure rectangle. */
-        XRectangle m_reconfigureRect;
+        XRectangle m_reconfigure_rect;
 
         /** The total number of workspaces. */
-        int m_workspaceCount;
+        int m_workspace_count;
 
 
         /** A list of damaged rectangles on the screen. */
-        std::vector<XRectangle> m_damagedScreenRects;
+        std::vector<XRectangle> m_damaged_screen_rects;
 
         /** Damaged screen region. */
-        XserverRegion m_screenDamage;
+        XserverRegion m_screen_damage;
 
 
         /** Pixmap, containing the desktop background. */
-        Pixmap m_rootWindowPixmap;
+        Pixmap m_root_window_pixmap;
 
         /** Whether the background pixmap is set by the window manager or this class. */
-        bool m_wmSetRootWindowPixmap;
+        bool m_wm_set_root_window_pixmap;
     };
 
 
@@ -323,7 +323,7 @@ namespace FbCompositor {
 
     // Returns the active window XID.
     inline Window BaseScreen::activeWindow() const {
-        return m_activeWindowXID;
+        return m_active_window_xid;
     }
 
     // Returns all of screen's windows.
@@ -333,12 +333,12 @@ namespace FbCompositor {
 
     // Returns the XID of the current iconbar item.
     inline Window BaseScreen::currentIconbarItem() const {
-        return m_currentIconbarItem;
+        return m_current_iconbar_item;
     }
 
     // Returns the index of the current workspace.
     inline int BaseScreen::currentWorkspace() const {
-        return m_currentWorkspace;
+        return m_current_workspace;
     }
 
     // Returns the current connection to the X server.
@@ -358,42 +358,42 @@ namespace FbCompositor {
 
     // Returns the plugin manager.
     inline const PluginManager &BaseScreen::pluginManager() const {
-        return m_pluginManager;
+        return m_plugin_manager;
     }
 
     // Returns the reconfigure rectangle.
     inline XRectangle BaseScreen::reconfigureRectangle() const {
-        return m_reconfigureRect;
+        return m_reconfigure_rect;
     }
 
     // Returns screen's root window.
     inline BaseCompWindow &BaseScreen::rootWindow() {
-        return m_rootWindow;
+        return m_root_window;
     }
 
     // Returns screen's root window (const version).
     inline const BaseCompWindow &BaseScreen::rootWindow() const {
-        return m_rootWindow;
+        return m_root_window;
     }
 
     // Returns the root window pixmap.
     inline Pixmap BaseScreen::rootWindowPixmap() const {
-        return m_rootWindowPixmap;
+        return m_root_window_pixmap;
     }
 
     // Returns the screen's number.
     inline int BaseScreen::screenNumber() const {
-        return m_screenNumber;
+        return m_screen_number;
     }
 
     // Returns whether the root window pixmap was set by the WM.
     inline bool BaseScreen::wmSetRootWindowPixmap() const {
-        return m_wmSetRootWindowPixmap;
+        return m_wm_set_root_window_pixmap;
     }
 
     // Returns the number of workspaces on this screen.
     inline int BaseScreen::workspaceCount() const {
-        return m_workspaceCount;
+        return m_workspace_count;
     }
 }
 

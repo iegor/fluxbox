@@ -33,8 +33,8 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-XRenderWindow::XRenderWindow(const XRenderScreen &screen, Window windowXID, const char *pictFilter) :
-    BaseCompWindow(static_cast<const BaseScreen&>(screen), windowXID, false),
+XRenderWindow::XRenderWindow(const XRenderScreen &screen, Window window_xid, const char *pictFilter) :
+    BaseCompWindow(static_cast<const BaseScreen&>(screen), window_xid, false),
     m_pictFilter(pictFilter) {
 
     XRenderPictFormat *contentPictFormat = XRenderFindVisualFormat(display(), visual());

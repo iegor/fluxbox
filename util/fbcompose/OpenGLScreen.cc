@@ -108,18 +108,18 @@ const GLfloat DEFAULT_TEX_POS_ARRAY[] = {
 
 /** Element array for drawing the reconfigure rectangle. */
 const GLushort RECONFIGURE_RECT_ELEMENT_ARRAY[] = {
-    0, 1, 2, 3, 0
+    0, 1, 3, 2, 0
 };
 
 
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-OpenGLScreen::OpenGLScreen(int screenNumber, const CompositorConfig &config) :
-    BaseScreen(screenNumber, Plugin_OpenGL, config) {
+OpenGLScreen::OpenGLScreen(int screen_number, const CompositorConfig &config) :
+    BaseScreen(screen_number, Plugin_OpenGL, config) {
 
-    m_bgChanged = true;
-    m_rootWindowChanged = false;
+    m_bg_changed = true;
+    m_root_window_changed = false;
 
     earlyInitGLXPointers();
     initRenderingContext();
@@ -134,10 +134,10 @@ OpenGLScreen::OpenGLScreen(int screenNumber, const CompositorConfig &config) :
 
 // Destructor.
 OpenGLScreen::~OpenGLScreen() {
-    XUnmapWindow(display(), m_renderingWindow);
-    glXDestroyWindow(display(), m_glxRenderingWindow);
-    glXDestroyContext(display(), m_glxContext);
-    XDestroyWindow(display(), m_renderingWindow);
+    XUnmapWindow(display(), m_rendering_window);
+    glXDestroyWindow(display(), m_glx_rendering_window);
+    glXDestroyContext(display(), m_glx_context);
+    XDestroyWindow(display(), m_rendering_window);
 }
 
 
@@ -172,28 +172,28 @@ void OpenGLScreen::earlyInitGLXPointers() {
 
 // Initializes the rendering context.
 void OpenGLScreen::initRenderingContext() {
-    int nConfigs;
+    int fb_config_count;
 
-    GLXFBConfig *fbConfigs = glXChooseFBConfig(display(), screenNumber(), PREFERRED_FBCONFIG_ATTRIBUTES, &nConfigs);
-    m_haveDoubleBuffering = true;
+    GLXFBConfig *fb_configs = glXChooseFBConfig(display(), screenNumber(), PREFERRED_FBCONFIG_ATTRIBUTES, &fb_config_count);
+    m_have_double_buffering = true;
 
-    if (!fbConfigs) {
-        fbConfigs = glXChooseFBConfig(display(), screenNumber(), FALLBACK_FBCONFIG_ATTRIBUTES, &nConfigs);
-        m_haveDoubleBuffering = false;
+    if (!fb_configs) {
+        fb_configs = glXChooseFBConfig(display(), screenNumber(), FALLBACK_FBCONFIG_ATTRIBUTES, &fb_config_count);
+        m_have_double_buffering = false;
 
         fbLog_warn << "Could not get a double-buffered framebuffer config, trying single buffer. Expect tearing." << std::endl;
 
-        if (!fbConfigs) {
+        if (!fb_configs) {
             throw InitException("Screen does not support the required framebuffer configuration.");
         }
     }
 
-    m_fbConfig = fbConfigs[0];
-    XFree(fbConfigs);
+    m_fb_config = fb_configs[0];
+    XFree(fb_configs);
 
     // Creating the GLX rendering context.
-    m_glxContext = glXCreateNewContext(display(), m_fbConfig, GLX_RGBA_TYPE, NULL, True);
-    if (!m_glxContext) {
+    m_glx_context = glXCreateNewContext(display(), m_fb_config, GLX_RGBA_TYPE, NULL, True);
+    if (!m_glx_context) {
         throw InitException("Cannot create the OpenGL rendering context.");
     }
 }
@@ -201,46 +201,46 @@ void OpenGLScreen::initRenderingContext() {
 // Initializes the rendering surface.
 void OpenGLScreen::initRenderingSurface() {
     // Creating an X window for rendering.
-    Window compOverlay = XCompositeGetOverlayWindow(display(), rootWindow().window());
+    Window comp_overlay = XCompositeGetOverlayWindow(display(), rootWindow().window());
 
-    XVisualInfo *visualInfo = glXGetVisualFromFBConfig(display(), m_fbConfig);
-    Colormap colormap = XCreateColormap(display(), rootWindow().window(), visualInfo->visual, AllocNone);
+    XVisualInfo *visual_info = glXGetVisualFromFBConfig(display(), m_fb_config);
+    Colormap colormap = XCreateColormap(display(), rootWindow().window(), visual_info->visual, AllocNone);
 
     XSetWindowAttributes wa;
     wa.colormap = colormap;
-    long waMask = CWColormap;
+    long wa_mask = CWColormap;
 
-    m_renderingWindow = XCreateWindow(display(), compOverlay, 0, 0, rootWindow().width(), rootWindow().height(), 0,
-                                      visualInfo->depth, InputOutput, visualInfo->visual, waMask, &wa);
-    XmbSetWMProperties(display(), m_renderingWindow, "fbcompose", "fbcompose", NULL, 0, NULL, NULL, NULL);
-    XMapWindow(display(), m_renderingWindow);
+    m_rendering_window = XCreateWindow(display(), comp_overlay, 0, 0, rootWindow().width(), rootWindow().height(), 0,
+                                       visual_info->depth, InputOutput, visual_info->visual, wa_mask, &wa);
+    XmbSetWMProperties(display(), m_rendering_window, "fbcompose", "fbcompose", NULL, 0, NULL, NULL, NULL);
+    XMapWindow(display(), m_rendering_window);
 
     // Make sure the overlays do not consume any input events.
-    XserverRegion emptyRegion = XFixesCreateRegion(display(), NULL, 0);
-    XFixesSetWindowShapeRegion(display(), compOverlay, ShapeInput, 0, 0, emptyRegion);
-    XFixesSetWindowShapeRegion(display(), m_renderingWindow, ShapeInput, 0, 0, emptyRegion);
-    XFixesDestroyRegion(display(), emptyRegion);
+    XserverRegion empty_region = XFixesCreateRegion(display(), NULL, 0);
+    XFixesSetWindowShapeRegion(display(), comp_overlay, ShapeInput, 0, 0, empty_region);
+    XFixesSetWindowShapeRegion(display(), m_rendering_window, ShapeInput, 0, 0, empty_region);
+    XFixesDestroyRegion(display(), empty_region);
 
-    ignoreWindow(compOverlay);
-    ignoreWindow(m_renderingWindow);
+    ignoreWindow(comp_overlay);
+    ignoreWindow(m_rendering_window);
 
     // Creating a GLX handle for the above window.
-    m_glxRenderingWindow = glXCreateWindow(display(), m_fbConfig, m_renderingWindow, NULL);
-    if (!m_glxRenderingWindow) {
+    m_glx_rendering_window = glXCreateWindow(display(), m_fb_config, m_rendering_window, NULL);
+    if (!m_glx_rendering_window) {
         throw InitException("Cannot create the rendering surface.");
     }
 
-    XFree(visualInfo);
+    XFree(visual_info);
 }
 
 // Initializes GLEW.
 void OpenGLScreen::initGlew() {
-    glXMakeCurrent(display(), m_glxRenderingWindow, m_glxContext);
+    glXMakeCurrent(display(), m_glx_rendering_window, m_glx_context);
 
-    GLenum glewErr = glewInit();
-    if(glewErr != GLEW_OK) {
+    GLenum glew_err = glewInit();
+    if(glew_err != GLEW_OK) {
         std::stringstream ss;
-        ss << "GLEW Error: " << (const char*)(glewGetErrorString(glewErr));
+        ss << "GLEW Error: " << (const char*)(glewGetErrorString(glew_err));
         throw InitException(ss.str());
     }
 
@@ -251,7 +251,7 @@ void OpenGLScreen::initGlew() {
 
 // Finishes the initialization of the rendering context and surface.
 void OpenGLScreen::finishRenderingInit() {
-    glXMakeCurrent(display(), m_glxRenderingWindow, m_glxContext);
+    glXMakeCurrent(display(), m_glx_rendering_window, m_glx_context);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -269,26 +269,26 @@ void OpenGLScreen::finishRenderingInit() {
 
 // Finds the maximum usable texture size.
 void OpenGLScreen::findMaxTextureSize() {
-    GLint texSize;
-    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &texSize);
-    texSize = (GLint)(largestSmallerPowerOf2((int)(texSize)));
+    GLint tex_size;
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &tex_size);
+    tex_size = (GLint)(largestSmallerPowerOf2((int)(tex_size)));
 
-    while (texSize > 0) {
+    while (tex_size > 0) {
         GLint width;
 
-        glTexImage2D(GL_PROXY_TEXTURE_2D, 0, GL_RGBA, texSize, texSize, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
+        glTexImage2D(GL_PROXY_TEXTURE_2D, 0, GL_RGBA, tex_size, tex_size, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
         glGetTexLevelParameteriv(GL_PROXY_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
 
         if (width == 0) {
-            texSize >>= 1;
+            tex_size >>= 1;
         } else {
             break;
         }
     }
 
-    m_maxTextureSize = (int)(texSize);
-    if ((m_maxTextureSize < (int)(rootWindow().width()))
-            || (m_maxTextureSize < (int)(rootWindow().height()))) {
+    m_max_texture_size = (int)(tex_size);
+    if ((m_max_texture_size < (int)(rootWindow().width()))
+            || (m_max_texture_size < (int)(rootWindow().height()))) {
         fbLog_warn << "Maximum supported OpenGL texture size on this machine is less than one "
                    << "of the root window's dimensions. There may be a performance hit." << std::endl;
     }
@@ -299,44 +299,44 @@ void OpenGLScreen::createResources() {
     Pixmap pixmap;
 
     // Default element buffer.
-    m_defaultElementBuffer = new OpenGLBuffer(*this, GL_ELEMENT_ARRAY_BUFFER);
-    m_defaultElementBuffer->bufferData(sizeof(DEFAULT_ELEMENT_ARRAY), (const GLvoid*)(DEFAULT_ELEMENT_ARRAY), GL_STATIC_DRAW);
+    m_default_element_buffer = new OpenGLBuffer(*this, GL_ELEMENT_ARRAY_BUFFER);
+    m_default_element_buffer->bufferData(sizeof(DEFAULT_ELEMENT_ARRAY), (const GLvoid*)(DEFAULT_ELEMENT_ARRAY), GL_STATIC_DRAW);
 
     // Default primitive position buffer.
-    m_defaultPrimPosBuffer = new OpenGLBuffer(*this, GL_ARRAY_BUFFER);
-    m_defaultPrimPosBuffer->bufferData(sizeof(DEFAULT_PRIM_POS_ARRAY), (const GLvoid*)(DEFAULT_PRIM_POS_ARRAY), GL_STATIC_DRAW);
+    m_default_prim_pos_buffer = new OpenGLBuffer(*this, GL_ARRAY_BUFFER);
+    m_default_prim_pos_buffer->bufferData(sizeof(DEFAULT_PRIM_POS_ARRAY), (const GLvoid*)(DEFAULT_PRIM_POS_ARRAY), GL_STATIC_DRAW);
 
     // Default texture position buffer.
-    m_defaultTexCoordBuffer = new OpenGLBuffer(*this, GL_ARRAY_BUFFER);
-    m_defaultTexCoordBuffer->bufferData(sizeof(DEFAULT_TEX_POS_ARRAY), (const GLvoid*)(DEFAULT_TEX_POS_ARRAY), GL_STATIC_DRAW);
+    m_default_tex_coord_buffer = new OpenGLBuffer(*this, GL_ARRAY_BUFFER);
+    m_default_tex_coord_buffer->bufferData(sizeof(DEFAULT_TEX_POS_ARRAY), (const GLvoid*)(DEFAULT_TEX_POS_ARRAY), GL_STATIC_DRAW);
 
 
     // Reconfigure rectangle position buffer.
-    m_recRectLinePosBuffer = new OpenGLBuffer(*this, GL_ARRAY_BUFFER);
+    m_rec_rect_line_pos_buffer = new OpenGLBuffer(*this, GL_ARRAY_BUFFER);
 
     // Reconfigure rectangle element buffer.
-    m_recRectElementBuffer = new OpenGLBuffer(*this, GL_ELEMENT_ARRAY_BUFFER);
-    m_recRectElementBuffer->bufferData(sizeof(RECONFIGURE_RECT_ELEMENT_ARRAY),
-                                       (const GLvoid*)(RECONFIGURE_RECT_ELEMENT_ARRAY), GL_STATIC_DRAW);
+    m_rec_rect_element_buffer = new OpenGLBuffer(*this, GL_ELEMENT_ARRAY_BUFFER);
+    m_rec_rect_element_buffer->bufferData(sizeof(RECONFIGURE_RECT_ELEMENT_ARRAY),
+                                          (const GLvoid*)(RECONFIGURE_RECT_ELEMENT_ARRAY), GL_STATIC_DRAW);
 
 
     // Background texture.
-    m_bgTexture = new OpenGL2DTexturePartition(*this, true);
+    m_bg_texture = new OpenGL2DTexturePartition(*this, true);
 
     // Background texture partition buffers.
-    m_bgPosBuffers = partitionSpaceToBuffers(*this, 0, 0, rootWindow().width(), rootWindow().height());
+    m_bg_pos_buffers = partitionSpaceToBuffers(*this, 0, 0, rootWindow().width(), rootWindow().height());
 
 
     // Plain black texture.
     pixmap = createSolidPixmap(*this, 1, 1, 0x00000000);
-    m_blackTexture = new OpenGL2DTexture(*this, false);
-    m_blackTexture->setPixmap(pixmap, false, 1, 1, true);
+    m_black_texture = new OpenGL2DTexture(*this, false);
+    m_black_texture->setPixmap(pixmap, false, 1, 1, true);
     XFreePixmap(display(), pixmap);
 
     // Plain white texture.
     pixmap = createSolidPixmap(*this, 1, 1, 0xffffffff);
-    m_whiteTexture = new OpenGL2DTexture(*this, false);
-    m_whiteTexture->setPixmap(pixmap, false, 1, 1, true);
+    m_white_texture = new OpenGL2DTexture(*this, false);
+    m_white_texture->setPixmap(pixmap, false, 1, 1, true);
     XFreePixmap(display(), pixmap);
 }
 
@@ -344,7 +344,7 @@ void OpenGLScreen::createResources() {
 void OpenGLScreen::initPlugins() {
     OpenGLPlugin *plugin = NULL;
     forEachPlugin(i, plugin) {
-        plugin->initOpenGL(m_shaderProgram);
+        plugin->initOpenGL(m_shader_program);
     }
 }
 
@@ -354,7 +354,7 @@ void OpenGLScreen::initPlugins() {
 // Initializes the screen's plugins.
 void OpenGLScreen::initPlugins(const CompositorConfig &config) {
     BaseScreen::initPlugins(config);
-    m_shaderProgram = new OpenGLShaderProgram(pluginManager().plugins());
+    m_shader_program = new OpenGLShaderProgram(pluginManager().plugins());
 }
 
 
@@ -363,13 +363,13 @@ void OpenGLScreen::initPlugins(const CompositorConfig &config) {
 // Notifies the screen of the background change.
 void OpenGLScreen::setRootPixmapChanged() {
     BaseScreen::setRootPixmapChanged();
-    m_bgChanged = true;
+    m_bg_changed = true;
 }
 
 // Notifies the screen of a root window change.
 void OpenGLScreen::setRootWindowSizeChanged() {
     BaseScreen::setRootWindowSizeChanged();
-    m_rootWindowChanged = true;
+    m_root_window_changed = true;
 }
 
 
@@ -382,13 +382,13 @@ void OpenGLScreen::updateBackgroundTexture() {
         depth = 32;
     }
 
-    m_bgTexture->setPixmap(rootWindowPixmap(), false, rootWindow().width(), rootWindow().height(), depth);
-    m_bgChanged = false;
+    m_bg_texture->setPixmap(rootWindowPixmap(), false, rootWindow().width(), rootWindow().height(), depth);
+    m_bg_changed = false;
 }
 
 // React to the geometry change of the root window.
 void OpenGLScreen::updateOnRootWindowResize() {
-    XResizeWindow(display(), m_renderingWindow, rootWindow().width(), rootWindow().height());
+    XResizeWindow(display(), m_rendering_window, rootWindow().width(), rootWindow().height());
 
     std::list<BaseCompWindow*>::const_iterator it = allWindows().begin();
     while (it != allWindows().end()) {
@@ -396,8 +396,8 @@ void OpenGLScreen::updateOnRootWindowResize() {
         ++it;
     }
 
-    m_bgPosBuffers = partitionSpaceToBuffers(*this, 0, 0, rootWindow().width(), rootWindow().height());
-    m_rootWindowChanged = false;
+    m_bg_pos_buffers = partitionSpaceToBuffers(*this, 0, 0, rootWindow().width(), rootWindow().height());
+    m_root_window_changed = false;
 }
 
 
@@ -405,8 +405,8 @@ void OpenGLScreen::updateOnRootWindowResize() {
 
 // Creates a window object from its XID.
 BaseCompWindow *OpenGLScreen::createWindowObject(Window window) {
-    OpenGLWindow *newWindow = new OpenGLWindow(*this, window);
-    return newWindow;
+    OpenGLWindow *new_window = new OpenGLWindow(*this, window);
+    return new_window;
 }
 
 
@@ -415,13 +415,13 @@ BaseCompWindow *OpenGLScreen::createWindowObject(Window window) {
 // Renders the screen's contents.
 void OpenGLScreen::renderScreen() {
     // React to root window changes.
-    if (m_rootWindowChanged) {
+    if (m_root_window_changed) {
         updateOnRootWindowResize();
     }
 
     // Set up the rendering context.
-    glXMakeCurrent(display(), m_glxRenderingWindow, m_glxContext);
-    m_shaderProgram->use();
+    glXMakeCurrent(display(), m_glx_rendering_window, m_glx_context);
+    m_shader_program->use();
 
     // Render background.
     renderBackground();
@@ -445,8 +445,8 @@ void OpenGLScreen::renderScreen() {
 
     // Finish.
     glFlush();
-    if (m_haveDoubleBuffering) {
-        glXSwapBuffers(display(), m_glxRenderingWindow);
+    if (m_have_double_buffering) {
+        glXSwapBuffers(display(), m_glx_rendering_window);
     }
 }
 
@@ -456,19 +456,19 @@ void OpenGLScreen::renderBackground() {
     OpenGLPlugin *plugin = NULL;
 
     // Update background texture if needed.
-    if (m_bgChanged) {
+    if (m_bg_changed) {
         updateBackgroundTexture();
     }
 
     // Render background.
-    for (size_t i = 0; i < m_bgTexture->partitions().size(); i++) {
+    for (size_t i = 0; i < m_bg_texture->partitions().size(); i++) {
         forEachPlugin(j, plugin) {
             plugin->backgroundRenderInit(i);
         }
-        render(GL_TRIANGLE_STRIP, m_bgPosBuffers[i],
-               m_defaultTexCoordBuffer, m_bgTexture->partitions()[i].texture,
-               m_defaultTexCoordBuffer, m_whiteTexture,
-               m_defaultElementBuffer, 4, 1.0);
+        render(GL_TRIANGLE_STRIP, m_bg_pos_buffers[i],
+               m_default_tex_coord_buffer, m_bg_texture->partitions()[i].texture,
+               m_default_tex_coord_buffer, m_white_texture,
+               m_default_element_buffer, 4, 1.0);
         forEachPlugin(j, plugin) {
             plugin->backgroundRenderCleanup(i);
         }
@@ -501,7 +501,7 @@ void OpenGLScreen::renderReconfigureRect() {
     OpenGLPlugin *plugin = NULL;
 
     // Convert reconfigure rectangle to OpenGL coordinates.
-    m_recRectLinePosBuffer->bufferPosRectangle(rootWindow().width(), rootWindow().height(), reconfigureRectangle());
+    m_rec_rect_line_pos_buffer->bufferPosRectangle(rootWindow().width(), rootWindow().height(), reconfigureRectangle());
 
     // Render it.
     glEnable(GL_COLOR_LOGIC_OP);
@@ -510,8 +510,8 @@ void OpenGLScreen::renderReconfigureRect() {
     forEachPlugin(i, plugin) {
         plugin->recRectRenderInit(reconfigureRectangle());
     }
-    render(GL_LINE_STRIP, m_recRectLinePosBuffer, m_defaultTexCoordBuffer, m_whiteTexture,
-           m_defaultTexCoordBuffer, m_whiteTexture, m_recRectElementBuffer, 5, 1.0);
+    render(GL_LINE_STRIP, m_rec_rect_line_pos_buffer, m_default_tex_coord_buffer, m_white_texture,
+           m_default_tex_coord_buffer, m_white_texture, m_rec_rect_element_buffer, 5, 1.0);
     forEachPlugin(i, plugin) {
         plugin->recRectRenderCleanup(reconfigureRectangle());
     }
@@ -542,9 +542,9 @@ void OpenGLScreen::renderWindow(OpenGLWindow &window) {
             plugin->windowRenderInit(window, i);
         }
         render(GL_TRIANGLE_STRIP, window.partitionPosBuffer(i),
-               m_defaultTexCoordBuffer, window.contentTexturePartition(i),
-               m_defaultTexCoordBuffer, window.shapeTexturePartition(i),
-               m_defaultElementBuffer, 4, window.alpha() / 255.0);
+               m_default_tex_coord_buffer, window.contentTexturePartition(i),
+               m_default_tex_coord_buffer, window.shapeTexturePartition(i),
+               m_default_element_buffer, 4, window.alpha() / 255.0);
         forEachPlugin(j, plugin) {
             plugin->windowRenderCleanup(window, i);
         }
@@ -572,58 +572,58 @@ void OpenGLScreen::executeMultipleJobs(OpenGLPlugin *plugin, const std::vector<O
 void OpenGLScreen::executeRenderingJob(const OpenGLRenderingJob &job) {
     if ((job.alpha >= 0.0) && (job.alpha <= 1.0)) {
         job.shaderInit->execute();
-        render(GL_TRIANGLE_STRIP, job.primPosBuffer, job.mainTexCoordBuffer, job.mainTexture,
-               job.shapeTexCoordBuffer, job.shapeTexture, m_defaultElementBuffer, 4, job.alpha);
+        render(GL_TRIANGLE_STRIP, job.prim_pos_buffer, job.main_tex_coord_buffer, job.main_texture,
+               job.shape_tex_coord_buffer, job.shape_texture, m_default_element_buffer, 4, job.alpha);
         job.shaderDeinit->execute();
     }
 }
 
 // A function to render something onto the screen.
-void OpenGLScreen::render(GLenum renderingMode, OpenGLBufferPtr primPosBuffer,
-                          OpenGLBufferPtr mainTexCoordBuffer, OpenGL2DTexturePtr mainTexture,
-                          OpenGLBufferPtr shapeTexCoordBuffer, OpenGL2DTexturePtr shapeTexture,
-                          OpenGLBufferPtr elementBuffer, GLuint elementCount, GLfloat alpha) {
+void OpenGLScreen::render(GLenum rendering_mode, OpenGLBufferPtr prim_pos_buffer,
+                          OpenGLBufferPtr main_tex_coord_buffer, OpenGL2DTexturePtr main_texture,
+                          OpenGLBufferPtr shape_tex_coord_buffer, OpenGL2DTexturePtr shape_texture,
+                          OpenGLBufferPtr element_buffer, GLuint element_count, GLfloat alpha) {
     // Load primitive position vertex array.
-    glBindBuffer(GL_ARRAY_BUFFER, primPosBuffer->handle());
-    glVertexAttribPointer(m_shaderProgram->primPosAttrib(), 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
-    glEnableVertexAttribArray(m_shaderProgram->primPosAttrib());
+    glBindBuffer(GL_ARRAY_BUFFER, prim_pos_buffer->handle());
+    glVertexAttribPointer(m_shader_program->primPosAttrib(), 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
+    glEnableVertexAttribArray(m_shader_program->primPosAttrib());
 
     // Load main texture position vertex array.
-    glBindBuffer(GL_ARRAY_BUFFER, mainTexCoordBuffer->handle());
-    glVertexAttribPointer(m_shaderProgram->mainTexCoordAttrib(), 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
-    glEnableVertexAttribArray(m_shaderProgram->mainTexCoordAttrib());
+    glBindBuffer(GL_ARRAY_BUFFER, main_tex_coord_buffer->handle());
+    glVertexAttribPointer(m_shader_program->mainTexCoordAttrib(), 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
+    glEnableVertexAttribArray(m_shader_program->mainTexCoordAttrib());
 
     // Load shape texture position vertex array.
-    glBindBuffer(GL_ARRAY_BUFFER, shapeTexCoordBuffer->handle());
-    glVertexAttribPointer(m_shaderProgram->shapeTexCoordAttrib(), 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
-    glEnableVertexAttribArray(m_shaderProgram->shapeTexCoordAttrib());
+    glBindBuffer(GL_ARRAY_BUFFER, shape_tex_coord_buffer->handle());
+    glVertexAttribPointer(m_shader_program->shapeTexCoordAttrib(), 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(0));
+    glEnableVertexAttribArray(m_shader_program->shapeTexCoordAttrib());
 
     // Set up textures.
-    glUniform1i(m_shaderProgram->mainTexUniform(), 0);
+    glUniform1i(m_shader_program->mainTexUniform(), 0);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, mainTexture->handle());
+    glBindTexture(GL_TEXTURE_2D, main_texture->handle());
 
-    glUniform1i(m_shaderProgram->shapeTexUniform(), 1);
+    glUniform1i(m_shader_program->shapeTexUniform(), 1);
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, shapeTexture->handle());
+    glBindTexture(GL_TEXTURE_2D, shape_texture->handle());
 
     // Set up other uniforms.
-    glUniform1f(m_shaderProgram->alphaUniform(), alpha);
+    glUniform1f(m_shader_program->alphaUniform(), alpha);
 
     // Load element array.
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer->handle());
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffer->handle());
 
     // Final setup.
-    if (m_haveDoubleBuffering) {
+    if (m_have_double_buffering) {
         glDrawBuffer(GL_BACK);
     }
     glViewport(0, 0, rootWindow().width(), rootWindow().height());
 
     // Render!
-    glDrawElements(renderingMode, elementCount, GL_UNSIGNED_SHORT, (void*)0);
+    glDrawElements(rendering_mode, element_count, GL_UNSIGNED_SHORT, (void*)0);
 
     // Cleanup.
-    glDisableVertexAttribArray(m_shaderProgram->mainTexCoordAttrib());
-    glDisableVertexAttribArray(m_shaderProgram->primPosAttrib());
-    glDisableVertexAttribArray(m_shaderProgram->shapeTexCoordAttrib());
+    glDisableVertexAttribArray(m_shader_program->mainTexCoordAttrib());
+    glDisableVertexAttribArray(m_shader_program->primPosAttrib());
+    glDisableVertexAttribArray(m_shader_program->shapeTexCoordAttrib());
 }

@@ -42,10 +42,10 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Costructor.
-PluginManager::PluginManager(PluginType pluginType, const BaseScreen &screen) :
+PluginManager::PluginManager(PluginType plugin_type, const BaseScreen &screen) :
     m_screen(screen) {
 
-    m_pluginType = pluginType;
+    m_plugin_type = plugin_type;
 }
 
 // Destructor.
@@ -82,7 +82,7 @@ void PluginManager::createPluginObject(FbTk::FbString name, std::vector<FbTk::Fb
 void PluginManager::loadPlugin(FbTk::FbString name) {
     static union {
         void *voidPtr;
-        PluginTypeFunction pluginTypeFunc;
+        PluginTypeFunction plugin_typeFunc;
         CreatePluginFunction createPluginFunc;
     } objUnion;
 
@@ -104,9 +104,9 @@ void PluginManager::loadPlugin(FbTk::FbString name) {
 
     // Check for the correct plugin type.
     objUnion.voidPtr = getLibraryObject(handle, "pluginType", name.c_str(), "type function");
-    PluginTypeFunction typeFunc = objUnion.pluginTypeFunc;
+    PluginTypeFunction typeFunc = objUnion.plugin_typeFunc;
 
-    if ((*(typeFunc))() != m_pluginType) {
+    if ((*(typeFunc))() != m_plugin_type) {
         std::stringstream ss;
         ss << "Plugin \"" << name << "\" is of the wrong type.";
         throw PluginException(ss.str());
@@ -151,9 +151,9 @@ std::vector<FbTk::FbString> PluginManager::buildPluginPaths(const FbTk::FbString
     std::vector<FbTk::FbString> paths;
 
     FbTk::FbString typeDir = "";
-    if (m_pluginType == Plugin_OpenGL) {
+    if (m_plugin_type == Plugin_OpenGL) {
         typeDir = "opengl/";
-    } else if (m_pluginType == Plugin_XRender) {
+    } else if (m_plugin_type == Plugin_XRender) {
         typeDir = "xrender/";
     }
 
@@ -171,7 +171,7 @@ std::vector<FbTk::FbString> PluginManager::buildPluginPaths(const FbTk::FbString
 }
 
 // Returns some object from the given library handle.
-void *PluginManager::getLibraryObject(void *handle, const char *objectName, const char *pluginName,
+void *PluginManager::getLibraryObject(void *handle, const char *objectName, const char *plugin_name,
                                       const char *verboseObjectName) {
     dlerror();
     void *rawObject = dlsym(handle, objectName);
@@ -180,7 +180,7 @@ void *PluginManager::getLibraryObject(void *handle, const char *objectName, cons
     if (error) {
         dlclose(handle);
         std::stringstream ss;
-        ss << "Error in loading " << verboseObjectName << " for \"" << pluginName << "\" plugin: " << error;
+        ss << "Error in loading " << verboseObjectName << " for \"" << plugin_name << "\" plugin: " << error;
         throw PluginException(ss.str());
     } else {
         return rawObject;

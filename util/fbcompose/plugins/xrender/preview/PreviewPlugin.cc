@@ -113,13 +113,13 @@ const std::vector<XRectangle> &PreviewPlugin::damagedAreas() {
 
     std::map<Window, PreviewWindowData>::iterator it = m_previewData.find(screen().currentIconbarItem());
     if (it != m_previewData.end()) {
-        Window curWindow = it->first;
+        Window cur_window = it->first;
         PreviewWindowData &curPreview = it->second;
 
-        if ((m_previousWindow != curWindow)
+        if ((m_previousWindow != cur_window)
                 && (curPreview.window.contentPicture()->pictureHandle())
                 && (curPreview.window.maskPicture()->pictureHandle())) {
-            m_previousWindow = curWindow;
+            m_previousWindow = cur_window;
             updatePreviewWindowData(curPreview);
         }
 
@@ -164,15 +164,15 @@ const std::vector<XRenderRenderingJob> &PreviewPlugin::extraRenderingActions() {
 
 // Update the preview window data.
 void PreviewPlugin::updatePreviewWindowData(PreviewWindowData &winPreview) {
-    double scaleFactor = 1.0;
-    scaleFactor = std::max(scaleFactor, winPreview.window.realWidth() / double(MAX_PREVIEW_WIDTH));
-    scaleFactor = std::max(scaleFactor, winPreview.window.realHeight() / double(MAX_PREVIEW_HEIGHT));
+    double scale_factor = 1.0;
+    scale_factor = std::max(scale_factor, winPreview.window.realWidth() / double(MAX_PREVIEW_WIDTH));
+    scale_factor = std::max(scale_factor, winPreview.window.realHeight() / double(MAX_PREVIEW_HEIGHT));
 
-    int thumbWidth = static_cast<int>(winPreview.window.realWidth() / scaleFactor);
-    int thumbHeight = static_cast<int>(winPreview.window.realHeight() / scaleFactor);
+    int thumbWidth = static_cast<int>(winPreview.window.realWidth() / scale_factor);
+    int thumbHeight = static_cast<int>(winPreview.window.realHeight() / scale_factor);
 
-    winPreview.window.contentPicture()->scalePicture(scaleFactor, scaleFactor);
-    winPreview.window.maskPicture()->scalePicture(scaleFactor, scaleFactor);
+    winPreview.window.contentPicture()->scalePicture(scale_factor, scale_factor);
+    winPreview.window.maskPicture()->scalePicture(scale_factor, scale_factor);
 
     XRenderComposite(display(), PictOpSrc,
                      winPreview.window.contentPicture()->pictureHandle(), 

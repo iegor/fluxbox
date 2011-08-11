@@ -50,10 +50,10 @@ const int TEX_PIXMAP_ATTRIBUTES[] = {
 //------- CONSTRUCTORS AND DESTRUCTORS -----------------------------------------
 
 // Constructor.
-OpenGLBuffer::OpenGLBuffer(const OpenGLScreen &screen, GLenum targetBuffer) :
+OpenGLBuffer::OpenGLBuffer(const OpenGLScreen &screen, GLenum target_buffer) :
     m_screen(screen) {
 
-    m_target = targetBuffer;
+    m_target = target_buffer;
 
     glGenBuffers(1, &m_buffer);
 }
@@ -67,18 +67,18 @@ OpenGLBuffer::~OpenGLBuffer() {
 //------- MUTATORS -------------------------------------------------------------
 
 // Sets the buffer's contents to be the rectangle's coordinates on the screen.
-void OpenGLBuffer::bufferPosRectangle(int screenWidth, int screenHeight, XRectangle rect) {
-    static GLfloat xLow, xHigh, yLow, yHigh;
-    static GLfloat tempPosArray[8];
+void OpenGLBuffer::bufferPosRectangle(int screen_width, int screen_height, XRectangle rect) {
+    static GLfloat x_low, x_high, y_low, y_high;
+    static GLfloat temp_pos_array[8];
 
-    toOpenGLCoords(screenWidth, screenHeight, rect, &xLow, &xHigh, &yLow, &yHigh);
+    toOpenGLCoords(screen_width, screen_height, rect, &x_low, &x_high, &y_low, &y_high);
 
-    tempPosArray[0] = tempPosArray[4] = xLow;
-    tempPosArray[2] = tempPosArray[6] = xHigh;
-    tempPosArray[1] = tempPosArray[3] = yLow;
-    tempPosArray[5] = tempPosArray[7] = yHigh;
+    temp_pos_array[0] = temp_pos_array[4] = x_low;
+    temp_pos_array[2] = temp_pos_array[6] = x_high;
+    temp_pos_array[1] = temp_pos_array[3] = y_low;
+    temp_pos_array[5] = temp_pos_array[7] = y_high;
     
-    bufferData(sizeof(tempPosArray), (const GLvoid*)(tempPosArray), GL_STATIC_DRAW);
+    bufferData(sizeof(temp_pos_array), (const GLvoid*)(temp_pos_array), GL_STATIC_DRAW);
 }
 
 
@@ -87,13 +87,13 @@ void OpenGLBuffer::bufferPosRectangle(int screenWidth, int screenHeight, XRectan
 //------- CONSTRUCTORS AND DESTRUCTORS -----------------------------------------
 
 // Constructor.
-OpenGL2DTexture::OpenGL2DTexture(const OpenGLScreen &screen, bool swizzleAlphaToOne) :
+OpenGL2DTexture::OpenGL2DTexture(const OpenGLScreen &screen, bool swizzle_alpha_to_one) :
     m_screen(screen) {
 
     m_display = (Display*)(screen.display());
-    m_glxPixmap = 0;
+    m_glx_pixmap = 0;
     m_pixmap = None;
-    m_pixmapManaged = false;
+    m_pixmap_managed = false;
 
     glGenTextures(1, &m_texture);
     bind();
@@ -103,7 +103,7 @@ OpenGL2DTexture::OpenGL2DTexture(const OpenGLScreen &screen, bool swizzleAlphaTo
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    if (swizzleAlphaToOne) {
+    if (swizzle_alpha_to_one) {
 #ifdef GL_ARB_texture_swizzle
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, GL_ONE);
 #else
@@ -118,10 +118,10 @@ OpenGL2DTexture::OpenGL2DTexture(const OpenGLScreen &screen, bool swizzleAlphaTo
 OpenGL2DTexture::~OpenGL2DTexture() {
     glDeleteTextures(1, &m_texture);
 
-    if (m_glxPixmap) {
-        glXDestroyPixmap(m_display, m_glxPixmap);
+    if (m_glx_pixmap) {
+        glXDestroyPixmap(m_display, m_glx_pixmap);
     }
-    if (m_pixmapManaged && m_pixmap) {
+    if (m_pixmap_managed && m_pixmap) {
         XFreePixmap(m_display, m_pixmap);
     }
 }
@@ -130,38 +130,38 @@ OpenGL2DTexture::~OpenGL2DTexture() {
 //------- MUTATORS -------------------------------------------------------------
 
 // Sets the texture's contents to the given pixmap.
-void OpenGL2DTexture::setPixmap(Pixmap pixmap, bool managePixmap, int width, int height, bool forceDirect) {
+void OpenGL2DTexture::setPixmap(Pixmap pixmap, bool manage_pixmap, int width, int height, bool force_direct) {
     bind();
 
     if (m_pixmap != pixmap) {
 #ifdef GLXEW_EXT_texture_from_pixmap
-        if (m_glxPixmap) {
-            glXReleaseTexImageEXT(m_display, m_glxPixmap, GLX_BACK_LEFT_EXT);
-            glXDestroyPixmap(m_display, m_glxPixmap);
-            m_glxPixmap = 0;
+        if (m_glx_pixmap) {
+            glXReleaseTexImageEXT(m_display, m_glx_pixmap, GLX_BACK_LEFT_EXT);
+            glXDestroyPixmap(m_display, m_glx_pixmap);
+            m_glx_pixmap = 0;
         }
 #endif  // GLXEW_EXT_texture_from_pixmap
 
-        if (m_pixmapManaged && m_pixmap) {
+        if (m_pixmap_managed && m_pixmap) {
             XFreePixmap(m_display, m_pixmap);
             m_pixmap = None;
         }
     }
 
     m_height = height;
-    m_pixmapManaged = managePixmap;
+    m_pixmap_managed = manage_pixmap;
     m_pixmap = pixmap;
     m_width = width;
 
 #ifdef GLXEW_EXT_texture_from_pixmap
-    if (!forceDirect) {
-        if (!m_glxPixmap) {
-            m_glxPixmap = glXCreatePixmap(m_display, m_screen.fbConfig(), m_pixmap, TEX_PIXMAP_ATTRIBUTES);
-            glXBindTexImageEXT(m_display, m_glxPixmap, GLX_BACK_LEFT_EXT, NULL);
+    if (!force_direct) {
+        if (!m_glx_pixmap) {
+            m_glx_pixmap = glXCreatePixmap(m_display, m_screen.fbConfig(), m_pixmap, TEX_PIXMAP_ATTRIBUTES);
+            glXBindTexImageEXT(m_display, m_glx_pixmap, GLX_BACK_LEFT_EXT, NULL);
         }
     } else 
 #else
-    MARK_PARAMETER_UNUSED(forceDirect);
+    MARK_PARAMETER_UNUSED(force_direct);
 #endif  // GLXEW_EXT_texture_from_pixmap
 
     {

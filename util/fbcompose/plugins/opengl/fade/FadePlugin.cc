@@ -65,9 +65,9 @@ FadePlugin::~FadePlugin() { }
 //--- OTHER INITIALIZATION -----------------------------------------------------
 
 // Initialize OpenGL-specific code.
-void FadePlugin::initOpenGL(OpenGLShaderProgramPtr shaderProgram) {
-    m_alphaUniformPos = shaderProgram->getUniformLocation("fade_Alpha");
-    m_shaderInitializer.setUniform(m_alphaUniformPos);
+void FadePlugin::initOpenGL(OpenGLShaderProgramPtr shader_program) {
+    m_alpha_uniformPos = shader_program->getUniformLocation("fade_Alpha");
+    m_shaderInitializer.setUniform(m_alpha_uniformPos);
 }
 
 
@@ -154,14 +154,14 @@ void FadePlugin::windowUnmapped(const BaseCompWindow &window) {
         newFade.timer.start();
         newFade.windowId = glWindow.window();
 
-        newFade.job.primPosBuffer = glWindow.partitionPosBuffer(i);
-        newFade.job.mainTexCoordBuffer = openGLScreen().defaultTexCoordBuffer();
-        newFade.job.mainTexture = glWindow.contentTexturePartition(i);
-        newFade.job.shapeTexCoordBuffer = openGLScreen().defaultTexCoordBuffer();
-        newFade.job.shapeTexture = glWindow.shapeTexturePartition(i);
+        newFade.job.prim_pos_buffer = glWindow.partitionPosBuffer(i);
+        newFade.job.main_tex_coord_buffer = openGLScreen().defaultTexCoordBuffer();
+        newFade.job.main_texture = glWindow.contentTexturePartition(i);
+        newFade.job.shape_tex_coord_buffer = openGLScreen().defaultTexCoordBuffer();
+        newFade.job.shape_texture = glWindow.shapeTexturePartition(i);
         newFade.job.alpha = glWindow.alpha() / 255.0;
 
-        newFade.job.shaderInit = new FadeShaderInitializer(m_alphaUniformPos, 0.0);
+        newFade.job.shaderInit = new FadeShaderInitializer(m_alpha_uniformPos, 0.0);
         newFade.job.shaderDeinit = new NullDeinitializer();
 
         m_negativeFades.push_back(newFade);
@@ -201,7 +201,7 @@ void FadePlugin::windowRenderInit(const OpenGLWindow &window, int /*partId*/) {
 }
 
 // Reconfigure rectangle rendering initialization.
-void FadePlugin::recRectRenderInit(const XRectangle &/*recRect*/) {
+void FadePlugin::recRectRenderInit(const XRectangle &/*rec_rect*/) {
     m_shaderInitializer.setAlpha(1.0);
     m_shaderInitializer.execute();
 }

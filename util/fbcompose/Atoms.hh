@@ -45,7 +45,7 @@ namespace FbCompositor {
         static Atom activeWindowAtom();
 
         /** \returns the _NET_WM_CM_Sxx atoms. */
-        static Atom compositingSelectionAtom(int screenNumber);
+        static Atom compositingSelectionAtom(int screen_number);
 
         /** \returns the _FLUXBOX_CURRENT_ICONBAR_ITEM atom. */
         static Atom currentIconbarItemAtom();

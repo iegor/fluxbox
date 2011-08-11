@@ -49,7 +49,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        OpenGLScreen(int screenNumber, const CompositorConfig &config);
+        OpenGLScreen(int screen_number, const CompositorConfig &config);
 
         /** Destructor. */
         ~OpenGLScreen();
@@ -173,81 +173,81 @@ namespace FbCompositor {
         void executeRenderingJob(const OpenGLRenderingJob &job);
 
         /** Render something onto the screen. */
-        void render(GLenum renderingMode, OpenGLBufferPtr primPosBuffer,
-                    OpenGLBufferPtr mainTexCoordBuffer, OpenGL2DTexturePtr mainTexture,
-                    OpenGLBufferPtr shapeTexCoordBuffer, OpenGL2DTexturePtr shapeTexture,
-                    OpenGLBufferPtr elementBuffer, GLuint elementCount, GLfloat alpha);
+        void render(GLenum rendering_mode, OpenGLBufferPtr prim_pos_buffer,
+                    OpenGLBufferPtr main_tex_coord_buffer, OpenGL2DTexturePtr main_texture,
+                    OpenGLBufferPtr shape_tex_coord_buffer, OpenGL2DTexturePtr shape_texture,
+                    OpenGLBufferPtr element_buffer, GLuint element_count, GLfloat alpha);
 
 
         //--- MAIN RENDERING-RELATED VARIABLES ---------------------------------
 
         /** The main FBConfig. */
-        GLXFBConfig m_fbConfig;
+        GLXFBConfig m_fb_config;
 
         /** The GLX context. */
-        GLXContext m_glxContext;
+        GLXContext m_glx_context;
 
         /** Shaders. */
-        OpenGLShaderProgramPtr m_shaderProgram;
+        OpenGLShaderProgramPtr m_shader_program;
 
 
         /** GLX handle to the rendering window. */
-        GLXWindow m_glxRenderingWindow;
+        GLXWindow m_glx_rendering_window;
 
         /** Rendering window. */
-        Window m_renderingWindow;
+        Window m_rendering_window;
 
         /** Whether the root window has changed since the last update. */
-        bool m_rootWindowChanged;
+        bool m_root_window_changed;
 
 
         //--- DESKTOP BACKGROUND RELATED ---------------------------------------
 
         /** The background texture. */
-        OpenGL2DTexturePartitionPtr m_bgTexture;
+        OpenGL2DTexturePartitionPtr m_bg_texture;
 
         /** Position buffers of the background texture partitions. */
-        std::vector<OpenGLBufferPtr> m_bgPosBuffers;
+        std::vector<OpenGLBufferPtr> m_bg_pos_buffers;
 
         /** Whether the background changed since the last update. */
-        bool m_bgChanged;
+        bool m_bg_changed;
 
 
         //--- DEFAULT OPENGL ELEMENTS ------------------------------------------
 
         /** Default element buffer. */
-        OpenGLBufferPtr m_defaultElementBuffer;
+        OpenGLBufferPtr m_default_element_buffer;
 
         /** Default primitive position buffer. */
-        OpenGLBufferPtr m_defaultPrimPosBuffer;
+        OpenGLBufferPtr m_default_prim_pos_buffer;
 
         /** Default texture position buffer. */
-        OpenGLBufferPtr m_defaultTexCoordBuffer;
+        OpenGLBufferPtr m_default_tex_coord_buffer;
 
 
         /** Default black texture. */
-        OpenGL2DTexturePtr m_blackTexture;
+        OpenGL2DTexturePtr m_black_texture;
 
         /** Default white texture. */
-        OpenGL2DTexturePtr m_whiteTexture;
+        OpenGL2DTexturePtr m_white_texture;
 
 
         //--- RESIZE FRAME RELATED ---------------------------------------------
 
         /** The reconfigure rectangle element buffer. */
-        OpenGLBufferPtr m_recRectElementBuffer;
+        OpenGLBufferPtr m_rec_rect_element_buffer;
 
         /** The reconfigure rectangle primitive position array buffer. */
-        OpenGLBufferPtr m_recRectLinePosBuffer;
+        OpenGLBufferPtr m_rec_rect_line_pos_buffer;
 
 
         //--- OTHER VARIABLES --------------------------------------------------
 
         /** Whether we have a double-buffered window. */
-        bool m_haveDoubleBuffering;
+        bool m_have_double_buffering;
 
         /** Maximum texture size. */
-        int m_maxTextureSize;
+        int m_max_texture_size;
     };
 
 
@@ -255,42 +255,42 @@ namespace FbCompositor {
 
     // Returns the default black texture.
     inline OpenGL2DTexturePtr OpenGLScreen::blackTexture() const {
-        return m_blackTexture;
+        return m_black_texture;
     }
 
     // Return the main GLX context.
     inline GLXContext OpenGLScreen::context() const {
-        return m_glxContext;
+        return m_glx_context;
     }
 
     // Returns the default element buffer.
     inline OpenGLBufferPtr OpenGLScreen::defaultElementBuffer() const {
-        return m_defaultElementBuffer;
+        return m_default_element_buffer;
     }
 
     // Returns the default primitive position buffer.
     inline OpenGLBufferPtr OpenGLScreen::defaultPrimPosBuffer() const {
-        return m_defaultPrimPosBuffer;
+        return m_default_prim_pos_buffer;
     }
 
     // Returns the default texture position buffer.
     inline OpenGLBufferPtr OpenGLScreen::defaultTexCoordBuffer() const {
-        return m_defaultTexCoordBuffer;
+        return m_default_tex_coord_buffer;
     }
 
     // Returns the main GLXFBConfig.
     inline GLXFBConfig OpenGLScreen::fbConfig() const {
-        return m_fbConfig;
+        return m_fb_config;
     }
 
     // Returns maximum supported texture size.
     inline int OpenGLScreen::maxTextureSize() const {
-        return m_maxTextureSize;
+        return m_max_texture_size;
     }
 
     // Returns the default white texture.
     inline OpenGL2DTexturePtr OpenGLScreen::whiteTexture() const {
-        return m_whiteTexture;
+        return m_white_texture;
     }
 }
 

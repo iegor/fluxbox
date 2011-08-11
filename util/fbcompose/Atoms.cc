@@ -41,9 +41,9 @@ Atom Atoms::activeWindowAtom() {
 }
 
 // Returns the _NET_WM_CM_Sxx atoms.
-Atom Atoms::compositingSelectionAtom(int screenNumber) {
+Atom Atoms::compositingSelectionAtom(int screen_number) {
     std::stringstream ss;
-    ss << "_NET_WM_CM_S" << screenNumber;
+    ss << "_NET_WM_CM_S" << screen_number;
     return XInternAtom(FbTk::App::instance()->display(), ss.str().c_str(), False);
 }
 
@@ -88,23 +88,23 @@ Atom Atoms::windowTypeAtom() {
 
 // Returns a vector with atoms and the correspoding WindowType enum members.
 std::vector< std::pair<Atom, WindowType> > Atoms::windowTypeAtomList() {
-    static std::vector< std::pair<Atom, WindowType> > atomList;
+    static std::vector< std::pair<Atom, WindowType> > atom_list;
 
     static bool initialized = false;
     if (!initialized) {
-        atomList.push_back(std::make_pair(XInternAtom(FbTk::App::instance()->display(), "_NET_WM_WINDOW_TYPE_DESKTOP", False), WinType_Desktop));
-        atomList.push_back(std::make_pair(XInternAtom(FbTk::App::instance()->display(), "_NET_WM_WINDOW_TYPE_DIALOG", False), WinType_Dialog));
-        atomList.push_back(std::make_pair(XInternAtom(FbTk::App::instance()->display(), "_NET_WM_WINDOW_TYPE_DOCK", False), WinType_Dock));
-        atomList.push_back(std::make_pair(XInternAtom(FbTk::App::instance()->display(), "_NET_WM_WINDOW_TYPE_MENU", False), WinType_Menu));
-        atomList.push_back(std::make_pair(XInternAtom(FbTk::App::instance()->display(), "_NET_WM_WINDOW_TYPE_NORMAL", False), WinType_Normal));
-        atomList.push_back(std::make_pair(XInternAtom(FbTk::App::instance()->display(), "_NET_WM_WINDOW_TYPE_SPLASH", False), WinType_Splash));
-        atomList.push_back(std::make_pair(XInternAtom(FbTk::App::instance()->display(), "_NET_WM_WINDOW_TYPE_TOOLBAR", False), WinType_Toolbar));
-        atomList.push_back(std::make_pair(XInternAtom(FbTk::App::instance()->display(), "_NET_WM_WINDOW_TYPE_UTILITY", False), WinType_Utility));
-        atomList.push_back(std::make_pair(None, WinType_Normal));   // Default
+        atom_list.push_back(std::make_pair(XInternAtom(FbTk::App::instance()->display(), "_NET_WM_WINDOW_TYPE_DESKTOP", False), WinType_Desktop));
+        atom_list.push_back(std::make_pair(XInternAtom(FbTk::App::instance()->display(), "_NET_WM_WINDOW_TYPE_DIALOG", False), WinType_Dialog));
+        atom_list.push_back(std::make_pair(XInternAtom(FbTk::App::instance()->display(), "_NET_WM_WINDOW_TYPE_DOCK", False), WinType_Dock));
+        atom_list.push_back(std::make_pair(XInternAtom(FbTk::App::instance()->display(), "_NET_WM_WINDOW_TYPE_MENU", False), WinType_Menu));
+        atom_list.push_back(std::make_pair(XInternAtom(FbTk::App::instance()->display(), "_NET_WM_WINDOW_TYPE_NORMAL", False), WinType_Normal));
+        atom_list.push_back(std::make_pair(XInternAtom(FbTk::App::instance()->display(), "_NET_WM_WINDOW_TYPE_SPLASH", False), WinType_Splash));
+        atom_list.push_back(std::make_pair(XInternAtom(FbTk::App::instance()->display(), "_NET_WM_WINDOW_TYPE_TOOLBAR", False), WinType_Toolbar));
+        atom_list.push_back(std::make_pair(XInternAtom(FbTk::App::instance()->display(), "_NET_WM_WINDOW_TYPE_UTILITY", False), WinType_Utility));
+        atom_list.push_back(std::make_pair(None, WinType_Normal));   // Default
         initialized = true;
     }
 
-    return atomList;
+    return atom_list;
 }
 
 // Returns the _WIN_WORKSPACE atom.

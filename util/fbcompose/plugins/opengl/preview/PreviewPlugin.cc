@@ -96,9 +96,9 @@ void PreviewPlugin::windowCreated(const BaseCompWindow &window) {
     const OpenGLWindow &glWindow = dynamic_cast<const OpenGLWindow&>(window);
 
     OpenGLRenderingJob job;
-    job.primPosBuffer = new OpenGLBuffer(openGLScreen(), GL_ARRAY_BUFFER);
-    job.mainTexCoordBuffer = openGLScreen().defaultTexCoordBuffer();
-    job.shapeTexCoordBuffer = openGLScreen().defaultTexCoordBuffer();
+    job.prim_pos_buffer = new OpenGLBuffer(openGLScreen(), GL_ARRAY_BUFFER);
+    job.main_tex_coord_buffer = openGLScreen().defaultTexCoordBuffer();
+    job.shape_tex_coord_buffer = openGLScreen().defaultTexCoordBuffer();
     job.alpha = PREVIEW_ALPHA / 255.0f;
     job.shaderInit = new NullInitializer();
     job.shaderDeinit = new NullDeinitializer();
@@ -159,12 +159,12 @@ void PreviewPlugin::updatePreviewWindow(PreviewWindowData &winPreview) {
     int fullThumbHeight = std::min(static_cast<int>(winPreview.window.realHeight()),
                                    openGLScreen().maxTextureSize());
 
-    double scaleFactor = 1.0;
-    scaleFactor = std::max(scaleFactor, fullThumbWidth / double(MAX_PREVIEW_WIDTH));
-    scaleFactor = std::max(scaleFactor, fullThumbHeight / double(MAX_PREVIEW_HEIGHT));
+    double scale_factor = 1.0;
+    scale_factor = std::max(scale_factor, fullThumbWidth / double(MAX_PREVIEW_WIDTH));
+    scale_factor = std::max(scale_factor, fullThumbHeight / double(MAX_PREVIEW_HEIGHT));
 
-    thumbDim.width = static_cast<int>(fullThumbWidth / scaleFactor);
-    thumbDim.height = static_cast<int>(fullThumbHeight / scaleFactor);
+    thumbDim.width = static_cast<int>(fullThumbWidth / scale_factor);
+    thumbDim.height = static_cast<int>(fullThumbHeight / scale_factor);
 
     // Find thumbnail's X and Y coordinates.
     int mousePosX, mousePosY;
@@ -199,10 +199,10 @@ void PreviewPlugin::updatePreviewWindow(PreviewWindowData &winPreview) {
     }
 
     // Update job struct variables.
-    winPreview.job.primPosBuffer->bufferPosRectangle(screen().rootWindow().width(), screen().rootWindow().height(), thumbDim);
+    winPreview.job.prim_pos_buffer->bufferPosRectangle(screen().rootWindow().width(), screen().rootWindow().height(), thumbDim);
 
-    winPreview.job.mainTexture = winPreview.window.contentTexturePartition(0);
-    winPreview.job.shapeTexture = winPreview.window.shapeTexturePartition(0);
+    winPreview.job.main_texture = winPreview.window.contentTexturePartition(0);
+    winPreview.job.shape_texture = winPreview.window.shapeTexturePartition(0);
 }
 
 

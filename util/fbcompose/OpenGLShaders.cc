@@ -111,7 +111,9 @@ OpenGLShaderProgram::OpenGLShaderProgram(const std::vector<BasePlugin*> &plugins
         ss << (dynamic_cast<OpenGLPlugin*>(plugins[i]))->pluginName() << "();\n";
     }
     ss << VERTEX_SHADER_TAIL;
-    m_vertexShader = createShader(GL_VERTEX_SHADER, ss.str().length(), ss.str().c_str());
+    m_vertex_shader = createShader(GL_VERTEX_SHADER, ss.str().length(), ss.str().c_str());
+
+    fbLog_debug << "Vertex shader source code:" << std::endl << ss.str() << std::endl;
 
     // Assemble fragment shader.
     ss.str("");
@@ -124,72 +126,74 @@ OpenGLShaderProgram::OpenGLShaderProgram(const std::vector<BasePlugin*> &plugins
         ss << (dynamic_cast<OpenGLPlugin*>(plugins[i]))->pluginName() << "();\n";
     }
     ss << FRAGMENT_SHADER_TAIL;
-    m_fragmentShader = createShader(GL_FRAGMENT_SHADER, ss.str().length(), ss.str().c_str());
+    m_fragment_shader = createShader(GL_FRAGMENT_SHADER, ss.str().length(), ss.str().c_str());
+
+    fbLog_debug << "Fragment shader source code:" << std::endl << ss.str() << std::endl;
 
     // Create shader program.
-    m_shaderProgram = createShaderProgram(m_vertexShader, m_fragmentShader);
+    m_shader_program = createShaderProgram(m_vertex_shader, m_fragment_shader);
 
     // Initialize attribute locations.
-    m_mainTexCoordAttrib = getAttributeLocation("fb_InitMainTexCoord");
-    m_primPosAttrib = getAttributeLocation("fb_InitPrimPos");
-    m_shapeTexCoordAttrib = getAttributeLocation("fb_InitShapeTexCoord");
+    m_main_tex_coord_attrib = getAttributeLocation("fb_InitMainTexCoord");
+    m_prim_pos_attrib = getAttributeLocation("fb_InitPrimPos");
+    m_shape_tex_coord_attrib = getAttributeLocation("fb_InitShapeTexCoord");
 
     // Initialize uniform locations.
-    m_alphaUniform = getUniformLocation("fb_Alpha");
-    m_mainTexUniform = getUniformLocation("fb_MainTexture");
-    m_shapeTexUniform = getUniformLocation("fb_ShapeTexture");
+    m_alpha_uniform = getUniformLocation("fb_Alpha");
+    m_main_tex_uniform = getUniformLocation("fb_MainTexture");
+    m_shape_tex_uniform = getUniformLocation("fb_ShapeTexture");
 }
 
 // Destructor.
 OpenGLShaderProgram::~OpenGLShaderProgram() {
-    glDetachShader(m_shaderProgram, m_vertexShader);
-    glDetachShader(m_shaderProgram, m_fragmentShader);
+    glDetachShader(m_shader_program, m_vertex_shader);
+    glDetachShader(m_shader_program, m_fragment_shader);
 
-    glDeleteProgram(m_shaderProgram);
-    glDeleteShader(m_vertexShader);
-    glDeleteShader(m_fragmentShader);
+    glDeleteProgram(m_shader_program);
+    glDeleteShader(m_vertex_shader);
+    glDeleteShader(m_fragment_shader);
 }
 
 
 //--- INITIALIZATION FUNCTIONS -------------------------------------------------
 
 // Creates a shader.
-GLuint OpenGLShaderProgram::createShader(GLenum shaderType, GLint sourceLength, const GLchar *source) {
+GLuint OpenGLShaderProgram::createShader(GLenum shader_type, GLint source_length, const GLchar *source) {
     // Determine shader type.
     FbTk::FbString shaderName;
-    if (shaderType == GL_VERTEX_SHADER) {
+    if (shader_type == GL_VERTEX_SHADER) {
         shaderName = "vertex";
-    } else if (shaderType == GL_GEOMETRY_SHADER) {  // For completeness.
+    } else if (shader_type == GL_GEOMETRY_SHADER) {  // For completeness.
         shaderName = "geometry";
-    } else if (shaderType == GL_FRAGMENT_SHADER) {
+    } else if (shader_type == GL_FRAGMENT_SHADER) {
         shaderName = "fragment";
     } else {
         throw InitException("createShader() was given an invalid shader type.");
     }
 
     // Create and compile.
-    GLuint shader = glCreateShader(shaderType);
+    GLuint shader = glCreateShader(shader_type);
     if (!shader) {
         std::stringstream ss;
         ss << "Could not create " << shaderName << " shader.";
         throw InitException(ss.str());
     }
 
-    glShaderSource(shader, 1, &source, &sourceLength);
+    glShaderSource(shader, 1, &source, &source_length);
     glCompileShader(shader);
 
     // Check for errors.
-    GLint compileStatus;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
+    GLint compile_status;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &compile_status);
 
-    if (!compileStatus) {
-        GLsizei infoLogSize;
-        GLchar infoLog[INFO_LOG_BUFFER_SIZE];
-        glGetShaderInfoLog(shader, INFO_LOG_BUFFER_SIZE, &infoLogSize, infoLog);
+    if (!compile_status) {
+        GLsizei info_log_size;
+        GLchar info_log[INFO_LOG_BUFFER_SIZE];
+        glGetShaderInfoLog(shader, INFO_LOG_BUFFER_SIZE, &info_log_size, info_log);
 
         std::stringstream ss;
         ss << "Error in compilation of the " << shaderName << " shader: "
-           << std::endl << (const char*)(infoLog);
+           << std::endl << (const char*)(info_log);
         throw InitException(ss.str());
     }
 
@@ -197,18 +201,18 @@ GLuint OpenGLShaderProgram::createShader(GLenum shaderType, GLint sourceLength, 
 }
 
 // Creates a shader program.
-GLuint OpenGLShaderProgram::createShaderProgram(GLuint vertexShader, GLuint fragmentShader) {
+GLuint OpenGLShaderProgram::createShaderProgram(GLuint vertex_shader, GLuint fragment_shader) {
     GLuint program = glCreateProgram();
     if (!program) {
         throw InitException("Cannot create a shader program.");
     }
 
     // Link program.
-    if (vertexShader) {
-        glAttachShader(program, vertexShader);
+    if (vertex_shader) {
+        glAttachShader(program, vertex_shader);
     }
-    if (fragmentShader) {
-        glAttachShader(program, fragmentShader);
+    if (fragment_shader) {
+        glAttachShader(program, fragment_shader);
     }
     glLinkProgram(program);
 
@@ -217,12 +221,12 @@ GLuint OpenGLShaderProgram::createShaderProgram(GLuint vertexShader, GLuint frag
     glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
 
     if (!linkStatus) {
-        GLsizei infoLogSize;
-        GLchar infoLog[INFO_LOG_BUFFER_SIZE];
-        glGetProgramInfoLog(program, INFO_LOG_BUFFER_SIZE, &infoLogSize, infoLog);
+        GLsizei info_log_size;
+        GLchar info_log[INFO_LOG_BUFFER_SIZE];
+        glGetProgramInfoLog(program, INFO_LOG_BUFFER_SIZE, &info_log_size, info_log);
 
         std::stringstream ss;
-        ss << "Error in linking of the shader program: " << std::endl << (const char*)(infoLog);
+        ss << "Error in linking of the shader program: " << std::endl << (const char*)(info_log);
         throw InitException(ss.str());
     }
 

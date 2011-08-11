@@ -59,7 +59,7 @@ namespace FbCompositor {
         static int loggingLevel();
 
         /** Sets a new logging level. */
-        static void setLoggingLevel(int newLevel);
+        static void setLoggingLevel(int new_level);
 
 
     private :

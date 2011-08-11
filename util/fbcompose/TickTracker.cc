@@ -38,14 +38,14 @@ const double EPSILON = 1e-6;
 
 // Constructor.
 TickTracker::TickTracker() {
-    m_isRunning = false;
+    m_is_running = false;
     m_tickSize = 1000000;
     m_ticksPerSecond = 1.0;
 }
 
 // Copy constructor.
 TickTracker::TickTracker(const TickTracker &other) :
-    m_isRunning(other.m_isRunning),
+    m_is_running(other.m_is_running),
     m_startTime(other.m_startTime),
     m_tickSize(other.m_tickSize),
     m_ticksPerSecond(other.m_ticksPerSecond),
@@ -55,7 +55,7 @@ TickTracker::TickTracker(const TickTracker &other) :
 // Assignment operator.
 TickTracker &TickTracker::operator=(const TickTracker &other) {
     if (this != &other) {
-        m_isRunning = other.m_isRunning;
+        m_is_running = other.m_is_running;
         m_startTime = other.m_startTime;
         m_tickSize = other.m_tickSize;
         m_ticksPerSecond = other.m_ticksPerSecond;
@@ -76,12 +76,12 @@ void TickTracker::start() {
         throw TimeException("Cannot obtain the current time.");
     }
     m_observedTicks = 0;
-    m_isRunning = true;
+    m_is_running = true;
 }
 
 /** Stops the timer. */
 void TickTracker::stop() {
-    m_isRunning = false;
+    m_is_running = false;
 }
 
 

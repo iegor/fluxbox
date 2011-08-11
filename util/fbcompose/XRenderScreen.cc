@@ -53,8 +53,8 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-XRenderScreen::XRenderScreen(int screenNumber, const CompositorConfig &config):
-    BaseScreen(screenNumber, Plugin_XRender, config),
+XRenderScreen::XRenderScreen(int screen_number, const CompositorConfig &config):
+    BaseScreen(screen_number, Plugin_XRender, config),
     m_pictFilter(config.xRenderPictFilter()) {
 
     m_pluginDamage = XFixesCreateRegion(display(), NULL, 0);
@@ -69,8 +69,8 @@ XRenderScreen::~XRenderScreen() {
         XFixesDestroyRegion(display(), m_pluginDamage);
     }
 
-    XUnmapWindow(display(), m_renderingWindow);
-    XDestroyWindow(display(), m_renderingWindow);
+    XUnmapWindow(display(), m_rendering_window);
+    XDestroyWindow(display(), m_rendering_window);
 }
 
 
@@ -79,45 +79,45 @@ XRenderScreen::~XRenderScreen() {
 // Initializes the rendering surface.
 void XRenderScreen::initRenderingSurface() {
     // Get all the elements, needed for the creation of the rendering surface.
-    Window compOverlay = XCompositeGetOverlayWindow(display(), rootWindow().window());
+    Window comp_overlay = XCompositeGetOverlayWindow(display(), rootWindow().window());
 
-    XVisualInfo visualInfo;
-    if (!XMatchVisualInfo(display(), screenNumber(), 32, TrueColor, &visualInfo)) {
+    XVisualInfo visual_info;
+    if (!XMatchVisualInfo(display(), screenNumber(), 32, TrueColor, &visual_info)) {
         throw InitException("Cannot find the required visual.");
     }
 
     XSetWindowAttributes wa;
     wa.border_pixel = XBlackPixel(display(), screenNumber());   // Without this XCreateWindow gives BadMatch error.
-    wa.colormap = XCreateColormap(display(), rootWindow().window(), visualInfo.visual, AllocNone);
-    long waMask = CWBorderPixel | CWColormap;
+    wa.colormap = XCreateColormap(display(), rootWindow().window(), visual_info.visual, AllocNone);
+    long wa_mask = CWBorderPixel | CWColormap;
 
     // Create the rendering surface.
-    m_renderingWindow = XCreateWindow(display(), compOverlay, 0, 0, rootWindow().width(), rootWindow().height(), 0,
-                                      visualInfo.depth, InputOutput, visualInfo.visual, waMask, &wa);
-    XmbSetWMProperties(display(), m_renderingWindow, "fbcompose", "fbcompose", NULL, 0, NULL, NULL, NULL);
-    XMapWindow(display(), m_renderingWindow);
+    m_rendering_window = XCreateWindow(display(), comp_overlay, 0, 0, rootWindow().width(), rootWindow().height(), 0,
+                                      visual_info.depth, InputOutput, visual_info.visual, wa_mask, &wa);
+    XmbSetWMProperties(display(), m_rendering_window, "fbcompose", "fbcompose", NULL, 0, NULL, NULL, NULL);
+    XMapWindow(display(), m_rendering_window);
 
     // Make sure the overlays do not consume any input events.
-    XserverRegion emptyRegion = XFixesCreateRegion(display(), NULL, 0);
-    XFixesSetWindowShapeRegion(display(), compOverlay, ShapeInput, 0, 0, emptyRegion);
-    XFixesSetWindowShapeRegion(display(), m_renderingWindow, ShapeInput, 0, 0, emptyRegion);
-    XFixesDestroyRegion(display(), emptyRegion);
+    XserverRegion empty_region = XFixesCreateRegion(display(), NULL, 0);
+    XFixesSetWindowShapeRegion(display(), comp_overlay, ShapeInput, 0, 0, empty_region);
+    XFixesSetWindowShapeRegion(display(), m_rendering_window, ShapeInput, 0, 0, empty_region);
+    XFixesDestroyRegion(display(), empty_region);
 
-    ignoreWindow(compOverlay);
-    ignoreWindow(m_renderingWindow);
+    ignoreWindow(comp_overlay);
+    ignoreWindow(m_rendering_window);
 
     // Create an XRender picture for the rendering window.
     XRenderPictureAttributes pa;
     pa.subwindow_mode = IncludeInferiors;
     long paMask = CPSubwindowMode;
 
-    XRenderPictFormat *renderingPictFormat = XRenderFindVisualFormat(display(), visualInfo.visual);
+    XRenderPictFormat *renderingPictFormat = XRenderFindVisualFormat(display(), visual_info.visual);
     if (!renderingPictFormat) {
         throw InitException("Cannot find the required picture format.");
     }
 
     m_renderingPicture = new XRenderPicture(*this, renderingPictFormat, m_pictFilter);
-    m_renderingPicture->setWindow(m_renderingWindow, pa, paMask);
+    m_renderingPicture->setWindow(m_rendering_window, pa, paMask);
 
     // Create the back buffer.
     XRenderPictFormat *backBufferPictFormat = XRenderFindStandardFormat(display(), PictStandardARGB32);
@@ -145,8 +145,8 @@ void XRenderScreen::setRootWindowSizeChanged() {
     pa.subwindow_mode = IncludeInferiors;
     long paMask = CPSubwindowMode;
 
-    XResizeWindow(display(), m_renderingWindow, rootWindow().width(), rootWindow().height());
-    m_renderingPicture->setWindow(m_renderingWindow, pa, paMask);   // We need to recreate the picture.
+    XResizeWindow(display(), m_rendering_window, rootWindow().width(), rootWindow().height());
+    m_renderingPicture->setWindow(m_rendering_window, pa, paMask);   // We need to recreate the picture.
 
     Pixmap backBufferPixmap = XCreatePixmap(display(), rootWindow().window(), rootWindow().width(), rootWindow().height(), 32);
     m_backBufferPicture->setPixmap(backBufferPixmap, true, pa, paMask);
@@ -351,6 +351,6 @@ void XRenderScreen::swapBuffers() {
 
 // Creates a window object from its XID.
 BaseCompWindow *XRenderScreen::createWindowObject(Window window) {
-    XRenderWindow *newWindow = new XRenderWindow(*this, window, m_pictFilter);
-    return newWindow;
+    XRenderWindow *new_window = new XRenderWindow(*this, window, m_pictFilter);
+    return new_window;
 }

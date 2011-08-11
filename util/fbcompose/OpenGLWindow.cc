@@ -40,8 +40,8 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-OpenGLWindow::OpenGLWindow(const OpenGLScreen &screen, Window windowXID) :
-    BaseCompWindow(static_cast<const BaseScreen&>(screen), windowXID, false) {
+OpenGLWindow::OpenGLWindow(const OpenGLScreen &screen, Window window_xid) :
+    BaseCompWindow(static_cast<const BaseScreen&>(screen), window_xid, false) {
 
     m_contentTexPartition = new OpenGL2DTexturePartition(screen, true);
     m_shapeTexPartition = new OpenGL2DTexturePartition(screen, false);

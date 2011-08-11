@@ -51,7 +51,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        OpenGLWindow(const OpenGLScreen &screen, Window windowXID);
+        OpenGLWindow(const OpenGLScreen &screen, Window window_xid);
 
         /** Destructor. */
         virtual ~OpenGLWindow();

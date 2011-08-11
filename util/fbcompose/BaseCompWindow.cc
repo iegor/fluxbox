@@ -39,50 +39,50 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-BaseCompWindow::BaseCompWindow(const BaseScreen &screen, Window windowXID, bool trackDamageDeltas) :
-    FbTk::FbWindow(windowXID),
+BaseCompWindow::BaseCompWindow(const BaseScreen &screen, Window window_xid, bool track_damage_deltas) :
+    FbTk::FbWindow(window_xid),
     m_screen(screen) {
 
     XWindowAttributes xwa;
     XGetWindowAttributes(display(), window(), &xwa);
 
     m_class = xwa.c_class;
-    m_isMapped = (xwa.map_state != IsUnmapped);
-    m_isRemapped = true;
-    m_isResized = true;
+    m_is_mapped = (xwa.map_state != IsUnmapped);
+    m_is_remapped = true;
+    m_is_resized = true;
     m_visual = xwa.visual;
 
-    m_clipShapeChanged = true;
-    m_clipShapeRects = 0;
-    m_clipShapeRectCount = 0;
+    m_clip_shape_changed = true;
+    m_clip_shape_rects = 0;
+    m_clip_shape_rect_count = 0;
 
-    m_isIgnored = false;
+    m_is_ignored = false;
 
     if (m_class == InputOutput) {
-        if (trackDamageDeltas) {
-            m_damage = XDamageCreate(display(), window(), XDamageReportDeltaRectangles);
+        if (track_damage_deltas) {
+            m_damage = XDamageCreate(display(), window_xid, XDamageReportDeltaRectangles);
         } else {
-            m_damage = XDamageCreate(display(), window(), XDamageReportNonEmpty);
+            m_damage = XDamageCreate(display(), window_xid, XDamageReportNonEmpty);
         }
     } else {
         m_damage = 0;
     }
 
-    m_contentPixmap = None;
+    m_content_pixmap = None;
 
     updateAlpha();
     updateWindowType();
 
-    XShapeSelectInput(display(), windowXID, ShapeNotifyMask);
+    XShapeSelectInput(display(), window_xid, ShapeNotifyMask);
 }
 
 // Destructor.
 BaseCompWindow::~BaseCompWindow() {
-    if (m_clipShapeRects) {
-        XFree(m_clipShapeRects);
+    if (m_clip_shape_rects) {
+        XFree(m_clip_shape_rects);
     }
-    if (m_contentPixmap) {
-        XFreePixmap(display(), m_contentPixmap);
+    if (m_content_pixmap) {
+        XFreePixmap(display(), m_content_pixmap);
     }
     // m_damage is apparently destroyed server-side.
 }
@@ -92,18 +92,18 @@ BaseCompWindow::~BaseCompWindow() {
 
 // Add damage to a window.
 void BaseCompWindow::addDamage() {
-    m_isDamaged = true;
+    m_is_damaged = true;
 }
 
 // Mark the window as mapped.
 void BaseCompWindow::setMapped() {
-    m_isMapped = true;
-    m_isRemapped = true;
+    m_is_mapped = true;
+    m_is_remapped = true;
 }
 
 // Mark the window as unmapped.
 void BaseCompWindow::setUnmapped() {
-    m_isMapped = false;
+    m_is_mapped = false;
 }
 
 // Update the window's contents.
@@ -111,7 +111,7 @@ void BaseCompWindow::setUnmapped() {
 // call this version at any time and override it in derived classes.
 void BaseCompWindow::updateContents() {
     updateContentPixmap();
-    if (m_clipShapeChanged) {
+    if (m_clip_shape_changed) {
         updateShape();
     }
 
@@ -120,31 +120,31 @@ void BaseCompWindow::updateContents() {
 
 // Update window's geometry.
 void BaseCompWindow::updateGeometry() {
-    unsigned int oldBorderWidth = borderWidth();
-    unsigned int oldHeight = height();
-    unsigned int oldWidth = width();
+    unsigned int old_border_width = borderWidth();
+    unsigned int old_height = height();
+    unsigned int old_width = width();
     FbTk::FbWindow::updateGeometry();
 
-    if ((borderWidth() != oldBorderWidth) || (height() != oldHeight) || (width() != oldWidth)) {
+    if ((borderWidth() != old_border_width) || (height() != old_height) || (width() != old_width)) {
         setClipShapeChanged();
-        m_isResized = true;
+        m_is_resized = true;
     }
 }
 
 // Update the window's clip shape.
 void BaseCompWindow::updateShape() {
-    int rectOrder;
+    int rect_order;
 
-    if (m_clipShapeRects) {
-        XFree(m_clipShapeRects);
-        m_clipShapeRects = NULL;
+    if (m_clip_shape_rects) {
+        XFree(m_clip_shape_rects);
+        m_clip_shape_rects = NULL;
     }
-    m_clipShapeRects = XShapeGetRectangles(display(), window(), ShapeClip, &m_clipShapeRectCount, &rectOrder);
+    m_clip_shape_rects = XShapeGetRectangles(display(), window(), ShapeClip, &m_clip_shape_rect_count, &rect_order);
 
     // We have to adjust the size here to account for borders.
-    for (int i = 0; i < m_clipShapeRectCount; i++) {
-        m_clipShapeRects[i].height = std::min(m_clipShapeRects[i].height + 2 * borderWidth(), realHeight());
-        m_clipShapeRects[i].width = std::min(m_clipShapeRects[i].width + 2 * borderWidth(), realWidth());
+    for (int i = 0; i < m_clip_shape_rect_count; i++) {
+        m_clip_shape_rects[i].height = std::min(m_clip_shape_rects[i].height + 2 * borderWidth(), realHeight());
+        m_clip_shape_rects[i].width = std::min(m_clip_shape_rects[i].width + 2 * borderWidth(), realWidth());
     }
 }
 
@@ -160,7 +160,7 @@ void BaseCompWindow::updateProperty(Atom property, int /*state*/) {
 
 // Set the clip shape as changed.
 void BaseCompWindow::setClipShapeChanged() {
-    m_clipShapeChanged = true;
+    m_clip_shape_changed = true;
 }
 
 
@@ -168,10 +168,10 @@ void BaseCompWindow::setClipShapeChanged() {
 
 // Removes all damage from the window.
 void BaseCompWindow::clearDamage() {
-    m_clipShapeChanged = false;
-    m_isDamaged = false;
-    m_isRemapped = false;
-    m_isResized = false;
+    m_clip_shape_changed = false;
+    m_is_damaged = false;
+    m_is_remapped = false;
+    m_is_resized = false;
 }
 
 // Updates the window's content pixmap.
@@ -179,18 +179,18 @@ void BaseCompWindow::updateContentPixmap() {
     // We must reset the damage here, otherwise we may miss damage events.
     XDamageSubtract(display(), m_damage, None, None);
 
-    if (m_isResized || m_isRemapped) {
+    if (m_is_resized || m_is_remapped) {
         XGrabServer(display());
 
         XWindowAttributes xwa;
         if (XGetWindowAttributes(display(), window(), &xwa)) {
             if (xwa.map_state == IsViewable) {
-                Pixmap newPixmap = XCompositeNameWindowPixmap(display(), window());
-                if (newPixmap) {
-                    if (m_contentPixmap) {
-                        XFreePixmap(display(), m_contentPixmap);
+                Pixmap new_pixmap = XCompositeNameWindowPixmap(display(), window());
+                if (new_pixmap) {
+                    if (m_content_pixmap) {
+                        XFreePixmap(display(), m_content_pixmap);
                     }
-                    m_contentPixmap = newPixmap;
+                    m_content_pixmap = new_pixmap;
                 }
             }
         }
@@ -208,13 +208,13 @@ void BaseCompWindow::updateAlpha() {
 
 // Updates the type of the window.
 void BaseCompWindow::updateWindowType() {
-    static std::vector< std::pair<Atom, WindowType> > typeList = Atoms::windowTypeAtomList();
-    Atom rawType = singlePropertyValue<Atom>(Atoms::windowTypeAtom(), None);
+    static std::vector< std::pair<Atom, WindowType> > type_list = Atoms::windowTypeAtomList();
+    Atom raw_type = singlePropertyValue<Atom>(Atoms::windowTypeAtom(), None);
 
     m_type = WinType_Normal;
-    for (size_t i = 0; i < typeList.size(); i++) {
-        if (rawType == typeList[i].first) {
-            m_type = typeList[i].second;
+    for (size_t i = 0; i < type_list.size(); i++) {
+        if (raw_type == type_list[i].first) {
+            m_type = type_list[i].second;
             break;
         }
     }
@@ -224,15 +224,15 @@ void BaseCompWindow::updateWindowType() {
 //--- CONVENIENCE FUNCTIONS ----------------------------------------------------
 
 // Reads and returns raw property contents.
-bool BaseCompWindow::rawPropertyData(Atom propertyAtom, Atom propertyType,
-                                     unsigned long *itemCount_return, unsigned char **data_return) {
-    Atom actualType;
-    int actualFormat;
-    unsigned long bytesLeft;
+bool BaseCompWindow::rawPropertyData(Atom property_atom, Atom property_type,
+                                     unsigned long *item_count_return, unsigned char **data_return) {
+    Atom actual_type;
+    int actual_format;
+    unsigned long bytes_left;
 
-    if (property(propertyAtom, 0, 0x7fffffff, False, propertyType,
-                 &actualType, &actualFormat, itemCount_return, &bytesLeft, data_return)) {
-        if (*itemCount_return > 0) {
+    if (property(property_atom, 0, 0x7fffffff, False, property_type,
+                 &actual_type, &actual_format, item_count_return, &bytes_left, data_return)) {
+        if (*item_count_return > 0) {
             return true;
         }
     }

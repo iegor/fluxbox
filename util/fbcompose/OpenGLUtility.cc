@@ -29,19 +29,19 @@ using namespace FbCompositor;
 //--- FUNCTIONS ----------------------------------------------------------------
 
 // Converts screen coordinates to OpenGL coordinates.
-void FbCompositor::toOpenGLCoords(int screenWidth, int screenHeight, int x, int y, int width, int height,
-                                  GLfloat *xLow_return, GLfloat *xHigh_return, GLfloat *yLow_return,
-                                  GLfloat *yHigh_return) {
-    *xLow_return  = ((x * 2.0) / screenWidth) - 1.0;
-    *xHigh_return = (((x + width) * 2.0) / screenWidth) - 1.0;
-    *yLow_return  = 1.0 - ((y * 2.0) / screenHeight);
-    *yHigh_return = 1.0 - (((y + height) * 2.0) / screenHeight);
+void FbCompositor::toOpenGLCoords(int screen_width, int screen_height, int x, int y, int width, int height,
+                                  GLfloat *x_low_return, GLfloat *x_high_return, GLfloat *y_low_return,
+                                  GLfloat *y_high_return) {
+    *x_low_return  = ((x * 2.0) / screen_width) - 1.0;
+    *x_high_return = (((x + width) * 2.0) / screen_width) - 1.0;
+    *y_low_return  = 1.0 - ((y * 2.0) / screen_height);
+    *y_high_return = 1.0 - (((y + height) * 2.0) / screen_height);
 }
 
 // Converts screen coordinates to OpenGL coordinates. */
-void FbCompositor::toOpenGLCoords(int screenWidth, int screenHeight, XRectangle rect,
-                                  GLfloat *xLow_return, GLfloat *xHigh_return, GLfloat *yLow_return,
-                                  GLfloat *yHigh_return) {
-    toOpenGLCoords(screenWidth, screenHeight, rect.x, rect.y, rect.width, rect.height,
-                        xLow_return, xHigh_return, yLow_return, yHigh_return);
+void FbCompositor::toOpenGLCoords(int screen_width, int screen_height, XRectangle rect,
+                                  GLfloat *x_low_return, GLfloat *x_high_return, GLfloat *y_low_return,
+                                  GLfloat *y_high_return) {
+    toOpenGLCoords(screen_width, screen_height, rect.x, rect.y, rect.width, rect.height,
+                        x_low_return, x_high_return, y_low_return, y_high_return);
 }

@@ -57,7 +57,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        PluginManager(PluginType pluginType, const BaseScreen &screen);
+        PluginManager(PluginType plugin_type, const BaseScreen &screen);
 
         /** Destructor. */
         ~PluginManager();
@@ -103,7 +103,7 @@ namespace FbCompositor {
         std::vector<FbTk::FbString> buildPluginPaths(const FbTk::FbString &name);
 
         /** \returns some object from the given library handle. */
-        void *getLibraryObject(void *handle, const char *objectName, const char *pluginName,
+        void *getLibraryObject(void *handle, const char *objectName, const char *plugin_name,
                                const char *verboseObjectName);
 
 
@@ -122,7 +122,7 @@ namespace FbCompositor {
         std::vector<BasePlugin*> m_pluginObjects;
 
         /** Type of the plugins this object manages. */
-        PluginType m_pluginType;
+        PluginType m_plugin_type;
 
         /** The screen this manager operates on. */
         const BaseScreen &m_screen;

@@ -90,15 +90,15 @@ namespace FbCompositor {
         //--- INITIALIZATION FUNCTIONS -----------------------------------------
 
         /** Acquire the ownership of compositing manager selections. */
-        Window getCMSelectionOwnership(int screenNumber);
+        Window getCMSelectionOwnership(int screen_number);
 
         /** Initializes all relevant X's extensions. */
         void initAllExtensions();
 
         /** Initializes a particular X server extension. */
-        void initExtension(const char *extensionName, QueryExtensionFunction extensionFunc,
-                           QueryVersionFunction versionFunc, const int minMajorVer, const int minMinorVer,
-                           int *eventBase, int *errorBase);
+        void initExtension(const char *extension_name, QueryExtensionFunction extension_func,
+                           QueryVersionFunction version_func, const int min_major_ver, const int min_minor_ver,
+                           int &event_base, int &error_base);
 
         /** Initializes monitor heads on every screen. */
         void initHeads();
@@ -119,7 +119,7 @@ namespace FbCompositor {
         TickTracker m_timer;
 
         /** Rendering mode in use. */
-        RenderingMode m_renderingMode;
+        RenderingMode m_rendering_mode;
 
         /** The array of available screens. */
         std::vector<BaseScreen*> m_screens;
@@ -128,46 +128,46 @@ namespace FbCompositor {
         //--- EXTENSION BASE VARIABLES -----------------------------------------
 
         /** Event base of the X Composite extension. */
-        int m_compositeEventBase;
+        int m_composite_event_base;
 
         /** Error base of the X Composite extension. */
-        int m_compositeErrorBase;
+        int m_composite_error_base;
 
         /** Event base of the X Damage extension. */
-        int m_damageEventBase;
+        int m_damage_event_base;
 
         /** Error base of the X Damage extension. */
-        int m_damageErrorBase;
+        int m_damage_error_base;
 
         /** Event base of the GLX extension. */
-        int m_glxEventBase;
+        int m_glx_event_base;
 
         /** Error base of the GLX extension. */
-        int m_glxErrorBase;
+        int m_glx_error_base;
 
         /** Event base of the X Fixes extension. */
-        int m_fixesEventBase;
+        int m_fixes_event_base;
 
         /** Error base of the X Fixes extension. */
-        int m_fixesErrorBase;
+        int m_fixes_error_base;
 
         /** Event base of the X Render extension. */
-        int m_renderEventBase;
+        int m_render_event_base;
 
         /** Error base of the X Render extension. */
-        int m_renderErrorBase;
+        int m_render_error_base;
 
         /** Event base of the X Shape extension. */
-        int m_shapeEventBase;
+        int m_shape_event_base;
 
         /** Error base of the X Shape extension. */
-        int m_shapeErrorBase;
+        int m_shape_error_base;
 
         /** Event base of the Xinerama extension. */
-        int m_xineramaEventBase;
+        int m_xinerama_event_base;
 
         /** Error base of the Xinerama extension. */
-        int m_xineramaErrorBase;
+        int m_xinerama_error_base;
     };
 
 

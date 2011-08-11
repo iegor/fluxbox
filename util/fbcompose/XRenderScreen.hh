@@ -51,7 +51,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        XRenderScreen(int screenNumber, const CompositorConfig &config);
+        XRenderScreen(int screen_number, const CompositorConfig &config);
 
         /** Destructor. */
         ~XRenderScreen();
@@ -125,7 +125,7 @@ namespace FbCompositor {
         //--- MAIN RENDERING-RELATED VARIABLES ---------------------------------
 
         /** The rendering window. */
-        Window m_renderingWindow;
+        Window m_rendering_window;
 
         /** The picture of the back buffer. */
         XRenderPicturePtr m_backBufferPicture;

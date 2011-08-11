@@ -40,6 +40,6 @@ int Logger::loggingLevel() {
 }
 
 // Sets a new logging level.
-void Logger::setLoggingLevel(int newLevel) {
-    m_level = newLevel;
+void Logger::setLoggingLevel(int new_level) {
+    m_level = new_level;
 }

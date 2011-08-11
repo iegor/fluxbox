@@ -66,36 +66,36 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-BaseScreen::BaseScreen(int screenNumber, PluginType pluginType, const CompositorConfig &/*config*/) :
+BaseScreen::BaseScreen(int screen_number, PluginType plugin_type, const CompositorConfig &/*config*/) :
     m_display(FbTk::App::instance()->display()),
-    m_pluginManager(pluginType, *this),
-    m_screenNumber(screenNumber),
-    m_rootWindow(*this, XRootWindow(m_display, m_screenNumber), false) {
+    m_plugin_manager(plugin_type, *this),
+    m_screen_number(screen_number),
+    m_root_window(*this, XRootWindow(m_display, m_screen_number), false) {
 
-    m_screenDamage = XFixesCreateRegion(display(), NULL, 0);
+    m_screen_damage = XFixesCreateRegion(display(), NULL, 0);
 
-    m_activeWindowXID = None;
-    m_currentIconbarItem = None;
+    m_active_window_xid = None;
+    m_current_iconbar_item = None;
     updateCurrentWorkspace();
     updateReconfigureRect();
     updateWorkspaceCount();
 
-    m_rootWindowPixmap = None;
-    m_wmSetRootWindowPixmap = true;
+    m_root_window_pixmap = None;
+    m_wm_set_root_window_pixmap = true;
     updateRootWindowPixmap();
 
-    long eventMask = PropertyChangeMask | StructureNotifyMask | SubstructureNotifyMask;
-    m_rootWindow.setEventMask(eventMask);
+    long event_mask = PropertyChangeMask | StructureNotifyMask | SubstructureNotifyMask;
+    m_root_window.setEventMask(event_mask);
 
-    XCompositeRedirectSubwindows(m_display, m_rootWindow.window(), CompositeRedirectManual);
+    XCompositeRedirectSubwindows(m_display, m_root_window.window(), CompositeRedirectManual);
 
     updateHeads(Heads_One);
 }
 
 // Destructor.
 BaseScreen::~BaseScreen() {
-    if (m_screenDamage) {
-        XFixesDestroyRegion(display(), m_screenDamage);
+    if (m_screen_damage) {
+        XFixesDestroyRegion(display(), m_screen_damage);
     }
 
     std::list<BaseCompWindow*>::iterator it = m_windows.begin();
@@ -111,7 +111,7 @@ BaseScreen::~BaseScreen() {
 // Initializes the screen's plugins.
 void BaseScreen::initPlugins(const CompositorConfig &config) {
     for(int i = 0; i < config.pluginCount(); i++) {
-        m_pluginManager.createPluginObject(config.pluginName(i), config.pluginArgs(i));
+        m_plugin_manager.createPluginObject(config.pluginName(i), config.pluginArgs(i));
     }
 }
 
@@ -120,10 +120,10 @@ void BaseScreen::initWindows() {
     Window root;
     Window parent;
     Window *children = 0;
-    unsigned int childCount;
+    unsigned int child_count;
 
-    XQueryTree(display(), rootWindow().window(), &root, &parent, &children, &childCount);
-    for (unsigned int i = 0; i < childCount; i++) {
+    XQueryTree(display(), rootWindow().window(), &root, &parent, &children, &child_count);
+    for (unsigned int i = 0; i < child_count; i++) {
         createWindow(children[i]);
     }
 
@@ -142,25 +142,25 @@ void BaseScreen::initWindows() {
 void BaseScreen::circulateWindow(Window window, int place) {
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
     if (it != m_windows.end()) {
-        BaseCompWindow *curWindow = *it;
+        BaseCompWindow *cur_window = *it;
         m_windows.erase(it);
 
         if (place == PlaceOnTop) {
-            m_windows.push_back(curWindow);
+            m_windows.push_back(cur_window);
         } else {
-            m_windows.push_front(curWindow);
+            m_windows.push_front(cur_window);
         }
 
-        if (!curWindow->isIgnored()) {
+        if (!cur_window->isIgnored()) {
             damageWholeWindowArea(*it);
 
             BasePlugin *plugin = NULL;
             forEachPlugin(i, plugin) {
-                plugin->windowCirculated(*curWindow, place);
+                plugin->windowCirculated(*cur_window, place);
             }
         }
     } else {
-        if (window != m_rootWindow.window()) {
+        if (window != m_root_window.window()) {
             fbLog_info << "Attempted to circulate an untracked window (" << std::hex << window << ")" << std::endl;
         }
     }
@@ -170,31 +170,31 @@ void BaseScreen::circulateWindow(Window window, int place) {
 void BaseScreen::createWindow(Window window) {
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
     if (it == m_windows.end()) {
-        BaseCompWindow *newWindow = NULL;
+        BaseCompWindow *new_window = NULL;
         try {
-            newWindow = createWindowObject(window);
+            new_window = createWindowObject(window);
         } catch(const InitException &e) {
             std::stringstream ss;
             ss << "Could not create window " << std::hex << window << " (" << e.what() << ")";
             throw WindowException(ss.str());
         }
 
-        newWindow->setEventMask(PropertyChangeMask);
-        m_windows.push_back(newWindow);
+        new_window->setEventMask(PropertyChangeMask);
+        m_windows.push_back(new_window);
 
-        if (newWindow->depth() == 0) {      // If the window is already destroyed, do not render it.
-            newWindow->setIgnored(true);
+        if (new_window->depth() == 0) {      // If the window is already destroyed, do not render it.
+            new_window->setIgnored(true);
         }
         if (isWindowIgnored(window)) {
-            newWindow->setIgnored(true);
+            new_window->setIgnored(true);
         } 
         
-        if (!newWindow->isIgnored()) {
-            damageScreenArea(newWindow->dimensions());
+        if (!new_window->isIgnored()) {
+            damageWholeWindowArea(new_window);
 
             BasePlugin *plugin = NULL;
             forEachPlugin(i, plugin) {
-                plugin->windowCreated(*newWindow);
+                plugin->windowCreated(*new_window);
             }
         }
     } else {
@@ -217,7 +217,7 @@ void BaseScreen::damageWindow(Window window, const XRectangle &area) {
             }
         }
     } else {
-        if (window != m_rootWindow.window()) {
+        if (window != m_root_window.window()) {
             fbLog_info << "Attempted to damage an untracked window (" << std::hex << window << ")" << std::endl;
         }
     }
@@ -264,13 +264,13 @@ void BaseScreen::mapWindow(Window window) {
 
 // Updates window's configuration.
 void BaseScreen::reconfigureWindow(const XConfigureEvent &event) {
-    if (event.window == m_rootWindow.window()) {
-        m_rootWindow.updateGeometry();
+    if (event.window == m_root_window.window()) {
+        m_root_window.updateGeometry();
         setRootWindowSizeChanged();
 
         BasePlugin *plugin = NULL;
         forEachPlugin(i, plugin) {
-            plugin->windowReconfigured(m_rootWindow);
+            plugin->windowReconfigured(m_root_window);
         }
         return;
     }
@@ -346,7 +346,7 @@ void BaseScreen::unmapWindow(Window window) {
 
 // Updates the value of some window's property.
 void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
-    if ((window == m_rootWindow.window()) && (property != None) && (state == PropertyNewValue)) {
+    if ((window == m_root_window.window()) && (property != None) && (state == PropertyNewValue)) {
         if (property == Atoms::activeWindowAtom()) {
             updateActiveWindow();
         } else if (property == Atoms::currentIconbarItemAtom()) {
@@ -361,10 +361,10 @@ void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
             updateWorkspaceCount();
         }
 
-        std::vector<Atom> rootPixmapAtoms = Atoms::rootPixmapAtoms();
-        for (size_t i = 0; i < rootPixmapAtoms.size(); i++) {
-            if (property == rootPixmapAtoms[i]) {
-                Pixmap newRootPixmap = m_rootWindow.singlePropertyValue<Pixmap>(rootPixmapAtoms[i], None);
+        std::vector<Atom> root_pixmap_atoms = Atoms::rootPixmapAtoms();
+        for (size_t i = 0; i < root_pixmap_atoms.size(); i++) {
+            if (property == root_pixmap_atoms[i]) {
+                Pixmap newRootPixmap = m_root_window.singlePropertyValue<Pixmap>(root_pixmap_atoms[i], None);
                 updateRootWindowPixmap(newRootPixmap);
                 setRootPixmapChanged();     // We don't want this called in the constructor, keep it here.
             }
@@ -372,7 +372,7 @@ void BaseScreen::updateWindowProperty(Window window, Atom property, int state) {
 
         BasePlugin *plugin = NULL;
         forEachPlugin(i, plugin) {
-            plugin->windowPropertyChanged(m_rootWindow, property, state);
+            plugin->windowPropertyChanged(m_root_window, property, state);
         }
 
     } else {
@@ -415,7 +415,7 @@ void BaseScreen::ignoreWindow(Window window) {
         }
     }
 
-    m_ignoreList.push_back(window);
+    m_ignore_list.push_back(window);
 }
 
 // Checks whether a given window is managed by the current screen.
@@ -428,31 +428,31 @@ bool BaseScreen::isWindowManaged(Window window) {
 
 // Removes all accumulated damage from the screen.
 void BaseScreen::clearScreenDamage() {
-    m_damagedScreenRects.clear();
+    m_damaged_screen_rects.clear();
 }
 
 // Reconfigure heads on the current screen.
-void BaseScreen::updateHeads(HeadMode headMode) {
+void BaseScreen::updateHeads(HeadMode head_mode) {
     m_heads.clear();
 
 #ifdef XINERAMA
-    if (headMode == Heads_Xinerama) {
-        int nHeads;
-        XineramaScreenInfo *xHeads = XineramaQueryScreens(display(), &nHeads);
+    if (head_mode == Heads_Xinerama) {
+        int head_count;
+        XineramaScreenInfo *x_heads = XineramaQueryScreens(display(), &head_count);
 
-        m_heads.reserve(nHeads);
-        for (int i = 0; i < nHeads; i++) {
-            XRectangle head = { xHeads[i].x_org, xHeads[i].y_org, xHeads[i].width, xHeads[i].height };
+        m_heads.reserve(head_count);
+        for (int i = 0; i < head_count; i++) {
+            XRectangle head = { x_heads[i].x_org, x_heads[i].y_org, x_heads[i].width, x_heads[i].height };
             m_heads.push_back(head);
         }
 
-        if (xHeads) {
-            XFree(xHeads);
+        if (x_heads) {
+            XFree(x_heads);
         }
     } else
 #endif  // XINERAMA
 
-    if (headMode == Heads_One) {
+    if (head_mode == Heads_One) {
         XRectangle head = { 0, 0, rootWindow().width(), rootWindow().height() };
         m_heads.push_back(head);
     } else {
@@ -482,8 +482,8 @@ void BaseScreen::setRootWindowSizeChanged() {
 
 // Returns the damaged screen area.
 XserverRegion BaseScreen::damagedScreenArea() {
-    XFixesSetRegion(display(), m_screenDamage, (XRectangle*)(m_damagedScreenRects.data()), m_damagedScreenRects.size());
-    return m_screenDamage;
+    XFixesSetRegion(display(), m_screen_damage, (XRectangle*)(m_damaged_screen_rects.data()), m_damaged_screen_rects.size());
+    return m_screen_damage;
 }
 
 
@@ -491,71 +491,71 @@ XserverRegion BaseScreen::damagedScreenArea() {
 
 // Update stored active window.
 void BaseScreen::updateActiveWindow() {
-    Window activeWindow = m_rootWindow.singlePropertyValue<Window>(Atoms::activeWindowAtom(), None);
-    std::list<BaseCompWindow*>::iterator it = getFirstManagedAncestorIterator(activeWindow);
+    Window active_window = m_root_window.singlePropertyValue<Window>(Atoms::activeWindowAtom(), None);
+    std::list<BaseCompWindow*>::iterator it = getFirstManagedAncestorIterator(active_window);
 
     if (it != m_windows.end()) {
-        m_activeWindowXID = (*it)->window();
+        m_active_window_xid = (*it)->window();
     } else {
-        m_activeWindowXID = None;
+        m_active_window_xid = None;
     }
 }
 
 // Update the current iconbar item.
 void BaseScreen::updateCurrentIconbarItem() {
-    Window currentItem = m_rootWindow.singlePropertyValue<Window>(Atoms::currentIconbarItemAtom(), None);
-    std::list<BaseCompWindow*>::iterator it = getFirstManagedAncestorIterator(currentItem);
+    Window current_item = m_root_window.singlePropertyValue<Window>(Atoms::currentIconbarItemAtom(), None);
+    std::list<BaseCompWindow*>::iterator it = getFirstManagedAncestorIterator(current_item);
 
     if (it != m_windows.end()) {
-        m_currentIconbarItem = (*it)->window();
+        m_current_iconbar_item = (*it)->window();
     } else {
-        m_currentIconbarItem = None;
+        m_current_iconbar_item = None;
     }
 }
 
 // Update the current workspace index.
 void BaseScreen::updateCurrentWorkspace() {
-    m_currentWorkspace = m_rootWindow.singlePropertyValue<long>(Atoms::workspaceAtom(), 0);
+    m_current_workspace = m_root_window.singlePropertyValue<long>(Atoms::workspaceAtom(), 0);
 }
 
 // Update stored reconfigure rectangle.
 void BaseScreen::updateReconfigureRect() {
-    std::vector<long> data = m_rootWindow.propertyValue<long>(Atoms::reconfigureRectAtom());
+    std::vector<long> data = m_root_window.propertyValue<long>(Atoms::reconfigureRectAtom());
 
     if (data.size() != 4) {
-        m_reconfigureRect.x = m_reconfigureRect.y = m_reconfigureRect.width = m_reconfigureRect.height = 0;
+        m_reconfigure_rect.x = m_reconfigure_rect.y = m_reconfigure_rect.width = m_reconfigure_rect.height = 0;
     } else {
-        m_reconfigureRect.x = data[0];
-        m_reconfigureRect.y = data[1];
-        m_reconfigureRect.width = data[2];
-        m_reconfigureRect.height = data[3];
+        m_reconfigure_rect.x = data[0];
+        m_reconfigure_rect.y = data[1];
+        m_reconfigure_rect.width = data[2];
+        m_reconfigure_rect.height = data[3];
     }
 }
 
 // Update stored root window pixmap.
-void BaseScreen::updateRootWindowPixmap(Pixmap newPixmap) {
-    if (m_rootWindowPixmap && !m_wmSetRootWindowPixmap) {
-        XFreePixmap(display(), m_rootWindowPixmap);
-        m_rootWindowPixmap = None;
+void BaseScreen::updateRootWindowPixmap(Pixmap new_pixmap) {
+    if (m_root_window_pixmap && !m_wm_set_root_window_pixmap) {
+        XFreePixmap(display(), m_root_window_pixmap);
+        m_root_window_pixmap = None;
     }
 
-    if (!newPixmap) {
-        m_rootWindowPixmap = rootWindow().firstSinglePropertyValue<Pixmap>(Atoms::rootPixmapAtoms(), None);
+    if (!new_pixmap) {
+        m_root_window_pixmap = rootWindow().firstSinglePropertyValue<Pixmap>(Atoms::rootPixmapAtoms(), None);
     } else {
-        m_rootWindowPixmap = newPixmap;
+        m_root_window_pixmap = new_pixmap;
     }
-    m_wmSetRootWindowPixmap = true;
+    m_wm_set_root_window_pixmap = true;
 
-    if (!m_rootWindowPixmap) {
+    if (!m_root_window_pixmap) {
         fbLog_info << "Cannot find background pixmap, using plain black." << std::endl;
-        m_rootWindowPixmap = createSolidPixmap(*this, rootWindow().width(), rootWindow().height(), 0x00000000);
-        m_wmSetRootWindowPixmap = false;
+        m_root_window_pixmap = createSolidPixmap(*this, rootWindow().width(), rootWindow().height(), 0x00000000);
+        m_wm_set_root_window_pixmap = false;
     }
 }
 
 // Update the number of workspaces.
 void BaseScreen::updateWorkspaceCount() {
-    m_workspaceCount = m_rootWindow.singlePropertyValue<long>(Atoms::workspaceCountAtom(), 1);
+    m_workspace_count = m_root_window.singlePropertyValue<long>(Atoms::workspaceCountAtom(), 1);
 }
 
 
@@ -563,14 +563,14 @@ void BaseScreen::updateWorkspaceCount() {
 
 // Damages the reconfigure rectangle on the screen.
 void BaseScreen::damageReconfigureRect() {
-    damageScreenArea(m_reconfigureRect);
+    damageScreenArea(m_reconfigure_rect);
 }
 
 // Damages the given rectangle on the screen.
 void BaseScreen::damageScreenArea(XRectangle area) {
     area.height = std::min(area.height + 1, static_cast<int>(rootWindow().height()));
     area.width = std::min(area.width + 1, static_cast<int>(rootWindow().width()));
-    m_damagedScreenRects.push_back(area);
+    m_damaged_screen_rects.push_back(area);
 }
 
 // Damages the area in the given window.
@@ -585,7 +585,7 @@ void BaseScreen::damageWholeWindowArea(BaseCompWindow *window) {
     XRectangle area = { window->x(), window->y(), window->realWidth() + 2, window->realHeight() + 2 };
     area.height = std::min(area.height, static_cast<short unsigned int>(rootWindow().height()));
     area.width = std::min(area.width, static_cast<short unsigned int>(rootWindow().width()));
-    m_damagedScreenRects.push_back(area);
+    m_damaged_screen_rects.push_back(area);
 }
 
 
@@ -593,12 +593,11 @@ void BaseScreen::damageWholeWindowArea(BaseCompWindow *window) {
 
 // Returns the parent of a given window.
 Window BaseScreen::getParentWindow(Window window) {
-    Window root;
-    Window parent;
+    Window root, parent;
     Window *children = 0;
-    unsigned int childCount;
+    unsigned int child_count;
 
-    XQueryTree(display(), window, &root, &parent, &children, &childCount);
+    XQueryTree(display(), window, &root, &parent, &children, &child_count);
     if (children) {
         XFree(children);
     }
@@ -624,36 +623,36 @@ std::list<BaseCompWindow*>::iterator BaseScreen::getFirstManagedAncestorIterator
         return m_windows.end();
     }
 
-    Window currentWindow = window;
+    Window current_window = window;
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
 
     while (it == m_windows.end()) {
-        currentWindow = getParentWindow(currentWindow);
-        if ((currentWindow == None) || (currentWindow == rootWindow().window())) {
+        current_window = getParentWindow(current_window);
+        if ((current_window == None) || (current_window == rootWindow().window())) {
             return m_windows.end();
         }
-        it = getWindowIterator(currentWindow);
+        it = getWindowIterator(current_window);
     }
     return it;
 }
 
 // Returns whether the given window is in the ignore list.
 bool BaseScreen::isWindowIgnored(Window window) {
-    return (find(m_ignoreList.begin(), m_ignoreList.end(), window) != m_ignoreList.end());
+    return (find(m_ignore_list.begin(), m_ignore_list.end(), window) != m_ignore_list.end());
 }
 
 // Puts a window to a new location on the stack.
-void BaseScreen::restackWindow(std::list<BaseCompWindow*>::iterator &windowIt, Window above) {
-    BaseCompWindow* window = *windowIt;
-    m_windows.erase(windowIt);
+void BaseScreen::restackWindow(std::list<BaseCompWindow*>::iterator &window_it, Window above) {
+    BaseCompWindow* window = *window_it;
+    m_windows.erase(window_it);
 
     std::list<BaseCompWindow*>::iterator it = getFirstManagedAncestorIterator(above);
     if (it != m_windows.end()) {
         ++it;
-        windowIt = m_windows.insert(it, window);
+        window_it = m_windows.insert(it, window);
     } else {    // Window is just above root.
         m_windows.push_front(window);
-        windowIt = m_windows.begin();
+        window_it = m_windows.begin();
     }
 }
 
@@ -662,11 +661,11 @@ void BaseScreen::restackWindow(std::list<BaseCompWindow*>::iterator &windowIt, W
 
 // << output stream operator for the BaseScreen class.
 std::ostream &FbCompositor::operator<<(std::ostream& out, const BaseScreen& s) {
-    out << "SCREEN NUMBER " << std::dec << s.m_screenNumber << ":" << std::endl
+    out << "SCREEN NUMBER " << std::dec << s.m_screen_number << ":" << std::endl
         << "  Properties" << std::endl
-        << "    Active window XID: " << std::hex << s.m_activeWindowXID << std::endl
-        << "    Number of workspaces: " << std::dec << s.m_workspaceCount << std::endl
-        << "    Current workspace: " << std::dec << s.m_currentWorkspace << std::endl
+        << "    Active window XID: " << std::hex << s.m_active_window_xid << std::endl
+        << "    Number of workspaces: " << std::dec << s.m_workspace_count << std::endl
+        << "    Current workspace: " << std::dec << s.m_current_workspace << std::endl
         << "  Windows" << std::endl;
 
     std::list<BaseCompWindow*>::const_iterator it = s.m_windows.begin();
@@ -676,8 +675,8 @@ std::ostream &FbCompositor::operator<<(std::ostream& out, const BaseScreen& s) {
     }
 
     out << "  Ignore list" << std::endl << "    ";
-    std::vector<Window>::const_iterator it2 = s.m_ignoreList.begin();
-    while (it2 != s.m_ignoreList.end()) {
+    std::vector<Window>::const_iterator it2 = s.m_ignore_list.begin();
+    while (it2 != s.m_ignore_list.end()) {
         out << std::hex << *it2 << " ";
         ++it2;
     }

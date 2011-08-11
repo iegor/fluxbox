@@ -82,42 +82,42 @@ ServerAutoApp::~ServerAutoApp() { }
 
 // Initialize Composite extension.
 void ServerAutoApp::initComposite() {
-    int eventBase;
-    int errorBase;
-    int majorVer;
-    int minorVer;
+    int event_base;
+    int error_base;
+    int major_ver;
+    int minor_ver;
 
-    if (!XCompositeQueryExtension(display(), &eventBase, &errorBase)) {
+    if (!XCompositeQueryExtension(display(), &event_base, &error_base)) {
         throw InitException("Composite extension not found.");
     }
-    if (!XCompositeQueryVersion(display(), &majorVer, &minorVer)) {
+    if (!XCompositeQueryVersion(display(), &major_ver, &minor_ver)) {
         throw InitException("Could not query the version of the Composite extension.");
     }
-    if ((majorVer < 0) || ((majorVer == 0) && (minorVer < 1))) {
+    if ((major_ver < 0) || ((major_ver == 0) && (minor_ver < 1))) {
         std::stringstream ss;
         ss << "Unsupported Composite extension version found (required >=0.1, got "
-           << majorVer << "." << minorVer << ").";
+           << major_ver << "." << minor_ver << ").";
         throw InitException(ss.str());
     }
 }
 
 // Prepare screens.
 void ServerAutoApp::initScreens() {
-    int screenCount = XScreenCount(display());
+    int screen_count = XScreenCount(display());
 
-    for (int i = 0; i < screenCount; i++) {
+    for (int i = 0; i < screen_count; i++) {
         XCompositeRedirectSubwindows(display(), XRootWindow(display(), i), CompositeRedirectAutomatic);
 
-        Atom cmAtom = Atoms::compositingSelectionAtom(i);
-        Window curOwner = XGetSelectionOwner(display(), cmAtom);
-        if (curOwner != None) {
+        Atom cm_atom = Atoms::compositingSelectionAtom(i);
+        Window cur_owner = XGetSelectionOwner(display(), cm_atom);
+        if (cur_owner != None) {
             // TODO: More detailed message - what is the other program?
             throw InitException("Another compositing manager is running.");
         }
 
-        curOwner = XCreateSimpleWindow(display(), XRootWindow(display(), i), -10, -10, 1, 1, 0, None, None);
-        XmbSetWMProperties(display(), curOwner, APP_NAME, APP_NAME, NULL, 0, NULL, NULL, NULL);
-        XSetSelectionOwner(display(), cmAtom, curOwner, CurrentTime);
+        cur_owner = XCreateSimpleWindow(display(), XRootWindow(display(), i), -10, -10, 1, 1, 0, None, None);
+        XmbSetWMProperties(display(), cur_owner, APP_NAME, APP_NAME, NULL, 0, NULL, NULL, NULL);
+        XSetSelectionOwner(display(), cm_atom, cur_owner, CurrentTime);
     }
 }
 
@@ -126,9 +126,9 @@ void ServerAutoApp::initScreens() {
 
 // Enters the event loop.
 void ServerAutoApp::eventLoop() {
-    timespec sleepTimespec = { 0, SLEEP_TIME * 1000 };
+    timespec sleep_timespec = { 0, SLEEP_TIME * 1000 };
     while (!done()) {
-        nanosleep(&sleepTimespec, NULL);
+        nanosleep(&sleep_timespec, NULL);
     }
 }
 

@@ -44,7 +44,7 @@ OpenGLPlugin::~OpenGLPlugin() { }
 //--- OTHER INITIALIZATION -----------------------------------------------------
 
 // Initialize OpenGL-specific code.
-void OpenGLPlugin::initOpenGL(OpenGLShaderProgramPtr /*shaderProgram*/) { }
+void OpenGLPlugin::initOpenGL(OpenGLShaderProgramPtr /*shader_program*/) { }
 
 
 //--- ACCESSORS ----------------------------------------------------------------
@@ -91,10 +91,10 @@ const std::vector<OpenGLRenderingJob> &OpenGLPlugin::postWindowRenderActions(con
 
 
 // Reconfigure rectangle rendering initialization.
-void OpenGLPlugin::recRectRenderInit(const XRectangle &/*recRect*/) { }
+void OpenGLPlugin::recRectRenderInit(const XRectangle &/*rec_rect*/) { }
 
 // Reconfigure rectangle rendering cleanup.
-void OpenGLPlugin::recRectRenderCleanup(const XRectangle &/*recRect*/) { }
+void OpenGLPlugin::recRectRenderCleanup(const XRectangle &/*rec_rect*/) { }
 
 
 // Extra rendering actions and jobs.

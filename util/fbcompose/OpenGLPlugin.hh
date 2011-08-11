@@ -52,11 +52,11 @@ namespace FbCompositor {
      * Information about an extra rendering job.
      */
     struct OpenGLRenderingJob {
-        OpenGLBufferPtr primPosBuffer;              ///< Primitive's position buffer.
-        OpenGLBufferPtr mainTexCoordBuffer;         ///< Main texture's position buffer.
-        OpenGLBufferPtr shapeTexCoordBuffer;        ///< Shape texture's position buffer.
-        OpenGL2DTexturePtr mainTexture;             ///< Main texture.
-        OpenGL2DTexturePtr shapeTexture;            ///< Shape texture.
+        OpenGLBufferPtr prim_pos_buffer;              ///< Primitive's position buffer.
+        OpenGLBufferPtr main_tex_coord_buffer;         ///< Main texture's position buffer.
+        OpenGLBufferPtr shape_tex_coord_buffer;        ///< Shape texture's position buffer.
+        OpenGL2DTexturePtr main_texture;             ///< Main texture.
+        OpenGL2DTexturePtr shape_texture;            ///< Shape texture.
         GLfloat alpha;                              ///< Rendering's alpha.
 
         OpenGLShaderInitializer *shaderInit;        ///< Shader initializer.
@@ -83,7 +83,7 @@ namespace FbCompositor {
         //--- OTHER INITIALIZATION ---------------------------------------------
 
         /** Initialize OpenGL-specific code. */
-        virtual void initOpenGL(OpenGLShaderProgramPtr shaderProgram);
+        virtual void initOpenGL(OpenGLShaderProgramPtr shader_program);
 
 
         //--- ACCESSORS --------------------------------------------------------
@@ -125,10 +125,10 @@ namespace FbCompositor {
 
 
         /** Reconfigure rectangle rendering initialization. */
-        virtual void recRectRenderInit(const XRectangle &recRect);
+        virtual void recRectRenderInit(const XRectangle &rec_rect);
 
         /** Reconfigure rectangle rendering cleanup. */
-        virtual void recRectRenderCleanup(const XRectangle &recRect);
+        virtual void recRectRenderCleanup(const XRectangle &rec_rect);
 
 
         /** Extra rendering actions and jobs. */

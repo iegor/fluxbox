@@ -61,7 +61,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        BaseCompWindow(const BaseScreen &screen, Window windowXID, bool trackDamageDeltas);
+        BaseCompWindow(const BaseScreen &screen, Window window_xid, bool track_damage_deltas);
 
         /** Destructor. */
         virtual ~BaseCompWindow();
@@ -225,7 +225,7 @@ namespace FbCompositor {
         int m_class;
 
         /** Window's map state. */
-        bool m_isMapped;
+        bool m_is_mapped;
 
         /** Window's type. */
         WindowType m_type;
@@ -235,32 +235,32 @@ namespace FbCompositor {
 
 
         /** Window's content pixmap. */
-        Pixmap m_contentPixmap;
+        Pixmap m_content_pixmap;
 
         /** Window's damage object. */
         Damage m_damage;
 
         /** Shows whether the window is damaged. */
-        bool m_isDamaged;
+        bool m_is_damaged;
 
         /** Shows whether the window should be ignored by the renderers or not. */
-        bool m_isIgnored;
+        bool m_is_ignored;
 
         /** Shows whether the window has been remapped since the last update. */
-        bool m_isRemapped;
+        bool m_is_remapped;
 
         /** Shows whether the window has been resized since the last update. */
-        bool m_isResized;
+        bool m_is_resized;
 
 
         /** The number of rectangles of window's clip shape. */
-        int m_clipShapeRectCount;
+        int m_clip_shape_rect_count;
 
         /** Rectangles, that make up the window's clip shape. */
-        XRectangle *m_clipShapeRects;
+        XRectangle *m_clip_shape_rects;
 
         /** Shows whether the clip shape changed since the last update. */
-        bool m_clipShapeChanged;
+        bool m_clip_shape_changed;
     };
 
 
@@ -273,22 +273,22 @@ namespace FbCompositor {
 
     // Returns whether the chip shape changed since the last update.
     inline int BaseCompWindow::clipShapeChanged() const {
-        return m_clipShapeChanged;
+        return m_clip_shape_changed;
     }
 
     // Returns the number of rectangles that make up the clip shape.
     inline int BaseCompWindow::clipShapeRectCount() const {
-        return m_clipShapeRectCount;
+        return m_clip_shape_rect_count;
     }
 
     // Returns the rectangles that make up the clip shape.
     inline XRectangle *BaseCompWindow::clipShapeRects() const {
-        return m_clipShapeRects;
+        return m_clip_shape_rects;
     }
 
     // Returns the window's contents as a pixmap.
     inline Pixmap BaseCompWindow::contentPixmap() const {
-        return m_contentPixmap;
+        return m_content_pixmap;
     }
 
     // Returns the window's dimensions as an XRectangle (borders factored in).
@@ -299,27 +299,27 @@ namespace FbCompositor {
 
     // Returns whether the window is damaged or not.
     inline bool BaseCompWindow::isDamaged() const {
-        return m_isDamaged;
+        return m_is_damaged;
     }
 
     // Returns whether the window is ignored or not.
     inline bool BaseCompWindow::isIgnored() const {
-        return m_isIgnored;
+        return m_is_ignored;
     }
 
     // Returns whether the window is mapped or not.
     inline bool BaseCompWindow::isMapped() const {
-        return m_isMapped;
+        return m_is_mapped;
     }
 
     // Returns whether the window has been remapped since the last update.
     inline bool BaseCompWindow::isRemapped() const {
-        return m_isRemapped;
+        return m_is_remapped;
     }
 
     // Returns whether the window has been resized since the last update.
     inline bool BaseCompWindow::isResized() const {
-        return m_isResized;
+        return m_is_resized;
     }
 
     // Returns the window's screen.
@@ -329,7 +329,7 @@ namespace FbCompositor {
 
     // Sets the window's ignore flag.
     inline void BaseCompWindow::setIgnored(bool ignoreStatus) {
-        m_isIgnored = ignoreStatus;
+        m_is_ignored = ignoreStatus;
     }
 
     // Returns the window's height with borders factored in.

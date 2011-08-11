@@ -56,18 +56,18 @@ namespace FbCompositor {
     class FadeShaderInitializer : public OpenGLShaderInitializer {
     public :
         /** Default constructor. */
-        FadeShaderInitializer() : m_alphaUniform(0), m_alpha(0.0) { }
+        FadeShaderInitializer() : m_alpha_uniform(0), m_alpha(0.0) { }
 
         /** Constructor. */
         FadeShaderInitializer(GLuint alphaUniform, GLfloat alpha) :
-            m_alphaUniform(alphaUniform), m_alpha(alpha) { }
+            m_alpha_uniform(alphaUniform), m_alpha(alpha) { }
 
         /** Destructor. */
         ~FadeShaderInitializer() { }
 
         /** Initialization code. */
         void execute() {
-            glUniform1f(m_alphaUniform, m_alpha);
+            glUniform1f(m_alpha_uniform, m_alpha);
         }
 
         /** Alpha mutator. */
@@ -77,12 +77,12 @@ namespace FbCompositor {
 
         /** Uniform mutator. */
         void setUniform(GLuint alphaUniform) {
-            m_alphaUniform = alphaUniform;
+            m_alpha_uniform = alphaUniform;
         }
 
     private :
         /** Uniform location of the alpha value. */
-        GLuint m_alphaUniform;
+        GLuint m_alpha_uniform;
 
         /** Alpha value to set. */
         GLfloat m_alpha;
@@ -108,7 +108,7 @@ namespace FbCompositor {
         //--- OTHER INITIALIZATION ---------------------------------------------
 
         /** Initialize OpenGL-specific code. */
-        void initOpenGL(OpenGLShaderProgramPtr shaderProgram);
+        void initOpenGL(OpenGLShaderProgramPtr shader_program);
 
 
         //--- ACCESSORS --------------------------------------------------------
@@ -145,7 +145,7 @@ namespace FbCompositor {
         void windowRenderInit(const OpenGLWindow &window, int partId);
 
         /** Reconfigure rectangle rendering initialization. */
-        void recRectRenderInit(const XRectangle &recRect);
+        void recRectRenderInit(const XRectangle &rec_rect);
 
 
         /** Extra rendering actions and jobs. */
@@ -163,7 +163,7 @@ namespace FbCompositor {
         //--- GENERAL RENDERING VARIABLES --------------------------------------
 
         /** Location of the fade_Alpha uniform. */
-        GLuint m_alphaUniformPos;
+        GLuint m_alpha_uniformPos;
 
 
         /** Main fade initialization object. */

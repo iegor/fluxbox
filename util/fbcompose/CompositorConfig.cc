@@ -46,23 +46,23 @@ CompositorConfig::CompositorConfig(std::vector<FbTk::FbString> args) :
     m_args(args),
 
 #ifdef USE_OPENGL_COMPOSITING
-    m_renderingMode(RM_OpenGL),
+    m_rendering_mode(RM_OpenGL),
 #else
 #ifdef USE_XRENDER_COMPOSITING
-    m_renderingMode(RM_XRender),
+    m_rendering_mode(RM_XRender),
 #else
-    m_renderingMode(RM_ServerAuto),
+    m_rendering_mode(RM_ServerAuto),
 #endif  // USE_XRENDER_COMPOSITING
 #endif  // USE_OPENGL_COMPOSITING
 
 #ifdef USE_XRENDER_COMPOSITING
-    m_xRenderPictFilter(FilterFast),
+    m_xrender_pict_filter(FilterFast),
 #endif  // USE_XRENDER_COMPOSITING
 
-    m_displayName(""),
-    m_framesPerSecond(60),
+    m_display_name(""),
+    m_frames_per_second(60),
     m_plugins(),
-    m_showXErrors(true),
+    m_show_x_errors(true),
     m_synchronize(false) {
 
     preScanArguments();
@@ -73,15 +73,15 @@ CompositorConfig::CompositorConfig(std::vector<FbTk::FbString> args) :
 CompositorConfig::CompositorConfig(const CompositorConfig &other) :
     m_args(other.m_args),
 
-    m_renderingMode(other.m_renderingMode),
+    m_rendering_mode(other.m_rendering_mode),
 #ifdef USE_XRENDER_COMPOSITING
-    m_xRenderPictFilter(other.m_xRenderPictFilter),
+    m_xrender_pict_filter(other.m_xrender_pict_filter),
 #endif  // USE_XRENDER_COMPOSITING
 
-    m_displayName(other.m_displayName),
-    m_framesPerSecond(other.m_framesPerSecond),
+    m_display_name(other.m_display_name),
+    m_frames_per_second(other.m_frames_per_second),
     m_plugins(other.m_plugins),
-    m_showXErrors(other.m_showXErrors),
+    m_show_x_errors(other.m_show_x_errors),
     m_synchronize(other.m_synchronize) {
 }
 
@@ -90,15 +90,15 @@ CompositorConfig &CompositorConfig::operator=(const CompositorConfig &other) {
     if (this != &other) {
         m_args = other.m_args;
 
-        m_renderingMode = other.m_renderingMode;
+        m_rendering_mode = other.m_rendering_mode;
 #ifdef USE_XRENDER_COMPOSITING
-        m_xRenderPictFilter = other.m_xRenderPictFilter;
+        m_xrender_pict_filter = other.m_xrender_pict_filter;
 #endif  // USE_XRENDER_COMPOSITING
 
-        m_displayName = other.m_displayName;
-        m_framesPerSecond = other.m_framesPerSecond;
+        m_display_name = other.m_display_name;
+        m_frames_per_second = other.m_frames_per_second;
         m_plugins = other.m_plugins;
-        m_showXErrors = other.m_showXErrors;
+        m_show_x_errors = other.m_show_x_errors;
         m_synchronize = other.m_synchronize;
     }
     return *this;
@@ -131,30 +131,30 @@ void CompositorConfig::processArguments() {
     std::vector<FbTk::FbString>::iterator it = m_args.begin();
     std::stringstream ss;
 
-    bool beQuiet = false;
-    int loggingLevel = 0;
+    bool be_quiet = false;
+    int logging_level = 0;
 
     while (it != m_args.end()) {
         if ((*it == "-d") || (*it == "--display")) {
-            m_displayName = getNextOption(it, "No display string specified.");
+            m_display_name = getNextOption(it, "No display string specified.");
 
         } else if ((*it == "-m") || (*it == "--mode")) {
             FbTk::FbString mode = getNextOption(it, "No rendering mode specified.");
 
 #ifdef USE_OPENGL_COMPOSITING
             if (mode == "opengl") {
-                m_renderingMode = RM_OpenGL;
+                m_rendering_mode = RM_OpenGL;
             } else
 #endif  // USE_OPENGL_COMPOSITING
                 
 #ifdef USE_XRENDER_COMPOSITING
             if (mode == "xrender") {
-                m_renderingMode = RM_XRender;
+                m_rendering_mode = RM_XRender;
             } else
 #endif  // USE_XRENDER_COMPOSITING
 
             if (mode == "serverauto") {
-                m_renderingMode = RM_ServerAuto;
+                m_rendering_mode = RM_ServerAuto;
             } else {
                 ss.str("");
                 ss << "Unknown rendering mode \"" << mode << "\".";
@@ -162,20 +162,20 @@ void CompositorConfig::processArguments() {
             }
 
         } else if (*it == "--no-x-errors") {
-            m_showXErrors = false;
+            m_show_x_errors = false;
 
         } else if ((*it == "-p") || (*it == "--plugin")) {
-            FbTk::FbString pluginName = getNextOption(it, "No plugin name specified.");
-            m_plugins.push_back(make_pair(pluginName, std::vector<FbTk::FbString>()));
+            FbTk::FbString plugin_name = getNextOption(it, "No plugin name specified.");
+            m_plugins.push_back(make_pair(plugin_name, std::vector<FbTk::FbString>()));
 
         } else if ((*it == "-q") || (*it == "--quiet")) {
-            beQuiet = true;
+            be_quiet = true;
 
         } else if ((*it == "-r") || (*it == "--refresh-rate")) {
             ss.str(getNextOption(it, "No refresh rate specified."));
-            ss >> m_framesPerSecond;
+            ss >> m_frames_per_second;
 
-            if (m_framesPerSecond <= 0) {
+            if (m_frames_per_second <= 0) {
                 ss.str("");
                 ss << "Invalid refresh rate given.";
                 throw ConfigException(ss.str());
@@ -185,13 +185,13 @@ void CompositorConfig::processArguments() {
             m_synchronize = true;
 
         } else if ((*it == "-v") || (*it == "--verbose")) {
-            loggingLevel += 1;
+            logging_level += 1;
 
         } else if (*it == "-vv") {
-            loggingLevel += 2;
+            logging_level += 2;
 
         } else if (*it == "-vvv") {
-            loggingLevel += 3;
+            logging_level += 3;
 
         } else {
             ss.str("");
@@ -201,16 +201,16 @@ void CompositorConfig::processArguments() {
         ++it;
     }
 
-    if (beQuiet) {
+    if (be_quiet) {
         Logger::setLoggingLevel(LOG_LEVEL_NONE);
     } else {
-        if (loggingLevel == 0) {
+        if (logging_level == 0) {
             Logger::setLoggingLevel(LOG_LEVEL_WARN);
-        } else if (loggingLevel == 1) {
+        } else if (logging_level == 1) {
             Logger::setLoggingLevel(LOG_LEVEL_INFO);
-        } else if (loggingLevel == 2) {
+        } else if (logging_level == 2) {
             Logger::setLoggingLevel(LOG_LEVEL_DEBUG);
-        } else if (loggingLevel >= 3) {
+        } else if (logging_level >= 3) {
             Logger::setLoggingLevel(LOG_LEVEL_DEBUG_DUMP);
         }
     }
@@ -218,10 +218,10 @@ void CompositorConfig::processArguments() {
 
 
 // Fetch the value of the next command line argument, advance iterator.
-FbTk::FbString CompositorConfig::getNextOption(std::vector<FbTk::FbString>::iterator &it, const char *errorMessage) {
+FbTk::FbString CompositorConfig::getNextOption(std::vector<FbTk::FbString>::iterator &it, const char *error_message) {
     ++it;
     if (it == m_args.end()) {
-        throw ConfigException(errorMessage);
+        throw ConfigException(error_message);
     }
     return *it;
 }
@@ -240,6 +240,8 @@ void CompositorConfig::printFullHelp(std::ostream &os) {
 #endif  // USE_XRENDER_COMPOSITING
         "serverauto";
 
+    // 80 character reference (final column = 92)
+    //     ................................................................................
     os << "Usage: fbcompose [OPTION]..." << std::endl
        << "Options and arguments:" << std::endl
        << "  -d DISPLAY, --display DISPLAY" << std::endl

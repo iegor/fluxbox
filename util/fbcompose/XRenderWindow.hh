@@ -47,7 +47,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        XRenderWindow(const XRenderScreen &screen, Window windowXID, const char *pictFilter);
+        XRenderWindow(const XRenderScreen &screen, Window window_xid, const char *pictFilter);
 
         /** Destructor. */
         ~XRenderWindow();

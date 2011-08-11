@@ -48,7 +48,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        OpenGLBuffer(const OpenGLScreen &screen, GLenum targetBuffer);
+        OpenGLBuffer(const OpenGLScreen &screen, GLenum target_buffer);
 
         /** Destructor. */
         ~OpenGLBuffer();
@@ -72,7 +72,7 @@ namespace FbCompositor {
         void bufferData(int elementSize, const GLvoid *data, GLenum usageHint);
 
         /** Sets the buffer's contents to be the rectangle's coordinates on the screen. */
-        void bufferPosRectangle(int screenWidth, int screenHeight, XRectangle rect);
+        void bufferPosRectangle(int screen_width, int screen_height, XRectangle rect);
 
 
     private:
@@ -135,7 +135,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        OpenGL2DTexture(const OpenGLScreen &screen, bool swizzleAlphaToOne);
+        OpenGL2DTexture(const OpenGLScreen &screen, bool swizzle_alpha_to_one);
 
         /** Destructor. */
         ~OpenGL2DTexture();
@@ -160,7 +160,7 @@ namespace FbCompositor {
         void bind();
 
         /** Sets the texture's contents to the given pixmap. */
-        void setPixmap(Pixmap pixmap, bool managePixmap, int width, int height, bool forceDirect = false);
+        void setPixmap(Pixmap pixmap, bool manage_pixmap, int width, int height, bool force_direct = false);
 
 
     private:
@@ -176,13 +176,13 @@ namespace FbCompositor {
         //--- INTERNALS --------------------------------------------------------
 
         /** Whether this object manages the pixmap. */
-        bool m_pixmapManaged;
+        bool m_pixmap_managed;
 
         /** Pixmap of the texture's contents. */
         Pixmap m_pixmap;
 
         /** GLX pixmap of the texture's contents. */
-        GLXPixmap m_glxPixmap;
+        GLXPixmap m_glx_pixmap;
 
         /** The texture in question. */
         GLuint m_texture;
