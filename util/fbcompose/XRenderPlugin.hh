@@ -54,14 +54,14 @@ namespace FbCompositor {
      */
     struct XRenderRenderingJob {
         int operation;                      ///< Compositing operation to use.
-        XRenderPicturePtr sourcePicture;    ///< Picture to render.
-        XRenderPicturePtr maskPicture;      ///< Mask picture to use.
-        int sourceX;                        ///< X offset on the source picture.
-        int sourceY;                        ///< Y offset on the source picture.
-        int maskX;                          ///< X offset on the mask picture.
-        int maskY;                          ///< Y offset on the mask picture.
-        int destinationX;                   ///< X offset on the destination picture.
-        int destinationY;                   ///< Y offset on the destination picture.
+        XRenderPicturePtr source_picture;   ///< Picture to render.
+        XRenderPicturePtr mask_picture;     ///< Mask picture to use.
+        int source_x;                       ///< X offset on the source picture.
+        int source_y;                       ///< Y offset on the source picture.
+        int mask_x;                         ///< X offset on the mask picture.
+        int mask_y;                         ///< Y offset on the mask picture.
+        int destination_x;                  ///< X offset on the destination picture.
+        int destination_y;                  ///< Y offset on the destination picture.
         int width;                          ///< Width of the picture to render.
         int height;                         ///< Height of the picture to render.
     };

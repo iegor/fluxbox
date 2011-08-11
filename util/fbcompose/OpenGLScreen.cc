@@ -571,10 +571,10 @@ void OpenGLScreen::executeMultipleJobs(OpenGLPlugin *plugin, const std::vector<O
 // Execute a given rendering job.
 void OpenGLScreen::executeRenderingJob(const OpenGLRenderingJob &job) {
     if ((job.alpha >= 0.0) && (job.alpha <= 1.0)) {
-        job.shaderInit->execute();
+        job.shader_init->execute();
         render(GL_TRIANGLE_STRIP, job.prim_pos_buffer, job.main_tex_coord_buffer, job.main_texture,
                job.shape_tex_coord_buffer, job.shape_texture, m_default_element_buffer, 4, job.alpha);
-        job.shaderDeinit->execute();
+        job.shader_deinit->execute();
     }
 }
 

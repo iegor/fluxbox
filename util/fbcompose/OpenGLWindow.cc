@@ -43,8 +43,8 @@ using namespace FbCompositor;
 OpenGLWindow::OpenGLWindow(const OpenGLScreen &screen, Window window_xid) :
     BaseCompWindow(static_cast<const BaseScreen&>(screen), window_xid, false) {
 
-    m_contentTexPartition = new OpenGL2DTexturePartition(screen, true);
-    m_shapeTexPartition = new OpenGL2DTexturePartition(screen, false);
+    m_content_tex_partition = new OpenGL2DTexturePartition(screen, true);
+    m_shape_tex_partition = new OpenGL2DTexturePartition(screen, false);
 
     updateWindowPos();
 }
@@ -68,7 +68,7 @@ const OpenGLScreen &OpenGLWindow::openGLScreen() const {
 void OpenGLWindow::updateContents() {
     updateContentPixmap();
     if (contentPixmap()) {
-        m_contentTexPartition->setPixmap(contentPixmap(), false, realWidth(), realHeight(), depth());
+        m_content_tex_partition->setPixmap(contentPixmap(), false, realWidth(), realHeight(), depth());
     }
 
     if (clipShapeChanged()) {
@@ -88,25 +88,25 @@ void OpenGLWindow::updateGeometry() {
 void OpenGLWindow::updateShape() {
     BaseCompWindow::updateShape();
 
-    Pixmap shapePixmap = XCreatePixmap(display(), window(), realWidth(), realHeight(), depth());
+    Pixmap shape_pixmap = XCreatePixmap(display(), window(), realWidth(), realHeight(), depth());
 
-    GC gc = XCreateGC(display(), shapePixmap, 0, 0);
+    GC gc = XCreateGC(display(), shape_pixmap, 0, 0);
     XSetGraphicsExposures(display(), gc, False);
     XSetPlaneMask(display(), gc, 0xffffffff);
 
     XSetForeground(display(), gc, 0x00000000);
-    XFillRectangle(display(), shapePixmap, gc, 0, 0, realWidth(), realHeight());
+    XFillRectangle(display(), shape_pixmap, gc, 0, 0, realWidth(), realHeight());
 
     XSetForeground(display(), gc, 0xffffffff);
     XSetClipRectangles(display(), gc, 0, 0, clipShapeRects(), clipShapeRectCount(), Unsorted);
-    XFillRectangle(display(), shapePixmap, gc, 0, 0, realWidth(), realHeight());
+    XFillRectangle(display(), shape_pixmap, gc, 0, 0, realWidth(), realHeight());
 
     XFreeGC(display(), gc);
 
-    m_shapeTexPartition->setPixmap(shapePixmap, true, realWidth(), realHeight(), depth());
+    m_shape_tex_partition->setPixmap(shape_pixmap, true, realWidth(), realHeight(), depth());
 }
 
 // Updates the window position vertex array.
 void OpenGLWindow::updateWindowPos() {
-    m_windowPosBuffers = partitionSpaceToBuffers(openGLScreen(), x(), y(), realWidth(), realHeight());
+    m_window_pos_buffers = partitionSpaceToBuffers(openGLScreen(), x(), y(), realWidth(), realHeight());
 }

@@ -92,7 +92,7 @@ namespace FbCompositor {
 
 
         /** \returns location of the given attribute. */
-        GLuint getAttributeLocation(const char *attribName);
+        GLuint getAttributeLocation(const char *attrib_name);
 
         /** \returns location of the fb_InitMainTexCoord attribute. */
         GLuint mainTexCoordAttrib() const;
@@ -105,7 +105,7 @@ namespace FbCompositor {
 
 
         /** \returns location of the given uniform. */
-        GLuint getUniformLocation(const char *uniformName);
+        GLuint getUniformLocation(const char *uniform_name);
 
         /** \returns location of the fb_Alpha uniform. */
         GLuint alphaUniform() const;
@@ -174,13 +174,13 @@ namespace FbCompositor {
     }
 
     // Returns location of the given attribute.
-    inline GLuint OpenGLShaderProgram::getAttributeLocation(const char *attribName) {
-        return glGetAttribLocation(m_shader_program, attribName);
+    inline GLuint OpenGLShaderProgram::getAttributeLocation(const char *attrib_name) {
+        return glGetAttribLocation(m_shader_program, attrib_name);
     }
 
     // Returns location of the given uniform.
-    inline GLuint OpenGLShaderProgram::getUniformLocation(const char *uniformName) {
-        return glGetUniformLocation(m_shader_program, uniformName);
+    inline GLuint OpenGLShaderProgram::getUniformLocation(const char *uniform_name) {
+        return glGetUniformLocation(m_shader_program, uniform_name);
     }
 
     // Returns location of the fb_InitMainTexCoord attribute.

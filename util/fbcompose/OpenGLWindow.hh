@@ -99,13 +99,13 @@ namespace FbCompositor {
         //--- RENDERING-RELATED VARIABLES --------------------------------------
 
         /** Window's content texture. */
-        OpenGL2DTexturePartitionPtr m_contentTexPartition;
+        OpenGL2DTexturePartitionPtr m_content_tex_partition;
 
         /** Window's shape texture. */
-        OpenGL2DTexturePartitionPtr m_shapeTexPartition;
+        OpenGL2DTexturePartitionPtr m_shape_tex_partition;
 
         /** Window position buffer holder. */
-        std::vector<OpenGLBufferPtr> m_windowPosBuffers;
+        std::vector<OpenGLBufferPtr> m_window_pos_buffers;
     };
 
 
@@ -116,7 +116,7 @@ namespace FbCompositor {
         if ((id < 0) || (id >= partitionCount())) {
             throw IndexException("Out of bounds index in OpenGLWindow::contentTexturePartition.");
         }
-        return m_contentTexPartition->partitions()[id].texture;
+        return m_content_tex_partition->partitions()[id].texture;
     }
 
     // Returns the adjacent borders of the given partition.
@@ -124,12 +124,12 @@ namespace FbCompositor {
         if ((id < 0) || (id >= partitionCount())) {
             throw IndexException("Out of bounds index in OpenGLWindow::partitionBorders.");
         }
-        return m_contentTexPartition->partitions()[id].borders;
+        return m_content_tex_partition->partitions()[id].borders;
     }
 
     // Returns the number of contents' partitions.
     inline int OpenGLWindow::partitionCount() const {
-        return m_contentTexPartition->partitions().size();
+        return m_content_tex_partition->partitions().size();
     }
 
     // Returns the array buffer, containing the position of the given partition.
@@ -137,7 +137,7 @@ namespace FbCompositor {
         if ((id < 0) || (id >= partitionCount())) {
             throw IndexException("Out of bounds index in OpenGLWindow::partitionPosBuffer.");
         }
-        return m_windowPosBuffers[id];
+        return m_window_pos_buffers[id];
     }
 
     // Returns the specified shape texture partition.
@@ -145,7 +145,7 @@ namespace FbCompositor {
         if ((id < 0) || (id >= partitionCount())) {
             throw IndexException("Out of bounds index in OpenGLWindow::shapeTexturePartition.");
         }
-        return m_shapeTexPartition->partitions()[id].texture;
+        return m_shape_tex_partition->partitions()[id].texture;
     }
 }
 

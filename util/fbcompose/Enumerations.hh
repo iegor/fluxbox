@@ -48,23 +48,23 @@ namespace FbCompositor {
     //--- OSTREAM OUTPUT OPERATORS ---------------------------------------------
 
     // << operator for WindowType.
-    std::ostream &operator<<(std::ostream &os, WindowType winType);
-    inline std::ostream &operator<<(std::ostream &os, WindowType winType) {
-        if (winType == WinType_Desktop) {
+    std::ostream &operator<<(std::ostream &os, WindowType win_type);
+    inline std::ostream &operator<<(std::ostream &os, WindowType win_type) {
+        if (win_type == WinType_Desktop) {
             os << "Desktop";
-        } else if (winType == WinType_Dialog) {
+        } else if (win_type == WinType_Dialog) {
             os << "Dialog";
-        } else if (winType == WinType_Dock) {
+        } else if (win_type == WinType_Dock) {
             os << "Dock";
-        } else if (winType == WinType_Menu) {
+        } else if (win_type == WinType_Menu) {
             os << "Menu";
-        } else if (winType == WinType_Normal) {
+        } else if (win_type == WinType_Normal) {
             os << "Normal";
-        } else if (winType == WinType_Splash) {
+        } else if (win_type == WinType_Splash) {
             os << "Splash";
-        } else if (winType == WinType_Toolbar) {
+        } else if (win_type == WinType_Toolbar) {
             os << "Toolbar";
-        } else if (winType == WinType_Utility) {
+        } else if (win_type == WinType_Utility) {
             os << "Utility";
         } else {
             os << "Unknown";

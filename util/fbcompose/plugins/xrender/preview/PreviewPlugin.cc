@@ -56,17 +56,17 @@ const int SLEEP_TIME = 500000;
 PreviewPlugin::PreviewPlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args) :
     XRenderPlugin(screen, args) {
 
-    unsigned long maskColor = 0x01010101 * PREVIEW_ALPHA;
-    Pixmap maskPixmap = createSolidPixmap(screen, MAX_PREVIEW_WIDTH, MAX_PREVIEW_HEIGHT, maskColor);
-    XRenderPictFormat *pictFormat = XRenderFindStandardFormat(display(), PictStandardARGB32);
-    m_maskPicture = new XRenderPicture(xrenderScreen(), pictFormat, FilterFast);
-    m_maskPicture->setPixmap(maskPixmap, true);
+    unsigned long mask_color = 0x01010101 * PREVIEW_ALPHA;
+    Pixmap mask_pixmap = createSolidPixmap(screen, MAX_PREVIEW_WIDTH, MAX_PREVIEW_HEIGHT, mask_color);
+    XRenderPictFormat *pict_format = XRenderFindStandardFormat(display(), PictStandardARGB32);
+    m_mask_picture = new XRenderPicture(xrenderScreen(), pict_format, FilterFast);
+    m_mask_picture->setPixmap(mask_pixmap, true);
 
-    m_previousDamage.width = 0;
-    m_previousDamage.height = 0;
-    m_previousWindow = None;
+    m_previous_damage.width = 0;
+    m_previous_damage.height = 0;
+    m_previous_window = None;
 
-    m_tickTracker.setTickSize(SLEEP_TIME);
+    m_tick_tracker.setTickSize(SLEEP_TIME);
 }
 
 // Destructor.
@@ -78,25 +78,25 @@ PreviewPlugin::~PreviewPlugin() { }
 
 // Called, whenever a new window is created.
 void PreviewPlugin::windowCreated(const BaseCompWindow &window) {
-    const XRenderWindow &xrWindow = dynamic_cast<const XRenderWindow&>(window);
+    const XRenderWindow &xr_window = dynamic_cast<const XRenderWindow&>(window);
 
-    XRenderPictFormat *pictFormat = XRenderFindStandardFormat(display(), PictStandardARGB32);
-    XRenderPicturePtr thumbnail(new XRenderPicture(xrenderScreen(), pictFormat, FilterBest));
+    XRenderPictFormat *pict_format = XRenderFindStandardFormat(display(), PictStandardARGB32);
+    XRenderPicturePtr thumbnail(new XRenderPicture(xrenderScreen(), pict_format, FilterBest));
 
-    Pixmap thumbPixmap = createSolidPixmap(screen(), MAX_PREVIEW_WIDTH, MAX_PREVIEW_HEIGHT);
-    thumbnail->setPixmap(thumbPixmap, true);
+    Pixmap thumb_pixmap = createSolidPixmap(screen(), MAX_PREVIEW_WIDTH, MAX_PREVIEW_HEIGHT);
+    thumbnail->setPixmap(thumb_pixmap, true);
 
-    XRenderRenderingJob job = { PictOpOver, thumbnail, m_maskPicture, 0, 0, 0, 0, 0, 0, 0, 0 };
+    XRenderRenderingJob job = { PictOpOver, thumbnail, m_mask_picture, 0, 0, 0, 0, 0, 0, 0, 0 };
 
-    PreviewWindowData winData = { xrWindow, job };
-    m_previewData.insert(std::make_pair(xrWindow.window(), winData));
+    PreviewWindowData win_data = { xr_window, job };
+    m_preview_data.insert(std::make_pair(xr_window.window(), win_data));
 }
 
 /** Called, whenever a window is destroyed. */
 void PreviewPlugin::windowDestroyed(const BaseCompWindow &window) {
-    std::map<Window, PreviewWindowData>::iterator it = m_previewData.find(window.window());
-    if (it != m_previewData.end()) {
-        m_previewData.erase(it);
+    std::map<Window, PreviewWindowData>::iterator it = m_preview_data.find(window.window());
+    if (it != m_preview_data.end()) {
+        m_preview_data.erase(it);
     }
 }
 
@@ -105,119 +105,119 @@ void PreviewPlugin::windowDestroyed(const BaseCompWindow &window) {
 
 /** Rectangles that the plugin wishes to damage. */
 const std::vector<XRectangle> &PreviewPlugin::damagedAreas() {
-    m_damagedAreas.clear();
+    m_damaged_areas.clear();
 
-    if ((m_previousDamage.width > 0) && (m_previousDamage.height > 0)) {
-        m_damagedAreas.push_back(m_previousDamage);
+    if ((m_previous_damage.width > 0) && (m_previous_damage.height > 0)) {
+        m_damaged_areas.push_back(m_previous_damage);
     }
 
-    std::map<Window, PreviewWindowData>::iterator it = m_previewData.find(screen().currentIconbarItem());
-    if (it != m_previewData.end()) {
+    std::map<Window, PreviewWindowData>::iterator it = m_preview_data.find(screen().currentIconbarItem());
+    if (it != m_preview_data.end()) {
         Window cur_window = it->first;
-        PreviewWindowData &curPreview = it->second;
+        PreviewWindowData &cur_preview = it->second;
 
-        if ((m_previousWindow != cur_window)
-                && (curPreview.window.contentPicture()->pictureHandle())
-                && (curPreview.window.maskPicture()->pictureHandle())) {
-            m_previousWindow = cur_window;
-            updatePreviewWindowData(curPreview);
+        if ((m_previous_window != cur_window)
+                && (cur_preview.window.contentPicture()->pictureHandle())
+                && (cur_preview.window.maskPicture()->pictureHandle())) {
+            m_previous_window = cur_window;
+            updatePreviewWindowData(cur_preview);
         }
 
-        updatePreviewWindowPos(curPreview);
+        updatePreviewWindowPos(cur_preview);
 
-        XRectangle curDamage = { curPreview.job.destinationX, curPreview.job.destinationY,
-                                 curPreview.job.width, curPreview.job.height };
-        m_damagedAreas.push_back(curDamage);
-        m_previousDamage = curDamage;
+        XRectangle cur_damage = { cur_preview.job.destination_x, cur_preview.job.destination_y,
+                                  cur_preview.job.width, cur_preview.job.height };
+        m_damaged_areas.push_back(cur_damage);
+        m_previous_damage = cur_damage;
 
-        if (!m_tickTracker.isRunning()) {
-            m_tickTracker.start();
+        if (!m_tick_tracker.isRunning()) {
+            m_tick_tracker.start();
         }
     } else {
-        m_previousDamage.width = 0;
-        m_previousDamage.height = 0;
-        m_previousWindow = None;
-        m_tickTracker.stop();
+        m_previous_damage.width = 0;
+        m_previous_damage.height = 0;
+        m_previous_window = None;
+        m_tick_tracker.stop();
     }
 
-    return m_damagedAreas;
+    return m_damaged_areas;
 }
 
 /** Extra rendering actions and jobs. */
 const std::vector<XRenderRenderingJob> &PreviewPlugin::extraRenderingActions() {
-    m_extraJobs.clear();
+    m_extra_jobs.clear();
 
-    std::map<Window, PreviewWindowData>::iterator it = m_previewData.find(xrenderScreen().currentIconbarItem());
-    if (it != m_previewData.end()) {
-        PreviewWindowData &curPreview = it->second;
+    std::map<Window, PreviewWindowData>::iterator it = m_preview_data.find(xrenderScreen().currentIconbarItem());
+    if (it != m_preview_data.end()) {
+        PreviewWindowData &cur_preview = it->second;
 
-        if ((curPreview.job.sourcePicture->pictureHandle()) && (m_tickTracker.totalElapsedTicks() > 0)) {
-            m_extraJobs.push_back(curPreview.job);
+        if ((cur_preview.job.source_picture->pictureHandle()) && (m_tick_tracker.totalElapsedTicks() > 0)) {
+            m_extra_jobs.push_back(cur_preview.job);
         }
     }
 
-    return m_extraJobs;
+    return m_extra_jobs;
 }
 
 
 //--- INTERNAL FUNCTIONS -------------------------------------------------------
 
 // Update the preview window data.
-void PreviewPlugin::updatePreviewWindowData(PreviewWindowData &winPreview) {
+void PreviewPlugin::updatePreviewWindowData(PreviewWindowData &win_preview) {
     double scale_factor = 1.0;
-    scale_factor = std::max(scale_factor, winPreview.window.realWidth() / double(MAX_PREVIEW_WIDTH));
-    scale_factor = std::max(scale_factor, winPreview.window.realHeight() / double(MAX_PREVIEW_HEIGHT));
+    scale_factor = std::max(scale_factor, win_preview.window.realWidth() / double(MAX_PREVIEW_WIDTH));
+    scale_factor = std::max(scale_factor, win_preview.window.realHeight() / double(MAX_PREVIEW_HEIGHT));
 
-    int thumbWidth = static_cast<int>(winPreview.window.realWidth() / scale_factor);
-    int thumbHeight = static_cast<int>(winPreview.window.realHeight() / scale_factor);
+    int thumbWidth = static_cast<int>(win_preview.window.realWidth() / scale_factor);
+    int thumbHeight = static_cast<int>(win_preview.window.realHeight() / scale_factor);
 
-    winPreview.window.contentPicture()->scalePicture(scale_factor, scale_factor);
-    winPreview.window.maskPicture()->scalePicture(scale_factor, scale_factor);
+    win_preview.window.contentPicture()->scalePicture(scale_factor, scale_factor);
+    win_preview.window.maskPicture()->scalePicture(scale_factor, scale_factor);
 
     XRenderComposite(display(), PictOpSrc,
-                     winPreview.window.contentPicture()->pictureHandle(), 
-                     winPreview.window.maskPicture()->pictureHandle(),
-                     winPreview.job.sourcePicture->pictureHandle(),
+                     win_preview.window.contentPicture()->pictureHandle(), 
+                     win_preview.window.maskPicture()->pictureHandle(),
+                     win_preview.job.source_picture->pictureHandle(),
                      0, 0, 0, 0, 0, 0, thumbWidth, thumbHeight);
 
-    winPreview.window.contentPicture()->resetPictureTransform();
-    winPreview.window.maskPicture()->resetPictureTransform();
+    win_preview.window.contentPicture()->resetPictureTransform();
+    win_preview.window.maskPicture()->resetPictureTransform();
 
-    winPreview.job.width = thumbWidth;
-    winPreview.job.height = thumbHeight;
+    win_preview.job.width = thumbWidth;
+    win_preview.job.height = thumbHeight;
 }
 
 // Update the preview window position.
 // TODO: Place the preview window on the edge of the toolbar.
 // TODO: Left/Right toolbar orientations.
-void PreviewPlugin::updatePreviewWindowPos(PreviewWindowData &winPreview) {
-    int mousePosX, mousePosY;
-    mousePointerLocation(screen(), mousePosX, mousePosY);
+void PreviewPlugin::updatePreviewWindowPos(PreviewWindowData &win_preview) {
+    int mouse_pos_x, mouse_pos_y;
+    mousePointerLocation(screen(), mouse_pos_x, mouse_pos_y);
 
     if (screen().heads().size() > 0) {
-        XRectangle curHead = screen().heads()[0];
+        XRectangle cur_head = screen().heads()[0];
 
         for (size_t i = 1; i < screen().heads().size(); i++) {
             XRectangle head = screen().heads()[i];
-            if ((mousePosX >= head.x) && (mousePosY >= head.y)
-                    && (mousePosX < (head.x + head.width))
-                    && (mousePosY < (head.y + head.height))) {
-                curHead = head;
+            if ((mouse_pos_x >= head.x) && (mouse_pos_y >= head.y)
+                    && (mouse_pos_x < (head.x + head.width))
+                    && (mouse_pos_y < (head.y + head.height))) {
+                cur_head = head;
                 break;
             }
         }
 
-        winPreview.job.destinationX = mousePosX - (winPreview.job.width / 2);
+        win_preview.job.destination_x = mouse_pos_x - (win_preview.job.width / 2);
 
-        int midHead = curHead.y + (curHead.height / 2);
-        if (mousePosY < midHead) {
-            winPreview.job.destinationY = mousePosY + 10;
+        int mid_head = cur_head.y + (cur_head.height / 2);
+        if (mouse_pos_y < mid_head) {
+            win_preview.job.destination_y = mouse_pos_y + 10;
         } else {
-            winPreview.job.destinationY = mousePosY - winPreview.job.height - 10;
+            win_preview.job.destination_y = mouse_pos_y - win_preview.job.height - 10;
         }
     } else {    // But what IF.
-        winPreview.job.destinationX = mousePosX - (winPreview.job.width / 2);
-        winPreview.job.destinationY = mousePosY + 10;
+        win_preview.job.destination_x = mouse_pos_x - (win_preview.job.width / 2);
+        win_preview.job.destination_y = mouse_pos_y + 10;
     }
 }
 

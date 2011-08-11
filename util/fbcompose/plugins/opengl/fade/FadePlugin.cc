@@ -55,7 +55,7 @@ const GLchar VERTEX_SHADER[] = "\
 // Constructor.
 FadePlugin::FadePlugin(const BaseScreen &screen, const std::vector<FbTk::FbString> &args) :
     OpenGLPlugin(screen, args),
-    m_shaderInitializer() {
+    m_shader_initializer() {
 }
 
 // Destructor.
@@ -66,8 +66,8 @@ FadePlugin::~FadePlugin() { }
 
 // Initialize OpenGL-specific code.
 void FadePlugin::initOpenGL(OpenGLShaderProgramPtr shader_program) {
-    m_alpha_uniformPos = shader_program->getUniformLocation("fade_Alpha");
-    m_shaderInitializer.setUniform(m_alpha_uniformPos);
+    m_alpha_uniform_pos = shader_program->getUniformLocation("fade_Alpha");
+    m_shader_initializer.setUniform(m_alpha_uniform_pos);
 }
 
 
@@ -89,35 +89,35 @@ const char *FadePlugin::vertexShader() const {
 // Called, whenever a window becomes ignored.
 void FadePlugin::windowBecameIgnored(const BaseCompWindow &window) {
     // Remove the window's positive fade, if any.
-    std::map<Window, PosFadeData>::iterator posIt = m_positiveFades.find(window.window());
-    if (posIt != m_positiveFades.end()) {
-        m_positiveFades.erase(posIt);
+    std::map<Window, PosFadeData>::iterator pos_it = m_positive_fades.find(window.window());
+    if (pos_it != m_positive_fades.end()) {
+        m_positive_fades.erase(pos_it);
     } 
 
     // Remove the window's negative fade, if any.
-    std::vector<NegFadeData>::iterator negIt = m_negativeFades.begin();
-    while (negIt != m_negativeFades.end()) {
-        if (negIt->windowId == window.window()) {
-            m_negativeFades.erase(negIt);
+    std::vector<NegFadeData>::iterator neg_it = m_negative_fades.begin();
+    while (neg_it != m_negative_fades.end()) {
+        if (neg_it->window_id == window.window()) {
+            m_negative_fades.erase(neg_it);
             break;
         } 
-        ++negIt;
+        ++neg_it;
     }
 }
 
 // Called, whenever a window is mapped.
 void FadePlugin::windowMapped(const BaseCompWindow &window) {
-    PosFadeData newFade;
+    PosFadeData new_fade;
 
     // Is the window being faded out?
-    std::vector<NegFadeData>::iterator it = m_negativeFades.begin();
+    std::vector<NegFadeData>::iterator it = m_negative_fades.begin();
     while (true) {
-        if (it == m_negativeFades.end()) {
-            newFade.fadeAlpha = 0;
+        if (it == m_negative_fades.end()) {
+            new_fade.fade_alpha = 0;
             break;
-        } else if (it->windowId == window.window()) {
-            newFade.fadeAlpha = it->fadeAlpha;
-            m_negativeFades.erase(it);
+        } else if (it->window_id == window.window()) {
+            new_fade.fade_alpha = it->fade_alpha;
+            m_negative_fades.erase(it);
             break;
         } else {
             ++it;
@@ -125,46 +125,46 @@ void FadePlugin::windowMapped(const BaseCompWindow &window) {
     }
 
     // Initialize the remaining fields.
-    newFade.timer.setTickSize(250000 / 255);
-    newFade.timer.start();
+    new_fade.timer.setTickSize(250000 / 255);
+    new_fade.timer.start();
 
     // Track the fade.
-    m_positiveFades.insert(std::make_pair(window.window(), newFade));
+    m_positive_fades.insert(std::make_pair(window.window(), new_fade));
 }
 
 // Called, whenever a window is unmapped.
 void FadePlugin::windowUnmapped(const BaseCompWindow &window) {
-    const OpenGLWindow &glWindow = dynamic_cast<const OpenGLWindow&>(window);
+    const OpenGLWindow &gl_window = dynamic_cast<const OpenGLWindow&>(window);
 
     // Is the window being faded in?
-    float fadeAlpha = 255;
-    std::map<Window, PosFadeData>::iterator it = m_positiveFades.find(window.window());
+    float fade_alpha = 255;
+    std::map<Window, PosFadeData>::iterator it = m_positive_fades.find(window.window());
 
-    if (it != m_positiveFades.end()) {
-        fadeAlpha = it->second.fadeAlpha;
-        m_positiveFades.erase(it);
+    if (it != m_positive_fades.end()) {
+        fade_alpha = it->second.fade_alpha;
+        m_positive_fades.erase(it);
     }
 
     // Create a fade for each window partition.
-    for (int i = 0; i < glWindow.partitionCount(); i++) {
-        NegFadeData newFade;
+    for (int i = 0; i < gl_window.partitionCount(); i++) {
+        NegFadeData new_fade;
 
-        newFade.fadeAlpha = fadeAlpha;
-        newFade.timer.setTickSize(250000 / 255);
-        newFade.timer.start();
-        newFade.windowId = glWindow.window();
+        new_fade.fade_alpha = fade_alpha;
+        new_fade.timer.setTickSize(250000 / 255);
+        new_fade.timer.start();
+        new_fade.window_id = gl_window.window();
 
-        newFade.job.prim_pos_buffer = glWindow.partitionPosBuffer(i);
-        newFade.job.main_tex_coord_buffer = openGLScreen().defaultTexCoordBuffer();
-        newFade.job.main_texture = glWindow.contentTexturePartition(i);
-        newFade.job.shape_tex_coord_buffer = openGLScreen().defaultTexCoordBuffer();
-        newFade.job.shape_texture = glWindow.shapeTexturePartition(i);
-        newFade.job.alpha = glWindow.alpha() / 255.0;
+        new_fade.job.prim_pos_buffer = gl_window.partitionPosBuffer(i);
+        new_fade.job.main_tex_coord_buffer = openGLScreen().defaultTexCoordBuffer();
+        new_fade.job.main_texture = gl_window.contentTexturePartition(i);
+        new_fade.job.shape_tex_coord_buffer = openGLScreen().defaultTexCoordBuffer();
+        new_fade.job.shape_texture = gl_window.shapeTexturePartition(i);
+        new_fade.job.alpha = gl_window.alpha() / 255.0;
 
-        newFade.job.shaderInit = new FadeShaderInitializer(m_alpha_uniformPos, 0.0);
-        newFade.job.shaderDeinit = new NullDeinitializer();
+        new_fade.job.shader_init = new FadeShaderInitializer(m_alpha_uniform_pos, 0.0);
+        new_fade.job.shader_deinit = new NullDeinitializer();
 
-        m_negativeFades.push_back(newFade);
+        m_negative_fades.push_back(new_fade);
     }
 }
 
@@ -172,71 +172,71 @@ void FadePlugin::windowUnmapped(const BaseCompWindow &window) {
 //--- RENDERING ACTIONS --------------------------------------------------------
 
 // Background rendering initialization.
-void FadePlugin::backgroundRenderInit(int /*partId*/) {
-    m_shaderInitializer.setAlpha(1.0);
-    m_shaderInitializer.execute();
+void FadePlugin::backgroundRenderInit(int /*part_id*/) {
+    m_shader_initializer.setAlpha(1.0);
+    m_shader_initializer.execute();
 }
 
 // Window rendering initialization.
-void FadePlugin::windowRenderInit(const OpenGLWindow &window, int /*partId*/) {
-    std::map<Window, PosFadeData>::iterator it = m_positiveFades.find(window.window());
-    if (it != m_positiveFades.end()) {
+void FadePlugin::windowRenderInit(const OpenGLWindow &window, int /*part_id*/) {
+    std::map<Window, PosFadeData>::iterator it = m_positive_fades.find(window.window());
+    if (it != m_positive_fades.end()) {
         try {
-            it->second.fadeAlpha += it->second.timer.newElapsedTicks();
+            it->second.fade_alpha += it->second.timer.newElapsedTicks();
         } catch (const TimeException &e) {
-            it->second.fadeAlpha = 255;
+            it->second.fade_alpha = 255;
         }
         
-        if (it->second.fadeAlpha >= 255) {
-            m_shaderInitializer.setAlpha(1.0);
-            m_positiveFades.erase(it);
+        if (it->second.fade_alpha >= 255) {
+            m_shader_initializer.setAlpha(1.0);
+            m_positive_fades.erase(it);
         } else {
-            m_shaderInitializer.setAlpha(it->second.fadeAlpha / 255.0);
+            m_shader_initializer.setAlpha(it->second.fade_alpha / 255.0);
         }
     } else {
-        m_shaderInitializer.setAlpha(1.0);
+        m_shader_initializer.setAlpha(1.0);
     }
 
-    m_shaderInitializer.execute();
+    m_shader_initializer.execute();
 }
 
 // Reconfigure rectangle rendering initialization.
 void FadePlugin::recRectRenderInit(const XRectangle &/*rec_rect*/) {
-    m_shaderInitializer.setAlpha(1.0);
-    m_shaderInitializer.execute();
+    m_shader_initializer.setAlpha(1.0);
+    m_shader_initializer.execute();
 }
 
 
 // Extra rendering actions and jobs.
 const std::vector<OpenGLRenderingJob> &FadePlugin::extraRenderingActions() {
-    m_extraJobs.clear();    // TODO: Stop copying jobs on every call.
+    m_extra_jobs.clear();    // TODO: Stop copying jobs on every call.
 
-    for (size_t i = 0; i < m_negativeFades.size(); i++) {
+    for (size_t i = 0; i < m_negative_fades.size(); i++) {
         try {
-            m_negativeFades[i].fadeAlpha -= m_negativeFades[i].timer.newElapsedTicks();
+            m_negative_fades[i].fade_alpha -= m_negative_fades[i].timer.newElapsedTicks();
         } catch (const TimeException &e) {
-            m_negativeFades[i].fadeAlpha = 0;
+            m_negative_fades[i].fade_alpha = 0;
         }
 
-        if (m_negativeFades[i].fadeAlpha <= 0) {
-            m_negativeFades[i].fadeAlpha = 0;
+        if (m_negative_fades[i].fade_alpha <= 0) {
+            m_negative_fades[i].fade_alpha = 0;
         }
 
-        (dynamic_cast<FadeShaderInitializer*>(m_negativeFades[i].job.shaderInit))->setAlpha(m_negativeFades[i].fadeAlpha / 255.0);
-        m_extraJobs.push_back(m_negativeFades[i].job);
+        (dynamic_cast<FadeShaderInitializer*>(m_negative_fades[i].job.shader_init))->setAlpha(m_negative_fades[i].fade_alpha / 255.0);
+        m_extra_jobs.push_back(m_negative_fades[i].job);
     }
 
-    return m_extraJobs;
+    return m_extra_jobs;
 }
 
 // Post extra rendering actions.
 void FadePlugin::postExtraRenderingActions() {
-    std::vector<NegFadeData>::iterator it = m_negativeFades.begin();
-    while (it != m_negativeFades.end()) {
-        if (it->fadeAlpha <= 0) {
-            delete it->job.shaderInit;
-            delete it->job.shaderDeinit;
-            it = m_negativeFades.erase(it);
+    std::vector<NegFadeData>::iterator it = m_negative_fades.begin();
+    while (it != m_negative_fades.end()) {
+        if (it->fade_alpha <= 0) {
+            delete it->job.shader_init;
+            delete it->job.shader_deinit;
+            it = m_negative_fades.erase(it);
         } else {
             ++it;
         }
@@ -246,8 +246,8 @@ void FadePlugin::postExtraRenderingActions() {
 
 // Null rendering job initialization.
 void FadePlugin::nullRenderInit() {
-    m_shaderInitializer.setAlpha(1.0);
-    m_shaderInitializer.execute();
+    m_shader_initializer.setAlpha(1.0);
+    m_shader_initializer.execute();
 }
 
 

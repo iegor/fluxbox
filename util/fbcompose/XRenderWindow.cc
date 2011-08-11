@@ -33,15 +33,15 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Constructor.
-XRenderWindow::XRenderWindow(const XRenderScreen &screen, Window window_xid, const char *pictFilter) :
+XRenderWindow::XRenderWindow(const XRenderScreen &screen, Window window_xid, const char *pict_filter) :
     BaseCompWindow(static_cast<const BaseScreen&>(screen), window_xid, false),
-    m_pictFilter(pictFilter) {
+    m_pict_filter(pict_filter) {
 
-    XRenderPictFormat *contentPictFormat = XRenderFindVisualFormat(display(), visual());
-    m_contentPicture = new XRenderPicture(screen, contentPictFormat, m_pictFilter);
+    XRenderPictFormat *content_pict_format = XRenderFindVisualFormat(display(), visual());
+    m_content_picture = new XRenderPicture(screen, content_pict_format, m_pict_filter);
 
-    XRenderPictFormat *maskPictFormat = XRenderFindStandardFormat(display(), PictStandardARGB32);
-    m_maskPicture = new XRenderPicture(screen, maskPictFormat, m_pictFilter);
+    XRenderPictFormat *mask_pict_format = XRenderFindStandardFormat(display(), PictStandardARGB32);
+    m_mask_picture = new XRenderPicture(screen, mask_pict_format, m_pict_filter);
 }
 
 // Destructor.
@@ -56,10 +56,10 @@ void XRenderWindow::updateContents() {
     if (contentPixmap()) {
         XRenderPictureAttributes pa;
         pa.subwindow_mode = IncludeInferiors;
-        long paMask = CPSubwindowMode;
+        long pa_mask = CPSubwindowMode;
 
-        m_contentPicture->setPictFormat(XRenderFindVisualFormat(display(), visual()));
-        m_contentPicture->setPixmap(contentPixmap(), false, pa, paMask);
+        m_content_picture->setPictFormat(XRenderFindVisualFormat(display(), visual()));
+        m_content_picture->setPixmap(contentPixmap(), false, pa, pa_mask);
     }
 
     if (clipShapeChanged()) {
@@ -92,14 +92,14 @@ void XRenderWindow::updateShape() {
 
 // Update the window's mask picture.
 void XRenderWindow::updateMaskPicture() {
-    if ((m_maskPicture->pictureHandle() == None) || isResized()) {
-        Pixmap maskPixmap = XCreatePixmap(display(), window(), realWidth(), realHeight(), 32);
-        m_maskPicture->setPixmap(maskPixmap, true);
+    if ((m_mask_picture->pictureHandle() == None) || isResized()) {
+        Pixmap mask_pixmap = XCreatePixmap(display(), window(), realWidth(), realHeight(), 32);
+        m_mask_picture->setPixmap(mask_pixmap, true);
     }
 
     XRenderColor color = { 0, 0, 0, 0 };
-    XRenderFillRectangle(display(), PictOpSrc, m_maskPicture->pictureHandle(), &color, 0, 0, realWidth(), realHeight());
+    XRenderFillRectangle(display(), PictOpSrc, m_mask_picture->pictureHandle(), &color, 0, 0, realWidth(), realHeight());
 
     color.alpha = (unsigned long)((alpha() * 0xffff) / 255.0);
-    XRenderFillRectangles(display(), PictOpSrc, m_maskPicture->pictureHandle(), &color, clipShapeRects(), clipShapeRectCount());
+    XRenderFillRectangles(display(), PictOpSrc, m_mask_picture->pictureHandle(), &color, clipShapeRects(), clipShapeRectCount());
 }

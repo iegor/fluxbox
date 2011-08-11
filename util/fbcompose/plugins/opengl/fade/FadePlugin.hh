@@ -139,10 +139,10 @@ namespace FbCompositor {
         //--- RENDERING ACTIONS ------------------------------------------------
 
         /** Background rendering initialization. */
-        void backgroundRenderInit(int partId);
+        void backgroundRenderInit(int part_id);
 
         /** Window rendering initialization. */
-        void windowRenderInit(const OpenGLWindow &window, int partId);
+        void windowRenderInit(const OpenGLWindow &window, int part_id);
 
         /** Reconfigure rectangle rendering initialization. */
         void recRectRenderInit(const XRectangle &rec_rect);
@@ -163,38 +163,38 @@ namespace FbCompositor {
         //--- GENERAL RENDERING VARIABLES --------------------------------------
 
         /** Location of the fade_Alpha uniform. */
-        GLuint m_alpha_uniformPos;
+        GLuint m_alpha_uniform_pos;
 
 
         /** Main fade initialization object. */
-        FadeShaderInitializer m_shaderInitializer;
+        FadeShaderInitializer m_shader_initializer;
 
         /** A vector, containing the extra rendering jobs. */
-        std::vector<OpenGLRenderingJob> m_extraJobs;
+        std::vector<OpenGLRenderingJob> m_extra_jobs;
 
 
         //--- FADE SPECIFIC ----------------------------------------------------
 
         /** Holds the data about positive fades. */
         struct PosFadeData {
-            int fadeAlpha;          ///< Window's relative fade alpha.
+            int fade_alpha;         ///< Window's relative fade alpha.
             TickTracker timer;      ///< Timer that tracks the current fade.
         };
 
         /** A list of appearing (positive) fades. */
-        std::map<Window, PosFadeData> m_positiveFades;
+        std::map<Window, PosFadeData> m_positive_fades;
 
 
         /** Holds the data about negative fades. */
         struct NegFadeData {
             OpenGLRenderingJob job;     ///< The associated rendering job.
-            int fadeAlpha;              ///< Window's fade relative alpha.
+            int fade_alpha;             ///< Window's fade relative alpha.
             TickTracker timer;          ///< Timer that tracks the current fade.
-            Window windowId;            ///< ID of the window being faded.
+            Window window_id;           ///< ID of the window being faded.
         };
 
         /** A list of disappearing (negative) fades. */
-        std::vector<NegFadeData> m_negativeFades;
+        std::vector<NegFadeData> m_negative_fades;
     };
 
 

@@ -128,28 +128,28 @@ namespace FbCompositor {
         Window m_rendering_window;
 
         /** The picture of the back buffer. */
-        XRenderPicturePtr m_backBufferPicture;
+        XRenderPicturePtr m_back_buffer_picture;
 
         /** The picture of the rendering window. */
-        XRenderPicturePtr m_renderingPicture;
+        XRenderPicturePtr m_rendering_picture;
 
 
         /** A container for rectangle, damaged by plugins. */
-        std::vector<XRectangle> m_pluginDamageRects;
+        std::vector<XRectangle> m_plugin_damage_rects;
 
         /** Screen region, damaged by plugins. */
-        XserverRegion m_pluginDamage;
+        XserverRegion m_plugin_damage;
 
 
         /** The picture of the root window. */
-        XRenderPicturePtr m_rootPicture;
+        XRenderPicturePtr m_root_picture;
 
         /** Whether the root window has changed since the last update. */
-        bool m_rootChanged;
+        bool m_root_changed;
 
 
         /** The picture filter to use. */
-        const char *m_pictFilter;
+        const char *m_pict_filter;
     };
 
 
@@ -157,7 +157,7 @@ namespace FbCompositor {
 
     // Returns the preferred filter for XRender Pictures.
     inline const char *XRenderScreen::pictFilter() const {
-        return m_pictFilter;
+        return m_pict_filter;
     }
 }
 

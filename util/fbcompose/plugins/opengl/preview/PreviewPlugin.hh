@@ -97,17 +97,17 @@ namespace FbCompositor {
         //--- INTERNAL FUNCTIONS -----------------------------------------------
 
         /** Update the preview window. */
-        void updatePreviewWindow(PreviewWindowData &winPreview);
+        void updatePreviewWindow(PreviewWindowData &win_preview);
 
 
         //--- GENERAL RENDERING VARIABLES --------------------------------------
 
         /** Vector, containing the plugin's extra rendering jobs. */
-        std::vector<OpenGLRenderingJob> m_extraJobs;
+        std::vector<OpenGLRenderingJob> m_extra_jobs;
 
 
         /** Timer that signals when the preview window should appear. */
-        TickTracker m_tickTracker;
+        TickTracker m_tick_tracker;
 
 
         //--- PREVIEW WINDOW DATA ----------------------------------------------
@@ -119,7 +119,7 @@ namespace FbCompositor {
         };
 
         /** A list of potential preview windows. */
-        std::map<Window, PreviewWindowData> m_previewData;
+        std::map<Window, PreviewWindowData> m_preview_data;
     };
 
 

@@ -59,11 +59,11 @@ int FbCompositor::largestSmallerPowerOf2(int value) {
 }
 
 // Returns the location of the mouse pointer.
-void FbCompositor::mousePointerLocation(const BaseScreen &screen, int &rootX_return, int &rootY_return) {
-    static Window rootWin, childWin;
-    static int childX, childY;
+void FbCompositor::mousePointerLocation(const BaseScreen &screen, int &root_x_return, int &root_y_return) {
+    static Window root_win, child_win;
+    static int child_x, child_y;
     static unsigned int mask;
 
     XQueryPointer((Display*)(screen.display()), screen.rootWindow().window(),
-                  &rootWin, &childWin, &rootX_return, &rootY_return, &childX, &childY, &mask);
+                  &root_win, &child_win, &root_x_return, &root_y_return, &child_x, &child_y, &mask);
 }

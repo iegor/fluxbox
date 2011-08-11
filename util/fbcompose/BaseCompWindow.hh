@@ -114,15 +114,15 @@ namespace FbCompositor {
 
         /** \returns the value of the specified property. */
         template<class T>
-        std::vector<T> propertyValue(Atom propertyAtom);
+        std::vector<T> propertyValue(Atom property_atom);
 
         /** Convenience function for accessing properties with a single value. */
         template<class T>
-        T singlePropertyValue(Atom propertyAtom, T defaultValue);
+        T singlePropertyValue(Atom property_atom, T default_value);
 
         /** Convenience function that returns the first existing single atom value. */
         template<class T>
-        T firstSinglePropertyValue(std::vector<Atom> propertyAtoms, T defaultValue);
+        T firstSinglePropertyValue(std::vector<Atom> property_atoms, T default_value);
 
 
         //--- WINDOW MANIPULATION ----------------------------------------------
@@ -150,7 +150,7 @@ namespace FbCompositor {
         void setClipShapeChanged();
 
         /** Sets window's ignore flag. */
-        void setIgnored(bool ignoreStatus);
+        void setIgnored(bool ignore_status);
 
 
     protected:
@@ -207,8 +207,8 @@ namespace FbCompositor {
         //--- CONVENIENCE FUNCTIONS --------------------------------------------
 
         /** Returns the raw contents of a property. */
-        bool rawPropertyData(Atom propertyAtom, Atom propertyType,
-                             unsigned long *itemCount_return, unsigned char **data_return);
+        bool rawPropertyData(Atom property_atom, Atom property_type,
+                             unsigned long *item_count_return, unsigned char **data_return);
 
 
 
@@ -328,8 +328,8 @@ namespace FbCompositor {
     }
 
     // Sets the window's ignore flag.
-    inline void BaseCompWindow::setIgnored(bool ignoreStatus) {
-        m_is_ignored = ignoreStatus;
+    inline void BaseCompWindow::setIgnored(bool ignore_status) {
+        m_is_ignored = ignore_status;
     }
 
     // Returns the window's height with borders factored in.
@@ -367,13 +367,13 @@ namespace FbCompositor {
 
     // Returns the value of the specified property.
     template<class T>
-    std::vector<T> BaseCompWindow::propertyValue(Atom propertyAtom) {
-        if (propertyAtom) {
-            unsigned long nItems;
+    std::vector<T> BaseCompWindow::propertyValue(Atom property_atom) {
+        if (property_atom) {
+            unsigned long item_count;
             T *data;
 
-            if (rawPropertyData(propertyAtom, AnyPropertyType, &nItems, reinterpret_cast<unsigned char**>(&data))) {
-                std::vector<T> actualData(data, data + nItems);
+            if (rawPropertyData(property_atom, AnyPropertyType, &item_count, reinterpret_cast<unsigned char**>(&data))) {
+                std::vector<T> actualData(data, data + item_count);
                 XFree(data);
                 return actualData;
             }
@@ -384,10 +384,10 @@ namespace FbCompositor {
 
     // Convenience function for accessing properties with a single value.
     template<class T>
-    T BaseCompWindow::singlePropertyValue(Atom propertyAtom, T defaultValue) {
-        std::vector<T> values = propertyValue<T>(propertyAtom);
+    T BaseCompWindow::singlePropertyValue(Atom property_atom, T default_value) {
+        std::vector<T> values = propertyValue<T>(property_atom);
         if (values.size() == 0) {
-            return defaultValue;
+            return default_value;
         } else {
             return values[0];
         }
@@ -395,14 +395,14 @@ namespace FbCompositor {
 
     // Convenience function that returns the first existing single atom value.
     template<class T>
-    T BaseCompWindow::firstSinglePropertyValue(std::vector<Atom> propertyAtoms, T defaultValue) {
-        for (size_t i = 0; i < propertyAtoms.size(); i++) {
-            std::vector<T> values = propertyValue<T>(propertyAtoms[i]);
+    T BaseCompWindow::firstSinglePropertyValue(std::vector<Atom> property_atoms, T default_value) {
+        for (size_t i = 0; i < property_atoms.size(); i++) {
+            std::vector<T> values = propertyValue<T>(property_atoms[i]);
             if (values.size() != 0) {
                 return values[0];
             }
         }
-        return defaultValue;
+        return default_value;
     }
 }
 

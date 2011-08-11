@@ -103,8 +103,8 @@ namespace FbCompositor {
         std::vector<FbTk::FbString> buildPluginPaths(const FbTk::FbString &name);
 
         /** \returns some object from the given library handle. */
-        void *getLibraryObject(void *handle, const char *objectName, const char *plugin_name,
-                               const char *verboseObjectName);
+        void *getLibraryObject(void *handle, const char *object_name, const char *plugin_name,
+                               const char *verbose_object_name);
 
 
         //--- PLUGINS AND METADATA ---------------------------------------------
@@ -112,14 +112,14 @@ namespace FbCompositor {
         /** Specific plugin-related data. */
         struct PluginLibData {
             void *handle;                           ///< Handle to the loaded library.
-            CreatePluginFunction createFunction;    ///< Plugin creation function.
+            CreatePluginFunction create_function;   ///< Plugin creation function.
         };
 
         /** A map, containing all loaded plugins. */
-        std::map<FbTk::FbString, PluginLibData> m_pluginLibs;
+        std::map<FbTk::FbString, PluginLibData> m_plugin_libs;
 
         /** A vector with active plugin objects. */
-        std::vector<BasePlugin*> m_pluginObjects;
+        std::vector<BasePlugin*> m_plugin_objects;
 
         /** Type of the plugins this object manages. */
         PluginType m_plugin_type;
@@ -133,12 +133,12 @@ namespace FbCompositor {
 
     // Returns a reference to a vector with plugin objects.
     inline std::vector<BasePlugin*> &PluginManager::plugins() {
-        return m_pluginObjects;
+        return m_plugin_objects;
     }
 
     // Returns a reference to a vector with plugin objects (const version).
     inline const std::vector<BasePlugin*> &PluginManager::plugins() const {
-        return m_pluginObjects;
+        return m_plugin_objects;
     }
 }
 

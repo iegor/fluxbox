@@ -171,7 +171,7 @@ namespace FbCompositor {
     unsigned int getBorderBitfield(int unit_width, int unit_height, int x, int y);
 
     /** Space partitioning function. */
-    std::vector<XRectangle> partitionSpace(int x, int y, int width, int height, int maxPartitionSize,
+    std::vector<XRectangle> partitionSpace(int x, int y, int width, int height, int max_partition_size,
                                            int *unit_width_return = 0, int *unit_height_return = 0);
 
     /** Partitions space directly to buffers. */

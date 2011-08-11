@@ -33,13 +33,13 @@ using namespace FbCompositor;
 //------- CONSTRUCTORS AND DESTRUCTORS -----------------------------------------
 
 // Constructor.
-XRenderPicture::XRenderPicture(const XRenderScreen &screen, XRenderPictFormat *pictFormat, const char *pictFilter) :
+XRenderPicture::XRenderPicture(const XRenderScreen &screen, XRenderPictFormat *pict_format, const char *pict_filter) :
     m_drawable(None),
     m_gc(None),
     m_picture(None),
-    m_resourcesManaged(false),
-    m_pictFilter(pictFilter),
-    m_pictFormat(pictFormat),
+    m_resources_managed(false),
+    m_pict_filter(pict_filter),
+    m_pict_format(pict_format),
     m_screen(screen) {
 
     m_display = (Display*)(screen.display());
@@ -54,33 +54,33 @@ XRenderPicture::~XRenderPicture() {
 //------- MUTATORS -------------------------------------------------------------
 
 // Associate the picture with the given pixmap.
-void XRenderPicture::setPixmap(Pixmap pixmap, bool manage_pixmap, XRenderPictureAttributes pa, long paMask) {
+void XRenderPicture::setPixmap(Pixmap pixmap, bool manage_pixmap, XRenderPictureAttributes pa, long pa_mask) {
     if (m_drawable != pixmap) {
         freeResources();
 
         m_drawable = pixmap;
         m_gc = XCreateGC(m_display, pixmap, 0, NULL);
 
-        m_picture = XRenderCreatePicture(m_display, pixmap, m_pictFormat, paMask, &pa);
-        XRenderSetPictureFilter(m_display, m_picture, m_pictFilter, NULL, 0);
+        m_picture = XRenderCreatePicture(m_display, pixmap, m_pict_format, pa_mask, &pa);
+        XRenderSetPictureFilter(m_display, m_picture, m_pict_filter, NULL, 0);
     }
 
-    m_resourcesManaged = manage_pixmap;
+    m_resources_managed = manage_pixmap;
 }
 
 // Associate the picture with the given window.
-void XRenderPicture::setWindow(Window window, XRenderPictureAttributes pa, long paMask) {
+void XRenderPicture::setWindow(Window window, XRenderPictureAttributes pa, long pa_mask) {
     if (m_drawable != window) {
         freeResources();
 
         m_drawable = window;
         m_gc = XCreateGC(m_display, window, 0, NULL);
 
-        m_picture = XRenderCreatePicture(m_display, window, m_pictFormat, paMask, &pa);
-        XRenderSetPictureFilter(m_display, m_picture, m_pictFilter, NULL, 0);
+        m_picture = XRenderCreatePicture(m_display, window, m_pict_format, pa_mask, &pa);
+        XRenderSetPictureFilter(m_display, m_picture, m_pict_filter, NULL, 0);
     }
 
-    m_resourcesManaged = false;
+    m_resources_managed = false;
 }
 
 
@@ -95,10 +95,10 @@ void XRenderPicture::resetPictureTransform() {
 }
 
 // Scale the picture by the given inverse quotients.
-void XRenderPicture::scalePicture(double xFactorInv, double yFactorInv) {
+void XRenderPicture::scalePicture(double x_factor_inv, double y_factor_inv) {
     XTransform transform = { {
-        { XDoubleToFixed(xFactorInv), XDoubleToFixed(0.0), XDoubleToFixed(0.0) },
-        { XDoubleToFixed(0.0), XDoubleToFixed(yFactorInv), XDoubleToFixed(0.0) },
+        { XDoubleToFixed(x_factor_inv), XDoubleToFixed(0.0), XDoubleToFixed(0.0) },
+        { XDoubleToFixed(0.0), XDoubleToFixed(y_factor_inv), XDoubleToFixed(0.0) },
         { XDoubleToFixed(0.0), XDoubleToFixed(0.0), XDoubleToFixed(1.0) }
     } };
     setPictureTransform(transform);
@@ -123,7 +123,7 @@ void XRenderPicture::freeResources() {
         m_gc = None;
     }
 
-    if (m_resourcesManaged && m_drawable) {
+    if (m_resources_managed && m_drawable) {
         XFreePixmap(m_display, m_drawable);     // Windows will never be managed.
         m_drawable = None;
     }

@@ -92,10 +92,10 @@ namespace FbCompositor {
         int pluginCount() const;
 
         /** \returns the name of the given plugin. */
-        const FbTk::FbString &pluginName(int pluginId) const;
+        const FbTk::FbString &pluginName(int plugin_id) const;
 
         /** \returns the arguments to the given plugin. */
-        const std::vector<FbTk::FbString> &pluginArgs(int pluginId) const;
+        const std::vector<FbTk::FbString> &pluginArgs(int plugin_id) const;
 
 
         //--- CONVENIENCE FUNCTIONS --------------------------------------------
@@ -168,11 +168,11 @@ namespace FbCompositor {
     }
 
     // Returns the arguments to the given plugin.
-    inline const std::vector<FbTk::FbString> &CompositorConfig::pluginArgs(int pluginId) const {
-        if ((pluginId < 0) || (pluginId >= pluginCount())) {
+    inline const std::vector<FbTk::FbString> &CompositorConfig::pluginArgs(int plugin_id) const {
+        if ((plugin_id < 0) || (plugin_id >= pluginCount())) {
             throw IndexException("Out of bounds index in CompositorConfig::pluginArgs.");
         }
-        return m_plugins[pluginId].second;
+        return m_plugins[plugin_id].second;
     }
 
     // Returns the number of available plugins.
@@ -181,11 +181,11 @@ namespace FbCompositor {
     }
 
     // Returns the name of the given plugin.
-    inline const FbTk::FbString &CompositorConfig::pluginName(int pluginId) const {
-        if ((pluginId < 0) || (pluginId >= pluginCount())) {
+    inline const FbTk::FbString &CompositorConfig::pluginName(int plugin_id) const {
+        if ((plugin_id < 0) || (plugin_id >= pluginCount())) {
             throw IndexException("Out of bounds index in CompositorConfig::pluginName.");
         }
-        return m_plugins[pluginId].first;
+        return m_plugins[plugin_id].first;
     }
 
     // Returns the rendering mode.

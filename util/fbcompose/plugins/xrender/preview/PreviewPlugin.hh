@@ -90,33 +90,33 @@ namespace FbCompositor {
         //--- INTERNAL FUNCTIONS -----------------------------------------------
 
         /** Update the preview window data. */
-        void updatePreviewWindowData(PreviewWindowData &winPreview);
+        void updatePreviewWindowData(PreviewWindowData &win_preview);
 
         /** Update the preview window position. */
-        void updatePreviewWindowPos(PreviewWindowData &winPreview);
+        void updatePreviewWindowPos(PreviewWindowData &win_preview);
 
 
         //--- GENERAL RENDERING VARIABLES --------------------------------------
 
         /** Vector, containing the areas that the plugin wishes to paint. */
-        std::vector<XRectangle> m_damagedAreas;
+        std::vector<XRectangle> m_damaged_areas;
 
         /** Vector, containing the plugin's extra rendering jobs. */
-        std::vector<XRenderRenderingJob> m_extraJobs;
+        std::vector<XRenderRenderingJob> m_extra_jobs;
 
 
         /** Preview window's mask. */
-        XRenderPicturePtr m_maskPicture;
+        XRenderPicturePtr m_mask_picture;
 
         /** Timer that signals when the preview window should appear. */
-        TickTracker m_tickTracker;
+        TickTracker m_tick_tracker;
 
 
         /** Previously modified rectangle. */
-        XRectangle m_previousDamage;
+        XRectangle m_previous_damage;
 
         /** Previously drawn preview window. */
-        Window m_previousWindow;
+        Window m_previous_window;
 
 
         //--- PREVIEW WINDOW DATA ----------------------------------------------
@@ -128,7 +128,7 @@ namespace FbCompositor {
         };
 
         /** A list of potential preview windows. */
-        std::map<Window, PreviewWindowData> m_previewData;
+        std::map<Window, PreviewWindowData> m_preview_data;
     };
 
 

@@ -39,17 +39,17 @@ const double EPSILON = 1e-6;
 // Constructor.
 TickTracker::TickTracker() {
     m_is_running = false;
-    m_tickSize = 1000000;
-    m_ticksPerSecond = 1.0;
+    m_tick_size = 1000000;
+    m_ticks_per_second = 1.0;
 }
 
 // Copy constructor.
 TickTracker::TickTracker(const TickTracker &other) :
     m_is_running(other.m_is_running),
     m_startTime(other.m_startTime),
-    m_tickSize(other.m_tickSize),
-    m_ticksPerSecond(other.m_ticksPerSecond),
-    m_observedTicks(other.m_observedTicks) {
+    m_tick_size(other.m_tick_size),
+    m_ticks_per_second(other.m_ticks_per_second),
+    m_observed_ticks(other.m_observed_ticks) {
 }
 
 // Assignment operator.
@@ -57,9 +57,9 @@ TickTracker &TickTracker::operator=(const TickTracker &other) {
     if (this != &other) {
         m_is_running = other.m_is_running;
         m_startTime = other.m_startTime;
-        m_tickSize = other.m_tickSize;
-        m_ticksPerSecond = other.m_ticksPerSecond;
-        m_observedTicks = other.m_observedTicks;
+        m_tick_size = other.m_tick_size;
+        m_ticks_per_second = other.m_ticks_per_second;
+        m_observed_ticks = other.m_observed_ticks;
     }
     return *this;
 }
@@ -75,7 +75,7 @@ void TickTracker::start() {
     if (gettimeofday(&m_startTime, NULL)) {
         throw TimeException("Cannot obtain the current time.");
     }
-    m_observedTicks = 0;
+    m_observed_ticks = 0;
     m_is_running = true;
 }
 
@@ -89,14 +89,14 @@ void TickTracker::stop() {
 
 // Returns the new number of elapsed ticks since last call of this function.
 int TickTracker::newElapsedTicks() {
-    int totalTicks = totalElapsedTicks();
-    int newTicks = totalTicks - m_observedTicks;
-    m_observedTicks = totalTicks;
+    int total_ticks = totalElapsedTicks();
+    int new_ticks = total_ticks - m_observed_ticks;
+    m_observed_ticks = total_ticks;
 
-    if (newTicks < 0) {
+    if (new_ticks < 0) {
         return 0;
     } else {
-        return newTicks;
+        return new_ticks;
     }
 }
 
@@ -118,8 +118,8 @@ void TickTracker::setTickSize(int usec) {
         throw TimeException("Invalid tick size.");
     }
 
-    m_tickSize = usec;
-    m_ticksPerSecond = 1000000.0 / usec;
+    m_tick_size = usec;
+    m_ticks_per_second = 1000000.0 / usec;
 }
 
 
@@ -128,17 +128,17 @@ void TickTracker::setTickSize(int usec) {
 // Returns the difference in time between two timevals.
 // Function adapted from http://www.gnu.org/s/libc/manual/html_node/Elapsed-Time.html.
 timeval TickTracker::timeDifference(timeval t1, timeval t2) {
-    int nsec;
+    int n_sec;
 
     if (t1.tv_usec < t2.tv_usec) {
-        nsec = (t2.tv_usec - t1.tv_usec) / 1000000 + 1;
-        t2.tv_usec -= 1000000 * nsec;
-        t2.tv_sec += nsec;
+        n_sec = (t2.tv_usec - t1.tv_usec) / 1000000 + 1;
+        t2.tv_usec -= 1000000 * n_sec;
+        t2.tv_sec += n_sec;
     }
     if (t1.tv_usec - t2.tv_usec > 1000000) {
-        nsec = (t1.tv_usec - t2.tv_usec) / 1000000;
-        t2.tv_usec += 1000000 * nsec;
-        t2.tv_sec -= nsec;
+        n_sec = (t1.tv_usec - t2.tv_usec) / 1000000;
+        t2.tv_usec += 1000000 * n_sec;
+        t2.tv_sec -= n_sec;
     }
 
     timeval diff;
@@ -151,6 +151,6 @@ timeval TickTracker::timeDifference(timeval t1, timeval t2) {
 int TickTracker::tickDifference(const timeval &t1, const timeval &t2) {
     timeval diff = timeDifference(t1, t2);
 
-    double rawDiff = diff.tv_sec * m_ticksPerSecond + (double(diff.tv_usec) / m_tickSize);
-    return int(rawDiff + EPSILON);
+    double raw_diff = diff.tv_sec * m_ticks_per_second + (double(diff.tv_usec) / m_tick_size);
+    return int(raw_diff + EPSILON);
 }

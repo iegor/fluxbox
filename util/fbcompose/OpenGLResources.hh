@@ -69,7 +69,7 @@ namespace FbCompositor {
         void bind();
 
         /** Loads the given data into the buffer. */
-        void bufferData(int elementSize, const GLvoid *data, GLenum usageHint);
+        void bufferData(int element_size, const GLvoid *data, GLenum usage_hint);
 
         /** Sets the buffer's contents to be the rectangle's coordinates on the screen. */
         void bufferPosRectangle(int screen_width, int screen_height, XRectangle rect);
@@ -105,9 +105,9 @@ namespace FbCompositor {
     }
 
     // Loads the given data into the buffer.
-    inline void OpenGLBuffer::bufferData(int elementSize, const GLvoid *data, GLenum usageHint) {
+    inline void OpenGLBuffer::bufferData(int element_size, const GLvoid *data, GLenum usage_hint) {
         bind();
-        glBufferData(m_target, elementSize, data, usageHint);
+        glBufferData(m_target, element_size, data, usage_hint);
     }
 
     // Returns the handle to the buffer held.

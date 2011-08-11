@@ -47,7 +47,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        XRenderWindow(const XRenderScreen &screen, Window window_xid, const char *pictFilter);
+        XRenderWindow(const XRenderScreen &screen, Window window_xid, const char *pict_filter);
 
         /** Destructor. */
         ~XRenderWindow();
@@ -88,14 +88,14 @@ namespace FbCompositor {
         //--- RENDERING RELATED ------------------------------------------------
 
         /** The window's content picture. */
-        XRenderPicturePtr m_contentPicture;
+        XRenderPicturePtr m_content_picture;
 
         /** The window's mask picture. */
-        XRenderPicturePtr m_maskPicture;
+        XRenderPicturePtr m_mask_picture;
 
 
         /** The picture filter. */
-        const char *m_pictFilter;
+        const char *m_pict_filter;
     };
 
 
@@ -103,12 +103,12 @@ namespace FbCompositor {
 
     // Returns the window's contents as an XRender picture.
     inline XRenderPicturePtr XRenderWindow::contentPicture() const {
-        return m_contentPicture;
+        return m_content_picture;
     }
 
     // Returns the window's mask picture.
     inline XRenderPicturePtr XRenderWindow::maskPicture() const {
-        return m_maskPicture;
+        return m_mask_picture;
     }
 }
 

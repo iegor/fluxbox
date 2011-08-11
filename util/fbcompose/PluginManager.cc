@@ -50,12 +50,12 @@ PluginManager::PluginManager(PluginType plugin_type, const BaseScreen &screen) :
 
 // Destructor.
 PluginManager::~PluginManager() {
-    for (size_t i = 0; i < m_pluginObjects.size(); i++) {
-        delete m_pluginObjects[i];
+    for (size_t i = 0; i < m_plugin_objects.size(); i++) {
+        delete m_plugin_objects[i];
     }
 
-    std::map<FbTk::FbString, PluginLibData>::iterator it = m_pluginLibs.begin();
-    while (it != m_pluginLibs.end()) {
+    std::map<FbTk::FbString, PluginLibData>::iterator it = m_plugin_libs.begin();
+    while (it != m_plugin_libs.end()) {
         unloadPlugin(it);
         ++it;
     }
@@ -66,13 +66,13 @@ PluginManager::~PluginManager() {
 
 // Create a plugin object, load the appropriate library if needed.
 void PluginManager::createPluginObject(FbTk::FbString name, std::vector<FbTk::FbString> args) {
-    if (m_pluginLibs.find(name) == m_pluginLibs.end()) {
+    if (m_plugin_libs.find(name) == m_plugin_libs.end()) {
         loadPlugin(name);
     }
 
-    CreatePluginFunction createFunction = m_pluginLibs.find(name)->second.createFunction;
-    BasePlugin *newPluginObject = (*createFunction)(m_screen, args);
-    m_pluginObjects.push_back(newPluginObject);
+    CreatePluginFunction create_function = m_plugin_libs.find(name)->second.create_function;
+    BasePlugin *new_plugin_object = (*create_function)(m_screen, args);
+    m_plugin_objects.push_back(new_plugin_object);
 }
 
 
@@ -81,10 +81,10 @@ void PluginManager::createPluginObject(FbTk::FbString name, std::vector<FbTk::Fb
 // Load a plugin.
 void PluginManager::loadPlugin(FbTk::FbString name) {
     static union {
-        void *voidPtr;
-        PluginTypeFunction plugin_typeFunc;
-        CreatePluginFunction createPluginFunc;
-    } objUnion;
+        void *void_ptr;
+        PluginTypeFunction plugin_type_func;
+        CreatePluginFunction create_plugin_func;
+    } obj_union;
 
     std::vector<FbTk::FbString> paths = buildPluginPaths(name);
 
@@ -103,29 +103,29 @@ void PluginManager::loadPlugin(FbTk::FbString name) {
     }
 
     // Check for the correct plugin type.
-    objUnion.voidPtr = getLibraryObject(handle, "pluginType", name.c_str(), "type function");
-    PluginTypeFunction typeFunc = objUnion.plugin_typeFunc;
+    obj_union.void_ptr = getLibraryObject(handle, "pluginType", name.c_str(), "type function");
+    PluginTypeFunction type_func = obj_union.plugin_type_func;
 
-    if ((*(typeFunc))() != m_plugin_type) {
+    if ((*(type_func))() != m_plugin_type) {
         std::stringstream ss;
         ss << "Plugin \"" << name << "\" is of the wrong type.";
         throw PluginException(ss.str());
     }
 
     // Get the plugin creation function.
-    objUnion.voidPtr = getLibraryObject(handle, "createPlugin", name.c_str(), "creation function");
-    CreatePluginFunction createFunc = objUnion.createPluginFunc;
+    obj_union.void_ptr = getLibraryObject(handle, "createPlugin", name.c_str(), "creation function");
+    CreatePluginFunction create_func = obj_union.create_plugin_func;
 
     // Track the loaded plugin.
-    PluginLibData pluginData = { handle, createFunc };
-    m_pluginLibs.insert(make_pair(name, pluginData));
+    PluginLibData plugin_data = { handle, create_func };
+    m_plugin_libs.insert(make_pair(name, plugin_data));
 }
 
 // Unload a plugin.
 void PluginManager::unloadPlugin(FbTk::FbString name) {
-    std::map<FbTk::FbString, PluginLibData>::iterator it = m_pluginLibs.find(name);
+    std::map<FbTk::FbString, PluginLibData>::iterator it = m_plugin_libs.find(name);
 
-    if (it == m_pluginLibs.end()) {
+    if (it == m_plugin_libs.end()) {
         std::stringstream ss;
         ss << "Plugin \"" << name << "\" is not loaded (unloadPlugin).";
         throw PluginException(ss.str());
@@ -139,7 +139,7 @@ void PluginManager::unloadPlugin(std::map<FbTk::FbString, PluginLibData>::iterat
     dlclose(it->second.handle);
 
     it->second.handle = NULL;
-    it->second.createFunction = NULL;
+    it->second.create_function = NULL;
 }
 
 
@@ -150,18 +150,18 @@ std::vector<FbTk::FbString> PluginManager::buildPluginPaths(const FbTk::FbString
     std::stringstream ss;
     std::vector<FbTk::FbString> paths;
 
-    FbTk::FbString typeDir = "";
+    FbTk::FbString type_dir = "";
     if (m_plugin_type == Plugin_OpenGL) {
-        typeDir = "opengl/";
+        type_dir = "opengl/";
     } else if (m_plugin_type == Plugin_XRender) {
-        typeDir = "xrender/";
+        type_dir = "xrender/";
     }
 
-    ss << "./plugins/" << typeDir << name << "/.libs/" << name << ".so";
+    ss << "./plugins/" << type_dir << name << "/.libs/" << name << ".so";
     paths.push_back(ss.str());
     ss.str("");
 
-    ss << "./plugins/" << typeDir << name << ".so";
+    ss << "./plugins/" << type_dir << name << ".so";
     paths.push_back(ss.str());
     ss.str("");
 
@@ -171,18 +171,18 @@ std::vector<FbTk::FbString> PluginManager::buildPluginPaths(const FbTk::FbString
 }
 
 // Returns some object from the given library handle.
-void *PluginManager::getLibraryObject(void *handle, const char *objectName, const char *plugin_name,
-                                      const char *verboseObjectName) {
+void *PluginManager::getLibraryObject(void *handle, const char *object_name, const char *plugin_name,
+                                      const char *verbose_object_name) {
     dlerror();
-    void *rawObject = dlsym(handle, objectName);
+    void *raw_object = dlsym(handle, object_name);
     const char *error = dlerror();
 
     if (error) {
         dlclose(handle);
         std::stringstream ss;
-        ss << "Error in loading " << verboseObjectName << " for \"" << plugin_name << "\" plugin: " << error;
+        ss << "Error in loading " << verbose_object_name << " for \"" << plugin_name << "\" plugin: " << error;
         throw PluginException(ss.str());
     } else {
-        return rawObject;
+        return raw_object;
     }
 }

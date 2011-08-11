@@ -101,20 +101,20 @@ namespace FbCompositor {
 
         /** \returns the faded mask picture for the given window fade. */
         void createFadedMask(int alpha, XRenderPicturePtr mask, XRectangle dimensions,
-                             XRenderPicturePtr fadePicture_return);
+                             XRenderPicturePtr fade_picture_return);
 
 
         //--- GENERAL RENDERING VARIABLES --------------------------------------
 
         /** PictFormat for fade pictures. */
-        XRenderPictFormat *m_fadePictFormat;
+        XRenderPictFormat *m_fade_pict_format;
 
 
         /** Vector, containing the areas that the plugin wishes to paint. */
-        std::vector<XRectangle> m_damagedAreas;
+        std::vector<XRectangle> m_damaged_areas;
         
         /** Vector, containing the plugin's extra rendering jobs. */
-        std::vector<XRenderRenderingJob> m_extraJobs;
+        std::vector<XRenderRenderingJob> m_extra_jobs;
 
 
         //--- FADE SPECIFIC ----------------------------------------------------
@@ -122,29 +122,29 @@ namespace FbCompositor {
         /** Holds the data about positive fades. */
         struct PosFadeData {
             XRectangle dimensions;          ///< Window's dimensions.
-            int fadeAlpha;                  ///< Window's relative fade alpha.
-            XRenderPicturePtr fadePicture;  ///< Picture of the faded window.
+            int fade_alpha;                 ///< Window's relative fade alpha.
+            XRenderPicturePtr fade_picture; ///< Picture of the faded window.
             TickTracker timer;              ///< Timer that tracks the current fade.
         };
 
         /** A list of appearing (positive) fades. */
-        std::map<Window, PosFadeData> m_positiveFades;
+        std::map<Window, PosFadeData> m_positive_fades;
 
 
         /** Holds the data about positive fades. */
         struct NegFadeData {
-            Window windowId;                    ///< ID of the window that is being faded.
+            Window window_id;                    ///< ID of the window that is being faded.
             XRenderRenderingJob job;            ///< Rendering job, associated with this fade.
-            XRenderPicturePtr maskPicture;      ///< Window's shape mask.
+            XRenderPicturePtr mask_picture;      ///< Window's shape mask.
 
             XRectangle dimensions;              ///< Window's dimensions.
-            int fadeAlpha;                      ///< Window's relative fade alpha.
-            XRenderPicturePtr fadePicture;      ///< Picture of the faded window.
+            int fade_alpha;                      ///< Window's relative fade alpha.
+            XRenderPicturePtr fade_picture;      ///< Picture of the faded window.
             TickTracker timer;                  ///< Timer that tracks the current fade.
         };
 
         /** A list of disappearing (negative) fades. */
-        std::vector<NegFadeData> m_negativeFades;
+        std::vector<NegFadeData> m_negative_fades;
     };
 
 

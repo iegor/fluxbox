@@ -110,14 +110,14 @@ namespace FbCompositor {
 
 
         /** Size of the timer ticks. */
-        int m_tickSize;
+        int m_tick_size;
 
         /** The number of ticks per second. */
-        double m_ticksPerSecond;
+        double m_ticks_per_second;
 
 
         /** The number of observed ticks with newElapsedTicks(). */
-        int m_observedTicks;
+        int m_observed_ticks;
     };
 
 
@@ -130,7 +130,7 @@ namespace FbCompositor {
 
     // Returns the tick size.
     inline int TickTracker::tickSize() const {
-        return m_tickSize;
+        return m_tick_size;
     }
 }
 

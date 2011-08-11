@@ -52,15 +52,15 @@ namespace FbCompositor {
      * Information about an extra rendering job.
      */
     struct OpenGLRenderingJob {
-        OpenGLBufferPtr prim_pos_buffer;              ///< Primitive's position buffer.
-        OpenGLBufferPtr main_tex_coord_buffer;         ///< Main texture's position buffer.
-        OpenGLBufferPtr shape_tex_coord_buffer;        ///< Shape texture's position buffer.
-        OpenGL2DTexturePtr main_texture;             ///< Main texture.
-        OpenGL2DTexturePtr shape_texture;            ///< Shape texture.
+        OpenGLBufferPtr prim_pos_buffer;            ///< Primitive's position buffer.
+        OpenGLBufferPtr main_tex_coord_buffer;      ///< Main texture's position buffer.
+        OpenGLBufferPtr shape_tex_coord_buffer;     ///< Shape texture's position buffer.
+        OpenGL2DTexturePtr main_texture;            ///< Main texture.
+        OpenGL2DTexturePtr shape_texture;           ///< Shape texture.
         GLfloat alpha;                              ///< Rendering's alpha.
 
-        OpenGLShaderInitializer *shaderInit;        ///< Shader initializer.
-        OpenGLShaderDeinitializer *shaderDeinit;    ///< Shader deinitializer.
+        OpenGLShaderInitializer *shader_init;       ///< Shader initializer.
+        OpenGLShaderDeinitializer *shader_deinit;   ///< Shader deinitializer.
     };
 
 
@@ -102,10 +102,10 @@ namespace FbCompositor {
         //--- RENDERING ACTIONS ------------------------------------------------
 
         /** Background rendering initialization. */
-        virtual void backgroundRenderInit(int partId);
+        virtual void backgroundRenderInit(int part_id);
 
         /** Background rendering cleanup. */
-        virtual void backgroundRenderCleanup(int partId);
+        virtual void backgroundRenderCleanup(int part_id);
 
         /** Post background rendering actions. */
         virtual const std::vector<OpenGLRenderingJob> &postBackgroundRenderActions();
@@ -115,10 +115,10 @@ namespace FbCompositor {
         virtual const std::vector<OpenGLRenderingJob> &preWindowRenderActions(const OpenGLWindow &window);
 
         /** Window rendering initialization. */
-        virtual void windowRenderInit(const OpenGLWindow &window, int partId);
+        virtual void windowRenderInit(const OpenGLWindow &window, int part_id);
 
         /** Window rendering cleanup. */
-        virtual void windowRenderCleanup(const OpenGLWindow &window, int partId);
+        virtual void windowRenderCleanup(const OpenGLWindow &window, int part_id);
 
         /** Post window rendering actions and jobs. */
         virtual const std::vector<OpenGLRenderingJob> &postWindowRenderActions(const OpenGLWindow &window);

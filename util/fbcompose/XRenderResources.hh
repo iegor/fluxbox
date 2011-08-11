@@ -48,7 +48,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        XRenderPicture(const XRenderScreen &screen, XRenderPictFormat *pictFormat, const char *pictFilter);
+        XRenderPicture(const XRenderScreen &screen, XRenderPictFormat *pict_format, const char *pict_filter);
 
         /** Destructor. */
         ~XRenderPicture();
@@ -69,21 +69,21 @@ namespace FbCompositor {
         //--- MUTATORS ---------------------------------------------------------
 
         /** Set a new PictFormat. */
-        void setPictFormat(XRenderPictFormat *pictFormat);
+        void setPictFormat(XRenderPictFormat *pict_format);
 
 
         /** Associate the picture with the given pixmap. */
-        void setPixmap(Pixmap pixmap, bool manage_pixmap, XRenderPictureAttributes pa = XRenderPictureAttributes(), long paMask = 0);
+        void setPixmap(Pixmap pixmap, bool manage_pixmap, XRenderPictureAttributes pa = XRenderPictureAttributes(), long pa_mask = 0);
 
         /** Associate the picture with the given window. */
-        void setWindow(Window window, XRenderPictureAttributes pa = XRenderPictureAttributes(), long paMask = 0);
+        void setWindow(Window window, XRenderPictureAttributes pa = XRenderPictureAttributes(), long pa_mask = 0);
 
 
         /** Reset the picture's transformation matrix. */
         void resetPictureTransform();
 
         /** Scale the picture by the given inverse quotients. */
-        void scalePicture(double xFactorInv, double yFactorInv);
+        void scalePicture(double x_factor_inv, double y_factor_inv);
 
         /** Set the picture's transformation matrix. */
         void setPictureTransform(const XTransform &transform);
@@ -116,14 +116,14 @@ namespace FbCompositor {
         Picture m_picture;
 
         /** Whether the resources are managed by this object. */
-        bool m_resourcesManaged;
+        bool m_resources_managed;
         
 
         /** Picture filter to use. */
-        const char *m_pictFilter;
+        const char *m_pict_filter;
 
         /** Picture format to use. */
-        XRenderPictFormat *m_pictFormat;
+        XRenderPictFormat *m_pict_format;
 
 
         /** Current connection to the X server. */
@@ -150,9 +150,9 @@ namespace FbCompositor {
     }
 
     // Set a new PictFormat.
-    inline void XRenderPicture::setPictFormat(XRenderPictFormat *pictFormat) {
-        if (pictFormat) {
-            m_pictFormat = pictFormat;
+    inline void XRenderPicture::setPictFormat(XRenderPictFormat *pict_format) {
+        if (pict_format) {
+            m_pict_format = pict_format;
         }
     }
 

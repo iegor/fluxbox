@@ -59,10 +59,10 @@ const OpenGLScreen &OpenGLPlugin::openGLScreen() const {
 //--- RENDERING ACTIONS --------------------------------------------------------
 
 // Background rendering initialization.
-void OpenGLPlugin::backgroundRenderInit(int /*partId*/) { }
+void OpenGLPlugin::backgroundRenderInit(int /*part_id*/) { }
 
 // Background rendering cleanup.
-void OpenGLPlugin::backgroundRenderCleanup(int /*partId*/) { }
+void OpenGLPlugin::backgroundRenderCleanup(int /*part_id*/) { }
 
 // Post background rendering actions.
 const std::vector<OpenGLRenderingJob> &OpenGLPlugin::postBackgroundRenderActions() {
@@ -78,10 +78,10 @@ const std::vector<OpenGLRenderingJob> &OpenGLPlugin::preWindowRenderActions(cons
 }
 
 // Window rendering initialization.
-void OpenGLPlugin::windowRenderInit(const OpenGLWindow &/*window*/, int /*partId*/) { }
+void OpenGLPlugin::windowRenderInit(const OpenGLWindow &/*window*/, int /*part_id*/) { }
 
 // Window rendering cleanup.
-void OpenGLPlugin::windowRenderCleanup(const OpenGLWindow &/*window*/, int /*partId*/) { }
+void OpenGLPlugin::windowRenderCleanup(const OpenGLWindow &/*window*/, int /*part_id*/) { }
 
 // Post window rendering actions and jobs.
 const std::vector<OpenGLRenderingJob> &OpenGLPlugin::postWindowRenderActions(const OpenGLWindow &/*window*/) {

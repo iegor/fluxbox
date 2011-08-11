@@ -120,20 +120,20 @@ unsigned int FbCompositor::getBorderBitfield(int unit_width, int unit_height, in
 }
 
 // Space partitioning function.
-std::vector<XRectangle> FbCompositor::partitionSpace(int x, int y, int width, int height, int maxPartitionSize,
+std::vector<XRectangle> FbCompositor::partitionSpace(int x, int y, int width, int height, int max_partition_size,
                                                      int *unit_width_return, int *unit_height_return) {
-    int unit_height = ((height - 1) / maxPartitionSize) + 1;
-    int unit_width = ((width - 1) / maxPartitionSize) + 1;
+    int unit_height = ((height - 1) / max_partition_size) + 1;
+    int unit_width = ((width - 1) / max_partition_size) + 1;
 
     std::vector<XRectangle> partitions;
     for (int i = 0; i < unit_height; i++) {
         for (int j = 0; j < unit_width; j++) {
-            int partX = x + j * maxPartitionSize;
-            int partY = y + i * maxPartitionSize;
-            int partHeight = ((i == (unit_height - 1)) ? (height % maxPartitionSize) : maxPartitionSize);
-            int partWidth = ((j == (unit_width - 1)) ? (width % maxPartitionSize) : maxPartitionSize);
+            int part_x = x + j * max_partition_size;
+            int part_y = y + i * max_partition_size;
+            int part_height = ((i == (unit_height - 1)) ? (height % max_partition_size) : max_partition_size);
+            int part_width = ((j == (unit_width - 1)) ? (width % max_partition_size) : max_partition_size);
 
-            XRectangle part = { partX, partY, partWidth, partHeight };
+            XRectangle part = { part_x, part_y, part_width, part_height };
             partitions.push_back(part);
         }
     }
