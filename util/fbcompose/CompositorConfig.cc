@@ -63,7 +63,8 @@ CompositorConfig::CompositorConfig(std::vector<FbTk::FbString> args) :
     m_frames_per_second(60),
     m_plugins(),
     m_show_x_errors(true),
-    m_synchronize(false) {
+    m_synchronize(false),
+    m_user_plugin_dir("~/.fluxbox/fbcompose/plugins") {
 
     preScanArguments();
     processArguments();
@@ -82,7 +83,8 @@ CompositorConfig::CompositorConfig(const CompositorConfig &other) :
     m_frames_per_second(other.m_frames_per_second),
     m_plugins(other.m_plugins),
     m_show_x_errors(other.m_show_x_errors),
-    m_synchronize(other.m_synchronize) {
+    m_synchronize(other.m_synchronize),
+    m_user_plugin_dir(other.m_user_plugin_dir) {
 }
 
 // Assignment operator.
@@ -100,6 +102,7 @@ CompositorConfig &CompositorConfig::operator=(const CompositorConfig &other) {
         m_plugins = other.m_plugins;
         m_show_x_errors = other.m_show_x_errors;
         m_synchronize = other.m_synchronize;
+        m_user_plugin_dir = other.m_user_plugin_dir;
     }
     return *this;
 }

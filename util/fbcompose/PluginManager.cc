@@ -31,6 +31,7 @@
 #include "BaseScreen.hh"
 #include "Exceptions.hh"
 #include "Logging.hh"
+#include "Utility.hh"
 
 #include <algorithm>
 #include <dlfcn.h>
@@ -42,10 +43,12 @@ using namespace FbCompositor;
 //--- CONSTRUCTORS AND DESTRUCTORS ---------------------------------------------
 
 // Costructor.
-PluginManager::PluginManager(PluginType plugin_type, const BaseScreen &screen) :
+PluginManager::PluginManager(PluginType plugin_type, const BaseScreen &screen,
+                             const FbTk::FbString user_plugin_dir) :
     m_screen(screen) {
 
     m_plugin_type = plugin_type;
+    m_user_plugin_dir = user_plugin_dir;
 }
 
 // Destructor.
@@ -157,11 +160,17 @@ std::vector<FbTk::FbString> PluginManager::buildPluginPaths(const FbTk::FbString
         type_dir = "xrender/";
     }
 
-    ss << "./plugins/" << type_dir << name << "/.libs/" << name << ".so";
+    ss << m_user_plugin_dir << type_dir << name << ".so";
     paths.push_back(ss.str());
     ss.str("");
 
-    ss << "./plugins/" << type_dir << name << ".so";
+#ifdef FBCOMPOSE_PATH
+    ss << FBCOMPOSE_PATH << "/plugins/" << type_dir << name << ".so";
+    paths.push_back(ss.str());
+    ss.str("");
+#endif
+
+    ss << "./plugins/" << type_dir << name << "/.libs/" << name << ".so";
     paths.push_back(ss.str());
     ss.str("");
 

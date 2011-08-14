@@ -57,7 +57,7 @@ namespace FbCompositor {
         //--- CONSTRUCTORS AND DESTRUCTORS -------------------------------------
 
         /** Constructor. */
-        PluginManager(PluginType plugin_type, const BaseScreen &screen);
+        PluginManager(PluginType plugin_type, const BaseScreen &screen, const FbTk::FbString user_plugin_dir);
 
         /** Destructor. */
         ~PluginManager();
@@ -126,6 +126,9 @@ namespace FbCompositor {
 
         /** The screen this manager operates on. */
         const BaseScreen &m_screen;
+
+        /** User plugin directory. */
+        FbTk::FbString m_user_plugin_dir;
     };
 
 

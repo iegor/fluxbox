@@ -18,7 +18,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-lib_LTLIBRARIES = preview.la
+FBCOMPOSE_PATH = @FBCOMPOSE_PATH@
+
+plugindir=$(FBCOMPOSE_PATH)/plugins/opengl
+plugin_LTLIBRARIES = preview.la
 
 preview_la_CPPFLAGS = \
 	-I$(src_incdir) \

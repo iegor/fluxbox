@@ -1,7 +1,7 @@
 fbcompose(1)
 ============
 Gediminas Liktaras <gliktaras@gmail.com>
-v0.6, 13 August 2011
+v0.6, 14 August 2011
 :man source:   fbcompose.txt
 :man version:  {revision}
 :man manual:   Fluxbox Compositor Manual  
@@ -31,15 +31,15 @@ Rendering modes
 fbcompose supports three different rendering backends, which are specified as
 the rendering mode:
 
-- opengl
+*opengl*::
     The OpenGL backend. It uses OpenGL and GLX to render the the screens'
     contents. It is the most resource intensive of the backends, but it
     provides the smoothest experience.
-- xrender
+*xrender*::
     The XRender backend. It uses X server's XRender extension to render the
     screens' contents. It is more reliable and less resource intensive compared
     to OpenGL backend, but its performance may sometimes drop.
-- serverauto
+*serverauto*::
     Lets the X server take care of compositing. Unlike other backends, this
     backend does not provide any graphical improvements or plugins, but it
     allows fluxbox to correctly render applications that require compositing.
@@ -93,16 +93,23 @@ Plugins, Included With fbcompose
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 fbcompose comes bundled with two plugins.
 
-- fade
+*fade*::
     The fade plugin adds fade animations to windows as they are being mapped
     and unmapped.
-- preview
+*preview*::
     The preview plugin adds a window preview thumbnail, which appears whenever
     the user hovers over the window buttons in the iconbar.
 
 Installing New Plugins
 ~~~~~~~~~~~~~~~~~~~~~~
-TODO
+Note that plugins for OpenGL and XRender backends are different: a single
+plugin can only work with one of these backends.
+
+To install an OpenGL plugin, copy the .so file into
+\~/.fluxbox/fbcompose/plugins/opengl directory.
+
+To install an XRender plugin, copy the .so file into
+\~/.fluxbox/fbcompose/plugins/xrender directory.
 
 Writing Plugins
 ~~~~~~~~~~~~~~~
@@ -110,13 +117,13 @@ TODO
 
 EXAMPLES
 --------
-+fbcompose+
++fbcompose+::
     Run the compositor using the default renderer, settings and no plugins.  
 
-+fbcompose -m xrender'
++fbcompose -m xrender+::
     Run the compositor in XRender mode.
 
-+fbcompose -m opengl -p fade -p preview+
++fbcompose -m opengl -p fade -p preview+::
     Run the compositor in OpenGL mode and use both fade and preview plugins.
 
 AUTHORS

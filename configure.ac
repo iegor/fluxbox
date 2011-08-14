@@ -650,6 +650,18 @@ AC_ARG_WITH([locale],
 ])
 AC_SUBST([LOCALE_PATH], [$locale_path])
 
+AC_ARG_WITH(
+            fbcompose,
+            [--with-fbcompose=path location of fbcompose files (PREFIX/share/fluxbox/fbcompose)]
+            ,
+            FBCOMPOSE_PATH=$with_fbcompose
+            AC_DEFINE_UNQUOTED(FBCOMPOSE_PATH, "$FBCOMPOSE_PATH", "Location of fbcompose data")
+            ,
+            FBCOMPOSE_PATH=\$\(prefix\)/share/fluxbox/fbcompose
+            AC_DEFINE_UNQUOTED(FBCOMPOSE_PATH, "$prefix/share/fluxbox/fbcompose", "Location of fbcompose data")
+            )
+AC_SUBST(FBCOMPOSE_PATH)
+
 AC_SUBST([program_prefix])
 AC_SUBST([program_suffix])
 

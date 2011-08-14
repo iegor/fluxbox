@@ -82,6 +82,9 @@ namespace FbCompositor {
         /** \returns whether the compositor should synchronize with the X server. */
         bool synchronize() const;
 
+        /** \returns the user plugin directory. */
+        const FbTk::FbString &userPluginDir() const;
+
 #ifdef USE_XRENDER_COMPOSITING
         /** \returns the XRender picture filter. */
         const char *xRenderPictFilter() const;
@@ -150,8 +153,11 @@ namespace FbCompositor {
         /** Whether the X errors should be printed. */
         bool m_show_x_errors;
 
-        /* Whether the compositor should synchronize with the X server. */
+        /** Whether the compositor should synchronize with the X server. */
         bool m_synchronize;
+
+        /** User plugin directory. */
+        FbTk::FbString m_user_plugin_dir;
     };
 
 
@@ -201,6 +207,11 @@ namespace FbCompositor {
     // Returns whether the compositor should synchronize with the X server.
     inline bool CompositorConfig::synchronize() const {
         return m_synchronize;
+    }
+
+    // Returns the user plugin directory.
+    inline const FbTk::FbString &CompositorConfig::userPluginDir() const {
+        return m_user_plugin_dir;
     }
 
 #ifdef USE_XRENDER_COMPOSITING

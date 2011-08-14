@@ -18,31 +18,34 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-lib_LTLIBRARIES = fbcompose/fade.la
+FBCOMPOSE_PATH = @FBCOMPOSE_PATH@
 
-fbcompose_fade_la_CPPFLAGS = \
+plugindir=$(FBCOMPOSE_PATH)/plugins/opengl
+plugin_LTLIBRARIES = fade.la
+
+fade_la_CPPFLAGS = \
 	$(AM_CPPFLAGS) \
 	-I$(top_srcdir)/src \
 	-I$(top_srcdir)/src/FbTk \
 	-I$(top_srcdir)/util/fbcompose
 
-fbcompose_fade_la_CXXFLAGS = \
+fade_la_CXXFLAGS = \
 	$(AM_CXXFLAGS) \
 	-Wall \
 	-Werror \
 	-Wextra \
 	-fPIC
 
-fbcompose_fade_la_SOURCES = \
+fade_la_SOURCES = \
 	util/fbcompose/plugins/opengl/fade/FadePlugin.hh \
 	util/fbcompose/plugins/opengl/fade/FadePlugin.cc
 
-fbcompose_fade_la_LDFLAGS = \
+fade_la_LDFLAGS = \
 	-export-dynamic \
 	-shared -module \
 	-avoid-version
 
-fbcompose_fade_la_LIBADD = \
+fade_la_LIBADD = \
 	$(top_builddir)/src/FbTk/libFbTk.a
 
 # $(top_builddir)/src/FbTk/libFbTk.a:
