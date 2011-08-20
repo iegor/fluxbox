@@ -38,16 +38,15 @@ the rendering mode:
 *xrender*::
     The XRender backend. It uses X server's XRender extension to render the
     screens' contents. It is more reliable and less resource intensive compared
-    to OpenGL backend, but its performance may sometimes drop.
+    to OpenGL backend, but its performance is somewhat unstable.
 *serverauto*::
     Lets the X server take care of compositing. Unlike other backends, this
     backend does not provide any graphical improvements or plugins, but it
     allows fluxbox to correctly render applications that require compositing.
     It is the least resource intensive mode.
 
-Note that not all of them may be available, depending on how the fluxbox
-package has been compiled. Running +fbcompose --help+ will list the available
-rendering modes.
+Note that not all of them may be available, depending on how fluxbox has been
+compiled. Running +fbcompose --help+ will list the available rendering modes.
 
 OPTIONS
 -------
@@ -85,7 +84,7 @@ PLUGINS
 -------
 Plugins provide fbcompose with extra functionality. They may change the way
 windows are presented to the user or add various effects to the desktop. To use
-plugins, just start fbcompose with the appropriate --plugin options.
+plugins, just start fbcompose with the appropriate +--plugin+ options.
 
 At the moment of writing, the plugins cannot be configured yet.
 
@@ -94,8 +93,8 @@ Plugins, Included With fbcompose
 fbcompose comes bundled with two plugins.
 
 *fade*::
-    The fade plugin adds fade animations to windows as they are being mapped
-    and unmapped.
+    The fade plugin adds fade animations to windows as they appear and
+    disappear.
 *preview*::
     The preview plugin adds a window preview thumbnail, which appears whenever
     the user hovers over the window buttons in the iconbar.
@@ -106,14 +105,10 @@ Note that plugins for OpenGL and XRender backends are different: a single
 plugin can only work with one of these backends.
 
 To install an OpenGL plugin, copy the .so file into
-\~/.fluxbox/fbcompose/plugins/opengl directory.
++~/.fluxbox/fbcompose/plugins/opengl+ directory.
 
 To install an XRender plugin, copy the .so file into
-\~/.fluxbox/fbcompose/plugins/xrender directory.
-
-Writing Plugins
-~~~~~~~~~~~~~~~
-TODO
++~/.fluxbox/fbcompose/plugins/xrender+ directory.
 
 EXAMPLES
 --------
@@ -121,21 +116,18 @@ EXAMPLES
     Run the compositor using the default renderer, settings and no plugins.  
 
 +fbcompose -m xrender+::
-    Run the compositor in XRender mode.
+    Run the compositor in XRender mode on display :1.
 
 +fbcompose -m opengl -p fade -p preview+::
     Run the compositor in OpenGL mode and use both fade and preview plugins.
 
-AUTHORS
--------
-fbcompose was originally written is currently maintained by Gediminas Liktaras
-<gliktaras at gmail com>.
-
-KNOWN BUGS
-----------
+COMMON ISSUES
+-------------
 - The OpenGL backend does not seem to work on computers with nvidia video cards
-  that have two monitors. At the moment the only workaround is to use XRender
-  mode.
+  and multiple monitors. At the moment the only workaround is to use XRender mode.
+- If conky disappears when the compositor is running, make sure that in your
+  conky configuration file (+~/.conkyrc+ by default) +own_window+ option is set
+  to +yes+ and +own_window_type+ is +desktop+.
 
 BUGS
 ----
@@ -144,6 +136,11 @@ find any, please visit the #fluxbox irc channel on irc.freenode.net or submit
 them to the bug tracker at http://sf.net/projects/fluxbox . Or you may
 subscribe to one of the mailing lists. More information can be found on the
 official website at http://www.fluxbox.org .
+
+AUTHORS
+-------
+fbcompose was originally written is currently maintained by Gediminas Liktaras
+<gliktaras at gmail dot com>.
 
 SEE ALSO
 --------
