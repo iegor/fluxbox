@@ -18,6 +18,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+FBCOMPOSE_PATH = @FBCOMPOSE_PATH@
+
 bin_PROGRAMS += fbcompose
 
 if SERVERAUTO_COMPOSITING_ONLY
@@ -86,3 +88,8 @@ fbcompose_LDADD = \
 
 # ${FLUXBOX_SRC_DIR}FbTk/libFbTk.a:
 # 	cd ${FLUXBOX_SRC_DIR}FbTk && make
+
+install-exec-hook:
+	$(INSTALL_DATA) "$(srcdir)/fbcompose-list_plugins" "$(DESTDIR)$(bindir)"
+	sed -i -e "s|[$$]FBCOMPOSE_PATH|${FBCOMPOSE_PATH}|g" "$(DESTDIR)$(bindir)/fbcompose-list_plugins"
+	chmod +x "$(DESTDIR)$(bindir)/fbcompose-list_plugins"
