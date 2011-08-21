@@ -110,6 +110,10 @@ To install an OpenGL plugin, copy the .so file into
 To install an XRender plugin, copy the .so file into
 +~/.fluxbox/fbcompose/plugins/xrender+ directory.
 
+Listing Plugins
+~~~~~~~~~~~~~~~
+Run +fbcompose-list_plugins+ to get a list of all currently installed plugins. 
+
 EXAMPLES
 --------
 +fbcompose+::

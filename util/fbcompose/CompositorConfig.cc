@@ -245,7 +245,7 @@ void CompositorConfig::printFullHelp(std::ostream &os) {
 
     // 80 character reference (final column = 92)
     //     ................................................................................
-    os << "Usage: fbcompose [OPTION]..." << std::endl
+    os << "Usage: fbcompose [OPTION] ..." << std::endl
        << "Options and arguments:" << std::endl
        << "  -d <display>, --display <display>" << std::endl
        << "                    Use the specified display connection." << std::endl
@@ -255,7 +255,8 @@ void CompositorConfig::printFullHelp(std::ostream &os) {
        << "                    <mode> can be " << modes << "." << std::endl
        << "  --no-x-errors     Do not print X errors." << std::endl
        << "  -p <plugin>, --plugin <plugin>" << std::endl
-       << "                    Load a specified plugin." << std::endl
+       << "                    Load a specified plugin. Run fbcompose-list_plugins script" << std::endl
+       << "                    to see all available plugins." << std::endl
        << "  -q, --quiet       Do not print anything." << std::endl
        << "  -r <rate>, --refresh-rate <rate>" << std::endl
        << "                    Specify the compositor's refresh rate in Hz." << std::endl
