@@ -141,10 +141,14 @@ void BaseCompWindow::updateShape() {
     }
     m_clip_shape_rects = XShapeGetRectangles(display(), window(), ShapeClip, &m_clip_shape_rect_count, &rect_order);
 
-    // We have to adjust the size here to account for borders.
-    for (int i = 0; i < m_clip_shape_rect_count; i++) {
-        m_clip_shape_rects[i].height = std::min(m_clip_shape_rects[i].height + 2 * borderWidth(), realHeight());
-        m_clip_shape_rects[i].width = std::min(m_clip_shape_rects[i].width + 2 * borderWidth(), realWidth());
+    if (!m_clip_shape_rects) {
+        m_clip_shape_rect_count = 0;
+    } else {
+        // We have to adjust the size here to account for borders.
+        for (int i = 0; i < m_clip_shape_rect_count; i++) {
+            m_clip_shape_rects[i].height = std::min(m_clip_shape_rects[i].height + 2 * borderWidth(), realHeight());
+            m_clip_shape_rects[i].width = std::min(m_clip_shape_rects[i].width + 2 * borderWidth(), realWidth());
+        }
     }
 }
 
@@ -177,6 +181,7 @@ void BaseCompWindow::clearDamage() {
 // Updates the window's content pixmap.
 void BaseCompWindow::updateContentPixmap() {
     // We must reset the damage here, otherwise we may miss damage events.
+    // TODO: BadDamage might be thrown here, probably safe to ignore for now.
     XDamageSubtract(display(), m_damage, None, None);
 
     if (m_is_resized || m_is_remapped) {

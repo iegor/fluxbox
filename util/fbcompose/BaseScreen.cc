@@ -171,7 +171,10 @@ void BaseScreen::createWindow(Window window) {
     std::list<BaseCompWindow*>::iterator it = getWindowIterator(window);
     if (it == m_windows.end()) {
         BaseCompWindow *new_window = NULL;
+
         try {
+            // TODO: Fix errors coming from window creation (occurs when a
+            // window is already destroyed??)
             new_window = createWindowObject(window);
         } catch(const InitException &e) {
             std::stringstream ss;
