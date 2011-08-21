@@ -20,7 +20,7 @@
 
 FBCOMPOSE_PATH = @FBCOMPOSE_PATH@
 
-plugindir=$(FBCOMPOSE_PATH)/plugins/xrender
+plugindir = $(FBCOMPOSE_PATH)/plugins/xrender
 plugin_LTLIBRARIES = fade.la
 
 fade_la_CPPFLAGS = \
@@ -30,7 +30,6 @@ fade_la_CPPFLAGS = \
 
 fade_la_CXXFLAGS = \
 	-Wall \
-	-Werror \
 	-Wextra \
 	-fPIC
 

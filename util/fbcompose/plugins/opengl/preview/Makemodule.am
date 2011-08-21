@@ -20,7 +20,7 @@
 
 FBCOMPOSE_PATH = @FBCOMPOSE_PATH@
 
-plugindir=$(FBCOMPOSE_PATH)/plugins/opengl
+plugindir = $(FBCOMPOSE_PATH)/plugins/opengl
 plugin_LTLIBRARIES = preview.la
 
 preview_la_CPPFLAGS = \
@@ -31,7 +31,6 @@ preview_la_CPPFLAGS = \
 
 preview_la_CXXFLAGS = \
 	-Wall \
-	-Werror \
 	-Wextra \
 	-fPIC
 

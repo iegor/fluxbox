@@ -463,6 +463,8 @@ void BaseScreen::updateHeads(HeadMode head_mode) {
 
 // Notifies the screen of the background change.
 void BaseScreen::setRootPixmapChanged() {
+    damageWholeWindowArea(&m_root_window);
+
     BasePlugin *plugin = NULL;
     forEachPlugin(i, plugin) {
         plugin->setRootPixmapChanged();
@@ -471,6 +473,8 @@ void BaseScreen::setRootPixmapChanged() {
 
 // Notifies the screen of a root window change.
 void BaseScreen::setRootWindowSizeChanged() {
+    damageWholeWindowArea(&m_root_window);
+
     BasePlugin *plugin = NULL;
     forEachPlugin(i, plugin) {
         plugin->setRootWindowSizeChanged();

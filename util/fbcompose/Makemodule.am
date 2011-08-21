@@ -66,7 +66,6 @@ fbcompose_CPPFLAGS = \
 fbcompose_CXXFLAGS = \
 	$(AM_CXXFLAGS) \
 	-Wall \
-	-Werror \
 	-Wextra \
 	-pedantic
 

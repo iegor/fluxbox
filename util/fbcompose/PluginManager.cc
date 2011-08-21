@@ -160,6 +160,10 @@ std::vector<FbTk::FbString> PluginManager::buildPluginPaths(const FbTk::FbString
         type_dir = "xrender/";
     }
 
+    ss << "./plugins/" << type_dir << name << "/.libs/" << name << ".so";
+    paths.push_back(ss.str());
+    ss.str("");
+
     ss << m_user_plugin_dir << type_dir << name << ".so";
     paths.push_back(ss.str());
     ss.str("");
@@ -169,10 +173,6 @@ std::vector<FbTk::FbString> PluginManager::buildPluginPaths(const FbTk::FbString
     paths.push_back(ss.str());
     ss.str("");
 #endif
-
-    ss << "./plugins/" << type_dir << name << "/.libs/" << name << ".so";
-    paths.push_back(ss.str());
-    ss.str("");
 
     paths.push_back(name);
 

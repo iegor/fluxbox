@@ -250,7 +250,7 @@ void CompositorConfig::printFullHelp(std::ostream &os) {
        << "  -d <display>, --display <display>" << std::endl
        << "                    Use the specified display connection." << std::endl
        << "  -h, --help        Print this text and exit." << std::endl
-       << "  -m <mode>, --mode <mode>"
+       << "  -m <mode>, --mode <mode>" << std::endl
        << "                    Select the rendering mode." << std::endl
        << "                    <mode> can be " << modes << "." << std::endl
        << "  --no-x-errors     Do not print X errors." << std::endl
