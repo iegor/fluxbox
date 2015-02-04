@@ -31,15 +31,18 @@
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 
-#ifdef HAVE_CASSERT
-  #include <cassert>
-#else
-  #include <assert.h>
-#endif
-
+#include <cassert>
 #include <limits>
 
 namespace FbTk {
+
+Window FbWindow::rootWindow(Display* dpy, Drawable win) {
+    union { int i; unsigned int ui; } ignore;
+    Window root = None;
+    XGetGeometry(dpy, win, &root, &ignore.i, &ignore.i, &ignore.ui, &ignore.ui, &ignore.ui, &ignore.ui);
+    return root;
+}
+
 
 FbWindow::FbWindow():
     FbDrawable(),
@@ -491,7 +494,7 @@ struct TextPropPtr {
 };
 }
 
-long FbWindow::cardinalProperty(Atom prop,bool*exists) const {
+long FbWindow::cardinalProperty(Atom prop, bool* exists) const {
     Atom type;
     int format;
     unsigned long nitems, bytes_after;
@@ -549,10 +552,8 @@ FbTk::FbString FbWindow::textProperty(Atom prop,bool*exists) const {
         ret = FbStringUtil::LocaleStrToFb(stringlist[0]);
     }
 
-    // they all use stringlist
-    if (stringlist) {
-        XFreeStringList(stringlist);
-    }
+    XFreeStringList(stringlist);
+
     if (exists) *exists=true;
     return ret;
 }

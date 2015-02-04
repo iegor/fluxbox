@@ -1,7 +1,7 @@
 dnl Initialize autoconf and automake
 AC_PREREQ([2.52])
 AC_INIT([fluxbox],
-	[1.3.6],
+	[1.3.7],
 	[fluxbox-devel@lists.sourceforge.net], [],
 	[http://fluxbox.org/])
 AC_CONFIG_SRCDIR([src/fluxbox.cc])
@@ -335,7 +335,7 @@ dnl Check whether to include native language support (i18n)
 AC_MSG_CHECKING([whether to include NLS support])
 AC_ARG_ENABLE([nls],
 	AS_HELP_STRING([--enable-nls],
-		[include native language support (default=no)]),
+		[include native language support (default=yes)]),
 	[], [enable_nls=yes]
 )
 AC_MSG_RESULT([$enable_nls])
@@ -599,6 +599,9 @@ nls/zh_CN/Makefile
 nls/zh_TW/Makefile
 ])
 
+MSG_RESULT_CXXFLAGS="$FRIBIDI_CFLAGS $XRANDR_CFLAGS $AM_CPPFLAGS $CXXFLAGS"
+MSG_RESULT_LIBS="$LDADD $FONTCONFIG_LIBS $FREETYPE2_LIBS $FRIBIDI_LIBS $IMLIB2_LIBS $RANDR_LIBS $XEXT_LIBS $XFT_LIBS $XINERAMA_LIBS $XPM_LIBS $XRENDER_LIBS"
+
 dnl Print results
 AC_MSG_RESULT([])
 AC_MSG_RESULT([	$PACKAGE version $VERSION configured successfully.])
@@ -614,8 +617,8 @@ AC_MSG_RESULT([	'$locale_path' for nls files.])
 AC_MSG_RESULT([	'$CXX' for C++ compiler.])
 AC_MSG_RESULT([])
 AC_MSG_RESULT([Building with:])
-AC_MSG_RESULT([	'$CXXFLAGS' for C++ compiler flags.])
-AC_MSG_RESULT([	'$LIBS' for linker flags.])
+AC_MSG_RESULT([	'$MSG_RESULT_CXXFLAGS' for C++ compiler flags.])
+AC_MSG_RESULT([	'$MSG_RESULT_LIBS' for linker flags.])
 AC_MSG_RESULT([])
 AC_MSG_RESULT([Now build $PACKAGE with 'make'])
 AC_MSG_RESULT([])

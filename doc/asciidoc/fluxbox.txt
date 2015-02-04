@@ -1,7 +1,7 @@
 fluxbox(1)
 ==========
 Henrik Kinnunen <fluxgen@fluxbox.org>
-v1.3.6, 03 January 2015
+v1.3.7, 22 January 2015
 :man source:   fluxbox.txt
 :man version:  {revision}
 :man manual:   Fluxbox Manual  
@@ -13,6 +13,8 @@ fluxbox - A lightweight window manager for the X Windowing System
 SYNOPSIS
 --------
 *fluxbox* [-rc 'rcfile']
+          [-no-slit]
+          [-no-toolbar]
           [-log 'logfile']
           [-display 'display']
           [-screen all|'scr','scr'...]
@@ -73,6 +75,10 @@ OPTIONS
 *-log* 'logfile'::
     Starting fluxbox with this option will designate a file in which you
     want to log events to.
+*-no-slit*::
+    Do not use the container for DockApps (aka the Slit)
+*-no-toolbar*::
+    Do not use the toolbar
 *-rc* 'rcfile'::
     Use a different config file other than the default *~/.fluxbox/init*.
 *-v*, *-version*::

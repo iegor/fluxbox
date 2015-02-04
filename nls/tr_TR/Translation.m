@@ -37,11 +37,12 @@ $set 3 #Common
 4 Derlenmiş ayarlar
 5 Derleyici
 6 Derleyici versiyonu
-7     başlat
-8     tuşlar
-9      nls
-10     menü
-11    stil
+7      başlat
+8      tuşlar
+9         nls
+10        menü
+20  windowmenu
+11        stil
 12 Varsayılanlar
 13 Devre Dışı
 14 Hata
@@ -255,10 +256,12 @@ $set 19 #main
 10 Günlük tutuluyor: 
 11 hata: '-rc' bir parametre ile birlikte kullanılıyor
 12 hata: '-screen' bir parametre ile birlikte kullanılıyor
-13 Fluxbox %s: (c) %s Henrik Kinnunen\n\
+13 Fluxbox %s: (c) %s Fluxbox Team\n\
 Web sitesi: http://www.fluxbox.org/\n\n\
 -display <string>\t\tekran bağlantısını kullan.\n\
 -screen <all|int,int,int>\tsadece belirlenen ekranlarda çalış.\n\
+-no-slit\t\t\tdo not provide a slit\n\
+-no-toolbar\t\tdo not provide a toolbar\n\
 -rc <string>\t\t\tulternatif kaynak dosyasını kullan.\n\
 -version\t\t\tversiyonu görüntüle ve çık.\n\
 -info\t\t\t\tyararlı bilgi görüntüler.\n\

@@ -62,22 +62,10 @@
 #include <X11/Xatom.h>
 #include <X11/keysym.h>
 
-#ifdef HAVE_CSTRING
-  #include <cstring>
-#else
-  #include <string.h>
-#endif
-#ifdef HAVE_CSTDIO
-  #include <cstdio>
-#else
-  #include <stdio.h>
-#endif
+#include <cstring>
+#include <cstdio>
 #include <iostream>
-#ifdef HAVE_CASSERT
-  #include <cassert>
-#else
-  #include <assert.h>
-#endif
+#include <cassert>
 #include <functional>
 #include <algorithm>
 
@@ -258,7 +246,7 @@ private:
 // Tests whether a point is on an edge or the corner.
 struct TestCornerHelper {
     int corner_size_px, corner_size_pc;
-    inline bool operator()(int xy, int wh)
+    bool operator()(int xy, int wh)
     {
         /* The % checking must be right: 0% must fail, 100% must succeed. */
         return xy < corner_size_px  ||  100 * xy < corner_size_pc * wh;
@@ -311,7 +299,7 @@ FluxboxWindow::FluxboxWindow(WinClient &client):
 
     // add the window to the focus list
     // always add to front on startup to keep the focus order the same
-    if (m_focused || Fluxbox::instance()->isStartup())
+    if (isFocused() || Fluxbox::instance()->isStartup())
         screen().focusControl().addFocusWinFront(*this);
     else
         screen().focusControl().addFocusWinBack(*this);
@@ -611,8 +599,8 @@ void FluxboxWindow::attachClient(WinClient &client, int x, int y) {
         delete old_win;
 
     } else { // client.fbwindow() == 0
-        associateClient(client);
 
+        associateClient(client);
         moveResizeClient(client);
 
         // right now, this block only happens with new windows or on restart
@@ -2402,10 +2390,13 @@ void FluxboxWindow::motionNotifyEvent(XMotionEvent &me) {
 
         // undraw rectangle before warping workspaces
         if (!screen().doOpaqueMove()) {
-            parent().drawRectangle(screen().rootTheme()->opGC(),
-                    m_last_move_x, m_last_move_y,
-                    frame().width() + 2*frame().window().borderWidth()-1,
-                    frame().height() + 2*frame().window().borderWidth()-1);
+            int bw = static_cast<int>(frame().window().borderWidth());
+            int w = static_cast<int>(frame().width()) + 2*bw -1;
+            int h = static_cast<int>(frame().height()) + 2*bw - 1;
+            if (w > 0 && h > 0) {
+                parent().drawRectangle(screen().rootTheme()->opGC(),
+                    m_last_move_x, m_last_move_y, w, h);
+            }
         }
 
         if (moved_x && screen().isWorkspaceWarping()) {
@@ -2456,10 +2447,12 @@ void FluxboxWindow::motionNotifyEvent(XMotionEvent &me) {
         // do not update display if another motion event is already pending
 
         if (!screen().doOpaqueMove()) {
-            parent().drawRectangle(screen().rootTheme()->opGC(),
-                    dx, dy,
-                    frame().width() + 2*frame().window().borderWidth()-1,
-                    frame().height() + 2*frame().window().borderWidth()-1);
+            int bw = frame().window().borderWidth();
+            int w = static_cast<int>(frame().width()) + 2*bw - 1;
+            int h = static_cast<int>(frame().height()) + 2*bw - 1;
+            if (w > 0 && h > 0) {
+                parent().drawRectangle(screen().rootTheme()->opGC(), dx, dy, w, h);
+            }
             m_last_move_x = dx;
             m_last_move_y = dy;
         } else {

@@ -26,10 +26,11 @@
 #include "Window.hh"
 #include "WindowCmd.hh"
 #include "FocusControl.hh"
-#include <X11/keysym.h>
 
 #include "FbTk/MenuItem.hh"
 #include "FbTk/MemFun.hh"
+
+#include <X11/keysym.h>
 
 namespace { // anonymous
 
@@ -118,9 +119,9 @@ void ClientMenu::refreshMenu() {
             FluxboxWindow::ClientList::iterator client_it_end =
                 win->clientList().end();
             for (; client_it != client_it_end; ++client_it)
-                insert(new ClientMenuItem(**client_it, *this));
+                insertItem(new ClientMenuItem(**client_it, *this));
         } else
-            insert(new ClientMenuItem(**win_it, *this));
+            insertItem(new ClientMenuItem(**win_it, *this));
     }
 
     updateMenu();
@@ -159,5 +160,5 @@ void ClientMenu::clientDied(Focusable &win) {
 
     // update accordingly
     if (cl_item)
-        remove(cl_item->getIndex());
+        FbTk::Menu::removeItem(cl_item);
 }
