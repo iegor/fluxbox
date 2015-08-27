@@ -1,7 +1,7 @@
 fluxbox(1)
 ==========
 Henrik Kinnunen <fluxgen@fluxbox.org>
-v1.3.7, 22 January 2015
+v1.3.7, 08 February 2015
 :man source:   fluxbox.txt
 :man version:  {revision}
 :man manual:   Fluxbox Manual  
@@ -1233,6 +1233,17 @@ This optionally specifies the location of a user-defined window menu. If left
 blank, it will use *~/.fluxbox/windowmenu*.
 +
 Default: *blank*
+
+*session.menuSearch*: *nowhere*|*itemstart*|*somewhere*::
+This setting controls the way the menu search feature works.
+--
+Available options:;;
+- nowhere: disables the menu search
+- itemstart: typed text matches at the start of a menu items
+- somewhere: typed text matches somewhere in a menu item
+--
++
+Default: *itemstart*
 
 ENVIRONMENT
 -----------
