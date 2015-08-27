@@ -723,6 +723,9 @@ AC_MSG_RESULT([	$PACKAGE version $VERSION configured successfully.])
 AC_MSG_RESULT([])
 AC_MSG_RESULT([Using:])
 AC_MSG_RESULT([	'$prefix' for installation.])
+if test x$BUILD_FBCOMPOSE = xtrue; then
+AC_MSG_RESULT([	'$FBCOMPOSE_PATH' for compositing binaries and resources.])
+fi
 AC_MSG_RESULT([	'$default_menu' for location menu file.])
 AC_MSG_RESULT([	'$default_windowmenu' for location window menu file.])
 AC_MSG_RESULT([	'$default_style' by default style.])
