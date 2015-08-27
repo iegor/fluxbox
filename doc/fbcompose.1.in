@@ -1,0 +1,200 @@
+'\" t
+.\"     Title: fbcompose
+.\"    Author: Gediminas Liktaras <gliktaras@gmail.com>
+.\" Generator: DocBook XSL Stylesheets v1.76.1 <http://docbook.sf.net/>
+.\"      Date: 14 August 2011
+.\"    Manual: Fluxbox Compositor Manual
+.\"    Source: fbcompose.txt
+.\"  Language: English
+.\"
+.TH "FBCOMPOSE" "1" "14 August 2011" "fbcompose\&.txt" "Fluxbox Compositor Manual"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+fbcompose \- A compositing addon for fluxbox window manager\&.
+.SH "SYNOPSIS"
+.sp
+\fBfbcompose\fR [options]
+.sp
+\fBfbcompose\fR [\-h | \-\-help] | [\-V | \-\-version]
+.SH "DESCRIPTION"
+.sp
+\fBfbcompose(1)\fR is an optional compositing addon for fluxbox window manager\&. It augments fluxbox with a number of graphical features\&. Most notably, fbcompose allows fluxbox to properly display applications that require compositing (docky, for example), adds support for true window transparency (as opposed to fluxbox\(cqs pseudo transparency) and provides a plugin framework to extend the compositor\(cqs functionality\&.
+.SS "Rendering modes"
+.sp
+fbcompose supports three different rendering backends, which are specified as the rendering mode:
+.PP
+\fBopengl\fR
+.RS 4
+The OpenGL backend\&. It uses OpenGL and GLX to render the the screens\*(Aq contents\&. It is the most resource intensive of the backends, but it provides the smoothest experience\&.
+.RE
+.PP
+\fBxrender\fR
+.RS 4
+The XRender backend\&. It uses X server\(cqs XRender extension to render the screens\*(Aq contents\&. It is more reliable and less resource intensive compared to OpenGL backend, but its performance is somewhat unstable\&.
+.RE
+.PP
+\fBserverauto\fR
+.RS 4
+Lets the X server take care of compositing\&. Unlike other backends, this backend does not provide any graphical improvements or plugins, but it allows fluxbox to correctly render applications that require compositing\&. It is the least resource intensive mode\&.
+.RE
+.sp
+Note that not all of them may be available, depending on how fluxbox has been compiled\&. Running fbcompose \-\-help will list the available rendering modes\&.
+.SH "OPTIONS"
+.PP
+\fB\-d\fR \fIdisplay\fR, \fB\-\-display\fR \fIdisplay\fR
+.RS 4
+Use the specified display connection\&.
+.RE
+.PP
+\fB\-h\fR, \fB\-\-help\fR
+.RS 4
+Print the help text and exit\&.
+.RE
+.PP
+\fB\-m\fR \fImode\fR, \fB\-\-mode\fR \fImode\fR
+.RS 4
+Use the specified rendering mode\&.
+.RE
+.PP
+\fB\-\-no\-x\-errors\fR
+.RS 4
+Do not print any X errors\&.
+.RE
+.PP
+\fB\-p\fR \fIplugin\fR, \fB\-\-plugin\fR \fIplugin\fR
+.RS 4
+Load and use the specified plugin\&.
+.RE
+.PP
+\fB\-q\fR, \fB\-\-quiet\fR
+.RS 4
+Do not print anything\&.
+.RE
+.PP
+\fB\-r\fR \fIrate\fR, \fB\-\-refresh\-rate\fR \fIrate\fR
+.RS 4
+Specify the target refresh rate in Hz\&.
+.RE
+.PP
+\fB\-\-sync\fR
+.RS 4
+Synchronize the connection with the X server\&. Useful for debugging\&.
+.RE
+.PP
+\fB\-v\fR, \fB\-\-verbose\fR
+.RS 4
+Print more information\&. Pass several times for more output\&.
+.RE
+.PP
+\fB\-V\fR, \fB\-\-version\fR
+.RS 4
+Print the version text and exit\&.
+.RE
+.SH "PLUGINS"
+.sp
+Plugins provide fbcompose with extra functionality\&. They may change the way windows are presented to the user or add various effects to the desktop\&. To use plugins, just start fbcompose with the appropriate \-\-plugin options\&.
+.sp
+At the moment of writing, the plugins cannot be configured yet\&.
+.SS "Plugins, Included With fbcompose"
+.sp
+fbcompose comes bundled with two plugins\&.
+.PP
+\fBfade\fR
+.RS 4
+The fade plugin adds fade animations to windows as they appear and disappear\&.
+.RE
+.PP
+\fBpreview\fR
+.RS 4
+The preview plugin adds a window preview thumbnail, which appears whenever the user hovers over the window buttons in the iconbar\&.
+.RE
+.SS "Installing New Plugins"
+.sp
+Note that plugins for OpenGL and XRender backends are different: a single plugin can only work with one of these backends\&.
+.sp
+To install an OpenGL plugin, copy the \&.so file into ~/\&.fluxbox/fbcompose/plugins/opengl directory\&.
+.sp
+To install an XRender plugin, copy the \&.so file into ~/\&.fluxbox/fbcompose/plugins/xrender directory\&.
+.SS "Listing Plugins"
+.sp
+Run fbcompose\-list_plugins to get a list of all currently installed plugins\&.
+.SH "EXAMPLES"
+.PP
+fbcompose
+.RS 4
+Run the compositor using the default renderer, settings and no plugins\&.
+.RE
+.PP
+fbcompose \-m xrender
+.RS 4
+Run the compositor in XRender mode on display :1\&.
+.RE
+.PP
+fbcompose \-m opengl \-p fade \-p preview
+.RS 4
+Run the compositor in OpenGL mode and use both fade and preview plugins\&.
+.RE
+.SH "COMMON ISSUES"
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The OpenGL backend does not seem to work on computers with nvidia video cards and multiple monitors\&. At the moment the only workaround is to use XRender mode\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+If conky disappears when the compositor is running, make sure that in your conky configuration file (~/\&.conkyrc
+by default)
+own_window
+option is set to
+yes
+and
+own_window_type
+is
+desktop\&.
+.RE
+.SH "BUGS"
+.sp
+As this is still a beta version of the compositor, the bugs are likely\&. If you find any, please visit the #fluxbox irc channel on irc\&.freenode\&.net or submit them to the bug tracker at \m[blue]\fBhttp://sf\&.net/projects/fluxbox\fR\m[] \&. Or you may subscribe to one of the mailing lists\&. More information can be found on the official website at \m[blue]\fBhttp://www\&.fluxbox\&.org\fR\m[] \&.
+.SH "AUTHORS"
+.sp
+fbcompose was originally written is currently maintained by Gediminas Liktaras <gliktaras at gmail dot com>\&.
+.SH "SEE ALSO"
+.sp
+fluxbox(1) startfluxbox(1)
+.SH "AUTHOR"
+.PP
+\fBGediminas Liktaras\fR <\&gliktaras@gmail\&.com\&>
+.RS 4
+Author.
+.RE
