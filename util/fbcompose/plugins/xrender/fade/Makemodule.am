@@ -32,7 +32,8 @@ fade_la_CXXFLAGS = \
 	-fPIC
 
 fade_la_SOURCES = \
-	FadePlugin.hh FadePlugin.cc
+	util/fbcompose/plugins/xrender/fade/FadePlugin.hh \
+	util/fbcompose/plugins/xrender/fade/FadePlugin.cc
 
 fade_la_LDFLAGS = \
 	-export-dynamic \
