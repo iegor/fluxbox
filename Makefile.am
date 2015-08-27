@@ -80,8 +80,8 @@ include src/Makemodule.am
 include src/tests/Makemodule.am
 include util/Makemodule.am
 include util/fbrun/Makemodule.am
-include util/fbcompose/Makemodule.am
 if BUILD_FBCOMPOSE
+include util/fbcompose/Makemodule.am
 if OPENGL_COMPOSITING
 include util/fbcompose/plugins/opengl/fade/Makemodule.am
 include util/fbcompose/plugins/opengl/preview/Makemodule.am
