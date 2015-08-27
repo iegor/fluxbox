@@ -22,6 +22,9 @@ FBCOMPOSE_PATH = @FBCOMPOSE_PATH@
 
 bin_PROGRAMS += fbcompose
 
+plugindir = $(FBCOMPOSE_PATH)/plugins
+plugin_LTLIBRARIES =
+
 if SERVERAUTO_COMPOSITING_ONLY
 fbcompose_main_SOURCES = \
 	util/fbcompose/BaseCompWindow.hh util/fbcompose/BaseCompWindow.cc \
