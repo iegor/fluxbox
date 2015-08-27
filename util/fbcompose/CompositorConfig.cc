@@ -244,22 +244,21 @@ void CompositorConfig::printFullHelp(std::ostream &os) {
     //     ................................................................................
     os << "Usage: fbcompose [OPTION]..." << std::endl
        << "Options and arguments:" << std::endl
-       << "  -d DISPLAY, --display DISPLAY" << std::endl
-       << "                         Use the specified display connection." << std::endl
-       << "  -h, --help             Print this text and exit." << std::endl
-       << "  -m MODE, --mode MODE   Select the rendering mode." << std::endl
-       << "                         MODE can be " << modes << "." << std::endl
-       << "  --no-x-errors          Do not print X errors." << std::endl
-       << "  -p PLUGIN, --plugin PLUGIN" << std::endl
-       << "                         Load a specified plugin." << std::endl
-       << "  -q, --quiet            Do not print anything." << std::endl
-       << "  -r RATE, --refresh-rate RATE" << std::endl
-       << "                         Specify the compositor's refresh rate in Hz" << std::endl
-       << "                         (aka frames per second)." << std::endl
-       << "  --sync                 Synchronize with the X server (useful for debugging)." << std::endl
-       << "  -v, --verbose          Print more information. Pass several times for more" << std::endl
-       << "                         output." << std::endl
-       << "  -V, --version          Print version and exit." << std::endl;
+       << "  -d <display>, --display <display>" << std::endl
+       << "                    Use the specified display connection." << std::endl
+       << "  -h, --help        Print this text and exit." << std::endl
+       << "  -m <mode>, --mode <mode>"
+       << "                    Select the rendering mode." << std::endl
+       << "                    <mode> can be " << modes << "." << std::endl
+       << "  --no-x-errors     Do not print X errors." << std::endl
+       << "  -p <plugin>, --plugin <plugin>" << std::endl
+       << "                    Load a specified plugin." << std::endl
+       << "  -q, --quiet       Do not print anything." << std::endl
+       << "  -r <rate>, --refresh-rate <rate>" << std::endl
+       << "                    Specify the compositor's refresh rate in Hz." << std::endl
+       << "  --sync            Synchronize with the X server (useful for debugging)." << std::endl
+       << "  -v, --verbose     Print more information. Pass several times for more output." << std::endl
+       << "  -V, --version     Print version and exit." << std::endl;
 }
 
 // Output short help message.

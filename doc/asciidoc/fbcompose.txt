@@ -1,0 +1,143 @@
+fbcompose(1)
+============
+Gediminas Liktaras <gliktaras@gmail.com>
+v0.6, 13 August 2011
+:man source:   fbcompose.txt
+:man version:  {revision}
+:man manual:   Fluxbox Compositor Manual  
+
+NAME
+----
+fbcompose - A compositing addon for fluxbox window manager.
+
+SYNOPSIS
+--------
+*fbcompose* [options]
+
+*fbcompose* [-h | --help] |
+            [-V | --version]
+
+DESCRIPTION
+-----------
+*fbcompose(1)* is an optional compositing addon for fluxbox window manager. It
+augments fluxbox with a number of graphical features. Most notably, fbcompose
+allows fluxbox to properly display applications that require compositing
+(docky, for example), adds support for true window transparency (as opposed to
+fluxbox's pseudo transparency) and provides a plugin framework to extend the
+compositor's functionality.
+
+Rendering modes
+~~~~~~~~~~~~~~~
+fbcompose supports three different rendering backends, which are specified as
+the rendering mode:
+
+- opengl
+    The OpenGL backend. It uses OpenGL and GLX to render the the screens'
+    contents. It is the most resource intensive of the backends, but it
+    provides the smoothest experience.
+- xrender
+    The XRender backend. It uses X server's XRender extension to render the
+    screens' contents. It is more reliable and less resource intensive compared
+    to OpenGL backend, but its performance may sometimes drop.
+- serverauto
+    Lets the X server take care of compositing. Unlike other backends, this
+    backend does not provide any graphical improvements or plugins, but it
+    allows fluxbox to correctly render applications that require compositing.
+    It is the least resource intensive mode.
+
+Note that not all of them may be available, depending on how the fluxbox
+package has been compiled. Running +fbcompose --help+ will list the available
+rendering modes.
+
+OPTIONS
+-------
+*-d* 'display', *--display* 'display'::
+    Use the specified display connection.
+
+*-h*, *--help*::
+    Print the help text and exit.
+
+*-m* 'mode', *--mode* 'mode'::
+    Use the specified rendering mode.
+
+*--no-x-errors*::
+    Do not print any X errors.
+
+*-p* 'plugin', *--plugin* 'plugin'::
+    Load and use the specified plugin.
+
+*-q*, *--quiet*::
+    Do not print anything.
+
+*-r* 'rate', *--refresh-rate* 'rate'::
+    Specify the target refresh rate in Hz.
+
+*--sync*::
+    Synchronize the connection with the X server. Useful for debugging.
+
+*-v*, *--verbose*::
+    Print more information. Pass several times for more output.
+
+*-V*, *--version*::
+    Print the version text and exit.
+
+PLUGINS
+-------
+Plugins provide fbcompose with extra functionality. They may change the way
+windows are presented to the user or add various effects to the desktop. To use
+plugins, just start fbcompose with the appropriate --plugin options.
+
+At the moment of writing, the plugins cannot be configured yet.
+
+Plugins, Included With fbcompose
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+fbcompose comes bundled with two plugins.
+
+- fade
+    The fade plugin adds fade animations to windows as they are being mapped
+    and unmapped.
+- preview
+    The preview plugin adds a window preview thumbnail, which appears whenever
+    the user hovers over the window buttons in the iconbar.
+
+Installing New Plugins
+~~~~~~~~~~~~~~~~~~~~~~
+TODO
+
+Writing Plugins
+~~~~~~~~~~~~~~~
+TODO
+
+EXAMPLES
+--------
++fbcompose+
+    Run the compositor using the default renderer, settings and no plugins.  
+
++fbcompose -m xrender'
+    Run the compositor in XRender mode.
+
++fbcompose -m opengl -p fade -p preview+
+    Run the compositor in OpenGL mode and use both fade and preview plugins.
+
+AUTHORS
+-------
+fbcompose was originally written is currently maintained by Gediminas Liktaras
+<gliktaras at gmail com>.
+
+KNOWN BUGS
+----------
+- The OpenGL backend does not seem to work on computers with nvidia video cards
+  that have two monitors. At the moment the only workaround is to use XRender
+  mode.
+
+BUGS
+----
+As this is still a beta version of the compositor, the bugs are likely. If you
+find any, please visit the #fluxbox irc channel on irc.freenode.net or submit
+them to the bug tracker at http://sf.net/projects/fluxbox . Or you may
+subscribe to one of the mailing lists. More information can be found on the
+official website at http://www.fluxbox.org .
+
+SEE ALSO
+--------
+fluxbox(1) startfluxbox(1)

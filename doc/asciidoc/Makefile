@@ -8,7 +8,8 @@ SRC1 = \
 	fbsetroot.txt \
 	fluxbox-remote.txt \
 	fluxbox.txt \
-	startfluxbox.txt
+	startfluxbox.txt \
+	fbcompose.txt
 
 SRC5 = \
 	fluxbox-apps.txt \
