@@ -19,7 +19,7 @@
 # THE SOFTWARE.
 
 plugindir = $(FBCOMPOSE_PATH)/plugins/xrender
-plugin_LTLIBRARIES = preview.la
+plugin_LTLIBRARIES += preview.la
 
 preview_la_CPPFLAGS = \
 	-I$(src_incdir) \
@@ -42,7 +42,7 @@ preview_la_LDFLAGS = \
 	-avoid-version
 
 preview_la_LIBADD = \
-	$(top_builddir)/src/FbTk/libFbTk.a
+	libFbTk.a
 
 # $(top_builddir)/src/FbTk/libFbTk.a:
 # 	cd $(top_builddir)/src/FbTk && make

@@ -83,7 +83,7 @@ fbcompose_SOURCES = \
 	${fbcompose_xrender_SOURCES}
 
 fbcompose_LDADD = \
-	${top_builddir}/src/FbTk/libFbTk.a
+	libFbTk.a
 
 # ${FLUXBOX_SRC_DIR}FbTk/libFbTk.a:
 # 	cd ${FLUXBOX_SRC_DIR}FbTk && make

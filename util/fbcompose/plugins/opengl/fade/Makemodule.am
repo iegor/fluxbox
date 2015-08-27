@@ -19,7 +19,7 @@
 # THE SOFTWARE.
 
 plugindir = $(FBCOMPOSE_PATH)/plugins/opengl
-plugin_LTLIBRARIES = fade.la
+plugin_LTLIBRARIES += fade.la
 
 fade_la_CPPFLAGS = \
 	$(AM_CPPFLAGS) \
@@ -43,7 +43,7 @@ fade_la_LDFLAGS = \
 	-avoid-version
 
 fade_la_LIBADD = \
-	$(top_builddir)/src/FbTk/libFbTk.a
+	libFbTk.a
 
 # $(top_builddir)/src/FbTk/libFbTk.a:
 #	cd $(top_builddir)/src/FbTk && make
