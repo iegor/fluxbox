@@ -8,8 +8,11 @@ CLEANFILES += \
 	doc/fluxbox-remote.1 \
 	doc/fluxbox-style.5 \
 	doc/fluxbox.1 \
-	doc/startfluxbox.1 \
-    doc/fbcompose.1
+	doc/startfluxbox.1
+
+if BUILD_FBCOMPOSE
+CLEANFILES += doc/fbcompose.1
+endif
 
 dist_man_MANS = \
 	doc/fbrun.1 \
@@ -21,8 +24,11 @@ dist_man_MANS = \
 	doc/fluxbox-remote.1 \
 	doc/fluxbox-style.5 \
 	doc/fluxbox.1 \
-	doc/startfluxbox.1 \
-    doc/fbcompose.1
+	doc/startfluxbox.1
+
+if BUILD_FBCOMPOSE
+dist_man_MANS += doc/fbcompose.1
+endif
 
 EXTRA_DIST += \
 	doc/CODESTYLE \
@@ -35,8 +41,11 @@ EXTRA_DIST += \
 	doc/fluxbox-remote.1.in \
 	doc/fluxbox-style.5.in \
 	doc/fluxbox.1.in \
-	doc/startfluxbox.1.in \
-    doc/fbcompose.1.in
+	doc/startfluxbox.1.in
+
+if BUILD_FBCOMPOSE
+EXTRA_DIST += doc/fbcompose.1.in
+endif
 
 doc/%: doc/%.in
 	$(MKDIR_P) doc
