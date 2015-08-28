@@ -125,8 +125,8 @@ const std::vector<XRectangle> &PreviewPlugin::damagedAreas() {
 
         updatePreviewWindowPos(cur_preview);
 
-        XRectangle cur_damage = { cur_preview.job.destination_x, cur_preview.job.destination_y,
-                                  cur_preview.job.width, cur_preview.job.height };
+        XRectangle cur_damage = { (short)cur_preview.job.destination_x, (short)cur_preview.job.destination_y,
+                                  (ushort)cur_preview.job.width, (ushort)cur_preview.job.height };
         m_damaged_areas.push_back(cur_damage);
         m_previous_damage = cur_damage;
 

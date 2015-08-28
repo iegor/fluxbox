@@ -293,7 +293,7 @@ namespace FbCompositor {
 
     // Returns the window's dimensions as an XRectangle (borders factored in).
     inline XRectangle BaseCompWindow::dimensions() const {
-        XRectangle dim = { x(), y(), realWidth(), realHeight() };
+        XRectangle dim = { (short)x(), (short)y(), (ushort)realWidth(), (ushort)realHeight() };
         return dim;
     }
 
