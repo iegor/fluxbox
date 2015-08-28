@@ -1,4 +1,3 @@
-# Makefile.am for fluxbox
 # Copyright (c) 2001 - 2003 Henrik Kinnunen (fluxgen at users.sourceforge.net)
 #
 # src/Makefile.am for Blackbox 0.61.x  - an X11 Window manager
