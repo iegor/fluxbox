@@ -22,6 +22,7 @@ plugindir = $(FBCOMPOSE_PATH)/plugins/xrender
 plugin_LTLIBRARIES += preview.la
 
 preview_la_CPPFLAGS = \
+	$(AM_CPPFLAGS) \
 	-I$(src_incdir) \
 	-I$(top_srcdir)/src \
 	-I$(top_srcdir)/src/FbTk \

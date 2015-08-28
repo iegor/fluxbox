@@ -22,6 +22,7 @@ plugindir = $(FBCOMPOSE_PATH)/plugins/xrender
 plugin_LTLIBRARIES += fade.la
 
 fade_la_CPPFLAGS = \
+	$(AM_CPPFLAGS) \
 	-I$(top_srcdir)/src \
 	-I$(top_srcdir)/src/FbTk \
 	-I$(top_srcdir)/util/fbcompose
