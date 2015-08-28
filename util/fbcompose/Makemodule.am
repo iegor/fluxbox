@@ -95,6 +95,6 @@ fbcompose_LDADD = \
 # 	cd ${FLUXBOX_SRC_DIR}FbTk && make
 
 install-exec-hook:
-	$(INSTALL_DATA) "$(srcdir)/fbcompose-list_plugins" "$(DESTDIR)$(bindir)"
+	$(INSTALL_DATA) "$(srcdir)/util/fbcompose/fbcompose-list_plugins" "$(DESTDIR)$(bindir)"
 	sed -i -e "s|[$$]FBCOMPOSE_PATH|${FBCOMPOSE_PATH}|g" "$(DESTDIR)$(bindir)/fbcompose-list_plugins"
 	chmod +x "$(DESTDIR)$(bindir)/fbcompose-list_plugins"
