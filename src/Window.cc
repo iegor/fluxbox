@@ -461,8 +461,7 @@ void FluxboxWindow::init() {
 
     if (fluxbox.isStartup())
         m_placed = true;
-    else if (m_client->isTransient() ||
-        m_client->normal_hint_flags & (PPosition|USPosition)) {
+    else if (m_client->normal_hint_flags & (PPosition|USPosition)) {
         m_placed = is_visible;
     } else {
         if (!is_visible) {
@@ -484,12 +483,20 @@ void FluxboxWindow::init() {
     if (m_workspace_number >= screen().numberOfWorkspaces())
         m_workspace_number = screen().currentWorkspaceID();
 
+    unsigned int real_width = frame().width();
+    unsigned int real_height = frame().height();
+    frame().applySizeHints(real_width, real_height);
+
     // if we're a transient then we should be on the same layer and workspace
     FluxboxWindow* twin = m_client->transientFor() ? m_client->transientFor()->fbwindow() : 0;
     if (twin && twin != this) {
         layerItem().setLayer(twin->layerItem().getLayer());
         m_state.layernum = twin->layerNum();
         m_workspace_number = twin->workspaceNumber();
+        const int x = twin->frame().x() + (twin->frame().width() - frame().width())/2;
+        const int y = twin->frame().y() + (twin->frame().height() - frame().height())/2;
+        frame().move(x, y);
+        m_placed = true;
     } else // if no parent then set default layer
         moveToLayer(m_state.layernum, m_state.layernum != ::ResourceLayer::NORMAL);
 
@@ -499,10 +506,6 @@ void FluxboxWindow::init() {
         fbdbg<<"FluxboxWindow::init("<<title().logical()<<") transientFor->title(): "<<
            twin->title().logical()<<endl;
     }
-
-    unsigned int real_width = frame().width();
-    unsigned int real_height = frame().height();
-    frame().applySizeHints(real_width, real_height);
 
     screen().getWorkspace(m_workspace_number)->addWindow(*this);
     if (m_placed)
@@ -2526,6 +2529,82 @@ void FluxboxWindow::motionNotifyEvent(XMotionEvent &me) {
                 old_resize_w != m_last_resize_w ||
                 old_resize_h != m_last_resize_h ) {
 
+                if (screen().getEdgeResizeSnapThreshold() != 0) {
+                    int tx, ty;
+                    int botright_x = m_last_resize_x + m_last_resize_w;
+                    int botright_y = m_last_resize_y + m_last_resize_h;
+
+                    switch (m_resize_corner) {
+                    case LEFTTOP:
+                        tx = m_last_resize_x;
+                        ty = m_last_resize_y;
+
+                        doSnapping(tx, ty, true);
+
+                        m_last_resize_x = tx;
+                        m_last_resize_y = ty;
+
+                        m_last_resize_w = botright_x - m_last_resize_x;
+                        m_last_resize_h = botright_y - m_last_resize_y;
+
+                        break;
+
+                    case LEFTBOTTOM:
+                        tx = m_last_resize_x;
+                        ty = m_last_resize_y + m_last_resize_h;
+
+                        ty += frame().window().borderWidth() * 2;
+
+                        doSnapping(tx, ty, true);
+
+                        ty -= frame().window().borderWidth() * 2;
+
+                        m_last_resize_x = tx;
+                        m_last_resize_h = ty - m_last_resize_y;
+
+                        m_last_resize_w = botright_x - m_last_resize_x;
+
+                        break;
+
+                    case RIGHTTOP:
+                        tx = m_last_resize_x + m_last_resize_w;
+                        ty = m_last_resize_y;
+
+                        tx += frame().window().borderWidth() * 2;
+
+                        doSnapping(tx, ty, true);
+
+                        tx -= frame().window().borderWidth() * 2;
+
+                        m_last_resize_w = tx - m_last_resize_x;
+                        m_last_resize_y = ty;
+
+                        m_last_resize_h = botright_y - m_last_resize_y;
+
+                        break;
+
+                    case RIGHTBOTTOM:
+                        tx = m_last_resize_x + m_last_resize_w;
+                        ty = m_last_resize_y + m_last_resize_h;
+
+                        tx += frame().window().borderWidth() * 2;
+                        ty += frame().window().borderWidth() * 2;
+
+                        doSnapping(tx, ty, true);
+
+                        tx -= frame().window().borderWidth() * 2;
+                        ty -= frame().window().borderWidth() * 2;
+
+                        m_last_resize_w = tx - m_last_resize_x;
+                        m_last_resize_h = ty - m_last_resize_y;
+
+                        break;
+
+                    default:
+                        break;
+                    }
+                }
+
             // draw over old rect
             parent().drawRectangle(screen().rootTheme()->opGC(),
                     old_resize_x, old_resize_y,
@@ -2816,7 +2895,8 @@ void FluxboxWindow::stopMoving(bool interrupted) {
  */
 inline void snapToWindow(int &xlimit, int &ylimit,
                          int left, int right, int top, int bottom,
-                         int oleft, int oright, int otop, int obottom) {
+                         int oleft, int oright, int otop, int obottom,
+                         bool resize) {
     // Only snap if we're adjacent to the edge we're looking at
 
     // for left + right, need to be in the right y range
@@ -2827,7 +2907,7 @@ inline void snapToWindow(int &xlimit, int &ylimit,
 
         // right
         if (abs(left-oright)  < abs(xlimit)) xlimit = -(left-oright);
-        if (abs(right-oright) < abs(xlimit)) xlimit = -(right-oright);
+        if (!resize && abs(right-oright) < abs(xlimit)) xlimit = -(right-oright);
     }
 
     // for top + bottom, need to be in the right x range
@@ -2838,7 +2918,7 @@ inline void snapToWindow(int &xlimit, int &ylimit,
 
         // bottom
         if (abs(top-obottom)    < abs(ylimit)) ylimit = -(top-obottom);
-        if (abs(bottom-obottom) < abs(ylimit)) ylimit = -(bottom-obottom);
+        if (!resize && abs(bottom-obottom) < abs(ylimit)) ylimit = -(bottom-obottom);
     }
 
 }
@@ -2847,18 +2927,25 @@ inline void snapToWindow(int &xlimit, int &ylimit,
  * Do Whatever snapping magic is necessary, and return using the orig_left
  * and orig_top variables to indicate the new x,y position
  */
-void FluxboxWindow::doSnapping(int &orig_left, int &orig_top) {
+void FluxboxWindow::doSnapping(int &orig_left, int &orig_top, bool resize) {
     /*
      * Snap to screen/head edges
      * Snap to windows
      */
+    int threshold;
 
-    if (screen().getEdgeSnapThreshold() == 0) return;
+    if (resize) {
+        threshold = screen().getEdgeResizeSnapThreshold();
+    } else {
+        threshold = screen().getEdgeSnapThreshold();
+    }
+
+    if (0 == threshold) return;
 
     // Keep track of our best offsets so far
     // We need to find things less than or equal to the threshold
-    int dx = screen().getEdgeSnapThreshold() + 1;
-    int dy = screen().getEdgeSnapThreshold() + 1;
+    int dx = threshold + 1;
+    int dy = threshold + 1;
 
     // we only care about the left/top etc that includes borders
     int borderW = 0;
@@ -2897,28 +2984,32 @@ void FluxboxWindow::doSnapping(int &orig_left, int &orig_top) {
                      screen().maxLeft(h),
                      screen().maxRight(h),
                      screen().maxTop(h),
-                     screen().maxBottom(h));
+                     screen().maxBottom(h),
+                     resize);
 
         if (i_have_tabs)
             snapToWindow(dx, dy, left - xoff, right - xoff + woff, top - yoff, bottom - yoff + hoff,
                          screen().maxLeft(h),
                          screen().maxRight(h),
                          screen().maxTop(h),
-                         screen().maxBottom(h));
+                         screen().maxBottom(h),
+                         resize);
     }
     for (int h=starth; h <= screen().numHeads(); h++) {
         snapToWindow(dx, dy, left, right, top, bottom,
                      screen().getHeadX(h),
                      screen().getHeadX(h) + screen().getHeadWidth(h),
                      screen().getHeadY(h),
-                     screen().getHeadY(h) + screen().getHeadHeight(h));
+                     screen().getHeadY(h) + screen().getHeadHeight(h),
+                     resize);
 
         if (i_have_tabs)
             snapToWindow(dx, dy, left - xoff, right - xoff + woff, top - yoff, bottom - yoff + hoff,
                          screen().getHeadX(h),
                          screen().getHeadX(h) + screen().getHeadWidth(h),
                          screen().getHeadY(h),
-                         screen().getHeadY(h) + screen().getHeadHeight(h));
+                         screen().getHeadY(h) + screen().getHeadHeight(h),
+                         resize);
     }
 
     /////////////////////////////////////
@@ -2942,14 +3033,16 @@ void FluxboxWindow::doSnapping(int &orig_left, int &orig_top) {
                      (*it)->x(),
                      (*it)->x() + (*it)->width() + 2 * bw,
                      (*it)->y(),
-                     (*it)->y() + (*it)->height() + 2 * bw);
+                     (*it)->y() + (*it)->height() + 2 * bw,
+                     resize);
 
         if (i_have_tabs)
             snapToWindow(dx, dy, left - xoff, right - xoff + woff, top - yoff, bottom - yoff + hoff,
                          (*it)->x(),
                          (*it)->x() + (*it)->width() + 2 * bw,
                          (*it)->y(),
-                         (*it)->y() + (*it)->height() + 2 * bw);
+                         (*it)->y() + (*it)->height() + 2 * bw,
+                         resize);
 
         // also snap to the box containing the tabs (don't bother with actual
         // tab edges, since they're dynamic
@@ -2958,21 +3051,23 @@ void FluxboxWindow::doSnapping(int &orig_left, int &orig_top) {
                          (*it)->x() - (*it)->xOffset(),
                          (*it)->x() - (*it)->xOffset() + (*it)->width() + 2 * bw + (*it)->widthOffset(),
                          (*it)->y() - (*it)->yOffset(),
-                         (*it)->y() - (*it)->yOffset() + (*it)->height() + 2 * bw + (*it)->heightOffset());
+                         (*it)->y() - (*it)->yOffset() + (*it)->height() + 2 * bw + (*it)->heightOffset(),
+                         resize);
 
         if (i_have_tabs)
             snapToWindow(dx, dy, left - xoff, right - xoff + woff, top - yoff, bottom - yoff + hoff,
                          (*it)->x() - (*it)->xOffset(),
                          (*it)->x() - (*it)->xOffset() + (*it)->width() + 2 * bw + (*it)->widthOffset(),
                          (*it)->y() - (*it)->yOffset(),
-                         (*it)->y() - (*it)->yOffset() + (*it)->height() + 2 * bw + (*it)->heightOffset());
+                         (*it)->y() - (*it)->yOffset() + (*it)->height() + 2 * bw + (*it)->heightOffset(),
+                         resize);
 
     }
 
     // commit
-    if (dx <= screen().getEdgeSnapThreshold())
+    if (dx <= threshold)
         orig_left += dx;
-    if (dy <= screen().getEdgeSnapThreshold())
+    if (dy <= threshold)
         orig_top  += dy;
 
 }
